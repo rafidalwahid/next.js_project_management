@@ -6,21 +6,26 @@
  * Fetches data from the API with proper error handling
  */
 export async function fetchAPI(url: string, options: RequestInit = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      'Content-Type': 'application/json',
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Content-Type': 'application/json',
+      },
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || 'An error occurred');
+    if (!response.ok) {
+      throw new Error(data.error || 'An error occurred');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API request failed:', url, error);
+    throw error;
   }
-
-  return data;
 }
 
 /**
@@ -41,6 +46,28 @@ export const userApi = {
     if (limit) params.append('limit', limit.toString());
 
     return fetchAPI(`/api/users?${params.toString()}`);
+  },
+
+  getUserProfile: async (userId: string) => {
+    return fetchAPI(`/api/users/${userId}`);
+  },
+
+  updateUserProfile: async (userId: string, profileData: any) => {
+    return fetchAPI(`/api/users/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  uploadProfileImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // This would need to be implemented on the server
+    return fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    }).then(res => res.json());
   },
 };
 

@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Filter, Plus, Search, Edit, Trash } from "lucide-react"
+import { Filter, Plus, Search, Edit, Trash, User } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,11 +80,11 @@ export default function TeamPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search members..." 
+          <Input
+            placeholder="Search members..."
             className="pl-8"
             value={searchQuery}
-            onChange={handleSearch} 
+            onChange={handleSearch}
           />
         </div>
         <Button variant="outline" size="sm" className="h-9">
@@ -112,17 +113,26 @@ export default function TeamPage() {
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/profile/${user.id}`} className="hover:text-primary hover:underline">
+                      {user.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell className="capitalize">{user.role}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/profile/${user.id}`}>
+                          <User className="h-4 w-4" />
+                        </Link>
+                      </Button>
                       <Button variant="outline" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleDelete(user.id)}
                       >
                         <Trash className="h-4 w-4" />

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import {
   LayoutDashboard,
   Briefcase,
@@ -10,46 +11,54 @@ import {
   Users,
   LibraryBig,
   Settings,
-  HelpCircle
+  HelpCircle,
+  UserCircle
 } from "lucide-react"
 
-const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Projects",
-    href: "/projects",
-    icon: Briefcase,
-  },
-  {
-    title: "Tasks",
-    href: "/tasks",
-    icon: CheckSquare,
-  },
-  {
-    title: "Team",
-    href: "/team",
-    icon: Users,
-  },
-  {
-    title: "Resources",
-    href: "/resources",
-    icon: LibraryBig,
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
-  {
-    title: "Help & Support",
-    href: "/support",
-    icon: HelpCircle,
-  },
-]
+function getNavItems(userId?: string) {
+  return [
+    {
+      title: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Projects",
+      href: "/projects",
+      icon: Briefcase,
+    },
+    {
+      title: "Tasks",
+      href: "/tasks",
+      icon: CheckSquare,
+    },
+    {
+      title: "Team",
+      href: "/team",
+      icon: Users,
+    },
+    {
+      title: "Resources",
+      href: "/resources",
+      icon: LibraryBig,
+    },
+    {
+      title: "My Profile",
+      href: userId ? `/profile/${userId}` : "/profile",
+      icon: UserCircle,
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
+    },
+    {
+      title: "Help & Support",
+      href: "/support",
+      icon: HelpCircle,
+    },
+  ];
+}
 
 interface DashboardNavProps {
   collapsed?: boolean
@@ -57,6 +66,9 @@ interface DashboardNavProps {
 
 export function DashboardNav({ collapsed = false }: DashboardNavProps) {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const userId = session?.user?.id
+  const navItems = getNavItems(userId)
 
   return (
     <nav className={cn(

@@ -95,10 +95,12 @@ export function UserNav({ compact = false, showName = false }: UserNavProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
+          <Link href={`/profile/${session.user.id}`}>
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             <CreditCard className="mr-2 h-4 w-4" />
             <span>Billing</span>
@@ -122,7 +124,7 @@ export function UserNav({ compact = false, showName = false }: UserNavProps) {
         <span className="text-sm font-medium truncate max-w-[120px] text-foreground">
           {session.user.name?.split(' ')[0] || 'User'}
         </span>
-        <span className="text-xs text-muted-foreground">Admin</span>
+        <span className="text-xs text-muted-foreground capitalize">{session.user.role || 'User'}</span>
       </div>
     )}
   </div>
