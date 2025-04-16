@@ -14,11 +14,14 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects } from "@/hooks/use-data"
+import { teamApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewTeamMemberPage() {
   const router = useRouter()
-  const { addTeamMember } = useData()
+  const { projects } = useProjects(1, 100)
+  const { toast } = useToast()
   const [memberData, setMemberData] = useState({
     name: "",
     email: "",
@@ -34,10 +37,23 @@ export default function NewTeamMemberPage() {
     setMemberData((prev) => ({ ...prev, role: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addTeamMember(memberData)
-    router.push("/team")
+
+    try {
+      await teamApi.addTeamMember(memberData)
+      toast({
+        title: "Team member added",
+        description: "New team member has been added successfully",
+      })
+      router.push("/team")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add team member",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

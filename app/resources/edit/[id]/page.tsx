@@ -14,11 +14,15 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects, useResources } from "@/hooks/use-data"
+import { resourceApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EditResourcePage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { resources, editResource, projects } = useData()
+  const { projects } = useProjects(1, 100)
+  const { resources, mutate } = useResources(1, 100)
+  const { toast } = useToast()
   const [resourceData, setResourceData] = useState({
     name: "",
     type: "",
@@ -27,11 +31,23 @@ export default function EditResourcePage({ params }: { params: { id: string } })
   })
 
   useEffect(() => {
-    const resource = resources.find((r) => r.id === params.id)
-    if (resource) {
-      setResourceData(resource)
+    const fetchResource = async () => {
+      try {
+        const response = await resourceApi.getResource(params.id)
+        if (response.resource) {
+          setResourceData(response.resource)
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch resource details",
+          variant: "destructive",
+        })
+      }
     }
-  }, [resources, params.id])
+
+    fetchResource()
+  }, [params.id, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -42,10 +58,24 @@ export default function EditResourcePage({ params }: { params: { id: string } })
     setResourceData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    editResource(params.id, resourceData)
-    router.push("/resources")
+
+    try {
+      await resourceApi.updateResource(params.id, resourceData)
+      mutate() // Refresh the data
+      toast({
+        title: "Resource updated",
+        description: "Resource has been updated successfully",
+      })
+      router.push("/resources")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update resource",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

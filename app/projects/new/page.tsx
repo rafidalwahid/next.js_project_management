@@ -15,11 +15,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
-import { useData } from "@/contexts/DataContext"
+import { projectApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewProjectPage() {
   const router = useRouter()
-  const { addProject } = useData()
+  const { toast } = useToast()
   const [projectData, setProjectData] = useState({
     title: "",
     description: "",
@@ -43,10 +44,23 @@ export default function NewProjectPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addProject(projectData)
-    router.push("/projects")
+
+    try {
+      await projectApi.createProject(projectData)
+      toast({
+        title: "Project created",
+        description: "New project has been created successfully",
+      })
+      router.push("/projects")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create project",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

@@ -15,11 +15,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects } from "@/hooks/use-data"
+import { taskApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
+import { useUsers } from "@/hooks/use-users"
 
 export default function NewTaskPage() {
   const router = useRouter()
-  const { addTask, projects, teamMembers } = useData()
+  const { projects } = useProjects(1, 100)
+  const { users } = useUsers()
+  const { toast } = useToast()
   const [taskData, setTaskData] = useState({
     title: "",
     description: "",
@@ -44,10 +49,23 @@ export default function NewTaskPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addTask(taskData)
-    router.push("/tasks")
+
+    try {
+      await taskApi.createTask(taskData)
+      toast({
+        title: "Task created",
+        description: "New task has been created successfully",
+      })
+      router.push("/tasks")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

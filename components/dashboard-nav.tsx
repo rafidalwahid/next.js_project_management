@@ -1,69 +1,97 @@
-import type React from "react"
-import Link from "next/link"
-import { BarChart3, Calendar, CheckSquare, Clock, FileText, Home, KanbanSquare, Settings, Users } from "lucide-react"
+"use client"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import {
+  LayoutDashboard,
+  Briefcase,
+  CheckSquare,
+  Users,
+  LibraryBig,
+  Settings,
+  HelpCircle
+} from "lucide-react"
 
-interface NavProps extends React.HTMLAttributes<HTMLDivElement> {}
+const navItems = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Projects",
+    href: "/projects",
+    icon: Briefcase,
+  },
+  {
+    title: "Tasks",
+    href: "/tasks",
+    icon: CheckSquare,
+  },
+  {
+    title: "Team",
+    href: "/team",
+    icon: Users,
+  },
+  {
+    title: "Resources",
+    href: "/resources",
+    icon: LibraryBig,
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+    icon: Settings,
+  },
+  {
+    title: "Help & Support",
+    href: "/support",
+    icon: HelpCircle,
+  },
+]
 
-export function DashboardNav({ className, ...props }: NavProps) {
+interface DashboardNavProps {
+  collapsed?: boolean
+}
+
+export function DashboardNav({ collapsed = false }: DashboardNavProps) {
+  const pathname = usePathname()
+
   return (
-    <div className={cn("flex flex-col gap-2 p-4", className)} {...props}>
-      <Link href="/dashboard">
-        <Button variant="ghost" className="w-full justify-start">
-          <Home className="mr-2 h-4 w-4" />
-          Dashboard
-        </Button>
-      </Link>
-      <Link href="/projects">
-        <Button variant="ghost" className="w-full justify-start">
-          <FileText className="mr-2 h-4 w-4" />
-          Projects
-        </Button>
-      </Link>
-      <Link href="/tasks">
-        <Button variant="ghost" className="w-full justify-start">
-          <CheckSquare className="mr-2 h-4 w-4" />
-          Tasks
-        </Button>
-      </Link>
-      <Link href="/kanban">
-        <Button variant="ghost" className="w-full justify-start">
-          <KanbanSquare className="mr-2 h-4 w-4" />
-          Kanban
-        </Button>
-      </Link>
-      <Link href="/team">
-        <Button variant="ghost" className="w-full justify-start">
-          <Users className="mr-2 h-4 w-4" />
-          Team
-        </Button>
-      </Link>
-      <Link href="/calendar">
-        <Button variant="ghost" className="w-full justify-start">
-          <Calendar className="mr-2 h-4 w-4" />
-          Calendar
-        </Button>
-      </Link>
-      <Link href="/resources">
-        <Button variant="ghost" className="w-full justify-start">
-          <Clock className="mr-2 h-4 w-4" />
-          Resources
-        </Button>
-      </Link>
-      <Link href="/analytics">
-        <Button variant="ghost" className="w-full justify-start">
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Analytics
-        </Button>
-      </Link>
-      <Link href="/settings">
-        <Button variant="ghost" className="w-full justify-start">
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </Button>
-      </Link>
-    </div>
+    <nav className={cn(
+      "flex flex-col gap-1",
+      collapsed ? "px-2" : "px-3"
+    )}>
+      {navItems.map((item) => {
+        const Icon = item.icon
+        const isActive = pathname === item.href
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "group flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+              isActive
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+              collapsed
+                ? "justify-center h-9 w-9 mx-auto px-0"
+                : "px-3"
+            )}
+            title={collapsed ? item.title : undefined}
+          >
+            <Icon
+              className={cn(
+                "flex-shrink-0",
+                collapsed ? "h-5 w-5" : "h-4 w-4 mr-2"
+              )}
+            />
+            {!collapsed && <span>{item.title}</span>}
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

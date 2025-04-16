@@ -16,11 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects, useEvents } from "@/hooks/use-data"
+import { eventApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EditEventPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { events, editEvent, projects } = useData()
+  const { projects } = useProjects(1, 100)
+  const { events, mutate } = useEvents(undefined, 1, 100)
+  const { toast } = useToast()
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
@@ -29,11 +33,23 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
   })
 
   useEffect(() => {
-    const event = events.find((e) => e.id === params.id)
-    if (event) {
-      setEventData(event)
+    const fetchEvent = async () => {
+      try {
+        const response = await eventApi.getEvent(params.id)
+        if (response.event) {
+          setEventData(response.event)
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch event details",
+          variant: "destructive",
+        })
+      }
     }
-  }, [events, params.id])
+
+    fetchEvent()
+  }, [params.id, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -50,10 +66,24 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    editEvent(params.id, eventData)
-    router.push("/calendar")
+
+    try {
+      await eventApi.updateEvent(params.id, eventData)
+      mutate() // Refresh the data
+      toast({
+        title: "Event updated",
+        description: "Event has been updated successfully",
+      })
+      router.push("/calendar")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update event",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

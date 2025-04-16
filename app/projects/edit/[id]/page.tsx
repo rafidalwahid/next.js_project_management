@@ -15,11 +15,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProject } from "@/hooks/use-data"
+import { projectApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { projects, editProject } = useData()
+  const { project, isLoading, mutate } = useProject(params.id)
+  const { toast } = useToast()
   const [projectData, setProjectData] = useState({
     title: "",
     description: "",
@@ -29,11 +32,16 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   })
 
   useEffect(() => {
-    const project = projects.find((p) => p.id === params.id)
     if (project) {
-      setProjectData(project)
+      setProjectData({
+        title: project.title,
+        description: project.description || "",
+        startDate: project.startDate,
+        endDate: project.endDate,
+        status: project.status,
+      })
     }
-  }, [params.id, projects])
+  }, [project])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -50,10 +58,24 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    editProject(params.id, projectData)
-    router.push("/projects")
+
+    try {
+      await projectApi.updateProject(params.id, projectData)
+      mutate() // Refresh the data
+      toast({
+        title: "Project updated",
+        description: "Project has been updated successfully",
+      })
+      router.push("/projects")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

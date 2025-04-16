@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { BarChart3, ChevronLeft, ChevronRight, Plus, Edit, Trash } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { DashboardNav } from "@/components/dashboard-nav"
@@ -9,10 +10,31 @@ import { UserNav } from "@/components/user-nav"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarView } from "@/components/calendar-view"
-import { useData } from "@/contexts/DataContext"
+import { useEvents } from "@/hooks/use-data"
+import { eventApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CalendarPage() {
-  const { events, deleteEvent } = useData()
+  const [page, setPage] = useState(1)
+  const { events, isLoading, mutate } = useEvents(undefined, page, 100)
+  const { toast } = useToast()
+
+  const deleteEvent = async (id: string) => {
+    try {
+      await eventApi.deleteEvent(id)
+      mutate() // Refresh the data
+      toast({
+        title: "Event deleted",
+        description: "The event has been deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the event",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

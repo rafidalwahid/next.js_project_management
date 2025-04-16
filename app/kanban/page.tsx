@@ -25,11 +25,26 @@ import { UserNav } from "@/components/user-nav"
 import KanbanColumn from "@/components/kanban-column"
 import KanbanTask from "@/components/kanban-task"
 import TaskListView from "@/components/task-list-view"
-import { useData } from "@/contexts/DataContext"
-import type { Column, Task } from "@/types"
+import { useProjects, useTasks } from "@/hooks/use-data"
+import { taskApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
+import type { Column } from "@/types"
+
+interface Task {
+  id: string
+  title: string
+  description: string
+  projectId: string
+  assignedTo: string
+  dueDate: string
+  status: string
+  priority?: string
+}
 
 export default function KanbanPage() {
-  const { tasks, projects, editTask, addTask } = useData()
+  const { projects } = useProjects(1, 100)
+  const { tasks, mutate } = useTasks(1, 100)
+  const { toast } = useToast()
   const [selectedProject, setSelectedProject] = useState<string>("all")
   const [filteredTasks, setFilteredTasks] = useState(tasks)
   const [columns, setColumns] = useState<Column[]>([
@@ -135,7 +150,7 @@ export default function KanbanPage() {
     })
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
     setActiveTask(null)
 
@@ -154,44 +169,91 @@ export default function KanbanPage() {
     const task = tasks.find((t) => t.id === activeId)
 
     if (task) {
-      // Update task status in the database
-      editTask(activeId, { ...task, status: overColumn.id })
+      try {
+        // Update task status in the database
+        await taskApi.updateTask(activeId, { status: overColumn.id })
+        mutate() // Refresh the data
+        toast({
+          title: "Task updated",
+          description: `Task moved to ${overColumn.title}`,
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update task status",
+          variant: "destructive",
+        })
+      }
     }
   }
 
-  const handleAddTask = (columnId: string, taskData: Partial<Task> = {}) => {
+  const handleAddTask = async (columnId: string, taskData: Partial<Task> = {}) => {
     // Generate default task data
-    const newTask: Omit<Task, "id"> = {
+    const newTask = {
       title: taskData.title || "New Task",
       description: taskData.description || "Click to edit",
       projectId: selectedProject !== "all" ? selectedProject : projects[0]?.id || "",
-      assignedTo: "",
+      assignedToId: null,
       dueDate: new Date().toISOString(),
       status: columnId,
       priority: taskData.priority || "medium",
     }
 
-    // Add the task
-    addTask(newTask)
+    try {
+      // Add the task
+      await taskApi.createTask(newTask)
+      mutate() // Refresh the data
+      toast({
+        title: "Task created",
+        description: "New task has been created",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleDeleteColumn = (columnId: string) => {
+  const handleDeleteColumn = async (columnId: string) => {
     // Don't delete default columns
     if (["pending", "in-progress", "completed"].includes(columnId)) {
-      alert("Cannot delete default columns")
+      toast({
+        title: "Cannot delete column",
+        description: "Default columns cannot be deleted",
+        variant: "destructive",
+      })
       return
     }
 
     // Move tasks to the first column
     const columnToDelete = columns.find((col) => col.id === columnId)
-    if (columnToDelete) {
-      columnToDelete.tasks.forEach((task) => {
-        editTask(task.id, { ...task, status: "pending" })
-      })
+    if (columnToDelete && columnToDelete.tasks.length > 0) {
+      try {
+        // Update all tasks in this column to pending status
+        const updatePromises = columnToDelete.tasks.map(task =>
+          taskApi.updateTask(task.id, { status: "pending" })
+        )
+        await Promise.all(updatePromises)
+        mutate() // Refresh the data
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update tasks",
+          variant: "destructive",
+        })
+        return
+      }
     }
 
     // Remove the column
     setColumns((prev) => prev.filter((col) => col.id !== columnId))
+
+    toast({
+      title: "Column deleted",
+      description: "The column has been removed",
+    })
   }
 
   const handleAddColumn = () => {

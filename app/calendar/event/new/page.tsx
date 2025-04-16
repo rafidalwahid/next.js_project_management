@@ -16,11 +16,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects } from "@/hooks/use-data"
+import { eventApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewEventPage() {
   const router = useRouter()
-  const { addEvent, projects } = useData()
+  const { projects } = useProjects(1, 100)
+  const { toast } = useToast()
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
@@ -43,10 +46,23 @@ export default function NewEventPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addEvent(eventData)
-    router.push("/calendar")
+
+    try {
+      await eventApi.createEvent(eventData)
+      toast({
+        title: "Event created",
+        description: "New event has been created successfully",
+      })
+      router.push("/calendar")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create event",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

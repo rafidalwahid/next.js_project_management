@@ -1,0 +1,250 @@
+/**
+ * API client utility for making requests to our backend API
+ */
+
+/**
+ * Fetches data from the API with proper error handling
+ */
+export async function fetchAPI(url: string, options: RequestInit = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'An error occurred');
+  }
+
+  return data;
+}
+
+/**
+ * User API functions
+ */
+export const userApi = {
+  getUsers: async (search?: string, limit = 10) => {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (limit) params.append('limit', limit.toString());
+
+    return fetchAPI(`/api/users?${params.toString()}`);
+  },
+
+  getUsersInProject: async (projectId: string, limit = 10) => {
+    const params = new URLSearchParams();
+    params.append('projectId', projectId);
+    if (limit) params.append('limit', limit.toString());
+
+    return fetchAPI(`/api/users?${params.toString()}`);
+  },
+};
+
+/**
+ * Project API functions
+ */
+export const projectApi = {
+  getProjects: async (page = 1, limit = 10, status?: string) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (status) params.append('status', status);
+
+    return fetchAPI(`/api/projects?${params.toString()}`);
+  },
+
+  getProject: async (id: string) => {
+    return fetchAPI(`/api/projects/${id}`);
+  },
+
+  createProject: async (project: any) => {
+    return fetchAPI('/api/projects', {
+      method: 'POST',
+      body: JSON.stringify(project),
+    });
+  },
+
+  updateProject: async (id: string, project: any) => {
+    return fetchAPI(`/api/projects/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(project),
+    });
+  },
+
+  deleteProject: async (id: string) => {
+    return fetchAPI(`/api/projects/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+/**
+ * Task API functions
+ */
+export const taskApi = {
+  getTasks: async (page = 1, limit = 20, filters: Record<string, any> = {}) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    // Add any additional filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value.toString());
+    });
+
+    return fetchAPI(`/api/tasks?${params.toString()}`);
+  },
+
+  getTask: async (id: string) => {
+    return fetchAPI(`/api/tasks/${id}`);
+  },
+
+  createTask: async (task: any) => {
+    return fetchAPI('/api/tasks', {
+      method: 'POST',
+      body: JSON.stringify(task),
+    });
+  },
+
+  updateTask: async (id: string, task: any) => {
+    return fetchAPI(`/api/tasks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(task),
+    });
+  },
+
+  updateTaskStatus: async (id: string, status: string) => {
+    return fetchAPI(`/api/tasks/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  deleteTask: async (id: string) => {
+    return fetchAPI(`/api/tasks/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+/**
+ * Team API functions
+ */
+export const teamApi = {
+  getTeamMembers: async (projectId?: string, page = 1, limit = 10) => {
+    const params = new URLSearchParams();
+    if (projectId) params.append('projectId', projectId);
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    return fetchAPI(`/api/team?${params.toString()}`);
+  },
+
+  getTeamMember: async (id: string) => {
+    return fetchAPI(`/api/team/${id}`);
+  },
+
+  addTeamMember: async (teamMember: any) => {
+    return fetchAPI('/api/team', {
+      method: 'POST',
+      body: JSON.stringify(teamMember),
+    });
+  },
+
+  updateTeamMember: async (id: string, teamMember: any) => {
+    return fetchAPI(`/api/team/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(teamMember),
+    });
+  },
+
+  removeTeamMember: async (id: string) => {
+    return fetchAPI(`/api/team/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+/**
+ * Event API functions
+ */
+export const eventApi = {
+  getEvents: async (projectId?: string, page = 1, limit = 10) => {
+    const params = new URLSearchParams();
+    if (projectId) params.append('projectId', projectId);
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    return fetchAPI(`/api/events?${params.toString()}`);
+  },
+
+  getEvent: async (id: string) => {
+    return fetchAPI(`/api/events/${id}`);
+  },
+
+  createEvent: async (event: any) => {
+    return fetchAPI('/api/events', {
+      method: 'POST',
+      body: JSON.stringify(event),
+    });
+  },
+
+  updateEvent: async (id: string, event: any) => {
+    return fetchAPI(`/api/events/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(event),
+    });
+  },
+
+  deleteEvent: async (id: string) => {
+    return fetchAPI(`/api/events/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+/**
+ * Resource API functions
+ */
+export const resourceApi = {
+  getResources: async (page = 1, limit = 10, filters: Record<string, any> = {}) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    // Add any additional filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value.toString());
+    });
+
+    return fetchAPI(`/api/resources?${params.toString()}`);
+  },
+
+  getResource: async (id: string) => {
+    return fetchAPI(`/api/resources/${id}`);
+  },
+
+  createResource: async (resource: any) => {
+    return fetchAPI('/api/resources', {
+      method: 'POST',
+      body: JSON.stringify(resource),
+    });
+  },
+
+  updateResource: async (id: string, resource: any) => {
+    return fetchAPI(`/api/resources/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(resource),
+    });
+  },
+
+  deleteResource: async (id: string) => {
+    return fetchAPI(`/api/resources/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};

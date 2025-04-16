@@ -14,11 +14,14 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
-import { useData } from "@/contexts/DataContext"
+import { useProjects } from "@/hooks/use-data"
+import { resourceApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function NewResourcePage() {
   const router = useRouter()
-  const { addResource, projects } = useData()
+  const { projects } = useProjects(1, 100)
+  const { toast } = useToast()
   const [resourceData, setResourceData] = useState({
     name: "",
     type: "",
@@ -35,10 +38,23 @@ export default function NewResourcePage() {
     setResourceData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    addResource(resourceData)
-    router.push("/resources")
+
+    try {
+      await resourceApi.createResource(resourceData)
+      toast({
+        title: "Resource created",
+        description: "New resource has been created successfully",
+      })
+      router.push("/resources")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create resource",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

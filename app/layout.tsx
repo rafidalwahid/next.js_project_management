@@ -2,14 +2,16 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { DataProvider } from "@/contexts/DataContext"
+import { NextAuthProvider } from "@/components/auth-provider"
+import { SWRProvider } from "@/components/swr-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "ProjectPro",
   description: "Enterprise Project Management System",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -20,11 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <DataProvider>{children}</DataProvider>
+        <NextAuthProvider>
+          <SWRProvider>
+            {children}
+            <Toaster />
+          </SWRProvider>
+        </NextAuthProvider>
       </body>
     </html>
   )
 }
-
-
-import './globals.css'

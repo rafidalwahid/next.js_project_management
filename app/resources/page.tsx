@@ -2,16 +2,39 @@
 
 import Link from "next/link"
 import { BarChart3, Filter, Plus, Search, Edit, Trash } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useData } from "@/contexts/DataContext"
+import { useResources } from "@/hooks/use-data"
+import { resourceApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ResourcesPage() {
-  const { resources, deleteResource } = useData()
+  const [page, setPage] = useState(1)
+  const [filters, setFilters] = useState({})
+  const { resources, isLoading, mutate } = useResources(page, 20, filters)
+  const { toast } = useToast()
+
+  const deleteResource = async (id: string) => {
+    try {
+      await resourceApi.deleteResource(id)
+      mutate() // Refresh the data
+      toast({
+        title: "Resource deleted",
+        description: "The resource has been deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the resource",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
