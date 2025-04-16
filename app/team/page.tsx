@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Filter, Plus, Search, Edit, Trash, User } from "lucide-react"
+import { Filter, Plus, Search, LayoutGrid, List } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
@@ -10,12 +10,37 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Spinner } from "@/components/ui/spinner"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { UserGrid } from "@/components/team/user-grid"
+import { UserList } from "@/components/team/user-list"
+import { Pagination } from "@/components/team/pagination"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function TeamPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const { users, isLoading, isError, mutate } = useUsers(searchQuery)
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 12
+  const { users: allUsers, isLoading, isError, mutate } = useUsers(searchQuery, 100) // Increased limit
+
+  // Filter users by role
+  const filteredUsers = allUsers.filter(user => {
+    if (roleFilter === "all") return true
+    return user.role.toLowerCase() === roleFilter.toLowerCase()
+  })
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const users = filteredUsers.slice(startIndex, startIndex + itemsPerPage)
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const { toast } = useToast()
   const router = useRouter()
   const { status } = useSession()
@@ -66,85 +91,133 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Team</h1>
+    <div className="flex flex-col gap-6 max-w-[1400px] mx-auto px-4 py-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
+        <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
         <div className="flex items-center gap-2">
-          <Button>
+          <Button className="bg-black hover:bg-black/90 text-white">
             <Plus className="mr-2 h-4 w-4" />
-            New Member
+            Add New Member
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search members..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-        </div>
-        <Button variant="outline" size="sm" className="h-9">
-          <Filter className="mr-2 h-4 w-4" />
-          Filter
-        </Button>
+      <div className="grid gap-4 md:grid-cols-4 mt-2">
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Total Members</CardDescription>
+            <CardTitle className="text-3xl">{allUsers.length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Active team members in your organization</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/50 dark:to-pink-950/50 border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Admins</CardDescription>
+            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'admin').length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Users with administrative privileges</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Managers</CardDescription>
+            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'manager').length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Project and team managers</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Contributors</CardDescription>
+            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'contributor').length}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Team members contributing to projects</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
-                  No users found.
-                </TableCell>
-              </TableRow>
+      <Card className="shadow-sm border-0">
+        <CardHeader className="pb-3 px-6 pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Team Directory</CardTitle>
+              <CardDescription>
+                View and manage all team members in your organization.
+              </CardDescription>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredUsers.length} {filteredUsers.length === 1 ? 'member' : 'members'}
+              {roleFilter !== 'all' && ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
+              {searchQuery && ` matching: "${searchQuery}"`}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="px-6 pb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-muted/30 p-4 rounded-lg">
+            <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name or email..."
+                  className="pl-8 bg-background"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="contributor">Contributor</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+            </div>
+
+            <Tabs defaultValue={viewMode} onValueChange={(value) => setViewMode(value as "grid" | "list")} className="w-full md:w-auto">
+              <TabsList className="grid w-full grid-cols-2 md:w-[160px] bg-background/80">
+                <TabsTrigger value="grid" className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger value="list" className="flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  List
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="mt-6">
+            {viewMode === "grid" ? (
+              <UserGrid users={users} onDelete={handleDelete} />
             ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/profile/${user.id}`} className="hover:text-primary hover:underline">
-                      {user.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell className="capitalize">{user.role}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/profile/${user.id}`}>
-                          <User className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              <UserList users={users} onDelete={handleDelete} />
             )}
-          </TableBody>
-        </Table>
-      </div>
+
+            {filteredUsers.length > itemsPerPage && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

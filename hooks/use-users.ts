@@ -7,6 +7,7 @@ type User = {
   email: string;
   image?: string | null;
   role: string;
+  createdAt?: string;
 };
 
 type UsersResponse = {
@@ -51,4 +52,4 @@ export function useProjectUsers(projectId: string, limit = 10) {
     isError: error,
     mutate,
   };
-} 
+}
