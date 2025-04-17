@@ -13,22 +13,47 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
+    // Get the logged-in user's ID and role
+    const userId = session.user.id;
+    const userRole = session.user.role;
+    
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found in session" }, { status: 401 });
+    }
+
     // Get search params
     const searchParams = req.nextUrl.searchParams;
-    const status = searchParams.get("status");
+    const statusParam = searchParams.get("status");
     const limit = parseInt(searchParams.get("limit") || "10");
     const page = parseInt(searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
     
-    // Build filter
-    const where: any = {};
+    // Build filter based on user role
+    let where: any = {};
     
-    // Filter by status if provided
-    if (status) {
-      where.status = status;
+    // Role-based filtering:
+    // - Admin: Can see all projects (no filter)
+    // - Manager: Can see all projects they created
+    // - Regular user: Can see all projects (for simplicity - can be customized further)
+    if (userRole === "admin") {
+      // Admin can see all projects
+      where = {};
+    } else if (userRole === "manager") {
+      // Manager can see projects they created
+      where = {
+        createdById: userId,
+      };
+    } else {
+      // Regular users can see all projects for now (can be customized)
+      where = {};
     }
     
-    // Get total count
+    // Filter by status if provided and is a valid string
+    if (statusParam && typeof statusParam === 'string' && statusParam !== '[object Object]') {
+      where.status = statusParam;
+    }
+    
+    // Get total count based on the filtered criteria
     const total = await prisma.project.count({ where });
     
     // Get projects with pagination
@@ -56,8 +81,23 @@ export async function GET(req: NextRequest) {
       skip: skip,
     });
     
+    // Ensure projects are serializable
+    const serializedProjects = projects.map(project => ({
+      id: project.id,
+      title: project.title,
+      description: project.description,
+      status: project.status,
+      startDate: project.startDate ? project.startDate.toISOString() : null,
+      endDate: project.endDate ? project.endDate.toISOString() : null,
+      createdAt: project.createdAt.toISOString(),
+      updatedAt: project.updatedAt.toISOString(),
+      createdById: project.createdById,
+      createdBy: project.createdBy,
+      _count: project._count
+    }));
+    
     return NextResponse.json({
-      projects,
+      projects: serializedProjects,
       pagination: {
         total,
         page,
@@ -106,7 +146,7 @@ export async function POST(req: NextRequest) {
     
     const { title, description, status, startDate, endDate } = validationResult.data;
     
-    // Create project
+    // Create project and team member entry first
     const project = await prisma.project.create({
       data: {
         title,
@@ -115,22 +155,12 @@ export async function POST(req: NextRequest) {
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         createdById: session.user.id,
-        // Create team member relation for the creator
         teamMembers: {
           create: {
             role: "owner",
             userId: session.user.id,
           }
         },
-        // Log activity
-        activities: {
-          create: {
-            action: "created",
-            entityType: "project",
-            description: `Project "${title}" was created`,
-            userId: session.user.id,
-          }
-        }
       },
       include: {
         createdBy: {
@@ -153,8 +183,25 @@ export async function POST(req: NextRequest) {
         }
       }
     });
+
+    // Log activity separately after project creation
+    if (project) {
+      await prisma.activity.create({
+        data: {
+          action: "created",
+          entityType: "project",
+          entityId: project.id, // Use the created project's ID
+          description: `Project "${project.title}" was created`,
+          userId: session.user.id,
+          projectId: project.id, // Also link activity to project
+        }
+      });
+    }
     
-    return NextResponse.json({ project }, { status: 201 });
+    return NextResponse.json({ 
+      project,
+      message: "Project created successfully" 
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating project:", error);
     return NextResponse.json(

@@ -4,12 +4,6 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
 // Define validation schema for profile updates
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").optional(),
@@ -28,8 +22,15 @@ const updateProfileSchema = z.object({
   }).optional(),
 });
 
+// Define the context type for the route parameters
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 // GET handler to get a user by ID
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = params.id;
+    const id = context.params.id;
 
     // Check if the user is requesting their own profile or has admin rights
     const isOwnProfile = session.user.id === id;
@@ -229,7 +230,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // PATCH handler to update a user profile
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -237,7 +238,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const id = context.params.id;
 
     // Check if the user is updating their own profile or has admin rights
     const isOwnProfile = session.user.id === id;

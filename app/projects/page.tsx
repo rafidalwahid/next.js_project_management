@@ -12,10 +12,18 @@ import { useProjects } from "@/hooks/use-data"
 import { projectApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
+interface Project {
+  id: string;
+  title: string;
+  status: string;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
 export default function ProjectsPage() {
   const [page, setPage] = useState(1)
-  const [filters, setFilters] = useState({})
-  const { projects, isLoading, mutate } = useProjects(page, 20, filters)
+  const [filters, setFilters] = useState<Record<string, string>>({})
+  const { projects, isLoading, isError, mutate } = useProjects(page, 20, {})
   const { toast } = useToast()
 
   const deleteProject = async (id: string) => {
@@ -35,6 +43,21 @@ export default function ProjectsPage() {
     }
   }
 
+  const refreshProjects = async () => {
+    try {
+      await mutate();
+      toast({
+        title: "Projects refreshed",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh projects",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -46,6 +69,9 @@ export default function ProjectsPage() {
               New Project
             </Button>
           </Link>
+          <Button variant="secondary" onClick={refreshProjects}>
+            Refresh Data
+          </Button>
         </div>
       </div>
 
@@ -60,39 +86,48 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {projects.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell>{project.title}</TableCell>
-              <TableCell>{project.status}</TableCell>
-              <TableCell>{new Date(project.startDate).toLocaleDateString()}</TableCell>
-              <TableCell>{new Date(project.endDate).toLocaleDateString()}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Link href={`/projects/edit/${project.id}`}>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Button variant="outline" size="sm" onClick={() => deleteProject(project.id)}>
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+      {isLoading ? (
+        <div className="text-center p-4">Loading projects...</div>
+      ) : isError ? (
+        <div className="text-center p-4 text-red-500">Error loading projects</div>
+      ) : projects && projects.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {projects.map((project: Project) => (
+              <TableRow key={project.id}>
+                <TableCell>{project.title}</TableCell>
+                <TableCell>{project.status}</TableCell>
+                <TableCell>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}</TableCell>
+                <TableCell>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/projects/edit/${project.id}`}>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button variant="outline" size="sm" onClick={() => deleteProject(project.id)}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div className="text-center p-4">No projects found</div>
+      )}
     </DashboardLayout>
   )
 }
+

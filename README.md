@@ -15,7 +15,7 @@ A comprehensive project management application built with Next.js, Prisma, and M
 
 - **Frontend**: Next.js, React, Tailwind CSS, Radix UI
 - **Backend**: Next.js API Routes
-- **Database**: MySQL 
+- **Database**: MySQL
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js
 
@@ -102,12 +102,141 @@ The application will be available at http://localhost:3000.
 - `/styles` - Global styles
 - `/types` - TypeScript type definitions
 
+## Database Structure
+
+The application uses a MySQL database with Prisma ORM for data modeling and access. Below is a detailed overview of the database schema, relationships, and architecture.
+
+### Core Models
+
+#### User
+- **Fields**: id (cuid), name (String?), email (String, unique), emailVerified (DateTime?), image (String?), password (String?), role (String), createdAt (DateTime), updatedAt (DateTime)
+- **Role Values**: "admin", "manager", "user" (default)
+- **Relations**: One-to-many with Projects, Tasks, TeamMembers, Accounts, Sessions, Activities
+
+#### Project
+- **Fields**: id (cuid), title (String), description (Text?), status (String), startDate (DateTime?), endDate (DateTime?), createdAt (DateTime), updatedAt (DateTime), createdById (String)
+- **Status Values**: "active" (default), "completed", "on-hold", "cancelled"
+- **Relations**: Many-to-one with User (createdBy), One-to-many with Tasks, TeamMembers, Events, Resources, Activities
+
+#### Task
+- **Fields**: id (cuid), title (String), description (Text?), status (String), priority (String), dueDate (DateTime?), projectId (String), assignedToId (String?), createdAt (DateTime), updatedAt (DateTime)
+- **Status Values**: "pending" (default), "in-progress", "completed"
+- **Priority Values**: "low", "medium" (default), "high"
+- **Relations**: Many-to-one with Project and User (assignedTo), One-to-many with Activities
+
+#### TeamMember
+- **Fields**: id (cuid), role (String), userId (String), projectId (String), joinedAt (DateTime)
+- **Role Values**: "owner", "admin", "member"
+- **Relations**: Many-to-one with User and Project
+- **Constraints**: Unique [userId, projectId] combination
+
+#### Resource
+- **Fields**: id (cuid), name (String), type (String), quantity (Int), projectId (String), assignedToId (String?), createdAt (DateTime), updatedAt (DateTime)
+- **Type Values**: "hardware", "software", "human", etc.
+- **Relations**: Many-to-one with Project
+
+#### Event
+- **Fields**: id (cuid), title (String), description (Text?), date (DateTime), projectId (String), createdAt (DateTime), updatedAt (DateTime)
+- **Relations**: Many-to-one with Project
+
+#### Activity
+- **Fields**: id (cuid), action (String), entityType (String), entityId (String), description (String?), userId (String), projectId (String?), taskId (String?), createdAt (DateTime)
+- **Action Values**: "created", "updated", "deleted", "assigned", etc.
+- **EntityType Values**: "project", "task", "resource", etc.
+- **Relations**: Many-to-one with User, Project (optional), Task (optional)
+
+### Authentication Models (NextAuth.js)
+
+#### Account
+- **Fields**: id (cuid), userId (String), type (String), provider (String), providerAccountId (String), refresh_token (Text?), access_token (Text?), expires_at (Int?), token_type (String?), scope (String?), id_token (Text?), session_state (String?)
+- **Relations**: Many-to-one with User
+- **Constraints**: Unique [provider, providerAccountId] combination
+
+#### Session
+- **Fields**: id (cuid), sessionToken (String, unique), userId (String), expires (DateTime)
+- **Relations**: Many-to-one with User
+
+#### VerificationToken
+- **Fields**: identifier (String), token (String, unique), expires (DateTime)
+- **Constraints**: Unique [identifier, token] combination
+
+### Database Relationships
+
+- **User-Project**: One-to-many (A user can create multiple projects)
+- **User-Task**: One-to-many (A user can be assigned multiple tasks)
+- **Project-Task**: One-to-many (A project can have multiple tasks)
+- **Project-TeamMember**: One-to-many (A project can have multiple team members)
+- **User-TeamMember**: One-to-many (A user can be a member of multiple project teams)
+- **Project-Resource**: One-to-many (A project can have multiple resources)
+- **Project-Event**: One-to-many (A project can have multiple events)
+- **User-Activity**: One-to-many (A user can generate multiple activities)
+- **Project-Activity**: One-to-many (A project can have multiple activities)
+- **Task-Activity**: One-to-many (A task can have multiple activities)
+
+### Important Notes on Data Types
+
+- **String Fields**: All string fields in Prisma are mapped to VARCHAR(191) in MySQL by default
+- **Text Fields**: Fields marked with @db.Text are mapped to TEXT in MySQL
+- **DateTime Fields**: Stored with millisecond precision (DATETIME(3))
+- **Status Fields**: Stored as strings but validated through application logic
+- **ID Fields**: All IDs use CUID (Collision-resistant Unique Identifiers)
+
+### Database Architecture and Data Flow
+
+#### Architecture Overview
+
+1. **Client Layer**: React components in the frontend make requests to the API
+2. **API Layer**: Next.js API routes handle requests and communicate with the database
+3. **Data Access Layer**: Prisma ORM provides type-safe database access
+4. **Database Layer**: MySQL stores all application data
+
+#### Data Flow
+
+1. **Data Retrieval**:
+   - Frontend components use custom hooks (e.g., `useProjects`, `useTasks`)
+   - Hooks use SWR for data fetching and caching
+   - API client functions in `lib/api.ts` make actual HTTP requests
+   - Next.js API routes process requests and use Prisma to query the database
+   - Results are returned as JSON responses
+
+2. **Data Modification**:
+   - Forms in the UI collect user input
+   - Form data is validated on the client side
+   - API client functions send data to API endpoints
+   - API routes validate incoming data using Zod schemas
+   - Prisma transactions ensure data consistency
+   - Activity logs are created to track changes
+
+3. **Authentication Flow**:
+   - NextAuth.js handles user authentication
+   - JWT tokens are used for session management
+   - API routes verify session tokens before processing requests
+   - Role-based access control restricts operations based on user roles
+
+#### Database Optimization
+
+- **Indexes**: Primary keys and foreign keys are automatically indexed
+- **Relations**: Proper relation definitions enable efficient joins
+- **Cascading Operations**: Automatic cleanup of related records on deletion
+- **Pagination**: API endpoints support pagination for large result sets
+
+### Common Issues and Solutions
+
+- **Object Serialization**: When filtering by status or other fields, ensure you're passing a string value and not an object. The API will reject requests where status is `[object Object]` instead of a valid string value.
+- **Date Handling**: Dates are stored in ISO format in the database but should be properly formatted for display in the UI.
+- **Cascading Deletes**: The schema includes cascading deletes for related records (e.g., deleting a project will delete all its tasks).
+- **Type Safety**: The Prisma schema enforces type safety, but be careful with dynamic values and user inputs.
+- **Status Enums**: Status fields like project status and task status are stored as strings but should only contain predefined values.
+
 ## API Routes
 
 - `/api/auth/*` - Authentication endpoints (NextAuth.js)
 - `/api/projects` - Project management
 - `/api/tasks` - Task management
 - `/api/users` - User management
+- `/api/events` - Event management
+- `/api/resources` - Resource management
+- `/api/activities` - Activity logging
 
 ## Development Workflow
 
@@ -118,4 +247,4 @@ The application will be available at http://localhost:3000.
 
 ## License
 
-[MIT](LICENSE) 
+[MIT](LICENSE)

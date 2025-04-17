@@ -6,12 +6,33 @@ import { projectApi, taskApi, teamApi, eventApi, resourceApi } from '@/lib/api';
 /**
  * Hook to fetch projects
  */
-export function useProjects(page = 1, limit = 10, filters = {}) {
+export function useProjects(page = 1, limit = 10, filters: Record<string, string> = {}) {
+  // Filter out any invalid values from filters
+  const cleanFilters = Object.fromEntries(
+    Object.entries(filters).filter(([_, value]) => 
+      value !== null && 
+      value !== undefined && 
+      typeof value === 'string' && 
+      value !== '[object Object]'
+    )
+  );
+  
+  // Create a unique cache key that includes all parameters
+  const queryString = `/api/projects?page=${page}&limit=${limit}${
+    Object.keys(cleanFilters).length > 0 
+      ? `&${new URLSearchParams(cleanFilters).toString()}` 
+      : ''
+  }`;
+  
   const { data, error, isLoading, mutate } = useSWR(
-    `/api/projects?page=${page}&limit=${limit}&${new URLSearchParams(filters as Record<string, string>).toString()}`,
+    queryString,
     async () => {
-      const response = await projectApi.getProjects(page, limit, filters);
-      return response;
+      try {
+        const response = await projectApi.getProjects(page, limit, filters);
+        return response;
+      } catch (err) {
+        throw err;
+      }
     }
   );
 

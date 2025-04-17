@@ -91,7 +91,7 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1400px] mx-auto px-4 py-2">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
         <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
         <div className="flex items-center gap-2">

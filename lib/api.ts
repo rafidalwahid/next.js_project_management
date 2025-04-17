@@ -75,11 +75,19 @@ export const userApi = {
  * Project API functions
  */
 export const projectApi = {
-  getProjects: async (page = 1, limit = 10, status?: string) => {
+  getProjects: async (page = 1, limit = 10, filters?: Record<string, string>) => {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
-    if (status) params.append('status', status);
+    
+    // Add filters if valid
+    if (filters && typeof filters === 'object') {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && typeof value === 'string' && value !== '[object Object]') {
+          params.append(key, value);
+        }
+      });
+    }
 
     return fetchAPI(`/api/projects?${params.toString()}`);
   },

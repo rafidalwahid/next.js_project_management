@@ -16,7 +16,7 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { status } = useSession()
-  
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email || !password) {
       toast({
         title: "Error",
@@ -44,7 +44,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       console.log("Attempting sign in with:", email)
-      
+
       const result = await signIn("credentials", {
         redirect: false,
         email,
@@ -66,7 +66,7 @@ export default function LoginPage() {
       console.log("Login successful, redirecting to dashboard")
       router.push("/dashboard")
       router.refresh() // Refresh to ensure session is updated throughout the app
-      
+
     } catch (error) {
       console.error("Login error:", error)
       toast({
@@ -90,7 +90,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription>Enter your credentials to access your account</CardDescription>
           <CardDescription className="text-sm text-muted-foreground">
-            Demo accounts: 
+            Demo accounts:
             <div>Admin: admin@example.com / admin123</div>
             <div>Manager: manager@example.com / manager123</div>
             <div>User: user@example.com / user123</div>
@@ -101,13 +101,13 @@ export default function LoginPage() {
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="name@example.com" 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required 
+                  required
                 />
               </div>
               <div className="grid gap-2">
@@ -117,12 +117,12 @@ export default function LoginPage() {
                     Forgot your password?
                   </Link>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
+                <Input
+                  id="password"
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required 
+                  required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>

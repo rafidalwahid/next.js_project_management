@@ -2,6 +2,7 @@
 
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 import { Button } from "@/components/ui/button"
 import { PanelLeft, PanelLeftClose } from "lucide-react"
 import { useState } from "react"
@@ -70,6 +71,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </aside>
         <main className="flex flex-col gap-6 p-6 transition-all duration-300 ease-in-out min-h-screen" style={{ marginLeft: sidebarCollapsed ? '64px' : '240px' }}>
+          <Breadcrumbs />
           {children}
         </main>
       </div>
