@@ -18,12 +18,27 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'An error occurred');
+      // Enhanced error handling
+      const error = {
+        status: response.status,
+        statusText: response.statusText,
+        message: data.error || 'Unknown error occurred',
+        details: data.details || {}
+      };
+
+      console.error('API Error:', error);
+      throw new Error(JSON.stringify(error));
     }
 
     return data;
   } catch (error) {
-    console.error('API request failed:', url, error);
+    if (error instanceof Error) {
+      console.error('API request failed:', {
+        url,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     throw error;
   }
 }
@@ -72,6 +87,15 @@ export const userApi = {
 };
 
 /**
+ * Project Status API functions
+ */
+export const projectStatusApi = {
+  getProjectStatuses: async () => {
+    return fetchAPI('/api/project-statuses');
+  },
+};
+
+/**
  * Project API functions
  */
 export const projectApi = {
@@ -79,7 +103,7 @@ export const projectApi = {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
-    
+
     // Add filters if valid
     if (filters && typeof filters === 'object') {
       Object.entries(filters).forEach(([key, value]) => {

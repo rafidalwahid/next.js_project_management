@@ -71,19 +71,34 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ProjectStatus model for flexible status management
+model ProjectStatus {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  color       String    @default("#6E56CF") // Default color for status badges
+  description String?
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  projects    Project[]
+}
+
 // Project model
 model Project {
   id          String   @id @default(cuid())
   title       String
-  description String?   @db.Text
-  status      String   @default("active") // active, completed, on-hold, cancelled
+  description String?
+  statusId    String
   startDate   DateTime?
   endDate     DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdById String
-  
+
   // Relations
+  status      ProjectStatus @relation(fields: [statusId], references: [id])
   createdBy   User       @relation(fields: [createdById], references: [id])
   tasks       Task[]
   teamMembers TeamMember[]
@@ -102,13 +117,18 @@ model Task {
   dueDate     DateTime?
   projectId   String
   assignedToId String?
+  parentId     String?   // New field for parent task reference
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignedTo  User?     @relation(fields: [assignedToId], references: [id])
   activities  Activity[]
+
+  // Self-relation for parent-child tasks
+  parent      Task?      @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks    Task[]     @relation("SubTasks")
 }
 
 // Team Member model (for project-specific roles)
@@ -118,11 +138,11 @@ model TeamMember {
   userId    String
   projectId String
   joinedAt  DateTime @default(now())
-  
+
   // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
+
   @@unique([userId, projectId])
 }
 
@@ -136,7 +156,7 @@ model Resource {
   assignedToId String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
@@ -150,7 +170,7 @@ model Event {
   projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
@@ -166,7 +186,7 @@ model Activity {
   projectId   String?
   taskId      String?
   createdAt   DateTime @default(now())
-  
+
   // Relations
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)

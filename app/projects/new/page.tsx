@@ -17,16 +17,18 @@ import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { projectApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { useProjectStatuses } from "@/hooks/use-project-statuses"
 
 export default function NewProjectPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { statuses } = useProjectStatuses()
   const [projectData, setProjectData] = useState({
     title: "",
     description: "",
     startDate: "",
     endDate: "",
-    status: "",
+    statusId: "", // Will be set automatically by the API
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -44,24 +46,73 @@ export default function NewProjectPage() {
     }
   }
 
+  const validateProject = () => {
+    if (!projectData.title) {
+      toast({
+        title: "Validation Error",
+        description: "Project title is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (projectData.title.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Project title must be at least 3 characters long",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      await projectApi.createProject(projectData)
-      toast({
-        title: "Project created",
-        description: "New project has been created successfully",
-      })
-      router.push("/projects")
+      // Validate before submission
+      if (!validateProject()) {
+        return;
+      }
+
+      const dataToSubmit = {
+        ...projectData,
+      };
+
+      const response = await projectApi.createProject(dataToSubmit);
+
+      if (response.project) {
+        toast({
+          title: "Success",
+          description: "Project created successfully",
+        });
+        router.push("/projects");
+      }
     } catch (error) {
+      let errorMessage = "Failed to create project";
+
+      if (error instanceof Error) {
+        try {
+          const parsedError = JSON.parse(error.message);
+          if (parsedError.details?.title?._errors) {
+            errorMessage = parsedError.details.title._errors[0];
+          } else {
+            errorMessage = parsedError.message || errorMessage;
+          }
+        } catch {
+          errorMessage = error.message || errorMessage;
+        }
+      }
+
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -91,13 +142,15 @@ export default function NewProjectPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="title">Project Name</Label>
+                  <Label htmlFor="title">Project Title (minimum 3 characters)</Label>
                   <Input
                     id="title"
                     name="title"
                     value={projectData.title}
                     onChange={handleInputChange}
-                    placeholder="Enter the project name"
+                    placeholder="Enter project title"
+                    minLength={3}
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
@@ -121,16 +174,17 @@ export default function NewProjectPage() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select onValueChange={handleSelectChange("status")}>
+                  <Label htmlFor="statusId">Status</Label>
+                  <Select onValueChange={handleSelectChange("statusId")}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select status (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="on-hold">On Hold</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      {statuses.map((status) => (
+                        <SelectItem key={status.id} value={status.id}>
+                          {status.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

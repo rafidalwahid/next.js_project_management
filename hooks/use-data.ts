@@ -7,7 +7,6 @@ import { projectApi, taskApi, teamApi, eventApi, resourceApi } from '@/lib/api';
  * Hook to fetch projects
  */
 export function useProjects(page = 1, limit = 10, filters: Record<string, string> = {}) {
-  // Filter out any invalid values from filters
   const cleanFilters = Object.fromEntries(
     Object.entries(filters).filter(([_, value]) => 
       value !== null && 
@@ -17,7 +16,6 @@ export function useProjects(page = 1, limit = 10, filters: Record<string, string
     )
   );
   
-  // Create a unique cache key that includes all parameters
   const queryString = `/api/projects?page=${page}&limit=${limit}${
     Object.keys(cleanFilters).length > 0 
       ? `&${new URLSearchParams(cleanFilters).toString()}` 
@@ -31,8 +29,14 @@ export function useProjects(page = 1, limit = 10, filters: Record<string, string
         const response = await projectApi.getProjects(page, limit, filters);
         return response;
       } catch (err) {
+        console.error('Project fetch error:', err);
         throw err;
       }
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      dedupingInterval: 5000,
     }
   );
 

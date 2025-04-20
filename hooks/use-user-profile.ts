@@ -21,7 +21,14 @@ export type UserProfileData = {
   projects: Array<{
     id: string;
     title: string;
-    status: string;
+    statusId: string;
+    status: {
+      id: string;
+      name: string;
+      color: string;
+      description?: string | null;
+      isDefault: boolean;
+    };
     startDate: string | null;
     endDate: string | null;
     role: string;
@@ -61,7 +68,7 @@ export type UserProfileData = {
   };
 };
 
-export function useUserProfile(userId: string) {
+export function useUserProfile(userId: string, initialUser?: UserProfile) {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -89,7 +96,19 @@ export function useUserProfile(userId: string) {
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
-      errorRetryCount: 2
+      errorRetryCount: 2,
+      fallbackData: initialUser ? {
+        user: initialUser,
+        projects: [],
+        tasks: [],
+        activities: [],
+        stats: {
+          projectCount: 0,
+          taskCount: 0,
+          teamCount: 0,
+          completionRate: '0%'
+        }
+      } : undefined
     }
   );
 

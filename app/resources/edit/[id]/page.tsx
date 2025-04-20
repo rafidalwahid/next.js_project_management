@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { BarChart3, Save, X } from "lucide-react"
 
@@ -18,7 +18,11 @@ import { useProjects, useResources } from "@/hooks/use-data"
 import { resourceApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
-export default function EditResourcePage({ params }: { params: { id: string } }) {
+export default function EditResourcePage() {
+  // Use the useParams hook to get the params
+  const params = useParams()
+  const resourceId = params.id as string
+
   const router = useRouter()
   const { projects } = useProjects(1, 100)
   const { resources, mutate } = useResources(1, 100)
@@ -33,7 +37,7 @@ export default function EditResourcePage({ params }: { params: { id: string } })
   useEffect(() => {
     const fetchResource = async () => {
       try {
-        const response = await resourceApi.getResource(params.id)
+        const response = await resourceApi.getResource(resourceId)
         if (response.resource) {
           setResourceData(response.resource)
         }
@@ -47,7 +51,7 @@ export default function EditResourcePage({ params }: { params: { id: string } })
     }
 
     fetchResource()
-  }, [params.id, toast])
+  }, [resourceId, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -62,7 +66,7 @@ export default function EditResourcePage({ params }: { params: { id: string } })
     e.preventDefault()
 
     try {
-      await resourceApi.updateResource(params.id, resourceData)
+      await resourceApi.updateResource(resourceId, resourceData)
       mutate() // Refresh the data
       toast({
         title: "Resource updated",

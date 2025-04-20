@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { BarChart3, Save, X } from "lucide-react"
 
@@ -20,7 +19,11 @@ import { useProjects, useEvents } from "@/hooks/use-data"
 import { eventApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
-export default function EditEventPage({ params }: { params: { id: string } }) {
+export default function EditEventPage() {
+  // Use the useParams hook to get the params
+  const params = useParams()
+  const eventId = params.id as string
+
   const router = useRouter()
   const { projects } = useProjects(1, 100)
   const { events, mutate } = useEvents(undefined, 1, 100)
@@ -35,7 +38,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await eventApi.getEvent(params.id)
+        const response = await eventApi.getEvent(eventId)
         if (response.event) {
           setEventData(response.event)
         }
@@ -49,7 +52,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     }
 
     fetchEvent()
-  }, [params.id, toast])
+  }, [eventId, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -70,7 +73,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     e.preventDefault()
 
     try {
-      await eventApi.updateEvent(params.id, eventData)
+      await eventApi.updateEvent(eventId, eventData)
       mutate() // Refresh the data
       toast({
         title: "Event updated",

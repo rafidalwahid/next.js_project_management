@@ -11,11 +11,19 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { useProjects } from "@/hooks/use-data"
 import { projectApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { Badge } from "@/components/ui/badge"
 
 interface Project {
   id: string;
   title: string;
-  status: string;
+  statusId: string;
+  status: {
+    id: string;
+    name: string;
+    color: string;
+    description?: string | null;
+    isDefault: boolean;
+  };
   startDate?: string | null;
   endDate?: string | null;
 }
@@ -105,7 +113,14 @@ export default function ProjectsPage() {
             {projects.map((project: Project) => (
               <TableRow key={project.id}>
                 <TableCell>{project.title}</TableCell>
-                <TableCell>{project.status}</TableCell>
+                <TableCell>
+                  <Badge
+                    style={{ backgroundColor: project.status?.color || '#6E56CF' }}
+                    className="text-white"
+                  >
+                    {project.status?.name || 'Unknown'}
+                  </Badge>
+                </TableCell>
                 <TableCell>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}</TableCell>
                 <TableCell>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</TableCell>
                 <TableCell>

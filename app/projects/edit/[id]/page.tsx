@@ -1,11 +1,10 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
-import { Save, X } from "lucide-react"
+import { Save, X, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,20 +14,30 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
-import { useProject } from "@/hooks/use-data"
-import { projectApi } from "@/lib/api"
+import { useProject, useTasks } from "@/hooks/use-data"
+import { projectApi, taskApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { useProjectStatuses } from "@/hooks/use-project-statuses"
+import { TaskList } from "@/components/tasks/task-list"
 
-export default function EditProjectPage({ params }: { params: { id: string } }) {
+export default function EditProjectPage() {
+  // Use the useParams hook to get the params
+  const params = useParams()
+  const projectId = params.id as string
+
   const router = useRouter()
-  const { project, isLoading, mutate } = useProject(params.id)
+  const { project, isLoading, mutate } = useProject(projectId)
+  const { statuses } = useProjectStatuses()
   const { toast } = useToast()
+
+  // Fetch tasks for this project
+  const { tasks, isLoading: tasksLoading, mutate: mutateTasks } = useTasks(1, 100, { projectId })
   const [projectData, setProjectData] = useState({
     title: "",
     description: "",
     startDate: "",
     endDate: "",
-    status: "",
+    statusId: "",
   })
 
   useEffect(() => {
@@ -38,7 +47,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         description: project.description || "",
         startDate: project.startDate,
         endDate: project.endDate,
-        status: project.status,
+        statusId: project.statusId,
       })
     }
   }, [project])
@@ -62,7 +71,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     e.preventDefault()
 
     try {
-      await projectApi.updateProject(params.id, projectData)
+      await projectApi.updateProject(projectId, projectData)
       mutate() // Refresh the data
       toast({
         title: "Project updated",
@@ -73,6 +82,24 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
       toast({
         title: "Error",
         description: "Failed to update project",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Handle task deletion
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await taskApi.deleteTask(taskId)
+      mutateTasks() // Refresh the tasks data
+      toast({
+        title: "Task deleted",
+        description: "Task has been deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
         variant: "destructive",
       })
     }
@@ -139,15 +166,17 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select onValueChange={handleSelectChange("status")} defaultValue={projectData.status}>
+                  <Label htmlFor="statusId">Status</Label>
+                  <Select onValueChange={handleSelectChange("statusId")} defaultValue={projectData.statusId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="planning">Planning</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
+                      {statuses.map((status) => (
+                        <SelectItem key={status.id} value={status.id}>
+                          {status.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -159,6 +188,40 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
                 </Button>
               </CardFooter>
             </form>
+          </Card>
+
+          {/* Project Tasks Section */}
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Project Tasks</CardTitle>
+                <CardDescription>Manage tasks for this project</CardDescription>
+              </div>
+              <Link href={`/tasks/new?projectId=${projectId}`}>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Task
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {tasksLoading ? (
+                <div className="text-center p-4">Loading tasks...</div>
+              ) : tasks && tasks.length > 0 ? (
+                <TaskList tasks={tasks} onDelete={handleDeleteTask} />
+              ) : (
+                <div className="text-center p-8 border rounded-md bg-muted/10">
+                  <h3 className="text-lg font-medium mb-2">No tasks yet</h3>
+                  <p className="text-muted-foreground mb-4">This project doesn't have any tasks yet.</p>
+                  <Link href={`/tasks/new?projectId=${projectId}`}>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create First Task
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </CardContent>
           </Card>
         </main>
       </div>

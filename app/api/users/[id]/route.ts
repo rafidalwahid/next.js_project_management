@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth-options";
 
 // Define validation schema for profile updates
 const updateProfileSchema = z.object({
@@ -22,27 +22,23 @@ const updateProfileSchema = z.object({
   }).optional(),
 });
 
-// Define the context type for the route parameters
-interface RouteContext {
+// GET handler to get a user by ID
+interface Params {
   params: {
     id: string;
   };
 }
 
-// GET handler to get a user by ID
-export async function GET(req: NextRequest, context: RouteContext) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
 
-    // Debug session information
-    console.log('Session:', session ? 'exists' : 'null');
-
-    if (!session || !session.user) {
-      console.error('No session or user found');
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = context.params.id;
+    // In Next.js 14, params is a Promise that needs to be awaited
+    const { id } = await params;
 
     // Check if the user is requesting their own profile or has admin rights
     const isOwnProfile = session.user.id === id;
@@ -88,6 +84,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
             select: {
               id: true,
               title: true,
+              statusId: true,
               status: true,
               startDate: true,
               endDate: true,
@@ -198,6 +195,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
         projects: projects.map(p => ({
           id: p.project.id,
           title: p.project.title,
+          statusId: p.project.statusId,
           status: p.project.status,
           startDate: p.project.startDate,
           endDate: p.project.endDate,
@@ -230,7 +228,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
 }
 
 // PATCH handler to update a user profile
-export async function PATCH(req: NextRequest, context: RouteContext) {
+export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -238,7 +236,8 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = context.params.id;
+    // In Next.js 14, params is a Promise that needs to be awaited
+    const { id } = await params;
 
     // Check if the user is updating their own profile or has admin rights
     const isOwnProfile = session.user.id === id;

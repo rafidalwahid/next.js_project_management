@@ -80,7 +80,9 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                             ? "success"
                             : task.status === "in-progress"
                             ? "default"
-                            : "secondary"
+                            : task.status === "pending"
+                            ? "secondary"
+                            : "outline"
                         }
                         className="capitalize"
                       >

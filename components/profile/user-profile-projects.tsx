@@ -9,7 +9,14 @@ import { formatDate } from "@/lib/utils"
 interface Project {
   id: string
   title: string
-  status: string
+  statusId: string
+  status: {
+    id: string
+    name: string
+    color: string
+    description?: string | null
+    isDefault: boolean
+  }
   startDate: string | null
   endDate: string | null
   role: string
@@ -62,16 +69,10 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge
-                    variant={
-                      project.status === "completed"
-                        ? "success"
-                        : project.status === "active"
-                        ? "default"
-                        : "secondary"
-                    }
-                    className="capitalize"
+                    style={{ backgroundColor: project.status?.color || '#6E56CF' }}
+                    className="text-white capitalize"
                   >
-                    {project.status}
+                    {project.status?.name || 'Unknown'}
                   </Badge>
                   <Badge variant="outline" className="capitalize">
                     {project.role}

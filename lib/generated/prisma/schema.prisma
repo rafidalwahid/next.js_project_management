@@ -71,12 +71,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ProjectStatus model for flexible status management
+model ProjectStatus {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String   @default("#6E56CF") // Default color for status badges
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  projects Project[]
+}
+
 // Project model
 model Project {
   id          String    @id @default(cuid())
   title       String
-  description String?   @db.Text
-  status      String    @default("active") // active, completed, on-hold, cancelled
+  description String?
+  statusId    String
   startDate   DateTime?
   endDate     DateTime?
   createdAt   DateTime  @default(now())
@@ -84,7 +98,8 @@ model Project {
   createdById String
 
   // Relations
-  createdBy   User         @relation(fields: [createdById], references: [id])
+  status      ProjectStatus @relation(fields: [statusId], references: [id])
+  createdBy   User          @relation(fields: [createdById], references: [id])
   tasks       Task[]
   teamMembers TeamMember[]
   events      Event[]
@@ -102,6 +117,7 @@ model Task {
   dueDate      DateTime?
   projectId    String
   assignedToId String?
+  parentId     String? // New field for parent task reference
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -109,6 +125,10 @@ model Task {
   project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignedTo User?      @relation(fields: [assignedToId], references: [id])
   activities Activity[]
+
+  // Self-relation for parent-child tasks
+  parent   Task?  @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[] @relation("SubTasks")
 }
 
 // Team Member model (for project-specific roles)

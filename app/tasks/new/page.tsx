@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Save, X } from "lucide-react"
 
@@ -22,6 +22,7 @@ import { useUsers } from "@/hooks/use-users"
 
 export default function NewTaskPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { projects } = useProjects(1, 100)
   const { users } = useUsers()
   const { toast } = useToast()
@@ -29,10 +30,55 @@ export default function NewTaskPage() {
     title: "",
     description: "",
     projectId: "",
-    assignedTo: "",
+    assignedToId: "",
     dueDate: "",
-    status: "",
+    status: "pending", // Default status
+    priority: "medium", // Default priority
+    parentId: null as string | null, // For subtasks
   })
+
+  const [parentTask, setParentTask] = useState<any>(null)
+  const [loadingParent, setLoadingParent] = useState(false)
+
+  // Check for projectId and parentId in URL parameters
+  useEffect(() => {
+    const projectId = searchParams.get('projectId')
+    const parentId = searchParams.get('parentId')
+
+    if (projectId) {
+      setTaskData(prev => ({ ...prev, projectId }))
+    }
+
+    // If parentId is provided, fetch the parent task
+    if (parentId) {
+      const fetchParentTask = async () => {
+        try {
+          setLoadingParent(true)
+          const response = await taskApi.getTask(parentId)
+          setParentTask(response.task)
+
+          // Set project ID to match parent task's project
+          if (response.task.projectId) {
+            setTaskData(prev => ({
+              ...prev,
+              projectId: response.task.projectId,
+              parentId: parentId
+            }))
+          }
+        } catch (err) {
+          toast({
+            title: "Error",
+            description: "Failed to load parent task details",
+            variant: "destructive",
+          })
+        } finally {
+          setLoadingParent(false)
+        }
+      }
+
+      fetchParentTask()
+    }
+  }, [searchParams, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -58,7 +104,21 @@ export default function NewTaskPage() {
         title: "Task created",
         description: "New task has been created successfully",
       })
-      router.push("/tasks")
+
+      // Determine where to redirect after task creation
+      const parentId = searchParams.get('parentId')
+      const projectId = searchParams.get('projectId')
+
+      if (parentId) {
+        // If this is a subtask, go back to parent task
+        router.push(`/tasks/${parentId}`)
+      } else if (projectId) {
+        // If task was created from a project page, redirect back to that project
+        router.push(`/projects/edit/${projectId}`)
+      } else {
+        // Otherwise go to the task list
+        router.push("/tasks")
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -91,8 +151,12 @@ export default function NewTaskPage() {
           <Card>
             <form onSubmit={handleSubmit}>
               <CardHeader>
-                <CardTitle>Task Information</CardTitle>
-                <CardDescription>Enter the details of the new task</CardDescription>
+                <CardTitle>{parentTask ? "Create Subtask" : "New Task"}</CardTitle>
+                <CardDescription>
+                  {parentTask
+                    ? `Add a subtask to "${parentTask.title}"`
+                    : "Enter the details of the new task"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
@@ -117,7 +181,11 @@ export default function NewTaskPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="projectId">Project</Label>
-                  <Select onValueChange={handleSelectChange("projectId")}>
+                  <Select
+                    onValueChange={handleSelectChange("projectId")}
+                    value={taskData.projectId}
+                    disabled={!!parentTask} // Disable if this is a subtask
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
@@ -129,17 +197,26 @@ export default function NewTaskPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {parentTask && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Subtasks must belong to the same project as their parent task.
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="assignedTo">Assigned to</Label>
-                  <Select onValueChange={handleSelectChange("assignedTo")}>
+                  <Label htmlFor="assignedToId">Assigned to</Label>
+                  <Select
+                    onValueChange={handleSelectChange("assignedToId")}
+                    value={taskData.assignedToId}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a team member" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.name}
+                      <SelectItem value="">Unassigned</SelectItem>
+                      {users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name || user.email}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -149,24 +226,70 @@ export default function NewTaskPage() {
                   <Label htmlFor="dueDate">Due Date</Label>
                   <DatePicker onSelect={handleDateChange} />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select onValueChange={handleSelectChange("status")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      onValueChange={handleSelectChange("status")}
+                      value={taskData.status}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select
+                      onValueChange={handleSelectChange("priority")}
+                      value={taskData.priority}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
+                {/* Display parent task info if this is a subtask */}
+                {parentTask && (
+                  <div className="bg-muted/30 p-4 rounded-md border">
+                    <h3 className="text-sm font-medium mb-2">Parent Task</h3>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={
+                        parentTask.status === "completed"
+                          ? "success"
+                          : parentTask.status === "in-progress"
+                            ? "default"
+                            : "secondary"
+                      }>
+                        {parentTask.status}
+                      </Badge>
+                      <span className="font-medium">{parentTask.title}</span>
+                    </div>
+                    {parentTask.description && (
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {parentTask.description}
+                      </p>
+                    )}
+                  </div>
+                )}
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Button type="submit">
                   <Save className="mr-2 h-4 w-4" />
-                  Save Task
+                  {parentTask ? "Create Subtask" : "Save Task"}
                 </Button>
               </CardFooter>
             </form>

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function seed() {
   try {
     console.log('Starting database seeding...');
-    
+
     // Clean up existing data (in reverse order of dependencies)
     console.log('Cleaning up existing data...');
     await prisma.activity.deleteMany();
@@ -16,11 +16,52 @@ async function seed() {
     await prisma.task.deleteMany();
     await prisma.teamMember.deleteMany();
     await prisma.project.deleteMany();
+    await prisma.projectStatus.deleteMany();
     await prisma.verificationToken.deleteMany();
     await prisma.session.deleteMany();
     await prisma.account.deleteMany();
     await prisma.user.deleteMany();
-    
+
+    // Create project statuses
+    console.log('Creating project statuses...');
+    const activeStatus = await prisma.projectStatus.create({
+      data: {
+        name: 'Active',
+        color: '#22c55e', // Green color
+        description: 'Project is currently active and in progress',
+        isDefault: true,
+      },
+    });
+
+    await prisma.projectStatus.createMany({
+      data: [
+        {
+          name: 'Completed',
+          color: '#3b82f6', // Blue color
+          description: 'Project has been completed successfully',
+          isDefault: false,
+        },
+        {
+          name: 'On Hold',
+          color: '#f59e0b', // Amber color
+          description: 'Project is temporarily on hold',
+          isDefault: false,
+        },
+        {
+          name: 'Cancelled',
+          color: '#ef4444', // Red color
+          description: 'Project has been cancelled',
+          isDefault: false,
+        },
+        {
+          name: 'Planning',
+          color: '#8b5cf6', // Purple color
+          description: 'Project is in the planning phase',
+          isDefault: false,
+        },
+      ],
+    });
+
     // Create admin user
     console.log('Creating admin user...');
     const adminPassword = await bcrypt.hash('admin123', 10);
@@ -32,7 +73,7 @@ async function seed() {
         role: 'admin',
       },
     });
-    
+
     // Create regular user
     console.log('Creating regular user...');
     const userPassword = await bcrypt.hash('user123', 10);
@@ -44,7 +85,7 @@ async function seed() {
         role: 'user',
       },
     });
-    
+
     // Create project manager
     console.log('Creating project manager...');
     const pmPassword = await bcrypt.hash('manager123', 10);
@@ -56,14 +97,14 @@ async function seed() {
         role: 'manager',
       },
     });
-    
+
     // Create projects
     console.log('Creating projects...');
     const project1 = await prisma.project.create({
       data: {
         title: 'Website Redesign',
         description: 'Complete update of the corporate website with new branding and improved UX',
-        status: 'active',
+        statusId: activeStatus.id,
         startDate: new Date('2025-01-15'),
         endDate: new Date('2025-04-30'),
         createdById: admin.id,
@@ -76,12 +117,12 @@ async function seed() {
         }
       },
     });
-    
+
     const project2 = await prisma.project.create({
       data: {
         title: 'Mobile App Development',
         description: 'Create a mobile app for iOS and Android to complement our web platform',
-        status: 'active',
+        statusId: activeStatus.id,
         startDate: new Date('2025-03-01'),
         endDate: new Date('2025-08-15'),
         createdById: projectManager.id,
@@ -93,7 +134,7 @@ async function seed() {
         }
       },
     });
-    
+
     // Create tasks for Website Redesign project
     console.log('Creating tasks for Website Redesign project...');
     await prisma.task.createMany({
@@ -136,7 +177,7 @@ async function seed() {
         },
       ]
     });
-    
+
     // Create tasks for Mobile App project
     console.log('Creating tasks for Mobile App project...');
     await prisma.task.createMany({
@@ -170,7 +211,7 @@ async function seed() {
         },
       ]
     });
-    
+
     // Create events
     console.log('Creating events...');
     await prisma.event.createMany({
@@ -195,7 +236,7 @@ async function seed() {
         },
       ]
     });
-    
+
     // Create resources
     console.log('Creating resources...');
     await prisma.resource.createMany({
@@ -220,7 +261,7 @@ async function seed() {
         },
       ]
     });
-    
+
     console.log('Database seeding completed successfully!');
   } catch (error) {
     console.error('Error seeding database:', error);
@@ -230,4 +271,4 @@ async function seed() {
   }
 }
 
-seed(); 
+seed();

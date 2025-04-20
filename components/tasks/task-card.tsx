@@ -16,6 +16,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { formatDistanceToNow } from "date-fns"
 
+interface Subtask {
+  id: string
+  title: string
+  status: string
+  priority: string
+  assignedToId?: string | null
+  assignedTo?: {
+    id: string
+    name: string | null
+    image: string | null
+  } | null
+}
+
 interface TaskCardProps {
   task: {
     id: string
@@ -24,6 +37,7 @@ interface TaskCardProps {
     status: string
     priority: string
     dueDate: string | null
+    projectId: string
     project?: {
       id: string
       title: string
@@ -33,6 +47,7 @@ interface TaskCardProps {
       name: string | null
       image: string | null
     } | null
+    subtasks?: Subtask[]
   }
   onDelete: (taskId: string) => void
 }
@@ -83,10 +98,10 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
   // Format due date
   const formatDueDate = () => {
     if (!task.dueDate) return "No due date"
-    
+
     const dueDate = new Date(task.dueDate)
     const isOverdue = dueDate < new Date()
-    
+
     return (
       <span className={isOverdue ? "text-destructive" : ""}>
         {isOverdue ? "Overdue: " : ""}
@@ -151,7 +166,7 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
             <Badge variant={getStatusBadgeVariant()} className="capitalize">
               {task.status}
             </Badge>
-            
+
             <Badge variant={getPriorityBadgeVariant()} className="capitalize">
               {task.priority} priority
             </Badge>
@@ -185,6 +200,16 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="mr-2 h-4 w-4" />
               {formatDueDate()}
+            </div>
+          )}
+
+          {/* Subtasks count */}
+          {task.subtasks && task.subtasks.length > 0 && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              <span>
+                {task.subtasks.filter(st => st.status === "completed").length} of {task.subtasks.length} subtasks completed
+              </span>
             </div>
           )}
 
