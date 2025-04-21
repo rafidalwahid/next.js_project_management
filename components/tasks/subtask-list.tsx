@@ -35,6 +35,8 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
   const { toast } = useToast()
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("")
   const [isAddingSubtask, setIsAddingSubtask] = useState(false)
+  const [addingNestedToId, setAddingNestedToId] = useState<string | null>(null)
+  const [nestedSubtaskTitle, setNestedSubtaskTitle] = useState("")
 
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
@@ -81,6 +83,44 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
       toast({
         title: "Error",
         description: "Failed to add subtask. There may be an issue with the database schema. Please check the console for details.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleAddNestedSubtask = async (parentSubtaskId: string) => {
+    if (!nestedSubtaskTitle.trim()) return
+
+    try {
+      console.log("Creating nested subtask with:", {
+        title: nestedSubtaskTitle,
+        projectId,
+        parentId: parentSubtaskId,
+        status: "pending",
+        priority: "medium",
+      })
+
+      await taskApi.createTask({
+        title: nestedSubtaskTitle,
+        projectId,
+        parentId: parentSubtaskId,
+        status: "pending",
+        priority: "medium",
+      })
+
+      setNestedSubtaskTitle("")
+      setAddingNestedToId(null)
+      onSubtaskChange()
+
+      toast({
+        title: "Nested subtask added",
+        description: "Nested subtask has been added successfully",
+      })
+    } catch (error) {
+      console.error("Error adding nested subtask:", error)
+      toast({
+        title: "Error",
+        description: "Failed to add nested subtask. Please check the console for details.",
         variant: "destructive",
       })
     }
@@ -235,11 +275,8 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
                   variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                  title="Add nested subtask (opens in new tab)"
-                  onClick={() => {
-                    // Open the subtask in a new tab
-                    window.open(`/tasks/${subtask.id}`, '_blank');
-                  }}
+                  title="Add nested subtask"
+                  onClick={() => setAddingNestedToId(subtask.id)}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -254,6 +291,48 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
                 </Button>
               </div>
             </div>
+
+            {/* Show form for adding nested subtask */}
+            {addingNestedToId === subtask.id && (
+              <div className="pl-6 border-l-2 border-muted ml-3 mt-2">
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Enter nested subtask title..."
+                    value={nestedSubtaskTitle}
+                    onChange={(e) => setNestedSubtaskTitle(e.target.value)}
+                    className="h-8 text-sm"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddNestedSubtask(subtask.id);
+                      } else if (e.key === 'Escape') {
+                        setAddingNestedToId(null);
+                        setNestedSubtaskTitle('');
+                      }
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    className="h-8"
+                    onClick={() => handleAddNestedSubtask(subtask.id)}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8"
+                    onClick={() => {
+                      setAddingNestedToId(null);
+                      setNestedSubtaskTitle('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Render nested subtasks if they exist */}
             {subtask.subtasks && subtask.subtasks.length > 0 && (

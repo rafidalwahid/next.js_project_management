@@ -15,15 +15,29 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       },
     });
 
-    const data = await response.json();
+    // Try to parse the response as JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      // If the response is not valid JSON, create a generic error
+      const error = {
+        status: response.status,
+        statusText: response.statusText,
+        message: 'Invalid response format',
+        details: { parseError: parseError instanceof Error ? parseError.message : String(parseError) }
+      };
+      console.error('API Error (parse failure):', error);
+      throw new Error(JSON.stringify(error));
+    }
 
     if (!response.ok) {
       // Enhanced error handling
       const error = {
         status: response.status,
         statusText: response.statusText,
-        message: data.error || 'Unknown error occurred',
-        details: data.details || {}
+        message: data?.error || 'Unknown error occurred',
+        details: data?.details || {}
       };
 
       console.error('API Error:', error);
@@ -33,10 +47,23 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     return data;
   } catch (error) {
     if (error instanceof Error) {
-      console.error('API request failed:', {
+      // Check if this is already our formatted error
+      try {
+        JSON.parse(error.message);
+        // If we can parse it, it's already formatted, so just rethrow
+      } catch {
+        // Otherwise, it's an unexpected error, so log it
+        console.error('API request failed:', {
+          url,
+          message: error.message,
+          stack: error.stack
+        });
+      }
+    } else {
+      // Handle non-Error objects
+      console.error('API request failed with non-Error:', {
         url,
-        message: error.message,
-        stack: error.stack
+        error: String(error)
       });
     }
     throw error;
@@ -187,6 +214,21 @@ export const taskApi = {
     return fetchAPI(`/api/tasks/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  reorderTask: async (taskId: string, newParentId: string | null, oldParentId: string | null, targetTaskId?: string, isSameParentReorder?: boolean) => {
+    console.log('Calling reorderTask API with:', { taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder });
+    try {
+      const result = await fetchAPI('/api/tasks/reorder', {
+        method: 'POST',
+        body: JSON.stringify({ taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder }),
+      });
+      console.log('reorderTask API response:', result);
+      return result;
+    } catch (error) {
+      console.error('reorderTask API error:', error);
+      throw error;
+    }
   },
 };
 

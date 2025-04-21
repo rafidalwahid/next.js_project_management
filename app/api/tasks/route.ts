@@ -75,6 +75,9 @@ export async function GET(req: NextRequest) {
           }
         },
         subtasks: {
+          orderBy: {
+            createdAt: 'asc' // Order subtasks by createdAt to support reordering
+          },
           include: {
             assignedTo: {
               select: {
@@ -85,6 +88,9 @@ export async function GET(req: NextRequest) {
             },
             // Include one level of nested subtasks
             subtasks: {
+              orderBy: {
+                createdAt: 'asc' // Order nested subtasks by createdAt too
+              },
               include: {
                 assignedTo: {
                   select: {

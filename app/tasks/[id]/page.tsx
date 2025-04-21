@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { 
-  ArrowLeft, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  Edit, 
-  MessageSquare, 
-  Trash 
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Edit,
+  MessageSquare,
+  Trash
 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"
 
@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { SubtaskList } from "@/components/tasks/subtask-list"
+import { DraggableSubtaskList } from "@/components/tasks/draggable-subtask-list"
 import { useToast } from "@/hooks/use-toast"
 import { taskApi } from "@/lib/api"
 
@@ -28,7 +28,7 @@ export default function TaskDetailPage() {
   const taskId = params.id as string
   const router = useRouter()
   const { toast } = useToast()
-  
+
   const [task, setTask] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -76,13 +76,13 @@ export default function TaskDetailPage() {
 
   const handleToggleStatus = async () => {
     if (!task) return
-    
+
     const newStatus = task.status === "completed" ? "pending" : "completed"
-    
+
     try {
       await taskApi.updateTask(taskId, { status: newStatus })
       fetchTask() // Refresh task data
-      
+
       toast({
         title: "Status updated",
         description: `Task marked as ${newStatus}`,
@@ -193,7 +193,7 @@ export default function TaskDetailPage() {
               Back to Tasks
             </Link>
           </Button>
-          
+
           {task.parent && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/tasks/${task.parent.id}`}>
@@ -203,9 +203,9 @@ export default function TaskDetailPage() {
             </Button>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             variant={task.status === "completed" ? "outline" : "default"}
             size="sm"
             onClick={handleToggleStatus}
@@ -213,21 +213,21 @@ export default function TaskDetailPage() {
             <CheckCircle2 className="mr-2 h-4 w-4" />
             {task.status === "completed" ? "Mark Incomplete" : "Mark Complete"}
           </Button>
-          
+
           <Button variant="outline" size="sm" asChild>
             <Link href={`/tasks/edit/${task.id}`}>
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Link>
           </Button>
-          
+
           <Button variant="destructive" size="sm" onClick={handleDeleteTask}>
             <Trash className="mr-2 h-4 w-4" />
             Delete
           </Button>
         </div>
       </div>
-      
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -241,19 +241,19 @@ export default function TaskDetailPage() {
                 </CardDescription>
               )}
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Badge variant={getStatusBadgeVariant(task.status)} className="capitalize">
                 {task.status}
               </Badge>
-              
+
               <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize">
                 {task.priority} priority
               </Badge>
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {/* Task description */}
           <div>
@@ -262,7 +262,7 @@ export default function TaskDetailPage() {
               {task.description || "No description provided"}
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Task details */}
             <div className="space-y-4">
@@ -281,7 +281,7 @@ export default function TaskDetailPage() {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex items-center text-sm">
                 <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
                 <div>
@@ -295,7 +295,7 @@ export default function TaskDetailPage() {
                   </span>
                 </div>
               </div>
-              
+
               {task.updatedAt && task.updatedAt !== task.createdAt && (
                 <div className="flex items-center text-sm">
                   <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -312,7 +312,7 @@ export default function TaskDetailPage() {
                 </div>
               )}
             </div>
-            
+
             {/* Assigned user */}
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Assigned to</h3>
@@ -336,21 +336,21 @@ export default function TaskDetailPage() {
               )}
             </div>
           </div>
-          
+
           <Separator />
-          
-          {/* Subtasks section */}
-          <SubtaskList 
-            parentTaskId={task.id} 
+
+          {/* Subtasks section with drag and drop */}
+          <DraggableSubtaskList
+            parentTaskId={task.id}
             projectId={task.projectId}
-            subtasks={task.subtasks || []} 
+            subtasks={task.subtasks || []}
             onSubtaskChange={fetchTask}
           />
-          
+
           {task.activities && task.activities.length > 0 && (
             <>
               <Separator />
-              
+
               {/* Activity log */}
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">

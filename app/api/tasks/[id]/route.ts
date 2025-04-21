@@ -318,6 +318,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           }
         },
         subtasks: {
+          orderBy: {
+            createdAt: 'asc'
+          },
           include: {
             assignedTo: {
               select: {
