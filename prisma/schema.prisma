@@ -1,12 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
+  output   = "../lib/prisma-client"
 }
 
 datasource db {
@@ -16,24 +13,26 @@ datasource db {
 
 // User model for authentication and user management
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String         @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String    @default("user") // admin, manager, member
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          String         @default("user") // admin, manager, member
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   // Relations
-  projects      Project[]
-  tasks         Task[]     @relation("TaskAssignedTo") // Renamed to avoid conflicts
+  projects        Project[]
+  tasks           Task[]         @relation("TaskAssignedTo") // Renamed to avoid conflicts
   taskAssignments TaskAssignee[] // New relation for tasks assigned to this user
-  teams         TeamMember[]
-  accounts      Account[]
-  sessions      Session[]
-  activities    Activity[]
+  teams           TeamMember[]
+  accounts        Account[]
+  sessions        Session[]
+  activities      Activity[]
+
+  @@map("user")
 }
 
 // NextAuth models for authentication
@@ -54,6 +53,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("account")
 }
 
 model Session {
@@ -62,6 +62,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
 }
 
 model VerificationToken {
@@ -70,6 +72,7 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verificationtoken")
 }
 
 // ProjectStatus model for flexible status management
@@ -83,55 +86,61 @@ model ProjectStatus {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  projects    Project[]
+  projects Project[]
+
+  @@map("projectstatus")
 }
 
 // Project model
 model Project {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
   statusId    String
   startDate   DateTime?
   endDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   createdById String
 
   // Relations
   status      ProjectStatus @relation(fields: [statusId], references: [id])
-  createdBy   User       @relation(fields: [createdById], references: [id])
+  createdBy   User          @relation(fields: [createdById], references: [id])
   tasks       Task[]
   teamMembers TeamMember[]
   events      Event[]
   resources   Resource[]
   activities  Activity[]
+
+  @@map("project")
 }
 
 // Task model
 model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String?   @db.Text
-  status      String   @default("pending") // pending, in-progress, completed
-  priority    String   @default("medium") // low, medium, high
-  dueDate     DateTime?
-  projectId   String
-  assignedToId String?  // Keeping for backward compatibility
-  parentId     String?   // New field for parent task reference
-  order       Int      @default(0) // Explicit field for ordering tasks
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String         @id @default(cuid())
+  title        String
+  description  String?        @db.Text
+  status       String         @default("pending") // pending, in-progress, completed
+  priority     String         @default("medium") // low, medium, high
+  dueDate      DateTime?
+  projectId    String
+  assignedToId String?
+  parentId     String?        // New field for parent task reference
+  order        Int            @default(0) // Explicit field for ordering tasks
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   // Relations
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo  User?     @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  activities  Activity[]
-  assignees   TaskAssignee[] // New relation for multiple assignees
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  activities Activity[]
+  assignees  TaskAssignee[] // New relation for multiple assignees
 
   // Self-relation for parent-child tasks
-  parent      Task?      @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks    Task[]     @relation("SubTasks")
+  parent   Task?  @relation("taskTotask", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[] @relation("taskTotask")
+
+  @@map("task")
 }
 
 // TaskAssignee model for many-to-many relationship between tasks and users
@@ -139,65 +148,71 @@ model TaskAssignee {
   id        String   @id @default(cuid())
   taskId    String
   userId    String
-  role      String?  // Optional role for the assignee (e.g., "responsible", "reviewer", etc.)
+  role      String? // Optional role for the assignee (e.g., "responsible", "reviewer", etc.)
   createdAt DateTime @default(now())
 
   // Relations
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, userId]) // Prevent duplicate assignments
+  @@map("taskassignee")
 }
 
 // Team Member model (for project-specific roles)
 model TeamMember {
   id        String   @id @default(cuid())
-  role      String   // owner, admin, member
+  role      String // owner, admin, member
   userId    String
   projectId String
   joinedAt  DateTime @default(now())
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, projectId])
+  @@map("teammember")
 }
 
 // Resource model
 model Resource {
-  id          String   @id @default(cuid())
-  name        String
-  type        String   // hardware, software, human, etc.
-  quantity    Int      @default(1)
-  projectId   String
+  id           String   @id @default(cuid())
+  name         String
+  type         String // hardware, software, human, etc.
+  quantity     Int      @default(1)
+  projectId    String
   assignedToId String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("resource")
 }
 
 // Event model
 model Event {
   id          String   @id @default(cuid())
   title       String
-  description String?   @db.Text
+  description String?  @db.Text
   date        DateTime
   projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("event")
 }
 
 // Activity log for tracking actions
 model Activity {
   id          String   @id @default(cuid())
-  action      String   // created, updated, deleted, assigned, etc.
-  entityType  String   // project, task, resource, etc.
+  action      String // created, updated, deleted, assigned, etc.
+  entityType  String // project, task, resource, etc.
   entityId    String
   description String?
   userId      String
@@ -206,7 +221,9 @@ model Activity {
   createdAt   DateTime @default(now())
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@map("activity")
 }

@@ -3,6 +3,10 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { checkProjectPermission } from "@/lib/permissions/project-permissions";
+import { checkTaskPermission } from "@/lib/permissions/task-permissions";
+import { getTaskIncludeObject, getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
+import { getNextOrderValue } from "@/lib/ordering/task-ordering";
 
 // GET handler to list tasks
 export async function GET(req: NextRequest) {
@@ -56,60 +60,11 @@ export async function GET(req: NextRequest) {
       where.parentId = parentId;
     }
 
-    // Get tasks with pagination
+    // Get tasks with pagination - use optimized include for list view
     const tasks = await prisma.task.findMany({
       where,
-      include: {
-        project: {
-          select: {
-            id: true,
-            title: true,
-          }
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          }
-        },
-        subtasks: {
-          orderBy: {
-            order: 'asc' // Order subtasks by the explicit order field
-          },
-          include: {
-            assignedTo: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              }
-            },
-            // Include one level of nested subtasks
-            subtasks: {
-              orderBy: {
-                order: 'asc' // Order nested subtasks by the explicit order field too
-              },
-              include: {
-                assignedTo: {
-                  select: {
-                    id: true,
-                    name: true,
-                    image: true,
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      orderBy: [
-        { priority: "desc" },
-        { order: "asc" },
-        { dueDate: "asc" },
-        { updatedAt: "desc" }
-      ],
+      include: getTaskListIncludeObject(),
+      orderBy: taskOrderBy,
       take: limit,
       skip: skip,
     });
@@ -170,58 +125,28 @@ export async function POST(req: NextRequest) {
 
     const { title, description, status, priority, dueDate, projectId, assignedToId, assigneeIds, parentId } = validationResult.data;
 
-    // Check if project exists
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        teamMembers: {
-          where: {
-            userId: session.user.id
-          }
-        }
-      }
-    });
+    // Check project permission
+    const { hasPermission, project, error } = await checkProjectPermission(projectId, session, 'update');
+    // We'll use the project object later for activity creation
 
-    if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
-
-    // Ensure user has access to this project
-    // Check if user is admin, project creator, or team member
-    const isAdmin = session.user.role === 'admin';
-    const isProjectCreator = project.createdById === session.user.id;
-    const isTeamMember = project.teamMembers.length > 0;
-
-    const hasAccess = isAdmin || isProjectCreator || isTeamMember;
-
-    console.log('Permission check:', {
-      userId: session.user.id,
-      userRole: session.user.role,
-      isAdmin,
-      isProjectCreator,
-      isTeamMember,
-      hasAccess
-    });
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "You don't have permission to add tasks to this project" },
-        { status: 403 }
-      );
+    if (!hasPermission) {
+      return NextResponse.json({ error }, { status: error === "Project not found" ? 404 : 403 });
     }
 
     // If this is a subtask, verify parent task exists and belongs to the same project
     if (parentId) {
-      const parentTask = await prisma.task.findUnique({
-        where: { id: parentId },
-        select: { projectId: true }
-      });
+      // Check parent task permission
+      const parentResult = await checkTaskPermission(parentId, session, 'update');
 
-      if (!parentTask) {
-        return NextResponse.json({ error: "Parent task not found" }, { status: 404 });
+      if (!parentResult.hasPermission) {
+        return NextResponse.json(
+          { error: parentResult.error },
+          { status: parentResult.error === "Task not found" ? 404 : 403 }
+        );
       }
 
-      if (parentTask.projectId !== projectId) {
+      // Verify parent task belongs to the same project
+      if (parentResult.task.projectId !== projectId) {
         return NextResponse.json(
           { error: "Subtask must belong to the same project as parent task" },
           { status: 400 }
@@ -229,160 +154,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Get the highest order value for tasks with the same parent
-    const highestOrderTask = await prisma.task.findFirst({
-      where: {
-        projectId,
-        parentId: parentId || null
-      },
-      orderBy: { order: 'desc' },
-      select: { order: true }
-    });
-
-    // Set the initial order value to be higher than the highest existing order
-    const initialOrder = highestOrderTask ? highestOrderTask.order + 1000 : 1000;
+    // Get the next order value for the new task
+    const initialOrder = await getNextOrderValue(projectId, parentId || null);
 
     // Create task
-    // Try to create with parentId first, but handle the case where the schema doesn't have parentId
-    let task;
-    try {
-      // Create the task first
-      task = await prisma.task.create({
-        data: {
-          title,
-          description,
-          status,
-          priority,
-          dueDate: dueDate ? new Date(dueDate) : null,
-          projectId,
-          assignedToId, // Keep for backward compatibility
-          parentId,
-          order: initialOrder, // Set the initial order value
-          // We'll create the activity separately after the task is created
-          // to ensure we have the entityId
-        },
-      include: {
-        project: {
-          select: {
-            id: true,
-            title: true,
-          }
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          }
-        },
-
-        subtasks: {
-          include: {
-            assignedTo: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              }
-            },
-            // Include one level of nested subtasks
-            subtasks: {
-              include: {
-                assignedTo: {
-                  select: {
-                    id: true,
-                    name: true,
-                    image: true,
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description,
+        status,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        projectId,
+        assignedToId, // Keep for backward compatibility
+        parentId,
+        order: initialOrder, // Set the initial order value
+        // We'll create the activity separately after the task is created
+        // to ensure we have the entityId
+      },
+      include: getTaskIncludeObject(2) // Include 2 levels of subtasks
     });
-
-    } catch (error) {
-      // If the error is about unknown field 'parentId', try creating without it
-      if (error instanceof Error && error.message.includes("Unknown field `parentId`")) {
-        console.warn("Creating task without parentId due to schema mismatch");
-
-        // Create task without parentId
-        task = await prisma.task.create({
-          data: {
-            title,
-            description,
-            status,
-            priority,
-            dueDate: dueDate ? new Date(dueDate) : null,
-            projectId,
-            assignedToId,
-            order: initialOrder, // Set the initial order value
-            // parentId is omitted
-            // We'll create the activity separately after the task is created
-            // to ensure we have the entityId
-          },
-          include: {
-            project: {
-              select: {
-                id: true,
-                title: true,
-              }
-            },
-            assignedTo: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-              }
-            },
-            // We can't safely include subtasks if the schema doesn't support it
-            // So we'll omit it in the fallback case
-          }
-        });
-
-        // Create activity for the task
-        try {
-          // First, verify that the user exists in the database
-          const userExists = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { id: true }
-          });
-
-          if (userExists) {
-            await prisma.activity.create({
-              data: {
-                action: "created",
-                entityType: "task",
-                entityId: task.id,
-                description: parentId
-                  ? `Task "${title}" was created (note: subtask relationship not saved due to schema mismatch)`
-                  : `Task "${title}" was created`,
-                userId: session.user.id,
-                projectId,
-                taskId: task.id,
-              }
-            });
-          } else {
-            console.warn(`Activity not created: User ID ${session.user.id} not found in database`);
-          }
-        } catch (activityError) {
-          // Log the error but don't fail the task creation
-          console.error('Error creating activity in fallback case:', activityError);
-        }
-
-        // Return with a warning
-        return NextResponse.json({
-          task,
-          warning: "Task created but subtask relationship could not be saved due to schema mismatch. Run 'npx prisma generate' to fix this issue."
-        }, { status: 201 });
-      } else {
-        // If it's another error, rethrow it
-        throw error;
-      }
-    }
 
     // Now create the activity with the task's ID as entityId
     try {
@@ -417,14 +208,8 @@ export async function POST(req: NextRequest) {
     // Create task assignees if assigneeIds is provided
     if (assigneeIds && assigneeIds.length > 0) {
       try {
-        // Check if TaskAssignee table exists
-        let hasTaskAssigneeTable = false;
-        try {
-          const result = await prisma.$queryRaw`SHOW TABLES LIKE 'TaskAssignee'`;
-          hasTaskAssigneeTable = Array.isArray(result) && result.length > 0;
-        } catch (err) {
-          console.error('Error checking for TaskAssignee table:', err);
-        }
+        // TaskAssignee table should now exist in the schema
+        const hasTaskAssigneeTable = true;
 
         if (hasTaskAssigneeTable) {
           // Create task assignees

@@ -36,8 +36,8 @@ console.log('Starting Prisma client regeneration...');
 
 try {
   // Step 1: Delete the generated Prisma client directory
-  const generatedDir = path.join(__dirname, '..', 'lib', 'generated', 'prisma');
-  
+  const generatedDir = path.join(__dirname, '..', 'lib', 'prisma-client');
+
   console.log(`Checking if generated directory exists: ${generatedDir}`);
   if (exists(generatedDir)) {
     console.log('Deleting existing generated Prisma client...');
@@ -50,7 +50,7 @@ try {
   // Step 2: Run prisma generate
   console.log('Running prisma generate...');
   execSync('npx prisma generate', { stdio: 'inherit' });
-  
+
   console.log('\nPrisma client regenerated successfully!');
   console.log('The subtask functionality should now work correctly.');
 } catch (error) {

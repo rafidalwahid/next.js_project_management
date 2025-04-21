@@ -1,0 +1,79 @@
+import { Session } from "next-auth";
+import prisma from "@/lib/prisma";
+
+/**
+ * Check if a user has permission to access a task
+ * @param taskId The ID of the task to check
+ * @param session The user's session
+ * @param action The action being performed (view, update, delete)
+ * @returns An object with hasPermission and task properties
+ */
+export async function checkTaskPermission(
+  taskId: string,
+  session: Session | null,
+  action: 'view' | 'update' | 'delete' = 'view'
+) {
+  // If no session, no permission
+  if (!session || !session.user.id) {
+    return { hasPermission: false, task: null, error: "Unauthorized" };
+  }
+
+  // Get the task with related data needed for permission checks
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: {
+      project: {
+        include: {
+          teamMembers: {
+            where: {
+              userId: session.user.id
+            }
+          }
+        }
+      },
+      assignees: {
+        where: {
+          userId: session.user.id
+        }
+      }
+    }
+  });
+
+  // If task doesn't exist, no permission
+  if (!task) {
+    return { hasPermission: false, task: null, error: "Task not found" };
+  }
+
+  // Check if user is admin
+  const isAdmin = session.user.role === 'admin';
+  
+  // Check if user is the project creator
+  const isProjectCreator = task.project.createdById === session.user.id;
+  
+  // Check if user is a team member of the project
+  const isTeamMember = task.project.teamMembers.length > 0;
+  
+  // Check if user is assigned to the task (legacy)
+  const isAssignedToTask = task.assignedToId === session.user.id;
+  
+  // Check if user is assigned to the task (new system)
+  const isTaskAssignee = task.assignees && task.assignees.length > 0;
+
+  // For view actions, any of these conditions is sufficient
+  let hasPermission = isAdmin || isProjectCreator || isTeamMember || isAssignedToTask || isTaskAssignee;
+
+  // For delete actions, we might want stricter permissions
+  if (action === 'delete' && !hasPermission) {
+    // Special case for subtasks - check if user has permission on the parent task
+    if (task.parentId) {
+      const parentPermission = await checkTaskPermission(task.parentId, session, 'update');
+      hasPermission = parentPermission.hasPermission;
+    }
+  }
+
+  return { 
+    hasPermission, 
+    task,
+    error: hasPermission ? null : "You don't have permission to " + action + " this task"
+  };
+}

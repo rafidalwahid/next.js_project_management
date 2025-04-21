@@ -41,7 +41,14 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       };
 
       console.error('API Error:', error);
-      throw new Error(JSON.stringify(error));
+      // Include more context in the error
+      const enhancedError = {
+        ...error,
+        url,
+        requestMethod: options.method || 'GET',
+        timestamp: new Date().toISOString()
+      };
+      throw new Error(JSON.stringify(enhancedError));
     }
 
     return data;
@@ -197,10 +204,18 @@ export const taskApi = {
   },
 
   updateTask: async (id: string, task: any) => {
-    return fetchAPI(`/api/tasks/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(task),
-    });
+    console.log('API client: Updating task with ID:', id, 'Data:', task);
+    try {
+      const result = await fetchAPI(`/api/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(task),
+      });
+      console.log('API client: Update task response:', result);
+      return result;
+    } catch (error) {
+      console.error('API client: Error updating task:', error);
+      throw error;
+    }
   },
 
   updateTaskStatus: async (id: string, status: string) => {

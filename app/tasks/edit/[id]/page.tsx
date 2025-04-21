@@ -87,7 +87,12 @@ export default function EditTaskPage() {
   }
 
   const handleSelectChange = (name: string) => (value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    // Special handling for parentId
+    if (name === "parentId" && value === "null") {
+      setFormData((prev) => ({ ...prev, [name]: null }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleMultiSelectChange = (name: string) => (values: string[]) => {
@@ -106,7 +111,16 @@ export default function EditTaskPage() {
 
     try {
       setSaving(true)
-      await taskApi.updateTask(taskId, formData)
+      console.log('Submitting task update with data:', formData);
+
+      // Create a copy of the form data and ensure parentId is properly formatted
+      const dataToSubmit = {
+        ...formData,
+        // Convert "null" string to actual null
+        parentId: formData.parentId === "null" ? null : formData.parentId
+      };
+
+      await taskApi.updateTask(taskId, dataToSubmit)
 
       toast({
         title: "Task updated",
@@ -115,9 +129,25 @@ export default function EditTaskPage() {
 
       router.push(`/tasks/${taskId}`)
     } catch (error) {
+      console.error('Error updating task:', error);
+      let errorMessage = "Failed to update task";
+
+      // Try to extract more detailed error message
+      if (error instanceof Error) {
+        try {
+          const parsedError = JSON.parse(error.message);
+          if (parsedError.message) {
+            errorMessage = parsedError.message;
+          }
+        } catch (e) {
+          // If parsing fails, use the original error message
+          errorMessage = error.message || errorMessage;
+        }
+      }
+
       toast({
         title: "Error",
-        description: "Failed to update task",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -311,14 +341,14 @@ export default function EditTaskPage() {
                   <div className="grid gap-2">
                     <Label htmlFor="parentId">Parent Task</Label>
                     <Select
-                      value={formData.parentId || ""}
+                      value={formData.parentId || "null"}
                       onValueChange={handleSelectChange("parentId")}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select parent task" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No Parent (Top-level Task)</SelectItem>
+                        <SelectItem value="null">No Parent (Top-level Task)</SelectItem>
                         {task.parent && (
                           <SelectItem value={task.parent.id}>
                             {task.parent.title}

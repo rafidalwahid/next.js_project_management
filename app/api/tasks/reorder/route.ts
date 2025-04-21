@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import prisma from "@/lib/prisma"
+import { checkTaskPermission } from "@/lib/permissions/task-permissions"
+import { calculateOrderBetween, rebalanceTaskOrders, needsRebalancing } from "@/lib/ordering/task-ordering"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +11,6 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
 
     console.log('Reorder API - Session:', JSON.stringify(session, null, 2));
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
 
     // Parse request body
     const { taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder } = await request.json()
@@ -26,19 +24,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get the task
-    const task = await prisma.task.findUnique({
-      where: { id: taskId },
-      select: {
-        id: true,
-        projectId: true,
-        parentId: true,
-        order: true,
-      },
-    })
+    // Check permission
+    const { hasPermission, task, error } = await checkTaskPermission(taskId, session, 'update');
+
+    if (!hasPermission) {
+      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
+    }
 
     // If the task doesn't have an order value or it's 0, initialize it
-    if (task && task.order === 0) {
+    if (task.order === 0) {
       // Update the task with a default order value
       await prisma.task.update({
         where: { id: taskId },
@@ -47,13 +41,6 @@ export async function POST(request: NextRequest) {
 
       // Update our local copy of the task
       task.order = 1000
-    }
-
-    if (!task) {
-      return NextResponse.json(
-        { error: "Task not found" },
-        { status: 404 }
-      )
     }
 
     // If newParentId is provided, verify it exists and belongs to the same project
@@ -189,23 +176,24 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Calculate the new order value
+      // Calculate the new order value using our utility function
       let newOrder;
 
       if (targetTask) {
         // If we have a target task, position relative to it
-        // If we're moving before the target task, use (targetTask.order - 1)
-        // If there's a task before the target, use the average of the two
-        newOrder = targetTask.order - 1;
-
         // Find the task that comes before the target task
         const tasksBefore = siblingTasks.filter(t => t.order < targetTask.order);
+
         if (tasksBefore.length > 0) {
           // Sort in descending order to get the closest task before the target
           tasksBefore.sort((a, b) => b.order - a.order);
           const prevTask = tasksBefore[0];
-          // Use the average of the previous task's order and the target task's order
-          newOrder = prevTask.order + (targetTask.order - prevTask.order) / 2;
+
+          // Calculate order between the previous task and the target task
+          newOrder = calculateOrderBetween(prevTask.order, targetTask.order);
+        } else {
+          // No task before the target, so position before the target
+          newOrder = calculateOrderBetween(null, targetTask.order);
         }
       } else {
         // If no target task, move to the end of the list
@@ -214,8 +202,14 @@ export async function POST(request: NextRequest) {
           siblingTasks.reduce((max, task) => task.order > max.order ? task : max, siblingTasks[0]) :
           null;
 
-        // Set the new order to be higher than the highest existing order
-        newOrder = highestOrderTask ? highestOrderTask.order + 1000 : 1000;
+        // Calculate order after the highest task (or at the beginning if no siblings)
+        newOrder = calculateOrderBetween(highestOrderTask?.order || null, null);
+      }
+
+      // Check if we need to rebalance the task orders
+      const needsRebalance = await needsRebalancing(task.projectId, parentIdToUse);
+      if (needsRebalance) {
+        await rebalanceTaskOrders(task.projectId, parentIdToUse);
       }
 
       updatedTask = await prisma.task.update({
@@ -272,11 +266,16 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Get the highest order value
+      // Calculate the new order value using our utility function
+      // When changing parents, we typically want to add the task at the end
       const highestOrderTask = newParentTasks.length > 0 ? newParentTasks[0] : null;
+      const newOrder = calculateOrderBetween(highestOrderTask?.order || null, null);
 
-      // Set the new order to be higher than the highest existing order
-      const newOrder = highestOrderTask ? highestOrderTask.order + 1000 : 1000;
+      // Check if we need to rebalance the task orders in the new parent
+      const needsRebalance = await needsRebalancing(task.projectId, newParentId || null);
+      if (needsRebalance) {
+        await rebalanceTaskOrders(task.projectId, newParentId || null);
+      }
 
       updatedTask = await prisma.task.update({
         where: { id: taskId },

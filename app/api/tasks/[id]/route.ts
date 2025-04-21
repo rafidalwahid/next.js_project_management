@@ -3,146 +3,36 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { checkTaskPermission } from "@/lib/permissions/task-permissions";
+import { getTaskIncludeObject } from "@/lib/queries/task-queries";
 
 interface Params {
   params: {
     id: string;
-  };
+  } | Promise<{ id: string }>;
 }
 
 // GET handler to get a task by ID
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
+    // In Next.js, params might be a promise that needs to be awaited
     const { id } = await params;
 
-    // First check if TaskAssignee table exists
-    let hasTaskAssigneeTable = false;
-    try {
-      const result = await prisma.$queryRaw`SHOW TABLES LIKE 'TaskAssignee'`;
-      hasTaskAssigneeTable = Array.isArray(result) && result.length > 0;
-    } catch (err) {
-      console.error('Error checking for TaskAssignee table:', err);
+    // Check permission
+    const { hasPermission, task, error } = await checkTaskPermission(id, session, 'view');
+
+    if (!hasPermission) {
+      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
     }
 
-    // Prepare the include object for the query
-    const includeObj: any = {
-      project: {
-        select: {
-          id: true,
-          title: true,
-          status: true,
-        }
-      },
-      assignedTo: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-        }
-      },
-      activities: {
-        orderBy: {
-          createdAt: 'desc'
-        },
-        take: 5,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-            }
-          }
-        }
-      },
-      parent: {
-        select: {
-          id: true,
-          title: true,
-          status: true,
-        }
-      },
-      subtasks: {
-        orderBy: [
-          { order: 'asc' },
-          { createdAt: 'asc' }
-        ],
-        include: {
-          assignedTo: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            }
-          },
-          subtasks: {
-            orderBy: [
-              { order: 'asc' },
-              { createdAt: 'asc' }
-            ],
-            include: {
-              assignedTo: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true,
-                }
-              },
-              subtasks: {
-                orderBy: [
-                  { order: 'asc' },
-                  { createdAt: 'asc' }
-                ],
-                include: {
-                  assignedTo: {
-                    select: {
-                      id: true,
-                      name: true,
-                      image: true,
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-
-    // Add assignees relation if the table exists
-    if (hasTaskAssigneeTable) {
-      includeObj.assignees = {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            }
-          }
-        }
-      };
-    }
-
-    // Get task with related data
-    const task = await prisma.task.findUnique({
+    // Get task with full details - include 3 levels of subtasks and activities
+    const taskWithDetails = await prisma.task.findUnique({
       where: { id },
-      include: includeObj
+      include: getTaskIncludeObject(3, true, 5) // 3 levels deep, include activities, 5 activities max
     });
 
-    if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ task });
+    return NextResponse.json({ task: taskWithDetails });
   } catch (error) {
     console.error("Error fetching task:", error);
 
@@ -191,12 +81,7 @@ const updateTaskSchema = z.object({
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
+    // In Next.js, params might be a promise that needs to be awaited
     const { id } = await params;
     const body = await req.json();
 
@@ -210,37 +95,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if task exists
-    const task = await prisma.task.findUnique({
-      where: { id },
-      include: {
-        project: {
-          include: {
-            teamMembers: {
-              where: {
-                userId: session.user.id
-              }
-            }
-          }
-        }
-      }
-    });
+    // Check permission
+    const { hasPermission, task, error } = await checkTaskPermission(id, session, 'update');
 
-    if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
-    }
-
-    // Check if user has access to this task's project
-    const hasAccess =
-      task.project.createdById === session.user.id ||
-      task.assignedToId === session.user.id ||
-      task.project.teamMembers.length > 0;
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "You don't have permission to update this task" },
-        { status: 403 }
-      );
+    if (!hasPermission) {
+      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
     }
 
     const { title, description, status, priority, dueDate, assignedToId, assigneeIds, projectId, parentId } = validationResult.data;
@@ -293,6 +152,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     if (projectId !== undefined) {
       // Verify that the user has access to the new project
+      if (!session || !session.user.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
       const newProject = await prisma.project.findUnique({
         where: { id: projectId },
         include: {
@@ -333,14 +196,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Handle assigneeIds if provided
     if (assigneeIds !== undefined) {
       try {
-        // Check if TaskAssignee table exists
-        let hasTaskAssigneeTable = false;
-        try {
-          const result = await prisma.$queryRaw`SHOW TABLES LIKE 'TaskAssignee'`;
-          hasTaskAssigneeTable = Array.isArray(result) && result.length > 0;
-        } catch (err) {
-          console.error('Error checking for TaskAssignee table:', err);
-        }
+        // TaskAssignee table should now exist in the schema
+        const hasTaskAssigneeTable = true;
 
         if (hasTaskAssigneeTable) {
           // First, delete all existing assignees
@@ -370,6 +227,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
+    // Ensure session exists before creating activity
+    if (!session || !session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Update task
     const updatedTask = await prisma.task.update({
       where: { id },
@@ -387,124 +249,58 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           }
         }
       },
-      include: {
-        project: {
-          select: {
-            id: true,
-            title: true,
-          }
-        },
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          }
-        },
-        parent: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
-          }
-        },
-        subtasks: {
-          orderBy: {
-            order: 'asc'
-          },
-          include: {
-            assignedTo: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              }
-            },
-            // Recursively include nested subtasks
-            subtasks: {
-              orderBy: {
-                order: 'asc'
-              },
-              include: {
-                assignedTo: {
-                  select: {
-                    id: true,
-                    name: true,
-                    image: true,
-                  }
-                },
-                // Include one more level of nesting
-                subtasks: {
-                  orderBy: {
-                    order: 'asc'
-                  },
-                  include: {
-                    assignedTo: {
-                      select: {
-                        id: true,
-                        name: true,
-                        image: true,
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      include: getTaskIncludeObject(3) // 3 levels deep, no activities
     });
 
     return NextResponse.json({ task: updatedTask });
   } catch (error) {
     console.error("Error updating task:", error);
+
+    // Provide more detailed error information
+    let errorMessage = "An error occurred while updating the task";
+    let errorDetails = {};
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = { stack: error.stack };
+
+      // Check for specific error types
+      if (error.message.includes("foreign key constraint")) {
+        errorMessage = "Cannot update this task due to database constraints";
+        errorDetails = {
+          ...errorDetails,
+          hint: "The task may be referenced by other items."
+        };
+      } else if (error.message.includes("Record to update not found")) {
+        errorMessage = "The task you're trying to update no longer exists";
+      }
+    }
+
     return NextResponse.json(
-      { error: "An error occurred while updating the task" },
+      {
+        error: errorMessage,
+        details: errorDetails
+      },
       { status: 500 }
     );
   }
 }
 
 // DELETE handler to delete a task
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     console.log('DELETE task handler called with params:', params);
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user.id) {
-      console.log('DELETE task: Unauthorized - no session or user ID');
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
+    // In Next.js, params might be a promise that needs to be awaited
     const { id } = await params;
     console.log('DELETE task: Task ID to delete:', id);
 
-    // Check if task exists
-    const task = await prisma.task.findUnique({
-      where: { id },
-      include: {
-        project: {
-          include: {
-            teamMembers: {
-              where: {
-                userId: session.user.id
-              }
-            }
-          }
-        },
-        assignees: {
-          where: {
-            userId: session.user.id
-          }
-        }
-      }
-    });
+    // Check permission
+    const { hasPermission, task, error } = await checkTaskPermission(id, session, 'delete');
 
-    if (!task) {
-      console.log('DELETE task: Task not found with ID:', id);
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    if (!hasPermission) {
+      console.log('DELETE task: Permission denied -', error);
+      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
     }
 
     console.log('DELETE task: Found task:', {
@@ -513,101 +309,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       projectId: task.projectId,
       parentId: task.parentId
     });
-
-    // Check if user has permission to delete this task
-    // Allow task deletion if:
-    // 1. User is the project creator
-    // 2. User is a team member with any role
-    // 3. User is the one assigned to the task
-    // 4. User is an admin
-    const isProjectCreator = task.project.createdById === session.user.id;
-    const isTeamMember = task.project.teamMembers.length > 0;
-    const isAssignedToTask = task.assignedToId === session.user.id;
-    const isTaskAssignee = task.assignees && task.assignees.length > 0;
-    const isAdmin = session.user.role === 'admin';
-
-    // Always allow deletion for admins and project creators
-    // For regular users, they need to be a team member or assigned to the task
-    let hasPermission = isAdmin || isProjectCreator || isTeamMember || isAssignedToTask || isTaskAssignee;
-
-    console.log('DELETE task: Permission check:', {
-      hasPermission,
-      isProjectCreator,
-      isTeamMember,
-      isAssignedToTask,
-      isTaskAssignee,
-      isAdmin,
-      projectCreatedById: task.project.createdById,
-      sessionUserId: session.user.id,
-      taskAssignedToId: task.assignedToId,
-      assigneesCount: task.assignees ? task.assignees.length : 0,
-      userRole: session.user.role,
-      teamMembersCount: task.project.teamMembers.length
-    });
-
-    if (!hasPermission) {
-      // Special case for subtasks - if this is a subtask, check if the user has permission on the parent task
-      if (task.parentId) {
-        console.log('DELETE task: This is a subtask, checking parent task permissions');
-        try {
-          const parentTask = await prisma.task.findUnique({
-            where: { id: task.parentId },
-            include: {
-              project: {
-                include: {
-                  teamMembers: {
-                    where: {
-                      userId: session.user.id
-                    }
-                  }
-                }
-              },
-              assignees: {
-                where: {
-                  userId: session.user.id
-                }
-              }
-            }
-          });
-
-          if (parentTask) {
-            const isParentProjectCreator = parentTask.project.createdById === session.user.id;
-            const isParentTeamMember = parentTask.project.teamMembers.length > 0;
-            const isParentAssignedToTask = parentTask.assignedToId === session.user.id;
-            const isParentTaskAssignee = parentTask.assignees && parentTask.assignees.length > 0;
-
-            const hasParentPermission = isAdmin || isParentProjectCreator || isParentTeamMember ||
-                                      isParentAssignedToTask || isParentTaskAssignee;
-
-            console.log('DELETE task: Parent task permission check:', {
-              hasParentPermission,
-              isParentProjectCreator,
-              isParentTeamMember,
-              isParentAssignedToTask,
-              isParentTaskAssignee
-            });
-
-            if (hasParentPermission) {
-              console.log('DELETE task: User has permission on parent task, allowing deletion');
-              // User has permission on the parent task, so allow deletion of this subtask
-              hasPermission = true;
-            }
-          }
-        } catch (parentCheckError) {
-          console.error('DELETE task: Error checking parent task permissions:', parentCheckError);
-          // Continue with normal permission check
-        }
-      }
-
-      // If still no permission, deny access
-      if (!hasPermission) {
-        console.log('DELETE task: Permission denied');
-        return NextResponse.json(
-          { error: "You don't have permission to delete this task" },
-          { status: 403 }
-        );
-      }
-    }
 
     // Check if task has subtasks
     const subtasksCount = await prisma.task.count({

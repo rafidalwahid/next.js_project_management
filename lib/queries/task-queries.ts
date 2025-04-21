@@ -1,0 +1,190 @@
+import { Prisma } from '@/lib/prisma-client';
+
+/**
+ * Standard select fields for user data
+ */
+export const userSelectFields = {
+  id: true,
+  name: true,
+  email: true,
+  image: true,
+};
+
+/**
+ * Standard select fields for minimal user data
+ */
+export const userMinimalSelectFields = {
+  id: true,
+  name: true,
+  image: true,
+};
+
+/**
+ * Standard select fields for project data
+ */
+export const projectSelectFields = {
+  id: true,
+  title: true,
+  status: true,
+};
+
+/**
+ * Standard select fields for minimal project data
+ */
+export const projectMinimalSelectFields = {
+  id: true,
+  title: true,
+};
+
+/**
+ * Get include object for task queries with configurable depth
+ * @param depth The depth of subtasks to include (0-3)
+ * @param includeActivities Whether to include activities
+ * @param activitiesLimit Number of activities to include
+ * @returns Prisma include object for task queries
+ */
+export function getTaskIncludeObject(
+  depth: 0 | 1 | 2 | 3 = 1,
+  includeActivities: boolean = false,
+  activitiesLimit: number = 5
+): Prisma.TaskInclude {
+  // Base include object
+  const includeObj: Prisma.TaskInclude = {
+    project: {
+      select: projectSelectFields
+    },
+    assignedTo: {
+      select: userSelectFields
+    },
+    assignees: {
+      include: {
+        user: {
+          select: userSelectFields
+        }
+      }
+    },
+    parent: {
+      select: {
+        id: true,
+        title: true,
+        status: true,
+      }
+    }
+  };
+
+  // Add activities if requested
+  if (includeActivities) {
+    includeObj.activities = {
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: activitiesLimit,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      }
+    };
+  }
+
+  // Add subtasks based on requested depth
+  if (depth >= 1) {
+    includeObj.subtasks = {
+      orderBy: [
+        { order: 'asc' },
+        { createdAt: 'asc' }
+      ],
+      include: {
+        assignedTo: {
+          select: userMinimalSelectFields
+        }
+      }
+    };
+
+    // Add second level of subtasks
+    if (depth >= 2) {
+      (includeObj.subtasks as any).include.subtasks = {
+        orderBy: [
+          { order: 'asc' },
+          { createdAt: 'asc' }
+        ],
+        include: {
+          assignedTo: {
+            select: userMinimalSelectFields
+          }
+        }
+      };
+
+      // Add third level of subtasks
+      if (depth >= 3) {
+        (includeObj.subtasks as any).include.subtasks.include.subtasks = {
+          orderBy: [
+            { order: 'asc' },
+            { createdAt: 'asc' }
+          ],
+          include: {
+            assignedTo: {
+              select: userMinimalSelectFields
+            }
+          }
+        };
+      }
+    }
+  }
+
+  return includeObj;
+}
+
+/**
+ * Get a lighter include object for task list queries
+ * @returns Prisma include object for task list queries
+ */
+export function getTaskListIncludeObject(): Prisma.TaskInclude {
+  return {
+    project: {
+      select: projectMinimalSelectFields
+    },
+    assignedTo: {
+      select: userMinimalSelectFields
+    },
+    assignees: {
+      include: {
+        user: {
+          select: userMinimalSelectFields
+        }
+      }
+    },
+    subtasks: {
+      select: {
+        id: true,
+      }
+    }
+  };
+}
+
+/**
+ * Standard order by for task queries
+ */
+export const taskOrderBy: Prisma.TaskOrderByWithRelationInput[] = [
+  { priority: "desc" },
+  { order: "asc" },
+  { dueDate: "asc" },
+  { updatedAt: "desc" }
+];
+
+/**
+ * Get a task by ID with configurable include depth
+ * @param id Task ID
+ * @param depth Depth of subtasks to include
+ * @param includeActivities Whether to include activities
+ * @returns Promise resolving to the task
+ */
+export function getTaskIncludeConfig(
+  depth: 0 | 1 | 2 | 3 = 1,
+  includeActivities: boolean = false
+): Prisma.TaskInclude {
+  return getTaskIncludeObject(depth, includeActivities);
+}

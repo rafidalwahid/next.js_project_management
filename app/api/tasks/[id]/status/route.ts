@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 
 interface Params {
   params: {
     id: string;
-  };
+  } | Promise<{ id: string }>;
 }
 
 // Validation schema for updating task status
@@ -19,12 +20,7 @@ const updateStatusSchema = z.object({
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
+    // In Next.js, params might be a promise that needs to be awaited
     const { id } = await params;
     const body = await req.json();
 
@@ -40,37 +36,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const { status } = validationResult.data;
 
-    // Check if task exists
-    const task = await prisma.task.findUnique({
-      where: { id },
-      include: {
-        project: {
-          include: {
-            teamMembers: {
-              where: {
-                userId: session.user.id
-              }
-            }
-          }
-        }
-      }
-    });
+    // Check permission
+    const { hasPermission, task, error } = await checkTaskPermission(id, session, 'update');
 
-    if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
-    }
-
-    // Check if user has access to this task's project
-    const hasAccess =
-      task.project.createdById === session.user.id ||
-      task.assignedToId === session.user.id ||
-      task.project.teamMembers.length > 0;
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "You don't have permission to update this task" },
-        { status: 403 }
-      );
+    if (!hasPermission) {
+      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
     }
 
     // Create activity description
