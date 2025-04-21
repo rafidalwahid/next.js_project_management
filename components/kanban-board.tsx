@@ -14,7 +14,12 @@ interface Task {
   title: string
   description: string
   projectId: string
-  assignedTo: string
+  assignedTo?: {
+    id: string
+    name?: string
+    email?: string
+    image?: string
+  } | string
   dueDate: string
   status: string
 }
@@ -116,6 +121,40 @@ function DraggableTaskCard({ task }: DraggableTaskCardProps) {
 
   const priorityColor = priorityColors[priority as keyof typeof priorityColors]
 
+  // Format avatar display based on assignedTo data type
+  const getAvatarDetails = () => {
+    // If we have assignedTo as an object with name
+    if (task.assignedTo && typeof task.assignedTo === 'object' && 'name' in task.assignedTo) {
+      const initials = task.assignedTo.name
+        ? task.assignedTo.name.split(' ').map(part => part[0]).join('').toUpperCase()
+        : 'UN'
+        
+      return {
+        image: task.assignedTo.image || "",
+        alt: task.assignedTo.name || "User",
+        fallback: initials
+      }
+    }
+    
+    // If assignedTo is just a string
+    if (typeof task.assignedTo === 'string') {
+      return {
+        image: "",
+        alt: "User",
+        fallback: task.assignedTo.substring(0, 2).toUpperCase() || "UN"
+      }
+    }
+    
+    // Default case - unassigned
+    return {
+      image: "",
+      alt: "Unassigned",
+      fallback: "UN"
+    }
+  }
+  
+  const avatarDetails = getAvatarDetails()
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className="mb-3 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow">
@@ -135,8 +174,8 @@ function DraggableTaskCard({ task }: DraggableTaskCardProps) {
           </div>
           <Link href={`/tasks/edit/${task.id}`} onClick={(e) => e.stopPropagation()}>
             <Avatar className="h-6 w-6">
-              <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-              <AvatarFallback>{task.assignedTo?.substring(0, 2).toUpperCase() || "UN"}</AvatarFallback>
+              <AvatarImage src={avatarDetails.image} alt={avatarDetails.alt} />
+              <AvatarFallback>{avatarDetails.fallback}</AvatarFallback>
             </Avatar>
           </Link>
         </CardFooter>

@@ -31,6 +31,7 @@ model User {
   accounts        Account[]
   sessions        Session[]
   activities      Activity[]
+  resources       Resource[] // Adding missing relation to Resource model
 
   @@map("user")
 }
@@ -88,6 +89,7 @@ model ProjectStatus {
   // Relations
   projects Project[]
 
+  @@index([name])
   @@map("projectstatus")
 }
 
@@ -112,6 +114,8 @@ model Project {
   resources   Resource[]
   activities  Activity[]
 
+  @@index([statusId])
+  @@index([createdById])
   @@map("project")
 }
 
@@ -125,7 +129,7 @@ model Task {
   dueDate      DateTime?
   projectId    String
   assignedToId String?
-  parentId     String? // New field for parent task reference
+  parentId     String? // Field for parent task reference
   order        Int       @default(0) // Explicit field for ordering tasks
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -134,12 +138,16 @@ model Task {
   project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignedTo User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
   activities Activity[]
-  assignees  TaskAssignee[] // New relation for multiple assignees
+  assignees  TaskAssignee[] // Relation for multiple assignees
 
-  // Self-relation for parent-child tasks
-  parent   Task?  @relation("taskTotask", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks Task[] @relation("taskTotask")
+  // Self-relation for parent-child tasks - fixed naming
+  parent   Task?  @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[] @relation("SubTasks")
 
+  @@index([projectId])
+  @@index([assignedToId])
+  @@index([parentId])
+  @@index([status])
   @@map("task")
 }
 
@@ -156,6 +164,8 @@ model TaskAssignee {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, userId]) // Prevent duplicate assignments
+  @@index([taskId])
+  @@index([userId])
   @@map("taskassignee")
 }
 
@@ -172,6 +182,8 @@ model TeamMember {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
   @@map("teammember")
 }
 
@@ -187,8 +199,11 @@ model Resource {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo User?   @relation(fields: [assignedToId], references: [id]) // Fixed missing relation
 
+  @@index([projectId])
+  @@index([assignedToId])
   @@map("resource")
 }
 
@@ -205,6 +220,8 @@ model Event {
   // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@index([projectId])
+  @@index([date])
   @@map("event")
 }
 
@@ -225,5 +242,10 @@ model Activity {
   project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   task    Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
+  @@index([userId])
+  @@index([projectId])
+  @@index([taskId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
   @@map("activity")
 }

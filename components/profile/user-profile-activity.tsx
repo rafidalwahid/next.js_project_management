@@ -27,12 +27,12 @@ interface UserProfileActivityProps {
 export function UserProfileActivity({ activities }: UserProfileActivityProps) {
   if (activities.length === 0) {
     return (
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="border-b px-6 py-4">
-          <h3 className="text-lg font-semibold">Recent Activity</h3>
-          <p className="text-sm text-muted-foreground">User's recent actions and updates</p>
-        </div>
-        <div className="p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+          <CardDescription>User's recent actions and updates</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
             <div className="text-center">
               <h3 className="text-lg font-medium">No Activity</h3>
@@ -41,18 +41,18 @@ export function UserProfileActivity({ activities }: UserProfileActivityProps) {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-      <div className="border-b px-6 py-4">
-        <h3 className="text-lg font-semibold">Recent Activity</h3>
-        <p className="text-sm text-muted-foreground">User's recent actions and updates</p>
-      </div>
-      <div className="p-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+        <CardDescription>User's recent actions and updates</CardDescription>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-8">
           {activities.map((activity) => (
             <div key={activity.id} className="flex">
@@ -76,8 +76,8 @@ export function UserProfileActivity({ activities }: UserProfileActivityProps) {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 

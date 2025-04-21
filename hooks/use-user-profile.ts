@@ -72,17 +72,59 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Create a proper fallback with the right structure
+  const fallbackData = initialUser ? {
+    user: initialUser,
+    projects: [],
+    tasks: [],
+    activities: [],
+    stats: {
+      projectCount: 0,
+      taskCount: 0,
+      teamCount: 0,
+      completionRate: '0%'
+    }
+  } : undefined;
+
   const {
     data,
     error,
     isLoading,
     mutate
   } = useSWR<UserProfileData>(
-    userId ? `/api/users/${userId}` : null,
+    userId ? `/api/users/${userId}?profile=true` : null,
     async () => {
       try {
         const response = await userApi.getUserProfile(userId);
-        return response as UserProfileData;
+        
+        // Transform the API response to match our expected format
+        // The API returns the user data directly with stats property
+        // But our client code expects a 'user' property
+        if (!response || typeof response !== 'object') {
+          throw new Error('Invalid profile data received');
+        }
+        
+        // If response has already the correct structure, use it directly
+        if (response.user) {
+          return response as UserProfileData;
+        }
+        
+        // Otherwise, transform it to match our expected structure
+        // Extract stats and other fields from the response
+        const { stats, projects, tasks, activities, ...userData } = response;
+        
+        return {
+          user: userData as UserProfile,
+          projects: projects || [],
+          tasks: tasks || [],
+          activities: activities || [],
+          stats: stats || {
+            projectCount: 0,
+            taskCount: 0,
+            teamCount: 0,
+            completionRate: '0%'
+          }
+        } as UserProfileData;
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
@@ -97,18 +139,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
       errorRetryCount: 2,
-      fallbackData: initialUser ? {
-        user: initialUser,
-        projects: [],
-        tasks: [],
-        activities: [],
-        stats: {
-          projectCount: 0,
-          taskCount: 0,
-          teamCount: 0,
-          completionRate: '0%'
-        }
-      } : undefined
+      fallbackData
     }
   );
 
@@ -140,10 +171,10 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
 
     setIsUpdating(true);
     try {
-      const response = await userApi.uploadProfileImage(file);
-      if (response.url) {
-        await updateProfile({ image: response.url });
-        return response.url;
+      const response = await userApi.uploadProfileImage(userId, file);
+      if (response && response.image) {
+        await updateProfile({ image: response.image });
+        return response.image;
       }
       return null;
     } catch (error) {

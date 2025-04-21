@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `task` ADD COLUMN `order` INTEGER NOT NULL DEFAULT 0;

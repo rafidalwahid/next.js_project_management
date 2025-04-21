@@ -1781,6 +1781,7 @@ export namespace Prisma {
     accounts: number
     sessions: number
     activities: number
+    resources: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1791,6 +1792,7 @@ export namespace Prisma {
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     activities?: boolean | UserCountOutputTypeCountActivitiesArgs
+    resources?: boolean | UserCountOutputTypeCountResourcesArgs
   }
 
   // Custom InputTypes
@@ -1851,6 +1853,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountActivitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ActivityWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountResourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ResourceWhereInput
   }
 
 
@@ -2208,6 +2217,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
+    resources?: boolean | User$resourcesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2234,6 +2244,7 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
+    resources?: boolean | User$resourcesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -2247,6 +2258,7 @@ export namespace Prisma {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       activities: Prisma.$ActivityPayload<ExtArgs>[]
+      resources: Prisma.$ResourcePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2605,6 +2617,7 @@ export namespace Prisma {
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activities<T extends User$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, User$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    resources<T extends User$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, User$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3151,6 +3164,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ActivityScalarFieldEnum | ActivityScalarFieldEnum[]
+  }
+
+  /**
+   * User.resources
+   */
+  export type User$resourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Resource
+     */
+    select?: ResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Resource
+     */
+    omit?: ResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ResourceInclude<ExtArgs> | null
+    where?: ResourceWhereInput
+    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
+    cursor?: ResourceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
   }
 
   /**
@@ -11347,6 +11384,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     project?: boolean | ProjectDefaultArgs<ExtArgs>
+    assignedTo?: boolean | Resource$assignedToArgs<ExtArgs>
   }, ExtArgs["result"]["resource"]>
 
 
@@ -11365,12 +11403,14 @@ export namespace Prisma {
   export type ResourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "quantity" | "projectId" | "assignedToId" | "createdAt" | "updatedAt", ExtArgs["result"]["resource"]>
   export type ResourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     project?: boolean | ProjectDefaultArgs<ExtArgs>
+    assignedTo?: boolean | Resource$assignedToArgs<ExtArgs>
   }
 
   export type $ResourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Resource"
     objects: {
       project: Prisma.$ProjectPayload<ExtArgs>
+      assignedTo: Prisma.$UserPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11722,6 +11762,7 @@ export namespace Prisma {
   export interface Prisma__ResourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    assignedTo<T extends Resource$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Resource$assignedToArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12099,6 +12140,25 @@ export namespace Prisma {
      * Limit how many Resources to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Resource.assignedTo
+   */
+  export type Resource$assignedToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -14481,6 +14541,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     activities?: ActivityListRelationFilter
+    resources?: ResourceListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -14500,6 +14561,7 @@ export namespace Prisma {
     accounts?: AccountOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     activities?: ActivityOrderByRelationAggregateInput
+    resources?: ResourceOrderByRelationAggregateInput
     _relevance?: UserOrderByRelevanceInput
   }
 
@@ -14523,6 +14585,7 @@ export namespace Prisma {
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     activities?: ActivityListRelationFilter
+    resources?: ResourceListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -15145,6 +15208,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Resource"> | Date | string
     updatedAt?: DateTimeFilter<"Resource"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }
 
   export type ResourceOrderByWithRelationInput = {
@@ -15157,6 +15221,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     project?: ProjectOrderByWithRelationInput
+    assignedTo?: UserOrderByWithRelationInput
     _relevance?: ResourceOrderByRelevanceInput
   }
 
@@ -15173,6 +15238,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Resource"> | Date | string
     updatedAt?: DateTimeFilter<"Resource"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }, "id">
 
   export type ResourceOrderByWithAggregationInput = {
@@ -15370,6 +15436,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -15389,6 +15456,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUpdateInput = {
@@ -15408,6 +15476,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -15427,6 +15496,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -16062,10 +16132,10 @@ export namespace Prisma {
     name: string
     type: string
     quantity?: number
-    assignedToId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     project: ProjectCreateNestedOneWithoutResourcesInput
+    assignedTo?: UserCreateNestedOneWithoutResourcesInput
   }
 
   export type ResourceUncheckedCreateInput = {
@@ -16084,10 +16154,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     project?: ProjectUpdateOneRequiredWithoutResourcesNestedInput
+    assignedTo?: UserUpdateOneWithoutResourcesNestedInput
   }
 
   export type ResourceUncheckedUpdateInput = {
@@ -16117,7 +16187,6 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16377,6 +16446,12 @@ export namespace Prisma {
     none?: ActivityWhereInput
   }
 
+  export type ResourceListRelationFilter = {
+    every?: ResourceWhereInput
+    some?: ResourceWhereInput
+    none?: ResourceWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -16407,6 +16482,10 @@ export namespace Prisma {
   }
 
   export type ActivityOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ResourceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -16728,17 +16807,7 @@ export namespace Prisma {
     none?: EventWhereInput
   }
 
-  export type ResourceListRelationFilter = {
-    every?: ResourceWhereInput
-    some?: ResourceWhereInput
-    none?: ResourceWhereInput
-  }
-
   export type EventOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ResourceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -17139,6 +17208,13 @@ export namespace Prisma {
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
   }
 
+  export type ResourceCreateNestedManyWithoutAssignedToInput = {
+    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
+    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
+    createMany?: ResourceCreateManyAssignedToInputEnvelope
+    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+  }
+
   export type ProjectUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ProjectCreateWithoutCreatedByInput, ProjectUncheckedCreateWithoutCreatedByInput> | ProjectCreateWithoutCreatedByInput[] | ProjectUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutCreatedByInput | ProjectCreateOrConnectWithoutCreatedByInput[]
@@ -17186,6 +17262,13 @@ export namespace Prisma {
     connectOrCreate?: ActivityCreateOrConnectWithoutUserInput | ActivityCreateOrConnectWithoutUserInput[]
     createMany?: ActivityCreateManyUserInputEnvelope
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
+  }
+
+  export type ResourceUncheckedCreateNestedManyWithoutAssignedToInput = {
+    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
+    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
+    createMany?: ResourceCreateManyAssignedToInputEnvelope
+    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -17302,6 +17385,20 @@ export namespace Prisma {
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
   }
 
+  export type ResourceUpdateManyWithoutAssignedToNestedInput = {
+    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
+    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
+    upsert?: ResourceUpsertWithWhereUniqueWithoutAssignedToInput | ResourceUpsertWithWhereUniqueWithoutAssignedToInput[]
+    createMany?: ResourceCreateManyAssignedToInputEnvelope
+    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    update?: ResourceUpdateWithWhereUniqueWithoutAssignedToInput | ResourceUpdateWithWhereUniqueWithoutAssignedToInput[]
+    updateMany?: ResourceUpdateManyWithWhereWithoutAssignedToInput | ResourceUpdateManyWithWhereWithoutAssignedToInput[]
+    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
+  }
+
   export type ProjectUncheckedUpdateManyWithoutCreatedByNestedInput = {
     create?: XOR<ProjectCreateWithoutCreatedByInput, ProjectUncheckedCreateWithoutCreatedByInput> | ProjectCreateWithoutCreatedByInput[] | ProjectUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutCreatedByInput | ProjectCreateOrConnectWithoutCreatedByInput[]
@@ -17398,6 +17495,20 @@ export namespace Prisma {
     update?: ActivityUpdateWithWhereUniqueWithoutUserInput | ActivityUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityUpdateManyWithWhereWithoutUserInput | ActivityUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
+  }
+
+  export type ResourceUncheckedUpdateManyWithoutAssignedToNestedInput = {
+    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
+    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
+    upsert?: ResourceUpsertWithWhereUniqueWithoutAssignedToInput | ResourceUpsertWithWhereUniqueWithoutAssignedToInput[]
+    createMany?: ResourceCreateManyAssignedToInputEnvelope
+    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+    update?: ResourceUpdateWithWhereUniqueWithoutAssignedToInput | ResourceUpdateWithWhereUniqueWithoutAssignedToInput[]
+    updateMany?: ResourceUpdateManyWithWhereWithoutAssignedToInput | ResourceUpdateManyWithWhereWithoutAssignedToInput[]
+    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutAccountsInput = {
@@ -17962,12 +18073,28 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutResourcesInput = {
+    create?: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutResourcesInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type ProjectUpdateOneRequiredWithoutResourcesNestedInput = {
     create?: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
     connectOrCreate?: ProjectCreateOrConnectWithoutResourcesInput
     upsert?: ProjectUpsertWithoutResourcesInput
     connect?: ProjectWhereUniqueInput
     update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutResourcesInput, ProjectUpdateWithoutResourcesInput>, ProjectUncheckedUpdateWithoutResourcesInput>
+  }
+
+  export type UserUpdateOneWithoutResourcesNestedInput = {
+    create?: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutResourcesInput
+    upsert?: UserUpsertWithoutResourcesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutResourcesInput, UserUpdateWithoutResourcesInput>, UserUncheckedUpdateWithoutResourcesInput>
   }
 
   export type ProjectCreateNestedOneWithoutEventsInput = {
@@ -18461,6 +18588,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ResourceCreateWithoutAssignedToInput = {
+    id?: string
+    name: string
+    type: string
+    quantity?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    project: ProjectCreateNestedOneWithoutResourcesInput
+  }
+
+  export type ResourceUncheckedCreateWithoutAssignedToInput = {
+    id?: string
+    name: string
+    type: string
+    quantity?: number
+    projectId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ResourceCreateOrConnectWithoutAssignedToInput = {
+    where: ResourceWhereUniqueInput
+    create: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput>
+  }
+
+  export type ResourceCreateManyAssignedToInputEnvelope = {
+    data: ResourceCreateManyAssignedToInput | ResourceCreateManyAssignedToInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProjectUpsertWithWhereUniqueWithoutCreatedByInput = {
     where: ProjectWhereUniqueInput
     update: XOR<ProjectUpdateWithoutCreatedByInput, ProjectUncheckedUpdateWithoutCreatedByInput>
@@ -18671,6 +18828,36 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Activity"> | Date | string
   }
 
+  export type ResourceUpsertWithWhereUniqueWithoutAssignedToInput = {
+    where: ResourceWhereUniqueInput
+    update: XOR<ResourceUpdateWithoutAssignedToInput, ResourceUncheckedUpdateWithoutAssignedToInput>
+    create: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput>
+  }
+
+  export type ResourceUpdateWithWhereUniqueWithoutAssignedToInput = {
+    where: ResourceWhereUniqueInput
+    data: XOR<ResourceUpdateWithoutAssignedToInput, ResourceUncheckedUpdateWithoutAssignedToInput>
+  }
+
+  export type ResourceUpdateManyWithWhereWithoutAssignedToInput = {
+    where: ResourceScalarWhereInput
+    data: XOR<ResourceUpdateManyMutationInput, ResourceUncheckedUpdateManyWithoutAssignedToInput>
+  }
+
+  export type ResourceScalarWhereInput = {
+    AND?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
+    OR?: ResourceScalarWhereInput[]
+    NOT?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
+    id?: StringFilter<"Resource"> | string
+    name?: StringFilter<"Resource"> | string
+    type?: StringFilter<"Resource"> | string
+    quantity?: IntFilter<"Resource"> | number
+    projectId?: StringFilter<"Resource"> | string
+    assignedToId?: StringNullableFilter<"Resource"> | string | null
+    createdAt?: DateTimeFilter<"Resource"> | Date | string
+    updatedAt?: DateTimeFilter<"Resource"> | Date | string
+  }
+
   export type UserCreateWithoutAccountsInput = {
     id?: string
     name?: string | null
@@ -18687,6 +18874,7 @@ export namespace Prisma {
     teams?: TeamMemberCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -18705,6 +18893,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -18739,6 +18928,7 @@ export namespace Prisma {
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -18757,6 +18947,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -18775,6 +18966,7 @@ export namespace Prisma {
     teams?: TeamMemberCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -18793,6 +18985,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -18827,6 +19020,7 @@ export namespace Prisma {
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -18845,6 +19039,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type ProjectCreateWithoutStatusInput = {
@@ -18946,6 +19141,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutProjectsInput = {
@@ -18964,6 +19160,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutProjectsInput = {
@@ -19072,9 +19269,9 @@ export namespace Prisma {
     name: string
     type: string
     quantity?: number
-    assignedToId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    assignedTo?: UserCreateNestedOneWithoutResourcesInput
   }
 
   export type ResourceUncheckedCreateWithoutProjectInput = {
@@ -19187,6 +19384,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProjectsInput = {
@@ -19205,6 +19403,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
@@ -19284,20 +19483,6 @@ export namespace Prisma {
     data: XOR<ResourceUpdateManyMutationInput, ResourceUncheckedUpdateManyWithoutProjectInput>
   }
 
-  export type ResourceScalarWhereInput = {
-    AND?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
-    OR?: ResourceScalarWhereInput[]
-    NOT?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
-    id?: StringFilter<"Resource"> | string
-    name?: StringFilter<"Resource"> | string
-    type?: StringFilter<"Resource"> | string
-    quantity?: IntFilter<"Resource"> | number
-    projectId?: StringFilter<"Resource"> | string
-    assignedToId?: StringNullableFilter<"Resource"> | string | null
-    createdAt?: DateTimeFilter<"Resource"> | Date | string
-    updatedAt?: DateTimeFilter<"Resource"> | Date | string
-  }
-
   export type ActivityUpsertWithWhereUniqueWithoutProjectInput = {
     where: ActivityWhereUniqueInput
     update: XOR<ActivityUpdateWithoutProjectInput, ActivityUncheckedUpdateWithoutProjectInput>
@@ -19367,6 +19552,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutTasksInput = {
@@ -19385,6 +19571,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutTasksInput = {
@@ -19601,6 +19788,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTasksInput = {
@@ -19619,6 +19807,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type ActivityUpsertWithWhereUniqueWithoutTaskInput = {
@@ -19769,6 +19958,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutTaskAssignmentsInput = {
@@ -19787,6 +19977,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutTaskAssignmentsInput = {
@@ -19866,6 +20057,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTaskAssignmentsInput = {
@@ -19884,6 +20076,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserCreateWithoutTeamsInput = {
@@ -19902,6 +20095,7 @@ export namespace Prisma {
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutTeamsInput = {
@@ -19920,6 +20114,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutTeamsInput = {
@@ -19991,6 +20186,7 @@ export namespace Prisma {
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTeamsInput = {
@@ -20009,6 +20205,7 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type ProjectUpsertWithoutTeamMembersInput = {
@@ -20091,6 +20288,49 @@ export namespace Prisma {
     create: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
   }
 
+  export type UserCreateWithoutResourcesInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
+    teams?: TeamMemberCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    activities?: ActivityCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutResourcesInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutResourcesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
+  }
+
   export type ProjectUpsertWithoutResourcesInput = {
     update: XOR<ProjectUpdateWithoutResourcesInput, ProjectUncheckedUpdateWithoutResourcesInput>
     create: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
@@ -20132,6 +20372,55 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
+  export type UserUpsertWithoutResourcesInput = {
+    update: XOR<UserUpdateWithoutResourcesInput, UserUncheckedUpdateWithoutResourcesInput>
+    create: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutResourcesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutResourcesInput, UserUncheckedUpdateWithoutResourcesInput>
+  }
+
+  export type UserUpdateWithoutResourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    activities?: ActivityUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutResourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProjectCreateWithoutEventsInput = {
@@ -20230,6 +20519,7 @@ export namespace Prisma {
     teams?: TeamMemberCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserUncheckedCreateWithoutActivitiesInput = {
@@ -20248,6 +20538,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type UserCreateOrConnectWithoutActivitiesInput = {
@@ -20358,6 +20649,7 @@ export namespace Prisma {
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
   }
 
   export type UserUncheckedUpdateWithoutActivitiesInput = {
@@ -20376,6 +20668,7 @@ export namespace Prisma {
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type ProjectUpsertWithoutActivitiesInput = {
@@ -20534,6 +20827,16 @@ export namespace Prisma {
     projectId?: string | null
     taskId?: string | null
     createdAt?: Date | string
+  }
+
+  export type ResourceCreateManyAssignedToInput = {
+    id?: string
+    name: string
+    type: string
+    quantity?: number
+    projectId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type ProjectUpdateWithoutCreatedByInput = {
@@ -20762,6 +21065,36 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ResourceUpdateWithoutAssignedToInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutResourcesNestedInput
+  }
+
+  export type ResourceUncheckedUpdateWithoutAssignedToInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ResourceUncheckedUpdateManyWithoutAssignedToInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ProjectCreateManyStatusInput = {
     id?: string
     title: string
@@ -20968,9 +21301,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignedTo?: UserUpdateOneWithoutResourcesNestedInput
   }
 
   export type ResourceUncheckedUpdateWithoutProjectInput = {

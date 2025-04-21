@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { getUserById, getUserProfile, updateUser, deleteUser } from '@/lib/queries/user-queries';
 
 // Define validation schema for profile updates
 const updateProfileSchema = z.object({
@@ -23,272 +24,147 @@ const updateProfileSchema = z.object({
 });
 
 // GET handler to get a user by ID
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
+    // Check authentication
     const session = await getServerSession(authOptions);
-
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
-    const { id } = await params;
-
-    // Check if the user is requesting their own profile or has admin rights
-    const isOwnProfile = session.user.id === id;
-    const isAdmin = session.user.role === "admin";
-
-    // For debugging
-    console.log('Session user ID:', session.user.id);
-    console.log('Requested profile ID:', id);
-    console.log('Is own profile:', isOwnProfile);
-    console.log('Is admin:', isAdmin);
-
-    if (!isOwnProfile && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Get user with related data
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-          // Include any additional profile fields we might add later
-          // These would need to be added to the Prisma schema
-        }
-      });
-
-      if (!user) {
-        console.error(`User with ID ${id} not found`);
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
-      // Get user's projects
-      const projects = await prisma.teamMember.findMany({
-        where: { userId: id },
-        include: {
-          project: {
-            select: {
-              id: true,
-              title: true,
-              statusId: true,
-              status: true,
-              startDate: true,
-              endDate: true,
-            }
-          }
-        },
-        orderBy: {
-          joinedAt: 'desc'
-        },
-        take: 5,
-      });
-
-      // Get user's tasks
-      const tasks = await prisma.task.findMany({
-        where: { assignedToId: id },
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          priority: true,
-          dueDate: true,
-          project: {
-            select: {
-              id: true,
-              title: true,
-            }
-          }
-        },
-        orderBy: {
-          dueDate: 'asc'
-        },
-        take: 5,
-      });
-
-      // Get task counts for stats
-      const taskCount = await prisma.task.count({
-        where: { assignedToId: id },
-      });
-
-      const completedTaskCount = await prisma.task.count({
-        where: {
-          assignedToId: id,
-          status: 'completed'
-        },
-      });
-
-      // Calculate completion rate
-      const completionRate = taskCount > 0
-        ? Math.round((completedTaskCount / taskCount) * 100) + '%'
-        : '0%';
-
-      // Get user's recent activities
-      const activities = await prisma.activity.findMany({
-        where: { userId: id },
-        select: {
-          id: true,
-          action: true,
-          entityType: true,
-          description: true,
-          createdAt: true,
-          project: {
-            select: {
-              id: true,
-              title: true,
-            }
-          },
-          task: {
-            select: {
-              id: true,
-              title: true,
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        take: 10,
-      });
-
-      // Get team count - count unique projects the user is a member of
-      let teamCount = 0;
-      try {
-        // First try with raw query
-        const result: any = await prisma.$queryRaw`
-          SELECT COUNT(DISTINCT projectId) as count
-          FROM TeamMember
-          WHERE userId = ${id}
-        `;
-        teamCount = Number(result[0]?.count || 0);
-      } catch (error) {
-        console.error('Error counting team memberships with raw query:', error);
-        try {
-          // Fallback: Get all team memberships and count unique project IDs in JS
-          const teamMemberships = await prisma.teamMember.findMany({
-            where: { userId: id },
-            select: { projectId: true },
-          });
-          const uniqueProjectIds = new Set(teamMemberships.map(tm => tm.projectId));
-          teamCount = uniqueProjectIds.size;
-        } catch (fallbackError) {
-          console.error('Error counting team memberships with fallback:', fallbackError);
-          // Continue with teamCount as 0
-        }
-      }
-
-      return NextResponse.json({
-        user,
-        projects: projects.map(p => ({
-          id: p.project.id,
-          title: p.project.title,
-          statusId: p.project.statusId,
-          status: p.project.status,
-          startDate: p.project.startDate,
-          endDate: p.project.endDate,
-          role: p.role,
-          joinedAt: p.joinedAt,
-        })),
-        tasks,
-        activities,
-        stats: {
-          projectCount: projects.length,
-          taskCount,
-          teamCount,
-          completionRate,
-        }
-      });
-    } catch (dbError) {
-      console.error("Database error:", dbError);
       return NextResponse.json(
-        { error: "Database error occurred" },
-        { status: 500 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
-  } catch (error) {
-    console.error("Error fetching user:", error);
+
+    // Await the params
+    const params = await Promise.resolve(context.params);
+    const userId = params.id;
+    const searchParams = req.nextUrl.searchParams;
+    const includeProfile = searchParams.get('profile') === 'true';
+
+    // Check if user is requesting their own profile or if they are an admin
+    const isOwnProfile = session.user.id === userId;
+    const isAdmin = session.user.role === 'admin';
+    
+    if (!isOwnProfile && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied: You can only view your own profile or you need admin privileges' },
+        { status: 403 }
+      );
+    }
+    
+    // Get detailed profile or just user info
+    const user = includeProfile
+      ? await getUserProfile(userId)
+      : await getUserById(userId, false);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(user);
+  } catch (error: any) {
+    console.error('Error fetching user:', error);
     return NextResponse.json(
-      { error: "An error occurred while fetching the user" },
+      { error: 'Failed to fetch user', details: error.message },
       { status: 500 }
     );
   }
 }
 
-// PATCH handler to update a user profile
-export async function PATCH(req: NextRequest, { params }: Params) {
+// PUT /api/users/[id] - Update user
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
+    // Check authentication
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // In Next.js 14, params is a Promise that needs to be awaited
-    const { id } = await params;
-
-    // Check if the user is updating their own profile or has admin rights
-    const isOwnProfile = session.user.id === id;
-    const isAdmin = session.user.role === "admin";
-
-    if (!isOwnProfile && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const body = await req.json();
-
-    // Validate request body
-    const validationResult = updateProfileSchema.safeParse(body);
-
-    if (!validationResult.success) {
+    if (!session) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
-        { status: 400 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    // Update user profile
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: validationResult.data,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        role: true,
-        updatedAt: true,
-      }
-    });
+    // Await the params
+    const params = await Promise.resolve(context.params);
+    const userId = params.id;
+    
+    // Check if user is updating their own profile or if they are an admin
+    const isOwnProfile = session.user.id === userId;
+    const isAdmin = session.user.role === 'admin';
+    
+    if (!isOwnProfile && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied: You can only update your own profile or you need admin privileges' },
+        { status: 403 }
+      );
+    }
 
-    // Log activity
-    await prisma.activity.create({
-      data: {
-        action: "updated",
-        entityType: "profile",
-        entityId: id,
-        description: "Updated profile information",
-        userId: session.user.id,
-      }
-    });
-
-    return NextResponse.json({ user: updatedUser });
-  } catch (error) {
-    console.error("Error updating user profile:", error);
+    // Parse request body
+    const body = await req.json();
+    
+    // If not an admin, restrict fields that can be updated
+    if (!isAdmin) {
+      // Regular users can only update their name, bio, and password
+      const { name, password, bio } = body;
+      const updatedUser = await updateUser(userId, { name, password, bio });
+      return NextResponse.json(updatedUser);
+    }
+    
+    // Admin can update all fields
+    const updatedUser = await updateUser(userId, body);
+    return NextResponse.json(updatedUser);
+  } catch (error: any) {
+    console.error('Error updating user:', error);
     return NextResponse.json(
-      { error: "An error occurred while updating the profile" },
+      { error: 'Failed to update user', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/users/[id] - Delete user
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin access required for user deletion' },
+        { status: 403 }
+      );
+    }
+
+    // Await the params
+    const params = await Promise.resolve(context.params);
+    const userId = params.id;
+    
+    // Don't allow deleting the current user
+    if (session.user.id === userId) {
+      return NextResponse.json(
+        { error: 'Cannot delete your own account' },
+        { status: 400 }
+      );
+    }
+    
+    // Delete user
+    await deleteUser(userId);
+    
+    return NextResponse.json({ success: true, message: 'User deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting user:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete user', details: error.message },
       { status: 500 }
     );
   }

@@ -12,7 +12,8 @@ export default async function UserProfilePage({ params }: { params: { id: string
   }
 
   // In server components, we need to await params in Next.js 14
-  const { id } = await params;
+  const resolvedParams = await Promise.resolve(params);
+  const id = resolvedParams.id;
 
   // Check if the user is requesting their own profile or has admin rights
   const isOwnProfile = session.user.id === id;

@@ -21,21 +21,50 @@ export default function KanbanTask({ task, isActive, isDragging }: Props) {
     opacity: isDragging ? 0.5 : 1,
   }
 
-  // Determine priority based on task description (for demo purposes)
-  let priority = task.priority || "medium"
-  if (!task.priority && task.description) {
-    if (task.description.toLowerCase().includes("high")) {
-      priority = "high"
-    } else if (task.description.toLowerCase().includes("low")) {
-      priority = "low"
-    }
-  }
+  // Use task priority directly, fall back to "medium" if not available
+  const priority = task.priority || "medium"
 
   const priorityColors = {
     low: "bg-blue-100 text-blue-800",
     medium: "bg-yellow-100 text-yellow-800",
     high: "bg-red-100 text-red-800",
   }
+
+  // Format avatar display
+  const getAvatarDetails = () => {
+    // If we have assignedTo user object with name
+    if (task.assignedTo?.name) {
+      const initials = task.assignedTo.name
+        .split(' ')
+        .map(part => part[0])
+        .join('')
+        .toUpperCase()
+        
+      return {
+        image: task.assignedTo.image || "",
+        alt: task.assignedTo.name,
+        fallback: initials || "UN"
+      }
+    }
+    
+    // If assignedTo is just a string (which might be the case in some APIs)
+    if (typeof task.assignedTo === 'string') {
+      return {
+        image: "",
+        alt: "User",
+        fallback: task.assignedTo.substring(0, 2).toUpperCase() || "UN"
+      }
+    }
+    
+    // Default case
+    return {
+      image: "",
+      alt: "Unassigned",
+      fallback: "UN"
+    }
+  }
+  
+  const avatarDetails = getAvatarDetails()
 
   return (
     <div
@@ -64,13 +93,15 @@ export default function KanbanTask({ task, isActive, isDragging }: Props) {
             {priority}
           </span>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Clock className="h-3 w-3" />
-              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-            </div>
+            {task.dueDate && (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Clock className="h-3 w-3" />
+                <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+              </div>
+            )}
             <Avatar className="h-6 w-6 border border-gray-200 shadow-sm">
-              <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-              <AvatarFallback>{task.assignedTo?.substring(0, 2).toUpperCase() || "UN"}</AvatarFallback>
+              <AvatarImage src={avatarDetails.image} alt={avatarDetails.alt} />
+              <AvatarFallback>{avatarDetails.fallback}</AvatarFallback>
             </Avatar>
           </div>
         </div>

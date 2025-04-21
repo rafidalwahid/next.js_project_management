@@ -1,10 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { Calendar, Clock } from "lucide-react"
+import { Calendar, Clock, MoreHorizontal, Plus } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Project {
   id: string
@@ -32,8 +41,18 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Projects</CardTitle>
-          <CardDescription>Projects the user is involved in</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Projects</CardTitle>
+              <CardDescription>Projects the user is involved in</CardDescription>
+            </div>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/projects/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Project
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
@@ -50,22 +69,32 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Projects</h2>
-        <Link href="/projects" className="text-sm text-primary hover:underline">
-          View All Projects
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {projects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/projects/${project.id}`}
-            className="group"
-          >
-            <Card className="h-full transition-all hover:shadow-md hover:border-primary/50">
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Projects</CardTitle>
+            <CardDescription>Projects the user is involved in</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/projects">
+                View All
+              </Link>
+            </Button>
+            <Button size="sm" variant="default" asChild>
+              <Link href="/projects/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Project
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {projects.map((project) => (
+            <Card key={project.id} className="h-full overflow-hidden border bg-background">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge
@@ -74,13 +103,37 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                   >
                     {project.status?.name || 'Unknown'}
                   </Badge>
-                  <Badge variant="outline" className="capitalize">
-                    {project.role}
-                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>
+                        <Link href={`/projects/${project.id}`} className="w-full">
+                          View Project
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link href={`/projects/${project.id}/edit`} className="w-full">
+                          Edit Project
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <CardTitle className="group-hover:text-primary">
-                  {project.title}
+                <CardTitle className="mt-2 text-xl">
+                  <Link href={`/projects/${project.id}`} className="hover:text-primary">
+                    {project.title}
+                  </Link>
                 </CardTitle>
+                <Badge variant="outline" className="mt-1 capitalize">
+                  {project.role}
+                </Badge>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm text-muted-foreground">
@@ -101,9 +154,9 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                 </div>
               </CardContent>
             </Card>
-          </Link>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -36,6 +36,28 @@ export const projectMinimalSelectFields = {
   title: true,
 };
 
+// Type for task include with subtasks
+type TaskIncludeWithSubtasks = Prisma.TaskInclude & {
+  subtasks?: {
+    orderBy: Prisma.Enumerable<Prisma.TaskOrderByWithRelationInput>;
+    include: {
+      assignedTo: { select: typeof userMinimalSelectFields };
+      subtasks?: {
+        orderBy: Prisma.Enumerable<Prisma.TaskOrderByWithRelationInput>;
+        include: {
+          assignedTo: { select: typeof userMinimalSelectFields };
+          subtasks?: {
+            orderBy: Prisma.Enumerable<Prisma.TaskOrderByWithRelationInput>;
+            include: {
+              assignedTo: { select: typeof userMinimalSelectFields };
+            };
+          };
+        };
+      };
+    };
+  };
+};
+
 /**
  * Get include object for task queries with configurable depth
  * @param depth The depth of subtasks to include (0-3)
@@ -47,9 +69,9 @@ export function getTaskIncludeObject(
   depth: 0 | 1 | 2 | 3 = 1,
   includeActivities: boolean = false,
   activitiesLimit: number = 5
-): Prisma.TaskInclude {
+): TaskIncludeWithSubtasks {
   // Base include object
-  const includeObj: Prisma.TaskInclude = {
+  const includeObj: TaskIncludeWithSubtasks = {
     project: {
       select: projectSelectFields
     },
@@ -105,8 +127,8 @@ export function getTaskIncludeObject(
     };
 
     // Add second level of subtasks
-    if (depth >= 2) {
-      (includeObj.subtasks as any).include.subtasks = {
+    if (depth >= 2 && includeObj.subtasks) {
+      includeObj.subtasks.include.subtasks = {
         orderBy: [
           { order: 'asc' },
           { createdAt: 'asc' }
@@ -119,8 +141,8 @@ export function getTaskIncludeObject(
       };
 
       // Add third level of subtasks
-      if (depth >= 3) {
-        (includeObj.subtasks as any).include.subtasks.include.subtasks = {
+      if (depth >= 3 && includeObj.subtasks.include.subtasks) {
+        includeObj.subtasks.include.subtasks.include.subtasks = {
           orderBy: [
             { order: 'asc' },
             { createdAt: 'asc' }

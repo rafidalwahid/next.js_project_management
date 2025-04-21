@@ -1,7 +1,8 @@
+"use client"
+
+import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,178 +12,199 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from "lucide-react"
+import { useTeamMembers } from "@/hooks/use-data"
+import { Input } from "@/components/ui/input"
+import { teamApi } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
+import { Spinner } from "@/components/ui/spinner"
 
-export function TeamTable() {
+interface TeamTableProps {
+  projectId?: string
+}
+
+export function TeamTable({ projectId }: TeamTableProps) {
+  const [page, setPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState("")
+  const { teamMembers, isLoading, isError, mutate, pagination } = useTeamMembers(projectId, page, 10)
+  const { toast } = useToast()
+
+  // Handle member removal
+  const handleRemoveMember = async (memberId: string) => {
+    if (confirm("Are you sure you want to remove this team member?")) {
+      try {
+        await teamApi.removeTeamMember(memberId)
+        toast({
+          title: "Team member removed",
+          description: "The team member has been removed from the project",
+        })
+        mutate() // Refresh the data
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to remove team member",
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+  // Function to handle search (for a complete implementation, this would need backend support)
+  const handleSearch = () => {
+    // In a real implementation, you'd pass this to the API
+    console.log("Searching for:", searchQuery)
+  }
+
+  // Get role badge style based on role
+  const getRoleBadge = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case "owner":
+        return "bg-purple-50 text-purple-700 border-purple-200"
+      case "admin":
+        return "bg-blue-50 text-blue-700 border-blue-200"
+      case "manager":
+        return "bg-yellow-50 text-yellow-700 border-yellow-200"
+      case "member":
+        return "bg-green-50 text-green-700 border-green-200"
+      default:
+        return "bg-gray-50 text-gray-700 border-gray-200"
+    }
+  }
+
+  if (isError) {
+    return <div className="p-8 text-center text-red-500">Error loading team members. Please try again later.</div>
+  }
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Member</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Department</TableHead>
-          <TableHead>Assigned Projects</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                <AvatarFallback>JP</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">John Doe</div>
-                <div className="text-sm text-muted-foreground">john.doe@example.com</div>
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>Project Manager</TableCell>
-          <TableCell>Technology</TableCell>
-          <TableCell>3</TableCell>
-          <TableCell>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Active
-            </Badge>
-          </TableCell>
-          <TableCell className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>View Profile</DropdownMenuItem>
-                <DropdownMenuItem>Edit Role</DropdownMenuItem>
-                <DropdownMenuItem>Assign to Project</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                <AvatarFallback>AP</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">Ana Perez</div>
-                <div className="text-sm text-muted-foreground">ana.perez@example.com</div>
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>UX/UI Designer</TableCell>
-          <TableCell>Design</TableCell>
-          <TableCell>2</TableCell>
-          <TableCell>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Active
-            </Badge>
-          </TableCell>
-          <TableCell className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>View Profile</DropdownMenuItem>
-                <DropdownMenuItem>Edit Role</DropdownMenuItem>
-                <DropdownMenuItem>Assign to Project</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                <AvatarFallback>CG</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">Carlos Garcia</div>
-                <div className="text-sm text-muted-foreground">carlos.garcia@example.com</div>
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>Full Stack Developer</TableCell>
-          <TableCell>Technology</TableCell>
-          <TableCell>4</TableCell>
-          <TableCell>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Active
-            </Badge>
-          </TableCell>
-          <TableCell className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>View Profile</DropdownMenuItem>
-                <DropdownMenuItem>Edit Role</DropdownMenuItem>
-                <DropdownMenuItem>Assign to Project</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                <AvatarFallback>MR</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">Maria Rodriguez</div>
-                <div className="text-sm text-muted-foreground">maria.rodriguez@example.com</div>
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>Marketing Specialist</TableCell>
-          <TableCell>Marketing</TableCell>
-          <TableCell>2</TableCell>
-          <TableCell>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Active
-            </Badge>
-          </TableCell>
-          <TableCell className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>View Profile</DropdownMenuItem>
-                <DropdownMenuItem>Edit Role</DropdownMenuItem>
-                <DropdownMenuItem>Assign to Project</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search team members..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+          </div>
+          <Button variant="outline" size="icon" title="Filter">
+            <Filter className="h-4 w-4" />
+          </Button>
+        </div>
+        <Button className="gap-2">
+          <UserPlus className="h-4 w-4" />
+          Add Member
+        </Button>
+      </div>
+      
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Joined</TableHead>
+            <TableHead>Tasks</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={6} className="h-24 text-center">
+                <Spinner className="mx-auto" />
+                <div className="mt-2 text-sm text-muted-foreground">Loading team members...</div>
+              </TableCell>
+            </TableRow>
+          ) : teamMembers.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="h-24 text-center">
+                <div className="text-muted-foreground">No team members found</div>
+              </TableCell>
+            </TableRow>
+          ) : (
+            teamMembers.map((member) => (
+              <TableRow key={member.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={member.user?.image || ""} alt={member.user?.name || ""} />
+                      <AvatarFallback>{member.user?.name?.split(" ").map(n => n[0]).join("") || "?"}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-semibold">{member.user?.name || "Unknown"}</div>
+                      <div className="text-sm text-muted-foreground">{member.user?.id}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{member.user?.email || "No email"}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={getRoleBadge(member.role)}>
+                    {member.role?.charAt(0).toUpperCase() + member.role?.slice(1).toLowerCase() || "Member"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-sm">{new Date(member.joinedAt).toLocaleDateString()}</span>
+                  </div>
+                </TableCell>
+                <TableCell>{member.taskCount || 0} tasks</TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>View Profile</DropdownMenuItem>
+                      <DropdownMenuItem>Change Role</DropdownMenuItem>
+                      <DropdownMenuItem>Assign Tasks</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => handleRemoveMember(member.id)}
+                      >
+                        Remove
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+      
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(page => Math.max(1, page - 1))}
+            disabled={page === 1 || isLoading}
+          >
+            Previous
+          </Button>
+          <div className="text-sm text-muted-foreground">
+            Page {page} of {pagination.totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(page => Math.min(pagination.totalPages, page + 1))}
+            disabled={page === pagination.totalPages || isLoading}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }

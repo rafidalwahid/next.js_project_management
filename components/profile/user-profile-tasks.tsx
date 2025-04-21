@@ -1,10 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { Calendar } from "lucide-react"
+import { Calendar, Clock, MoreHorizontal, Plus } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { formatDate } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Task {
   id: string
@@ -27,8 +36,18 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Tasks</CardTitle>
-          <CardDescription>Tasks assigned to the user</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Tasks</CardTitle>
+              <CardDescription>Tasks assigned to the user</CardDescription>
+            </div>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/tasks/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Task
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
@@ -45,83 +64,112 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Tasks</h2>
-        <Link href="/tasks" className="text-sm text-primary hover:underline">
-          View All Tasks
-        </Link>
-      </div>
-
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="border-b px-6 py-4">
-          <h3 className="text-lg font-semibold">Assigned Tasks</h3>
-          <p className="text-sm text-muted-foreground">Tasks currently assigned to this user</p>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Tasks</CardTitle>
+            <CardDescription>Tasks assigned to the user</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/tasks">
+                View All
+              </Link>
+            </Button>
+            <Button size="sm" variant="default" asChild>
+              <Link href="/tasks/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Task
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex flex-col space-y-2 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Link
-                      href={`/tasks/${task.id}`}
-                      className="font-medium hover:text-primary hover:underline"
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
+          {tasks.map((task) => (
+            <Card key={task.id} className="overflow-hidden border bg-background">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <Badge
+                      variant={
+                        task.status === "completed"
+                          ? "success"
+                          : task.status === "in-progress"
+                          ? "default"
+                          : task.status === "pending"
+                          ? "secondary"
+                          : "outline"
+                      }
+                      className="capitalize"
                     >
-                      {task.title}
-                    </Link>
-                    <div className="flex gap-2">
-                      <Badge
-                        variant={
-                          task.status === "completed"
-                            ? "success"
-                            : task.status === "in-progress"
-                            ? "default"
-                            : task.status === "pending"
-                            ? "secondary"
-                            : "outline"
-                        }
-                        className="capitalize"
-                      >
-                        {task.status}
-                      </Badge>
-                      <Badge
-                        variant={
-                          task.priority === "high"
-                            ? "destructive"
-                            : task.priority === "medium"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="capitalize"
-                      >
-                        {task.priority}
-                      </Badge>
-                    </div>
+                      {task.status}
+                    </Badge>
+                    <Badge
+                      variant={
+                        task.priority === "high"
+                          ? "destructive"
+                          : task.priority === "medium"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="capitalize"
+                    >
+                      {task.priority}
+                    </Badge>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    <Link
-                      href={`/projects/${task.project.id}`}
-                      className="hover:text-primary hover:underline"
-                    >
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>
+                        <Link href={`/tasks/${task.id}`} className="w-full">
+                          View Task
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link href={`/tasks/${task.id}/edit`} className="w-full">
+                          Edit Task
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <CardTitle className="mt-2 text-lg">
+                  <Link href={`/tasks/${task.id}`} className="hover:text-primary">
+                    {task.title}
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="flex items-center">
+                    <Clock className="mr-2 h-4 w-4" />
+                    <Link href={`/projects/${task.project.id}`} className="hover:text-primary hover:underline">
                       {task.project.title}
                     </Link>
                   </div>
+                  {task.dueDate && (
+                    <div className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      <span>Due {formatDate(task.dueDate)}</span>
+                    </div>
+                  )}
                 </div>
-                {task.dueDate && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-1 h-4 w-4" />
-                    <span>Due {formatDate(task.dueDate)}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

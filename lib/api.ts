@@ -98,7 +98,12 @@ export const userApi = {
   },
 
   getUserProfile: async (userId: string) => {
-    return fetchAPI(`/api/users/${userId}`);
+    try {
+      return fetchAPI(`/api/users/${userId}?profile=true`);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
   },
 
   updateUserProfile: async (userId: string, profileData: any) => {
@@ -108,13 +113,13 @@ export const userApi = {
     });
   },
 
-  uploadProfileImage: async (file: File) => {
+  uploadProfileImage: async (userId: string, file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file);
 
-    // This would need to be implemented on the server
-    return fetch('/api/upload', {
-      method: 'POST',
+    // Use the correct endpoint format that matches our API structure
+    return fetch(`/api/users/${userId}/image`, {
+      method: 'PUT',
       body: formData,
     }).then(res => res.json());
   },
