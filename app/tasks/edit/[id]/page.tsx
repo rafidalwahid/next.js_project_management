@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/date-picker"
 import { Separator } from "@/components/ui/separator"
 import { SubtaskList } from "@/components/tasks/subtask-list"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { useToast } from "@/hooks/use-toast"
 import { useProjects } from "@/hooks/use-data"
 import { useUsers } from "@/hooks/use-users"
@@ -26,12 +27,12 @@ export default function EditTaskPage() {
   const { toast } = useToast()
   const { projects } = useProjects(1, 100)
   const { users } = useUsers(100)
-  
+
   const [task, setTask] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -39,7 +40,8 @@ export default function EditTaskPage() {
     priority: "medium",
     dueDate: "",
     projectId: "",
-    assignedToId: "",
+    assignedToId: "", // Keep for backward compatibility
+    assigneeIds: [] as string[], // New field for multiple assignees
     parentId: null as string | null,
   })
 
@@ -48,7 +50,7 @@ export default function EditTaskPage() {
       setLoading(true)
       const response = await taskApi.getTask(taskId)
       setTask(response.task)
-      
+
       // Initialize form data
       setFormData({
         title: response.task.title,
@@ -58,9 +60,10 @@ export default function EditTaskPage() {
         dueDate: response.task.dueDate || "",
         projectId: response.task.projectId,
         assignedToId: response.task.assignedToId || "",
+        assigneeIds: response.task.assignees && Array.isArray(response.task.assignees) ? response.task.assignees.map((a: any) => a.userId) : [],
         parentId: response.task.parentId,
       })
-      
+
       setError(null)
     } catch (err) {
       setError("Failed to load task details")
@@ -87,25 +90,29 @@ export default function EditTaskPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleMultiSelectChange = (name: string) => (values: string[]) => {
+    setFormData((prev) => ({ ...prev, [name]: values }))
+  }
+
   const handleDateChange = (date: Date | undefined) => {
-    setFormData((prev) => ({ 
-      ...prev, 
-      dueDate: date ? date.toISOString() : "" 
+    setFormData((prev) => ({
+      ...prev,
+      dueDate: date ? date.toISOString() : ""
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       setSaving(true)
       await taskApi.updateTask(taskId, formData)
-      
+
       toast({
         title: "Task updated",
         description: "Task has been updated successfully",
       })
-      
+
       router.push(`/tasks/${taskId}`)
     } catch (error) {
       toast({
@@ -175,7 +182,7 @@ export default function EditTaskPage() {
               Back to Tasks
             </Link>
           </Button>
-          
+
           <Button variant="outline" size="sm" asChild>
             <Link href={`/tasks/${taskId}`}>
               <X className="mr-2 h-4 w-4" />
@@ -184,14 +191,14 @@ export default function EditTaskPage() {
           </Button>
         </div>
       </div>
-      
+
       <Card>
         <form onSubmit={handleSubmit}>
           <CardHeader>
             <CardTitle>Edit Task</CardTitle>
             <CardDescription>Update task details</CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             <div className="grid gap-4">
               <div className="grid gap-2">
@@ -205,7 +212,7 @@ export default function EditTaskPage() {
                   required
                 />
               </div>
-              
+
               <div className="grid gap-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -217,7 +224,7 @@ export default function EditTaskPage() {
                   rows={4}
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="status">Status</Label>
@@ -235,7 +242,7 @@ export default function EditTaskPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="grid gap-2">
                   <Label htmlFor="priority">Priority</Label>
                   <Select
@@ -253,7 +260,7 @@ export default function EditTaskPage() {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="dueDate">Due Date</Label>
@@ -262,28 +269,24 @@ export default function EditTaskPage() {
                     defaultDate={formData.dueDate ? new Date(formData.dueDate) : undefined}
                   />
                 </div>
-                
+
                 <div className="grid gap-2">
-                  <Label htmlFor="assignedToId">Assigned To</Label>
-                  <Select
-                    value={formData.assignedToId}
-                    onValueChange={handleSelectChange("assignedToId")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name || user.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="assigneeIds">Assigned To (Multiple)</Label>
+                  <MultiSelect
+                    options={users.map((user) => ({
+                      label: user.name || user.email,
+                      value: user.id,
+                    }))}
+                    selected={formData.assigneeIds}
+                    onChange={handleMultiSelectChange("assigneeIds")}
+                    placeholder="Select team members..."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You can assign multiple users to this task
+                  </p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="projectId">Project</Label>
@@ -303,7 +306,7 @@ export default function EditTaskPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {task.parent || task.subtasks?.length > 0 ? (
                   <div className="grid gap-2">
                     <Label htmlFor="parentId">Parent Task</Label>
@@ -332,20 +335,20 @@ export default function EditTaskPage() {
                 ) : null}
               </div>
             </div>
-            
+
             {task.subtasks && task.subtasks.length > 0 && (
               <>
                 <Separator />
-                <SubtaskList 
-                  parentTaskId={task.id} 
+                <SubtaskList
+                  parentTaskId={task.id}
                   projectId={task.projectId}
-                  subtasks={task.subtasks} 
+                  subtasks={task.subtasks}
                   onSubtaskChange={fetchTask}
                 />
               </>
             )}
           </CardContent>
-          
+
           <CardFooter className="flex justify-between">
             <Button variant="outline" type="button" asChild>
               <Link href={`/tasks/${taskId}`}>
@@ -353,7 +356,7 @@ export default function EditTaskPage() {
                 Cancel
               </Link>
             </Button>
-            
+
             <Button type="submit" disabled={saving}>
               <Save className="mr-2 h-4 w-4" />
               {saving ? "Saving..." : "Save Changes"}

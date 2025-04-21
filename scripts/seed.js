@@ -147,6 +147,7 @@ async function seed() {
           dueDate: new Date('2025-01-30'),
           projectId: project1.id,
           assignedToId: projectManager.id,
+          order: 1000, // Explicit order value
         },
         {
           title: 'Design Wireframes',
@@ -156,6 +157,7 @@ async function seed() {
           dueDate: new Date('2025-02-15'),
           projectId: project1.id,
           assignedToId: user.id,
+          order: 2000, // Explicit order value
         },
         {
           title: 'Frontend Development',
@@ -165,6 +167,7 @@ async function seed() {
           dueDate: new Date('2025-03-15'),
           projectId: project1.id,
           assignedToId: user.id,
+          order: 3000, // Explicit order value
         },
         {
           title: 'Backend API Development',
@@ -174,15 +177,16 @@ async function seed() {
           dueDate: new Date('2025-03-30'),
           projectId: project1.id,
           assignedToId: admin.id,
+          order: 4000, // Explicit order value
         },
       ]
     });
 
     // Create tasks for Mobile App project
     console.log('Creating tasks for Mobile App project...');
-    await prisma.task.createMany({
-      data: [
-        {
+    const mobileAppTasks = await Promise.all([
+      prisma.task.create({
+        data: {
           title: 'App Architecture Planning',
           description: 'Design the overall architecture of the mobile app',
           status: 'in-progress',
@@ -190,8 +194,11 @@ async function seed() {
           dueDate: new Date('2025-03-15'),
           projectId: project2.id,
           assignedToId: projectManager.id,
+          order: 1000, // Explicit order value
         },
-        {
+      }),
+      prisma.task.create({
+        data: {
           title: 'UI/UX Design',
           description: 'Create the user interface and experience design',
           status: 'pending',
@@ -199,8 +206,11 @@ async function seed() {
           dueDate: new Date('2025-04-01'),
           projectId: project2.id,
           assignedToId: user.id,
+          order: 2000, // Explicit order value
         },
-        {
+      }),
+      prisma.task.create({
+        data: {
           title: 'iOS Development',
           description: 'Implement the iOS version of the app',
           status: 'pending',
@@ -208,8 +218,89 @@ async function seed() {
           dueDate: new Date('2025-06-01'),
           projectId: project2.id,
           assignedToId: null,
+          order: 3000, // Explicit order value
         },
-      ]
+      }),
+    ]);
+
+    // Create subtasks for UI/UX Design task
+    console.log('Creating subtasks for UI/UX Design task...');
+    const uiUxTask = mobileAppTasks[1]; // UI/UX Design task
+    const uiUxSubtasks = await Promise.all([
+      prisma.task.create({
+        data: {
+          title: 'Create Wireframes',
+          description: 'Create wireframes for all main screens',
+          status: 'pending',
+          priority: 'high',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: uiUxTask.id,
+          order: 1000, // Explicit order value
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: 'Design System',
+          description: 'Create a design system with colors, typography, and components',
+          status: 'pending',
+          priority: 'medium',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: uiUxTask.id,
+          order: 2000, // Explicit order value
+        },
+      }),
+      prisma.task.create({
+        data: {
+          title: 'User Testing',
+          description: 'Conduct user testing with prototypes',
+          status: 'pending',
+          priority: 'medium',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: uiUxTask.id,
+          order: 3000, // Explicit order value
+        },
+      }),
+    ]);
+
+    // Create nested subtasks for the wireframes task
+    console.log('Creating nested subtasks for wireframes task...');
+    const wireframesTask = uiUxSubtasks[0]; // Create Wireframes task
+    await prisma.task.createMany({
+      data: [
+        {
+          title: 'Home Screen Wireframe',
+          description: 'Create wireframe for the home screen',
+          status: 'pending',
+          priority: 'high',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: wireframesTask.id,
+          order: 1000, // Explicit order value
+        },
+        {
+          title: 'Profile Screen Wireframe',
+          description: 'Create wireframe for the profile screen',
+          status: 'pending',
+          priority: 'medium',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: wireframesTask.id,
+          order: 2000, // Explicit order value
+        },
+        {
+          title: 'Settings Screen Wireframe',
+          description: 'Create wireframe for the settings screen',
+          status: 'pending',
+          priority: 'low',
+          projectId: project2.id,
+          assignedToId: user.id,
+          parentId: wireframesTask.id,
+          order: 3000, // Explicit order value
+        },
+      ],
     });
 
     // Create events

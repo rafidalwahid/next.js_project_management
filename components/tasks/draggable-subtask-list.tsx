@@ -68,11 +68,22 @@ export function DraggableSubtaskList({
   }
 
   const handleAddSubtask = async () => {
-    if (!newSubtaskTitle.trim()) return
+    const trimmedTitle = newSubtaskTitle.trim()
+    if (!trimmedTitle) return
+
+    // Validate title length
+    if (trimmedTitle.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Subtask title must be at least 3 characters long",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       await taskApi.createTask({
-        title: newSubtaskTitle,
+        title: trimmedTitle,
         projectId,
         parentId: parentTaskId,
         status: "pending",
@@ -98,11 +109,22 @@ export function DraggableSubtaskList({
   }
 
   const handleAddNestedSubtask = async (parentSubtaskId: string) => {
-    if (!nestedSubtaskTitle.trim()) return
+    const trimmedTitle = nestedSubtaskTitle.trim()
+    if (!trimmedTitle) return
+
+    // Validate title length
+    if (trimmedTitle.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Subtask title must be at least 3 characters long",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       await taskApi.createTask({
-        title: nestedSubtaskTitle,
+        title: trimmedTitle,
         projectId,
         parentId: parentSubtaskId,
         status: "pending",
@@ -143,20 +165,45 @@ export function DraggableSubtaskList({
   }
 
   const handleDeleteSubtask = async (subtaskId: string) => {
+    console.log('Deleting subtask with ID:', subtaskId);
     try {
-      await taskApi.deleteTask(subtaskId)
-      onSubtaskChange()
+      // Show loading toast
+      const loadingToast = toast({
+        title: "Deleting subtask",
+        description: "Please wait...",
+      });
+
+      const result = await taskApi.deleteTask(subtaskId);
+      console.log('Delete subtask API response:', result);
+      onSubtaskChange();
 
       toast({
         title: "Subtask deleted",
         description: "Subtask has been deleted successfully",
-      })
+      });
     } catch (error) {
+      console.error('Error deleting subtask:', error);
+
+      // Extract error message if available
+      let errorMessage = "Failed to delete subtask";
+
+      if (error instanceof Error) {
+        try {
+          const parsedError = JSON.parse(error.message);
+          if (parsedError.message) {
+            errorMessage = parsedError.message;
+          }
+        } catch (e) {
+          // If parsing fails, use the original error message
+          errorMessage = error.message || errorMessage;
+        }
+      }
+
       toast({
         title: "Error",
-        description: "Failed to delete subtask",
+        description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
   }
 
@@ -293,6 +340,14 @@ export function DraggableSubtaskList({
         const targetParentId = overSubtask ? overSubtask.parentId || parentTaskId : parentTaskId
         const isSameParentReorder = activeParentId === targetParentId
 
+        console.log('Reordering details:', {
+          activeSubtask: activeSubtask.title,
+          activeParentId,
+          overSubtask: overSubtask?.title || 'parent task',
+          targetParentId,
+          isSameParentReorder
+        })
+
         if (process.env.NODE_ENV === 'development') {
           console.log('Moving subtask:', {
             activeSubtask: activeSubtask.title,
@@ -344,10 +399,18 @@ export function DraggableSubtaskList({
         // If reordering within the same parent (either parent task or another subtask)
         else if (isSameParentReorder) {
           try {
+            console.log('Calling reorderTask API for same-parent reordering with:', {
+              taskId: activeSubtask.id,
+              newParentId: null,
+              oldParentId: activeSubtask.parentId || parentTaskId,
+              targetTaskId: overSubtask ? overSubtask.id : null,
+              isSameParentReorder: true
+            });
+
             await taskApi.reorderTask(
               activeSubtask.id,
               null, // No parent change
-              null, // No old parent needed
+              activeSubtask.parentId || parentTaskId, // Pass the current parent ID
               overSubtask ? overSubtask.id : null, // Target task ID for positioning
               true // Flag to indicate this is a same-parent reordering
             )

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
 import { DashboardNav } from "@/components/dashboard-nav"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { useProjects } from "@/hooks/use-data"
 import { taskApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
@@ -30,7 +31,8 @@ export default function NewTaskPage() {
     title: "",
     description: "",
     projectId: "",
-    assignedToId: "",
+    assignedToId: "", // Keep for backward compatibility
+    assigneeIds: [] as string[], // New field for multiple assignees
     dueDate: "",
     status: "pending", // Default status
     priority: "medium", // Default priority
@@ -87,6 +89,10 @@ export default function NewTaskPage() {
 
   const handleSelectChange = (name: string) => (value: string) => {
     setTaskData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleMultiSelectChange = (name: string) => (values: string[]) => {
+    setTaskData((prev) => ({ ...prev, [name]: values }))
   }
 
   const handleDateChange = (date: Date | undefined) => {
@@ -204,23 +210,19 @@ export default function NewTaskPage() {
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="assignedToId">Assigned to</Label>
-                  <Select
-                    onValueChange={handleSelectChange("assignedToId")}
-                    value={taskData.assignedToId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a team member" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name || user.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="assigneeIds">Assigned to (Multiple)</Label>
+                  <MultiSelect
+                    options={users.map((user) => ({
+                      label: user.name || user.email,
+                      value: user.id,
+                    }))}
+                    selected={taskData.assigneeIds}
+                    onChange={handleMultiSelectChange("assigneeIds")}
+                    placeholder="Select team members..."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You can assign multiple users to this task
+                  </p>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="dueDate">Due Date</Label>

@@ -313,10 +313,30 @@ export default function TaskDetailPage() {
               )}
             </div>
 
-            {/* Assigned user */}
+            {/* Assigned users */}
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Assigned to</h3>
-              {task.assignedTo ? (
+              {task.assignees && Array.isArray(task.assignees) && task.assignees.length > 0 ? (
+                <div className="space-y-3">
+                  {task.assignees.map((assignee: any) => (
+                    <div key={assignee.id} className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-black/10">
+                        {assignee.user.image ? (
+                          <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                        ) : null}
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {getUserInitials(assignee.user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{assignee.user.name || "Unnamed User"}</p>
+                        <p className="text-sm text-muted-foreground">{assignee.user.email}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : task.assignedTo ? (
+                // Fallback to legacy assignedTo field
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-black/10">
                     {task.assignedTo.image ? (

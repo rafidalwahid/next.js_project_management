@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
         },
         subtasks: {
           orderBy: {
-            createdAt: 'asc' // Order subtasks by createdAt to support reordering
+            order: 'asc' // Order subtasks by the explicit order field
           },
           include: {
             assignedTo: {
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
             // Include one level of nested subtasks
             subtasks: {
               orderBy: {
-                createdAt: 'asc' // Order nested subtasks by createdAt too
+                order: 'asc' // Order nested subtasks by the explicit order field too
               },
               include: {
                 assignedTo: {
@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
       },
       orderBy: [
         { priority: "desc" },
+        { order: "asc" },
         { dueDate: "asc" },
         { updatedAt: "desc" }
       ],
@@ -139,7 +140,8 @@ const createTaskSchema = z.object({
   priority: z.enum(["low", "medium", "high"]).default("medium"),
   dueDate: z.string().optional().nullable(),
   projectId: z.string(),
-  assignedToId: z.string().optional().nullable(),
+  assignedToId: z.string().optional().nullable(), // Kept for backward compatibility
+  assigneeIds: z.array(z.string()).optional(), // New field for multiple assignees
   parentId: z.string().optional().nullable(), // New field for parent task reference
 });
 
@@ -147,6 +149,8 @@ const createTaskSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
+    console.log('Session:', JSON.stringify(session, null, 2));
 
     if (!session || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -164,7 +168,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, status, priority, dueDate, projectId, assignedToId, parentId } = validationResult.data;
+    const { title, description, status, priority, dueDate, projectId, assignedToId, assigneeIds, parentId } = validationResult.data;
 
     // Check if project exists
     const project = await prisma.project.findUnique({
@@ -183,7 +187,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user has access to this project
-    const hasAccess = project.createdById === session.user.id || project.teamMembers.length > 0;
+    // Check if user is admin, project creator, or team member
+    const isAdmin = session.user.role === 'admin';
+    const isProjectCreator = project.createdById === session.user.id;
+    const isTeamMember = project.teamMembers.length > 0;
+
+    const hasAccess = isAdmin || isProjectCreator || isTeamMember;
+
+    console.log('Permission check:', {
+      userId: session.user.id,
+      userRole: session.user.role,
+      isAdmin,
+      isProjectCreator,
+      isTeamMember,
+      hasAccess
+    });
 
     if (!hasAccess) {
       return NextResponse.json(
@@ -211,10 +229,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get the highest order value for tasks with the same parent
+    const highestOrderTask = await prisma.task.findFirst({
+      where: {
+        projectId,
+        parentId: parentId || null
+      },
+      orderBy: { order: 'desc' },
+      select: { order: true }
+    });
+
+    // Set the initial order value to be higher than the highest existing order
+    const initialOrder = highestOrderTask ? highestOrderTask.order + 1000 : 1000;
+
     // Create task
     // Try to create with parentId first, but handle the case where the schema doesn't have parentId
     let task;
     try {
+      // Create the task first
       task = await prisma.task.create({
         data: {
           title,
@@ -223,8 +255,9 @@ export async function POST(req: NextRequest) {
           priority,
           dueDate: dueDate ? new Date(dueDate) : null,
           projectId,
-          assignedToId,
+          assignedToId, // Keep for backward compatibility
           parentId,
+          order: initialOrder, // Set the initial order value
           // We'll create the activity separately after the task is created
           // to ensure we have the entityId
         },
@@ -243,6 +276,7 @@ export async function POST(req: NextRequest) {
             image: true,
           }
         },
+
         subtasks: {
           include: {
             assignedTo: {
@@ -284,6 +318,7 @@ export async function POST(req: NextRequest) {
             dueDate: dueDate ? new Date(dueDate) : null,
             projectId,
             assignedToId,
+            order: initialOrder, // Set the initial order value
             // parentId is omitted
             // We'll create the activity separately after the task is created
             // to ensure we have the entityId
@@ -309,19 +344,34 @@ export async function POST(req: NextRequest) {
         });
 
         // Create activity for the task
-        await prisma.activity.create({
-          data: {
-            action: "created",
-            entityType: "task",
-            entityId: task.id,
-            description: parentId
-              ? `Task "${title}" was created (note: subtask relationship not saved due to schema mismatch)`
-              : `Task "${title}" was created`,
-            userId: session.user.id,
-            projectId,
-            taskId: task.id,
+        try {
+          // First, verify that the user exists in the database
+          const userExists = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { id: true }
+          });
+
+          if (userExists) {
+            await prisma.activity.create({
+              data: {
+                action: "created",
+                entityType: "task",
+                entityId: task.id,
+                description: parentId
+                  ? `Task "${title}" was created (note: subtask relationship not saved due to schema mismatch)`
+                  : `Task "${title}" was created`,
+                userId: session.user.id,
+                projectId,
+                taskId: task.id,
+              }
+            });
+          } else {
+            console.warn(`Activity not created: User ID ${session.user.id} not found in database`);
           }
-        });
+        } catch (activityError) {
+          // Log the error but don't fail the task creation
+          console.error('Error creating activity in fallback case:', activityError);
+        }
 
         // Return with a warning
         return NextResponse.json({
@@ -335,19 +385,91 @@ export async function POST(req: NextRequest) {
     }
 
     // Now create the activity with the task's ID as entityId
-    await prisma.activity.create({
-      data: {
-        action: "created",
-        entityType: parentId ? "subtask" : "task",
-        entityId: task.id, // Now we have the task ID
-        description: parentId
-          ? `Subtask "${title}" was created under task ID ${parentId}`
-          : `Task "${title}" was created`,
-        userId: session.user.id,
-        projectId,
-        taskId: task.id, // Link to the task
+    try {
+      // First, verify that the user exists in the database
+      const userExists = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true }
+      });
+
+      if (userExists) {
+        await prisma.activity.create({
+          data: {
+            action: "created",
+            entityType: parentId ? "subtask" : "task",
+            entityId: task.id, // Now we have the task ID
+            description: parentId
+              ? `Subtask "${title}" was created under task ID ${parentId}`
+              : `Task "${title}" was created`,
+            userId: session.user.id,
+            projectId,
+            taskId: task.id, // Link to the task
+          }
+        });
+      } else {
+        console.warn(`Activity not created: User ID ${session.user.id} not found in database`);
       }
-    });
+    } catch (activityError) {
+      // Log the error but don't fail the task creation
+      console.error('Error creating activity:', activityError);
+    }
+
+    // Create task assignees if assigneeIds is provided
+    if (assigneeIds && assigneeIds.length > 0) {
+      try {
+        // Check if TaskAssignee table exists
+        let hasTaskAssigneeTable = false;
+        try {
+          const result = await prisma.$queryRaw`SHOW TABLES LIKE 'TaskAssignee'`;
+          hasTaskAssigneeTable = Array.isArray(result) && result.length > 0;
+        } catch (err) {
+          console.error('Error checking for TaskAssignee table:', err);
+        }
+
+        if (hasTaskAssigneeTable) {
+          // Create task assignees
+          await Promise.all(
+            assigneeIds.map(async (userId) => {
+              return prisma.taskAssignee.create({
+                data: {
+                  taskId: task.id,
+                  userId,
+                }
+              });
+            })
+          );
+
+          // Fetch the task with assignees to get the complete data
+          const updatedTask = await prisma.task.findUnique({
+            where: { id: task.id },
+            include: {
+              assignees: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                      image: true,
+                    }
+                  }
+                }
+              }
+            }
+          });
+
+          if (updatedTask && 'assignees' in updatedTask && updatedTask.assignees) {
+            // Use type assertion to handle the dynamic property
+            (task as any).assignees = updatedTask.assignees;
+          }
+        } else {
+          console.warn('TaskAssignee table does not exist yet. Skipping assignee creation.');
+        }
+      } catch (error) {
+        console.error("Error creating task assignees:", error);
+        // Don't fail the task creation if assignee creation fails
+      }
+    }
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {

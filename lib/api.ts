@@ -211,9 +211,17 @@ export const taskApi = {
   },
 
   deleteTask: async (id: string) => {
-    return fetchAPI(`/api/tasks/${id}`, {
-      method: 'DELETE',
-    });
+    console.log('API client: Deleting task with ID:', id);
+    try {
+      const result = await fetchAPI(`/api/tasks/${id}`, {
+        method: 'DELETE',
+      });
+      console.log('API client: Delete task response:', result);
+      return result;
+    } catch (error) {
+      console.error('API client: Error deleting task:', error);
+      throw error;
+    }
   },
 
   reorderTask: async (taskId: string, newParentId: string | null, oldParentId: string | null, targetTaskId?: string, isSameParentReorder?: boolean) => {
