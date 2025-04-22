@@ -9,34 +9,23 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { ProjectCard } from "@/components/project-card"
 import { RecentActivity } from "@/components/recent-activity"
-import { AttendanceWidget } from "@/components/attendance/attendance-widget"
 
 export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <Link href="/projects/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
-            </Button>
-          </Link>
-        </div>
       </div>
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="attendance" asChild>
+            <Link href="/attendance/dashboard">Attendance</Link>
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6">
-          {/* Attendance Widget - Full Width */}
-          <div className="grid gap-4 md:grid-cols-1">
-            <AttendanceWidget />
-          </div>
-
           {/* Dashboard Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
