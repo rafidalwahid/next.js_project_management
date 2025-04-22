@@ -203,7 +203,7 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/tasks/edit/${task.id}`} className="cursor-pointer">
+                      <Link href={`/tasks/${task.id}`} className="cursor-pointer">
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Task
                       </Link>

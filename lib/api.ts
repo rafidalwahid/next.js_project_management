@@ -13,7 +13,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
   };
 
   console.log(`API Request: ${options.method || 'GET'} ${url}`);
-  
+
   try {
     const response = await fetch(url, options);
     console.log(`API Response status: ${response.status} ${response.statusText}`);
@@ -23,7 +23,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     try {
       const textResponse = await response.text();
       console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
-      
+
       // Handle empty responses
       data = textResponse ? JSON.parse(textResponse) : {};
     } catch (error) {
@@ -189,16 +189,34 @@ export const taskApi = {
     params.append('page', page.toString());
     params.append('limit', limit.toString());
 
-    // Add any additional filters
+    // Add any additional filters with better validation
     Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value.toString());
+      if (value !== null &&
+          value !== undefined &&
+          value !== '[object Object]' &&
+          String(value).trim() !== '') {
+        params.append(key, value.toString());
+      }
     });
 
+    console.log('API getTasks params:', params.toString());
     return fetchAPI(`/api/tasks?${params.toString()}`);
   },
 
   getTask: async (id: string) => {
-    return fetchAPI(`/api/tasks/${id}`);
+    console.log('API client: Getting task with ID:', id);
+    try {
+      const result = await fetchAPI(`/api/tasks/${id}`);
+      console.log('API client: Get task response:', JSON.stringify({
+        id: result.task.id,
+        title: result.task.title,
+        dueDate: result.task.dueDate
+      }, null, 2));
+      return result;
+    } catch (error) {
+      console.error('API client: Error getting task:', error);
+      throw error;
+    }
   },
 
   createTask: async (task: any) => {

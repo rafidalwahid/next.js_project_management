@@ -183,6 +183,8 @@ export function getTaskListIncludeObject(): Prisma.TaskInclude {
       }
     }
   };
+  // Note: Fields like dueDate, priority, etc. are automatically included from the Task model
+  // and don't need to be explicitly specified in the include object
 }
 
 /**

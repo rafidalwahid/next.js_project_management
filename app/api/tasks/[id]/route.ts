@@ -32,6 +32,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
       include: getTaskIncludeObject(3, true, 5) // 3 levels deep, include activities, 5 activities max
     });
 
+    console.log('GET task response:', JSON.stringify({
+      id: taskWithDetails?.id,
+      title: taskWithDetails?.title,
+      dueDate: taskWithDetails?.dueDate
+    }, null, 2));
+
     return NextResponse.json({ task: taskWithDetails });
   } catch (error) {
     console.error("Error fetching task:", error);
@@ -109,7 +115,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
-    if (dueDate !== undefined) updateData.dueDate = dueDate && dueDate.trim() !== "" ? new Date(dueDate) : null;
+    if (dueDate !== undefined) {
+      console.log('Setting dueDate:', dueDate);
+      // Handle null case explicitly
+      if (dueDate === null) {
+        updateData.dueDate = null;
+        console.log('Setting dueDate to null');
+      } else if (typeof dueDate === 'string' && dueDate.trim() !== "") {
+        updateData.dueDate = new Date(dueDate);
+        console.log('Converted dueDate to Date object:', updateData.dueDate);
+      } else {
+        updateData.dueDate = null;
+        console.log('Setting dueDate to null (fallback)');
+      }
+    }
 
     // Validate assignedToId if it's being updated
     if (assignedToId !== undefined) {
@@ -346,6 +365,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
+    console.log('Updating task with data:', {
+      ...updateData,
+      dueDate: updateData.dueDate
+    });
+
     // Update task
     const updatedTask = await prisma.task.update({
       where: { id },
@@ -365,6 +389,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       },
       include: getTaskIncludeObject(3) // 3 levels deep, no activities
     });
+
+    console.log('Updated task:', JSON.stringify({
+      id: updatedTask.id,
+      title: updatedTask.title,
+      dueDate: updatedTask.dueDate
+    }, null, 2));
 
     return NextResponse.json({ task: updatedTask });
   } catch (error) {

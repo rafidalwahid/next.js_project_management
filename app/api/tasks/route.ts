@@ -64,6 +64,8 @@ export async function GET(req: NextRequest) {
       skip: skip,
     });
 
+    console.log('Tasks fetched:', JSON.stringify(tasks.map(t => ({ id: t.id, title: t.title, dueDate: t.dueDate })), null, 2));
+
     return NextResponse.json({
       tasks,
       pagination: {

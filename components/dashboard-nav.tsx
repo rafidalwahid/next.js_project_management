@@ -12,8 +12,11 @@ import {
   LibraryBig,
   Settings,
   HelpCircle,
-  UserCircle
-} from "lucide-react"
+  UserCircle,
+  Clock
+}
+from "lucide-react"
+import { AttendanceNavItem } from "@/components/attendance/attendance-nav-item"
 
 function getNavItems(userId?: string) {
   return [
@@ -36,6 +39,12 @@ function getNavItems(userId?: string) {
       title: "Team",
       href: "/team",
       icon: Users,
+    },
+    {
+      title: "Attendance",
+      href: "/attendance",
+      icon: Clock,
+      isExpandable: true,
     },
     {
       title: "Resources",
@@ -76,6 +85,11 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
       collapsed ? "px-2" : "px-3"
     )}>
       {navItems.map((item) => {
+        // Special handling for Attendance with dropdown
+        if (item.title === "Attendance") {
+          return <AttendanceNavItem key={item.href} collapsed={collapsed} />
+        }
+
         const Icon = item.icon
         const isActive = pathname === item.href
 

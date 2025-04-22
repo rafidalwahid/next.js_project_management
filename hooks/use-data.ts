@@ -8,20 +8,20 @@ import { projectApi, taskApi, teamApi, eventApi, resourceApi } from '@/lib/api';
  */
 export function useProjects(page = 1, limit = 10, filters: Record<string, string> = {}) {
   const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) => 
-      value !== null && 
-      value !== undefined && 
-      typeof value === 'string' && 
+    Object.entries(filters).filter(([_, value]) =>
+      value !== null &&
+      value !== undefined &&
+      typeof value === 'string' &&
       value !== '[object Object]'
     )
   );
-  
+
   const queryString = `/api/projects?page=${page}&limit=${limit}${
-    Object.keys(cleanFilters).length > 0 
-      ? `&${new URLSearchParams(cleanFilters).toString()}` 
+    Object.keys(cleanFilters).length > 0
+      ? `&${new URLSearchParams(cleanFilters).toString()}`
       : ''
   }`;
-  
+
   const { data, error, isLoading, mutate } = useSWR(
     queryString,
     async () => {
@@ -74,10 +74,27 @@ export function useProject(id: string | null) {
  * Hook to fetch tasks
  */
 export function useTasks(page = 1, limit = 10, filters = {}) {
+  // Clean filters to avoid [object Object] and other invalid values
+  const cleanFilters = Object.fromEntries(
+    Object.entries(filters).filter(([_, value]) =>
+      value !== null &&
+      value !== undefined &&
+      value !== '[object Object]' &&
+      String(value).trim() !== ''
+    )
+  );
+
+  const queryString = `/api/tasks?page=${page}&limit=${limit}${
+    Object.keys(cleanFilters).length > 0
+      ? `&${new URLSearchParams(cleanFilters as Record<string, string>).toString()}`
+      : ''
+  }`;
+
   const { data, error, isLoading, mutate } = useSWR(
-    `/api/tasks?page=${page}&limit=${limit}&${new URLSearchParams(filters as Record<string, string>).toString()}`,
+    queryString,
     async () => {
-      const response = await taskApi.getTasks(page, limit, filters);
+      console.log('Fetching tasks with query:', queryString);
+      const response = await taskApi.getTasks(page, limit, cleanFilters);
       return response;
     }
   );

@@ -9,6 +9,7 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { ProjectCard } from "@/components/project-card"
 import { RecentActivity } from "@/components/recent-activity"
+import { AttendanceWidget } from "@/components/attendance/attendance-widget"
 
 export default function DashboardPage() {
   return (
@@ -31,6 +32,12 @@ export default function DashboardPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6">
+          {/* Attendance Widget - Full Width */}
+          <div className="grid gap-4 md:grid-cols-1">
+            <AttendanceWidget />
+          </div>
+
+          {/* Dashboard Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
