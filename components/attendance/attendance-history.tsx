@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Calendar, Clock, MapPin, Search, Filter, ChevronLeft, ChevronRight, Laptop, Info, ExternalLink } from "lucide-react"
+import { startOfWeek, endOfWeek } from "date-fns"
 import { getDeviceInfo } from "@/lib/geo-utils"
 import { LocationMap } from "@/components/attendance/location-map"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,24 +25,43 @@ export function AttendanceHistory() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([])
+  const [groupedRecords, setGroupedRecords] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedRecord, setSelectedRecord] = useState<any>(null)
+  const [groupBy, setGroupBy] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAttendanceHistory()
-  }, [page])
+  }, [page, groupBy])
 
   const fetchAttendanceHistory = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/attendance/history?page=${page}&limit=10`)
+      let url = `/api/attendance/history?page=${page}&limit=10`
+      if (groupBy) {
+        url += `&groupBy=${groupBy}`
+      }
+
+      const response = await fetch(url)
       const data = await response.json()
 
       if (response.ok) {
         setAttendanceRecords(data.attendanceRecords)
+
+        // Debug the grouped records
+        console.log('Grouped records from API:', data.groupedRecords)
+
+        // Make sure we're getting the grouped records correctly
+        if (data.groupedRecords && Array.isArray(data.groupedRecords)) {
+          setGroupedRecords(data.groupedRecords)
+        } else {
+          setGroupedRecords([])
+          console.error('Invalid grouped records format:', data.groupedRecords)
+        }
+
         setTotalPages(data.pagination.totalPages)
         setError(null)
       } else {
@@ -89,13 +109,36 @@ export function AttendanceHistory() {
   const calculateDuration = (checkIn: string, checkOut: string | null) => {
     if (!checkOut) return "In progress"
 
-    const start = new Date(checkIn)
-    const end = new Date(checkOut)
+    try {
+      const start = new Date(checkIn)
+      const end = new Date(checkOut)
 
-    const hours = differenceInHours(end, start)
-    const minutes = differenceInMinutes(end, start) % 60
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return "Invalid time"
+      }
 
-    return `${hours}h ${minutes}m`
+      const hours = differenceInHours(end, start)
+      const minutes = differenceInMinutes(end, start) % 60
+
+      return `${hours}h ${minutes}m`
+    } catch (error) {
+      console.error("Error calculating duration:", error)
+      return "Error"
+    }
+  }
+
+  // Safe date formatting function
+  const safeFormat = (date: string | Date | null, formatString: string, fallback: string = "N/A") => {
+    if (!date) return fallback
+
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date
+      if (isNaN(dateObj.getTime())) return fallback
+      return format(dateObj, formatString)
+    } catch (error) {
+      console.error("Error formatting date:", error, date)
+      return fallback
+    }
   }
 
   const viewLocationDetails = (record: any) => {
@@ -104,21 +147,37 @@ export function AttendanceHistory() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSearch} className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by date..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <form onSubmit={handleSearch} className="flex items-center gap-4 flex-1">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by date..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button type="submit" variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+          </Button>
+        </form>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm whitespace-nowrap">Group by:</span>
+          <select
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            value={groupBy || ''}
+            onChange={(e) => setGroupBy(e.target.value || null)}
+          >
+            <option value="">None</option>
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+          </select>
         </div>
-        <Button type="submit" variant="outline" size="icon">
-          <Filter className="h-4 w-4" />
-        </Button>
-      </form>
+      </div>
 
       <Card>
         <CardContent className="pt-6">
@@ -132,10 +191,125 @@ export function AttendanceHistory() {
             <div className="p-4 text-center text-muted-foreground">
               {error}
             </div>
-          ) : attendanceRecords.length === 0 ? (
+          ) : attendanceRecords.length === 0 && groupedRecords.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               No attendance records found
             </div>
+          ) : groupBy ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Period</TableHead>
+                    <TableHead>Check-ins</TableHead>
+                    <TableHead>Total Hours</TableHead>
+                    <TableHead>Avg. Hours/Day</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {groupedRecords.map((group) => (
+                    <TableRow key={group.period}>
+                      <TableCell className="font-medium">
+                        {groupBy === 'day' ? (
+                          safeFormat(group.period, "EEEE, MMMM d, yyyy", group.period)
+                        ) : groupBy === 'week' ? (
+                          <span title={group.period}>{group.period}</span>
+                        ) : groupBy === 'month' ? (
+                          safeFormat(`${group.period}-01`, "MMMM yyyy", group.period)
+                        ) : (
+                          group.period
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {group.checkInCount} check-ins
+                      </TableCell>
+                      <TableCell>
+                        {group.totalHours.toFixed(2)} hours
+                      </TableCell>
+                      <TableCell>
+                        {group.averageHoursPerDay.toFixed(2)} hours/day
+                      </TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              title="View Details"
+                            >
+                              <Info className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl">
+                            <DialogHeader>
+                              <DialogTitle>
+                                {groupBy === 'day' ? (
+                                  safeFormat(group.period, "EEEE, MMMM d, yyyy", group.period)
+                                ) : groupBy === 'week' ? (
+                                  `Week: ${group.period}`
+                                ) : groupBy === 'month' ? (
+                                  safeFormat(group.period + "-01", "MMMM yyyy", group.period)
+                                ) : (
+                                  group.period
+                                )}
+                              </DialogTitle>
+                              <DialogDescription>
+                                {group.checkInCount} check-ins, {group.totalHours.toFixed(2)} total hours
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="max-h-[60vh] overflow-auto">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Check In</TableHead>
+                                    <TableHead>Check Out</TableHead>
+                                    <TableHead>Duration</TableHead>
+                                    <TableHead>Location</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {group.records.map((record: any) => (
+                                    <TableRow key={record.id}>
+                                      <TableCell>
+                                        {safeFormat(record.checkInTime, "MMM d, yyyy")}
+                                      </TableCell>
+                                      <TableCell>
+                                        {safeFormat(record.checkInTime, "h:mm a")}
+                                      </TableCell>
+                                      <TableCell>
+                                        {record.checkOutTime
+                                          ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
+                                          : "In progress"}
+                                      </TableCell>
+                                      <TableCell>
+                                        {calculateDuration(record.checkInTime, record.checkOutTime)}
+                                      </TableCell>
+                                      <TableCell>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0"
+                                          onClick={() => viewLocationDetails(record)}
+                                        >
+                                          <MapPin className="h-4 w-4" />
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           ) : (
             <>
               <Table>
@@ -152,14 +326,14 @@ export function AttendanceHistory() {
                   {attendanceRecords.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>
-                        {format(new Date(record.checkInTime), "MMM d, yyyy")}
+                        {safeFormat(record.checkInTime, "MMM d, yyyy")}
                       </TableCell>
                       <TableCell>
-                        {format(new Date(record.checkInTime), "h:mm a")}
+                        {safeFormat(record.checkInTime, "h:mm a")}
                       </TableCell>
                       <TableCell>
                         {record.checkOutTime
-                          ? format(new Date(record.checkOutTime), "h:mm a")
+                          ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
                           : "In progress"}
                       </TableCell>
                       <TableCell>
@@ -181,7 +355,7 @@ export function AttendanceHistory() {
                             <DialogHeader>
                               <DialogTitle>Location Details</DialogTitle>
                               <DialogDescription>
-                                Attendance record for {format(new Date(record.checkInTime), "MMMM d, yyyy")}
+                                Attendance record for {safeFormat(record.checkInTime, "MMMM d, yyyy")}
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-6 py-4">
@@ -217,7 +391,7 @@ export function AttendanceHistory() {
                                     <div className="flex items-center gap-2">
                                       <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                       <p className="text-xs text-muted-foreground">
-                                        {format(new Date(record.checkInTime), "MMM d, yyyy 'at' h:mm:ss a")}
+                                        {safeFormat(record.checkInTime, "MMM d, yyyy 'at' h:mm:ss a")}
                                       </p>
                                     </div>
                                     <div className="flex items-start gap-2">
@@ -265,7 +439,7 @@ export function AttendanceHistory() {
                                       <div className="flex items-center gap-2">
                                         <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                         <p className="text-xs text-muted-foreground">
-                                          {format(new Date(record.checkOutTime), "MMM d, yyyy 'at' h:mm:ss a")}
+                                          {safeFormat(record.checkOutTime, "MMM d, yyyy 'at' h:mm:ss a")}
                                         </p>
                                       </div>
                                       <div className="flex items-start gap-2">
