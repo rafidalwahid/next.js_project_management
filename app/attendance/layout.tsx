@@ -1,14 +1,22 @@
-import { Metadata } from "next"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Attendance | ProjectPro",
-  description: "Track and manage your work hours",
-}
+import { DashboardLayout } from "@/components/dashboard-layout"
+import { AuthGuard } from "@/components/auth-guard"
+
+// Note: Metadata is moved to a separate file or removed to avoid conflicts with 'use client'
 
 export default function AttendanceLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return (
+    <AuthGuard>
+      <div className="flex min-h-screen flex-col">
+        <DashboardLayout>
+          {children}
+        </DashboardLayout>
+      </div>
+    </AuthGuard>
+  )
 }

@@ -74,6 +74,11 @@ export type Event = $Result.DefaultSelection<Prisma.$EventPayload>
  */
 export type Attendance = $Result.DefaultSelection<Prisma.$AttendancePayload>
 /**
+ * Model AttendanceSettings
+ * 
+ */
+export type AttendanceSettings = $Result.DefaultSelection<Prisma.$AttendanceSettingsPayload>
+/**
  * Model Activity
  * 
  */
@@ -323,6 +328,16 @@ export class PrismaClient<
     * ```
     */
   get attendance(): Prisma.AttendanceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.attendanceSettings`: Exposes CRUD operations for the **AttendanceSettings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AttendanceSettings
+    * const attendanceSettings = await prisma.attendanceSettings.findMany()
+    * ```
+    */
+  get attendanceSettings(): Prisma.AttendanceSettingsDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.activity`: Exposes CRUD operations for the **Activity** model.
@@ -785,6 +800,7 @@ export namespace Prisma {
     Resource: 'Resource',
     Event: 'Event',
     Attendance: 'Attendance',
+    AttendanceSettings: 'AttendanceSettings',
     Activity: 'Activity'
   };
 
@@ -804,7 +820,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "projectStatus" | "project" | "task" | "taskAssignee" | "teamMember" | "resource" | "event" | "attendance" | "activity"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "projectStatus" | "project" | "task" | "taskAssignee" | "teamMember" | "resource" | "event" | "attendance" | "attendanceSettings" | "activity"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1600,6 +1616,72 @@ export namespace Prisma {
           }
         }
       }
+      AttendanceSettings: {
+        payload: Prisma.$AttendanceSettingsPayload<ExtArgs>
+        fields: Prisma.AttendanceSettingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AttendanceSettingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AttendanceSettingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          findFirst: {
+            args: Prisma.AttendanceSettingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AttendanceSettingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          findMany: {
+            args: Prisma.AttendanceSettingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>[]
+          }
+          create: {
+            args: Prisma.AttendanceSettingsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          createMany: {
+            args: Prisma.AttendanceSettingsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.AttendanceSettingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          update: {
+            args: Prisma.AttendanceSettingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.AttendanceSettingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AttendanceSettingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AttendanceSettingsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AttendanceSettingsPayload>
+          }
+          aggregate: {
+            args: Prisma.AttendanceSettingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAttendanceSettings>
+          }
+          groupBy: {
+            args: Prisma.AttendanceSettingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AttendanceSettingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AttendanceSettingsCountArgs<ExtArgs>
+            result: $Utils.Optional<AttendanceSettingsCountAggregateOutputType> | number
+          }
+        }
+      }
       Activity: {
         payload: Prisma.$ActivityPayload<ExtArgs>
         fields: Prisma.ActivityFieldRefs
@@ -1762,6 +1844,7 @@ export namespace Prisma {
     resource?: ResourceOmit
     event?: EventOmit
     attendance?: AttendanceOmit
+    attendanceSettings?: AttendanceSettingsOmit
     activity?: ActivityOmit
   }
 
@@ -1866,6 +1949,7 @@ export namespace Prisma {
     activities: number
     resources: number
     attendanceRecords: number
+    attendanceAdjustments: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1878,6 +1962,7 @@ export namespace Prisma {
     activities?: boolean | UserCountOutputTypeCountActivitiesArgs
     resources?: boolean | UserCountOutputTypeCountResourcesArgs
     attendanceRecords?: boolean | UserCountOutputTypeCountAttendanceRecordsArgs
+    attendanceAdjustments?: boolean | UserCountOutputTypeCountAttendanceAdjustmentsArgs
   }
 
   // Custom InputTypes
@@ -1954,6 +2039,13 @@ export namespace Prisma {
     where?: AttendanceWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAttendanceAdjustmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AttendanceWhereInput
+  }
+
 
   /**
    * Count Type ProjectStatusCountOutputType
@@ -1996,6 +2088,7 @@ export namespace Prisma {
     events: number
     resources: number
     activities: number
+    attendances: number
   }
 
   export type ProjectCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2004,6 +2097,7 @@ export namespace Prisma {
     events?: boolean | ProjectCountOutputTypeCountEventsArgs
     resources?: boolean | ProjectCountOutputTypeCountResourcesArgs
     activities?: boolean | ProjectCountOutputTypeCountActivitiesArgs
+    attendances?: boolean | ProjectCountOutputTypeCountAttendancesArgs
   }
 
   // Custom InputTypes
@@ -2052,6 +2146,13 @@ export namespace Prisma {
     where?: ActivityWhereInput
   }
 
+  /**
+   * ProjectCountOutputType without action
+   */
+  export type ProjectCountOutputTypeCountAttendancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AttendanceWhereInput
+  }
+
 
   /**
    * Count Type TaskCountOutputType
@@ -2060,12 +2161,14 @@ export namespace Prisma {
   export type TaskCountOutputType = {
     activities: number
     assignees: number
+    attendances: number
     subtasks: number
   }
 
   export type TaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     activities?: boolean | TaskCountOutputTypeCountActivitiesArgs
     assignees?: boolean | TaskCountOutputTypeCountAssigneesArgs
+    attendances?: boolean | TaskCountOutputTypeCountAttendancesArgs
     subtasks?: boolean | TaskCountOutputTypeCountSubtasksArgs
   }
 
@@ -2092,6 +2195,13 @@ export namespace Prisma {
    */
   export type TaskCountOutputTypeCountAssigneesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskAssigneeWhereInput
+  }
+
+  /**
+   * TaskCountOutputType without action
+   */
+  export type TaskCountOutputTypeCountAttendancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AttendanceWhereInput
   }
 
   /**
@@ -2319,6 +2429,8 @@ export namespace Prisma {
     activities?: boolean | User$activitiesArgs<ExtArgs>
     resources?: boolean | User$resourcesArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
+    attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
+    attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2348,6 +2460,8 @@ export namespace Prisma {
     activities?: boolean | User$activitiesArgs<ExtArgs>
     resources?: boolean | User$resourcesArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
+    attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
+    attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -2363,6 +2477,8 @@ export namespace Prisma {
       activities: Prisma.$ActivityPayload<ExtArgs>[]
       resources: Prisma.$ResourcePayload<ExtArgs>[]
       attendanceRecords: Prisma.$AttendancePayload<ExtArgs>[]
+      attendanceAdjustments: Prisma.$AttendancePayload<ExtArgs>[]
+      attendanceSettings: Prisma.$AttendanceSettingsPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2724,6 +2840,8 @@ export namespace Prisma {
     activities<T extends User$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, User$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     resources<T extends User$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, User$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceRecords<T extends User$attendanceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attendanceAdjustments<T extends User$attendanceAdjustmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceAdjustmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attendanceSettings<T extends User$attendanceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceSettingsArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3319,6 +3437,49 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AttendanceScalarFieldEnum | AttendanceScalarFieldEnum[]
+  }
+
+  /**
+   * User.attendanceAdjustments
+   */
+  export type User$attendanceAdjustmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Attendance
+     */
+    select?: AttendanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Attendance
+     */
+    omit?: AttendanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceInclude<ExtArgs> | null
+    where?: AttendanceWhereInput
+    orderBy?: AttendanceOrderByWithRelationInput | AttendanceOrderByWithRelationInput[]
+    cursor?: AttendanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AttendanceScalarFieldEnum | AttendanceScalarFieldEnum[]
+  }
+
+  /**
+   * User.attendanceSettings
+   */
+  export type User$attendanceSettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    where?: AttendanceSettingsWhereInput
   }
 
   /**
@@ -7338,6 +7499,7 @@ export namespace Prisma {
     events?: boolean | Project$eventsArgs<ExtArgs>
     resources?: boolean | Project$resourcesArgs<ExtArgs>
     activities?: boolean | Project$activitiesArgs<ExtArgs>
+    attendances?: boolean | Project$attendancesArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
 
@@ -7364,6 +7526,7 @@ export namespace Prisma {
     events?: boolean | Project$eventsArgs<ExtArgs>
     resources?: boolean | Project$resourcesArgs<ExtArgs>
     activities?: boolean | Project$activitiesArgs<ExtArgs>
+    attendances?: boolean | Project$attendancesArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -7377,6 +7540,7 @@ export namespace Prisma {
       events: Prisma.$EventPayload<ExtArgs>[]
       resources: Prisma.$ResourcePayload<ExtArgs>[]
       activities: Prisma.$ActivityPayload<ExtArgs>[]
+      attendances: Prisma.$AttendancePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7735,6 +7899,7 @@ export namespace Prisma {
     events<T extends Project$eventsArgs<ExtArgs> = {}>(args?: Subset<T, Project$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     resources<T extends Project$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, Project$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activities<T extends Project$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, Project$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attendances<T extends Project$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, Project$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8236,6 +8401,30 @@ export namespace Prisma {
   }
 
   /**
+   * Project.attendances
+   */
+  export type Project$attendancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Attendance
+     */
+    select?: AttendanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Attendance
+     */
+    omit?: AttendanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceInclude<ExtArgs> | null
+    where?: AttendanceWhereInput
+    orderBy?: AttendanceOrderByWithRelationInput | AttendanceOrderByWithRelationInput[]
+    cursor?: AttendanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AttendanceScalarFieldEnum | AttendanceScalarFieldEnum[]
+  }
+
+  /**
    * Project without action
    */
   export type ProjectDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8504,6 +8693,7 @@ export namespace Prisma {
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
     activities?: boolean | Task$activitiesArgs<ExtArgs>
     assignees?: boolean | Task$assigneesArgs<ExtArgs>
+    attendances?: boolean | Task$attendancesArgs<ExtArgs>
     parent?: boolean | Task$parentArgs<ExtArgs>
     subtasks?: boolean | Task$subtasksArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -8531,6 +8721,7 @@ export namespace Prisma {
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
     activities?: boolean | Task$activitiesArgs<ExtArgs>
     assignees?: boolean | Task$assigneesArgs<ExtArgs>
+    attendances?: boolean | Task$attendancesArgs<ExtArgs>
     parent?: boolean | Task$parentArgs<ExtArgs>
     subtasks?: boolean | Task$subtasksArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -8543,6 +8734,7 @@ export namespace Prisma {
       assignedTo: Prisma.$UserPayload<ExtArgs> | null
       activities: Prisma.$ActivityPayload<ExtArgs>[]
       assignees: Prisma.$TaskAssigneePayload<ExtArgs>[]
+      attendances: Prisma.$AttendancePayload<ExtArgs>[]
       parent: Prisma.$TaskPayload<ExtArgs> | null
       subtasks: Prisma.$TaskPayload<ExtArgs>[]
     }
@@ -8902,6 +9094,7 @@ export namespace Prisma {
     assignedTo<T extends Task$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Task$assignedToArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     activities<T extends Task$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, Task$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     assignees<T extends Task$assigneesArgs<ExtArgs> = {}>(args?: Subset<T, Task$assigneesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAssigneePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attendances<T extends Task$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, Task$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     parent<T extends Task$parentArgs<ExtArgs> = {}>(args?: Subset<T, Task$parentArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     subtasks<T extends Task$subtasksArgs<ExtArgs> = {}>(args?: Subset<T, Task$subtasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -9351,6 +9544,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskAssigneeScalarFieldEnum | TaskAssigneeScalarFieldEnum[]
+  }
+
+  /**
+   * Task.attendances
+   */
+  export type Task$attendancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Attendance
+     */
+    select?: AttendanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Attendance
+     */
+    omit?: AttendanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceInclude<ExtArgs> | null
+    where?: AttendanceWhereInput
+    orderBy?: AttendanceOrderByWithRelationInput | AttendanceOrderByWithRelationInput[]
+    cursor?: AttendanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AttendanceScalarFieldEnum | AttendanceScalarFieldEnum[]
   }
 
   /**
@@ -13296,6 +13513,11 @@ export namespace Prisma {
     checkOutDeviceInfo: string | null
     totalHours: number | null
     notes: string | null
+    projectId: string | null
+    taskId: string | null
+    manuallyAdjusted: boolean | null
+    adjustedById: string | null
+    adjustmentReason: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13317,6 +13539,11 @@ export namespace Prisma {
     checkOutDeviceInfo: string | null
     totalHours: number | null
     notes: string | null
+    projectId: string | null
+    taskId: string | null
+    manuallyAdjusted: boolean | null
+    adjustedById: string | null
+    adjustmentReason: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13338,6 +13565,11 @@ export namespace Prisma {
     checkOutDeviceInfo: number
     totalHours: number
     notes: number
+    projectId: number
+    taskId: number
+    manuallyAdjusted: number
+    adjustedById: number
+    adjustmentReason: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -13377,6 +13609,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: true
     totalHours?: true
     notes?: true
+    projectId?: true
+    taskId?: true
+    manuallyAdjusted?: true
+    adjustedById?: true
+    adjustmentReason?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13398,6 +13635,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: true
     totalHours?: true
     notes?: true
+    projectId?: true
+    taskId?: true
+    manuallyAdjusted?: true
+    adjustedById?: true
+    adjustmentReason?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13419,6 +13661,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: true
     totalHours?: true
     notes?: true
+    projectId?: true
+    taskId?: true
+    manuallyAdjusted?: true
+    adjustedById?: true
+    adjustmentReason?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -13527,6 +13774,11 @@ export namespace Prisma {
     checkOutDeviceInfo: string | null
     totalHours: number | null
     notes: string | null
+    projectId: string | null
+    taskId: string | null
+    manuallyAdjusted: boolean
+    adjustedById: string | null
+    adjustmentReason: string | null
     createdAt: Date
     updatedAt: Date
     _count: AttendanceCountAggregateOutputType | null
@@ -13567,9 +13819,17 @@ export namespace Prisma {
     checkOutDeviceInfo?: boolean
     totalHours?: boolean
     notes?: boolean
+    projectId?: boolean
+    taskId?: boolean
+    manuallyAdjusted?: boolean
+    adjustedById?: boolean
+    adjustmentReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    project?: boolean | Attendance$projectArgs<ExtArgs>
+    task?: boolean | Attendance$taskArgs<ExtArgs>
+    adjustedBy?: boolean | Attendance$adjustedByArgs<ExtArgs>
   }, ExtArgs["result"]["attendance"]>
 
 
@@ -13591,19 +13851,30 @@ export namespace Prisma {
     checkOutDeviceInfo?: boolean
     totalHours?: boolean
     notes?: boolean
+    projectId?: boolean
+    taskId?: boolean
+    manuallyAdjusted?: boolean
+    adjustedById?: boolean
+    adjustmentReason?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AttendanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "checkInTime" | "checkOutTime" | "checkInLatitude" | "checkInLongitude" | "checkInLocationName" | "checkOutLatitude" | "checkOutLongitude" | "checkOutLocationName" | "checkInIpAddress" | "checkOutIpAddress" | "checkInDeviceInfo" | "checkOutDeviceInfo" | "totalHours" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["attendance"]>
+  export type AttendanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "checkInTime" | "checkOutTime" | "checkInLatitude" | "checkInLongitude" | "checkInLocationName" | "checkOutLatitude" | "checkOutLongitude" | "checkOutLocationName" | "checkInIpAddress" | "checkOutIpAddress" | "checkInDeviceInfo" | "checkOutDeviceInfo" | "totalHours" | "notes" | "projectId" | "taskId" | "manuallyAdjusted" | "adjustedById" | "adjustmentReason" | "createdAt" | "updatedAt", ExtArgs["result"]["attendance"]>
   export type AttendanceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    project?: boolean | Attendance$projectArgs<ExtArgs>
+    task?: boolean | Attendance$taskArgs<ExtArgs>
+    adjustedBy?: boolean | Attendance$adjustedByArgs<ExtArgs>
   }
 
   export type $AttendancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Attendance"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      project: Prisma.$ProjectPayload<ExtArgs> | null
+      task: Prisma.$TaskPayload<ExtArgs> | null
+      adjustedBy: Prisma.$UserPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13622,6 +13893,11 @@ export namespace Prisma {
       checkOutDeviceInfo: string | null
       totalHours: number | null
       notes: string | null
+      projectId: string | null
+      taskId: string | null
+      manuallyAdjusted: boolean
+      adjustedById: string | null
+      adjustmentReason: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["attendance"]>
@@ -13965,6 +14241,9 @@ export namespace Prisma {
   export interface Prisma__AttendanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    project<T extends Attendance$projectArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$projectArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    task<T extends Attendance$taskArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$taskArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    adjustedBy<T extends Attendance$adjustedByArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$adjustedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14010,6 +14289,11 @@ export namespace Prisma {
     readonly checkOutDeviceInfo: FieldRef<"Attendance", 'String'>
     readonly totalHours: FieldRef<"Attendance", 'Float'>
     readonly notes: FieldRef<"Attendance", 'String'>
+    readonly projectId: FieldRef<"Attendance", 'String'>
+    readonly taskId: FieldRef<"Attendance", 'String'>
+    readonly manuallyAdjusted: FieldRef<"Attendance", 'Boolean'>
+    readonly adjustedById: FieldRef<"Attendance", 'String'>
+    readonly adjustmentReason: FieldRef<"Attendance", 'String'>
     readonly createdAt: FieldRef<"Attendance", 'DateTime'>
     readonly updatedAt: FieldRef<"Attendance", 'DateTime'>
   }
@@ -14355,6 +14639,63 @@ export namespace Prisma {
   }
 
   /**
+   * Attendance.project
+   */
+  export type Attendance$projectArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Project
+     */
+    select?: ProjectSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Project
+     */
+    omit?: ProjectOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectInclude<ExtArgs> | null
+    where?: ProjectWhereInput
+  }
+
+  /**
+   * Attendance.task
+   */
+  export type Attendance$taskArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Task
+     */
+    select?: TaskSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Task
+     */
+    omit?: TaskOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskInclude<ExtArgs> | null
+    where?: TaskWhereInput
+  }
+
+  /**
+   * Attendance.adjustedBy
+   */
+  export type Attendance$adjustedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
    * Attendance without action
    */
   export type AttendanceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14370,6 +14711,1017 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AttendanceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AttendanceSettings
+   */
+
+  export type AggregateAttendanceSettings = {
+    _count: AttendanceSettingsCountAggregateOutputType | null
+    _avg: AttendanceSettingsAvgAggregateOutputType | null
+    _sum: AttendanceSettingsSumAggregateOutputType | null
+    _min: AttendanceSettingsMinAggregateOutputType | null
+    _max: AttendanceSettingsMaxAggregateOutputType | null
+  }
+
+  export type AttendanceSettingsAvgAggregateOutputType = {
+    workDaysPerWeek: number | null
+    targetHoursPerDay: number | null
+  }
+
+  export type AttendanceSettingsSumAggregateOutputType = {
+    workDaysPerWeek: number | null
+    targetHoursPerDay: number | null
+  }
+
+  export type AttendanceSettingsMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    workStartTime: string | null
+    workEndTime: string | null
+    workDaysPerWeek: number | null
+    targetHoursPerDay: number | null
+    reminderEnabled: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AttendanceSettingsMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    workStartTime: string | null
+    workEndTime: string | null
+    workDaysPerWeek: number | null
+    targetHoursPerDay: number | null
+    reminderEnabled: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AttendanceSettingsCountAggregateOutputType = {
+    id: number
+    userId: number
+    workStartTime: number
+    workEndTime: number
+    workDaysPerWeek: number
+    targetHoursPerDay: number
+    reminderEnabled: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AttendanceSettingsAvgAggregateInputType = {
+    workDaysPerWeek?: true
+    targetHoursPerDay?: true
+  }
+
+  export type AttendanceSettingsSumAggregateInputType = {
+    workDaysPerWeek?: true
+    targetHoursPerDay?: true
+  }
+
+  export type AttendanceSettingsMinAggregateInputType = {
+    id?: true
+    userId?: true
+    workStartTime?: true
+    workEndTime?: true
+    workDaysPerWeek?: true
+    targetHoursPerDay?: true
+    reminderEnabled?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AttendanceSettingsMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    workStartTime?: true
+    workEndTime?: true
+    workDaysPerWeek?: true
+    targetHoursPerDay?: true
+    reminderEnabled?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AttendanceSettingsCountAggregateInputType = {
+    id?: true
+    userId?: true
+    workStartTime?: true
+    workEndTime?: true
+    workDaysPerWeek?: true
+    targetHoursPerDay?: true
+    reminderEnabled?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AttendanceSettingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AttendanceSettings to aggregate.
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AttendanceSettings to fetch.
+     */
+    orderBy?: AttendanceSettingsOrderByWithRelationInput | AttendanceSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AttendanceSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AttendanceSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AttendanceSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AttendanceSettings
+    **/
+    _count?: true | AttendanceSettingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AttendanceSettingsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AttendanceSettingsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AttendanceSettingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AttendanceSettingsMaxAggregateInputType
+  }
+
+  export type GetAttendanceSettingsAggregateType<T extends AttendanceSettingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateAttendanceSettings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAttendanceSettings[P]>
+      : GetScalarType<T[P], AggregateAttendanceSettings[P]>
+  }
+
+
+
+
+  export type AttendanceSettingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AttendanceSettingsWhereInput
+    orderBy?: AttendanceSettingsOrderByWithAggregationInput | AttendanceSettingsOrderByWithAggregationInput[]
+    by: AttendanceSettingsScalarFieldEnum[] | AttendanceSettingsScalarFieldEnum
+    having?: AttendanceSettingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AttendanceSettingsCountAggregateInputType | true
+    _avg?: AttendanceSettingsAvgAggregateInputType
+    _sum?: AttendanceSettingsSumAggregateInputType
+    _min?: AttendanceSettingsMinAggregateInputType
+    _max?: AttendanceSettingsMaxAggregateInputType
+  }
+
+  export type AttendanceSettingsGroupByOutputType = {
+    id: string
+    userId: string
+    workStartTime: string
+    workEndTime: string
+    workDaysPerWeek: number
+    targetHoursPerDay: number
+    reminderEnabled: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: AttendanceSettingsCountAggregateOutputType | null
+    _avg: AttendanceSettingsAvgAggregateOutputType | null
+    _sum: AttendanceSettingsSumAggregateOutputType | null
+    _min: AttendanceSettingsMinAggregateOutputType | null
+    _max: AttendanceSettingsMaxAggregateOutputType | null
+  }
+
+  type GetAttendanceSettingsGroupByPayload<T extends AttendanceSettingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AttendanceSettingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AttendanceSettingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AttendanceSettingsGroupByOutputType[P]>
+            : GetScalarType<T[P], AttendanceSettingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AttendanceSettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    workStartTime?: boolean
+    workEndTime?: boolean
+    workDaysPerWeek?: boolean
+    targetHoursPerDay?: boolean
+    reminderEnabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["attendanceSettings"]>
+
+
+
+  export type AttendanceSettingsSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    workStartTime?: boolean
+    workEndTime?: boolean
+    workDaysPerWeek?: boolean
+    targetHoursPerDay?: boolean
+    reminderEnabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AttendanceSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "workStartTime" | "workEndTime" | "workDaysPerWeek" | "targetHoursPerDay" | "reminderEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["attendanceSettings"]>
+  export type AttendanceSettingsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AttendanceSettingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AttendanceSettings"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      workStartTime: string
+      workEndTime: string
+      workDaysPerWeek: number
+      targetHoursPerDay: number
+      reminderEnabled: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["attendanceSettings"]>
+    composites: {}
+  }
+
+  type AttendanceSettingsGetPayload<S extends boolean | null | undefined | AttendanceSettingsDefaultArgs> = $Result.GetResult<Prisma.$AttendanceSettingsPayload, S>
+
+  type AttendanceSettingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AttendanceSettingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AttendanceSettingsCountAggregateInputType | true
+    }
+
+  export interface AttendanceSettingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AttendanceSettings'], meta: { name: 'AttendanceSettings' } }
+    /**
+     * Find zero or one AttendanceSettings that matches the filter.
+     * @param {AttendanceSettingsFindUniqueArgs} args - Arguments to find a AttendanceSettings
+     * @example
+     * // Get one AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AttendanceSettingsFindUniqueArgs>(args: SelectSubset<T, AttendanceSettingsFindUniqueArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AttendanceSettings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AttendanceSettingsFindUniqueOrThrowArgs} args - Arguments to find a AttendanceSettings
+     * @example
+     * // Get one AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AttendanceSettingsFindUniqueOrThrowArgs>(args: SelectSubset<T, AttendanceSettingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AttendanceSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsFindFirstArgs} args - Arguments to find a AttendanceSettings
+     * @example
+     * // Get one AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AttendanceSettingsFindFirstArgs>(args?: SelectSubset<T, AttendanceSettingsFindFirstArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AttendanceSettings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsFindFirstOrThrowArgs} args - Arguments to find a AttendanceSettings
+     * @example
+     * // Get one AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AttendanceSettingsFindFirstOrThrowArgs>(args?: SelectSubset<T, AttendanceSettingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AttendanceSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findMany()
+     * 
+     * // Get first 10 AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const attendanceSettingsWithIdOnly = await prisma.attendanceSettings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AttendanceSettingsFindManyArgs>(args?: SelectSubset<T, AttendanceSettingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AttendanceSettings.
+     * @param {AttendanceSettingsCreateArgs} args - Arguments to create a AttendanceSettings.
+     * @example
+     * // Create one AttendanceSettings
+     * const AttendanceSettings = await prisma.attendanceSettings.create({
+     *   data: {
+     *     // ... data to create a AttendanceSettings
+     *   }
+     * })
+     * 
+     */
+    create<T extends AttendanceSettingsCreateArgs>(args: SelectSubset<T, AttendanceSettingsCreateArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AttendanceSettings.
+     * @param {AttendanceSettingsCreateManyArgs} args - Arguments to create many AttendanceSettings.
+     * @example
+     * // Create many AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AttendanceSettingsCreateManyArgs>(args?: SelectSubset<T, AttendanceSettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a AttendanceSettings.
+     * @param {AttendanceSettingsDeleteArgs} args - Arguments to delete one AttendanceSettings.
+     * @example
+     * // Delete one AttendanceSettings
+     * const AttendanceSettings = await prisma.attendanceSettings.delete({
+     *   where: {
+     *     // ... filter to delete one AttendanceSettings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AttendanceSettingsDeleteArgs>(args: SelectSubset<T, AttendanceSettingsDeleteArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AttendanceSettings.
+     * @param {AttendanceSettingsUpdateArgs} args - Arguments to update one AttendanceSettings.
+     * @example
+     * // Update one AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AttendanceSettingsUpdateArgs>(args: SelectSubset<T, AttendanceSettingsUpdateArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AttendanceSettings.
+     * @param {AttendanceSettingsDeleteManyArgs} args - Arguments to filter AttendanceSettings to delete.
+     * @example
+     * // Delete a few AttendanceSettings
+     * const { count } = await prisma.attendanceSettings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AttendanceSettingsDeleteManyArgs>(args?: SelectSubset<T, AttendanceSettingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AttendanceSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AttendanceSettingsUpdateManyArgs>(args: SelectSubset<T, AttendanceSettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AttendanceSettings.
+     * @param {AttendanceSettingsUpsertArgs} args - Arguments to update or create a AttendanceSettings.
+     * @example
+     * // Update or create a AttendanceSettings
+     * const attendanceSettings = await prisma.attendanceSettings.upsert({
+     *   create: {
+     *     // ... data to create a AttendanceSettings
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AttendanceSettings we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AttendanceSettingsUpsertArgs>(args: SelectSubset<T, AttendanceSettingsUpsertArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AttendanceSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsCountArgs} args - Arguments to filter AttendanceSettings to count.
+     * @example
+     * // Count the number of AttendanceSettings
+     * const count = await prisma.attendanceSettings.count({
+     *   where: {
+     *     // ... the filter for the AttendanceSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends AttendanceSettingsCountArgs>(
+      args?: Subset<T, AttendanceSettingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AttendanceSettingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AttendanceSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AttendanceSettingsAggregateArgs>(args: Subset<T, AttendanceSettingsAggregateArgs>): Prisma.PrismaPromise<GetAttendanceSettingsAggregateType<T>>
+
+    /**
+     * Group by AttendanceSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AttendanceSettingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AttendanceSettingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AttendanceSettingsGroupByArgs['orderBy'] }
+        : { orderBy?: AttendanceSettingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AttendanceSettingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAttendanceSettingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AttendanceSettings model
+   */
+  readonly fields: AttendanceSettingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AttendanceSettings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AttendanceSettingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AttendanceSettings model
+   */
+  interface AttendanceSettingsFieldRefs {
+    readonly id: FieldRef<"AttendanceSettings", 'String'>
+    readonly userId: FieldRef<"AttendanceSettings", 'String'>
+    readonly workStartTime: FieldRef<"AttendanceSettings", 'String'>
+    readonly workEndTime: FieldRef<"AttendanceSettings", 'String'>
+    readonly workDaysPerWeek: FieldRef<"AttendanceSettings", 'Int'>
+    readonly targetHoursPerDay: FieldRef<"AttendanceSettings", 'Float'>
+    readonly reminderEnabled: FieldRef<"AttendanceSettings", 'Boolean'>
+    readonly createdAt: FieldRef<"AttendanceSettings", 'DateTime'>
+    readonly updatedAt: FieldRef<"AttendanceSettings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AttendanceSettings findUnique
+   */
+  export type AttendanceSettingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which AttendanceSettings to fetch.
+     */
+    where: AttendanceSettingsWhereUniqueInput
+  }
+
+  /**
+   * AttendanceSettings findUniqueOrThrow
+   */
+  export type AttendanceSettingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which AttendanceSettings to fetch.
+     */
+    where: AttendanceSettingsWhereUniqueInput
+  }
+
+  /**
+   * AttendanceSettings findFirst
+   */
+  export type AttendanceSettingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which AttendanceSettings to fetch.
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AttendanceSettings to fetch.
+     */
+    orderBy?: AttendanceSettingsOrderByWithRelationInput | AttendanceSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AttendanceSettings.
+     */
+    cursor?: AttendanceSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AttendanceSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AttendanceSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AttendanceSettings.
+     */
+    distinct?: AttendanceSettingsScalarFieldEnum | AttendanceSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * AttendanceSettings findFirstOrThrow
+   */
+  export type AttendanceSettingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which AttendanceSettings to fetch.
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AttendanceSettings to fetch.
+     */
+    orderBy?: AttendanceSettingsOrderByWithRelationInput | AttendanceSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AttendanceSettings.
+     */
+    cursor?: AttendanceSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AttendanceSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AttendanceSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AttendanceSettings.
+     */
+    distinct?: AttendanceSettingsScalarFieldEnum | AttendanceSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * AttendanceSettings findMany
+   */
+  export type AttendanceSettingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter, which AttendanceSettings to fetch.
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AttendanceSettings to fetch.
+     */
+    orderBy?: AttendanceSettingsOrderByWithRelationInput | AttendanceSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AttendanceSettings.
+     */
+    cursor?: AttendanceSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AttendanceSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AttendanceSettings.
+     */
+    skip?: number
+    distinct?: AttendanceSettingsScalarFieldEnum | AttendanceSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * AttendanceSettings create
+   */
+  export type AttendanceSettingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AttendanceSettings.
+     */
+    data: XOR<AttendanceSettingsCreateInput, AttendanceSettingsUncheckedCreateInput>
+  }
+
+  /**
+   * AttendanceSettings createMany
+   */
+  export type AttendanceSettingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AttendanceSettings.
+     */
+    data: AttendanceSettingsCreateManyInput | AttendanceSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AttendanceSettings update
+   */
+  export type AttendanceSettingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AttendanceSettings.
+     */
+    data: XOR<AttendanceSettingsUpdateInput, AttendanceSettingsUncheckedUpdateInput>
+    /**
+     * Choose, which AttendanceSettings to update.
+     */
+    where: AttendanceSettingsWhereUniqueInput
+  }
+
+  /**
+   * AttendanceSettings updateMany
+   */
+  export type AttendanceSettingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AttendanceSettings.
+     */
+    data: XOR<AttendanceSettingsUpdateManyMutationInput, AttendanceSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which AttendanceSettings to update
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * Limit how many AttendanceSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AttendanceSettings upsert
+   */
+  export type AttendanceSettingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AttendanceSettings to update in case it exists.
+     */
+    where: AttendanceSettingsWhereUniqueInput
+    /**
+     * In case the AttendanceSettings found by the `where` argument doesn't exist, create a new AttendanceSettings with this data.
+     */
+    create: XOR<AttendanceSettingsCreateInput, AttendanceSettingsUncheckedCreateInput>
+    /**
+     * In case the AttendanceSettings was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AttendanceSettingsUpdateInput, AttendanceSettingsUncheckedUpdateInput>
+  }
+
+  /**
+   * AttendanceSettings delete
+   */
+  export type AttendanceSettingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
+    /**
+     * Filter which AttendanceSettings to delete.
+     */
+    where: AttendanceSettingsWhereUniqueInput
+  }
+
+  /**
+   * AttendanceSettings deleteMany
+   */
+  export type AttendanceSettingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AttendanceSettings to delete
+     */
+    where?: AttendanceSettingsWhereInput
+    /**
+     * Limit how many AttendanceSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AttendanceSettings without action
+   */
+  export type AttendanceSettingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AttendanceSettings
+     */
+    select?: AttendanceSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AttendanceSettings
+     */
+    omit?: AttendanceSettingsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AttendanceSettingsInclude<ExtArgs> | null
   }
 
 
@@ -15570,11 +16922,31 @@ export namespace Prisma {
     checkOutDeviceInfo: 'checkOutDeviceInfo',
     totalHours: 'totalHours',
     notes: 'notes',
+    projectId: 'projectId',
+    taskId: 'taskId',
+    manuallyAdjusted: 'manuallyAdjusted',
+    adjustedById: 'adjustedById',
+    adjustmentReason: 'adjustmentReason',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
+
+
+  export const AttendanceSettingsScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    workStartTime: 'workStartTime',
+    workEndTime: 'workEndTime',
+    workDaysPerWeek: 'workDaysPerWeek',
+    targetHoursPerDay: 'targetHoursPerDay',
+    reminderEnabled: 'reminderEnabled',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AttendanceSettingsScalarFieldEnum = (typeof AttendanceSettingsScalarFieldEnum)[keyof typeof AttendanceSettingsScalarFieldEnum]
 
 
   export const ActivityScalarFieldEnum: {
@@ -15738,10 +17110,24 @@ export namespace Prisma {
     checkOutIpAddress: 'checkOutIpAddress',
     checkInDeviceInfo: 'checkInDeviceInfo',
     checkOutDeviceInfo: 'checkOutDeviceInfo',
-    notes: 'notes'
+    notes: 'notes',
+    projectId: 'projectId',
+    taskId: 'taskId',
+    adjustedById: 'adjustedById',
+    adjustmentReason: 'adjustmentReason'
   };
 
   export type AttendanceOrderByRelevanceFieldEnum = (typeof AttendanceOrderByRelevanceFieldEnum)[keyof typeof AttendanceOrderByRelevanceFieldEnum]
+
+
+  export const AttendanceSettingsOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    workStartTime: 'workStartTime',
+    workEndTime: 'workEndTime'
+  };
+
+  export type AttendanceSettingsOrderByRelevanceFieldEnum = (typeof AttendanceSettingsOrderByRelevanceFieldEnum)[keyof typeof AttendanceSettingsOrderByRelevanceFieldEnum]
 
 
   export const ActivityOrderByRelevanceFieldEnum: {
@@ -15824,6 +17210,8 @@ export namespace Prisma {
     activities?: ActivityListRelationFilter
     resources?: ResourceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
+    attendanceAdjustments?: AttendanceListRelationFilter
+    attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -15846,6 +17234,8 @@ export namespace Prisma {
     activities?: ActivityOrderByRelationAggregateInput
     resources?: ResourceOrderByRelationAggregateInput
     attendanceRecords?: AttendanceOrderByRelationAggregateInput
+    attendanceAdjustments?: AttendanceOrderByRelationAggregateInput
+    attendanceSettings?: AttendanceSettingsOrderByWithRelationInput
     _relevance?: UserOrderByRelevanceInput
   }
 
@@ -15872,6 +17262,8 @@ export namespace Prisma {
     activities?: ActivityListRelationFilter
     resources?: ResourceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
+    attendanceAdjustments?: AttendanceListRelationFilter
+    attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -16181,6 +17573,7 @@ export namespace Prisma {
     events?: EventListRelationFilter
     resources?: ResourceListRelationFilter
     activities?: ActivityListRelationFilter
+    attendances?: AttendanceListRelationFilter
   }
 
   export type ProjectOrderByWithRelationInput = {
@@ -16200,6 +17593,7 @@ export namespace Prisma {
     events?: EventOrderByRelationAggregateInput
     resources?: ResourceOrderByRelationAggregateInput
     activities?: ActivityOrderByRelationAggregateInput
+    attendances?: AttendanceOrderByRelationAggregateInput
     _relevance?: ProjectOrderByRelevanceInput
   }
 
@@ -16223,6 +17617,7 @@ export namespace Prisma {
     events?: EventListRelationFilter
     resources?: ResourceListRelationFilter
     activities?: ActivityListRelationFilter
+    attendances?: AttendanceListRelationFilter
   }, "id">
 
   export type ProjectOrderByWithAggregationInput = {
@@ -16274,6 +17669,7 @@ export namespace Prisma {
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     activities?: ActivityListRelationFilter
     assignees?: TaskAssigneeListRelationFilter
+    attendances?: AttendanceListRelationFilter
     parent?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     subtasks?: TaskListRelationFilter
   }
@@ -16294,6 +17690,7 @@ export namespace Prisma {
     assignedTo?: UserOrderByWithRelationInput
     activities?: ActivityOrderByRelationAggregateInput
     assignees?: TaskAssigneeOrderByRelationAggregateInput
+    attendances?: AttendanceOrderByRelationAggregateInput
     parent?: TaskOrderByWithRelationInput
     subtasks?: TaskOrderByRelationAggregateInput
     _relevance?: TaskOrderByRelevanceInput
@@ -16318,6 +17715,7 @@ export namespace Prisma {
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     activities?: ActivityListRelationFilter
     assignees?: TaskAssigneeListRelationFilter
+    attendances?: AttendanceListRelationFilter
     parent?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     subtasks?: TaskListRelationFilter
   }, "id">
@@ -16640,9 +18038,17 @@ export namespace Prisma {
     checkOutDeviceInfo?: StringNullableFilter<"Attendance"> | string | null
     totalHours?: FloatNullableFilter<"Attendance"> | number | null
     notes?: StringNullableFilter<"Attendance"> | string | null
+    projectId?: StringNullableFilter<"Attendance"> | string | null
+    taskId?: StringNullableFilter<"Attendance"> | string | null
+    manuallyAdjusted?: BoolFilter<"Attendance"> | boolean
+    adjustedById?: StringNullableFilter<"Attendance"> | string | null
+    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     createdAt?: DateTimeFilter<"Attendance"> | Date | string
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    project?: XOR<ProjectNullableScalarRelationFilter, ProjectWhereInput> | null
+    task?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
+    adjustedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }
 
   export type AttendanceOrderByWithRelationInput = {
@@ -16662,9 +18068,17 @@ export namespace Prisma {
     checkOutDeviceInfo?: SortOrderInput | SortOrder
     totalHours?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
+    projectId?: SortOrderInput | SortOrder
+    taskId?: SortOrderInput | SortOrder
+    manuallyAdjusted?: SortOrder
+    adjustedById?: SortOrderInput | SortOrder
+    adjustmentReason?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    project?: ProjectOrderByWithRelationInput
+    task?: TaskOrderByWithRelationInput
+    adjustedBy?: UserOrderByWithRelationInput
     _relevance?: AttendanceOrderByRelevanceInput
   }
 
@@ -16688,9 +18102,17 @@ export namespace Prisma {
     checkOutDeviceInfo?: StringNullableFilter<"Attendance"> | string | null
     totalHours?: FloatNullableFilter<"Attendance"> | number | null
     notes?: StringNullableFilter<"Attendance"> | string | null
+    projectId?: StringNullableFilter<"Attendance"> | string | null
+    taskId?: StringNullableFilter<"Attendance"> | string | null
+    manuallyAdjusted?: BoolFilter<"Attendance"> | boolean
+    adjustedById?: StringNullableFilter<"Attendance"> | string | null
+    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     createdAt?: DateTimeFilter<"Attendance"> | Date | string
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    project?: XOR<ProjectNullableScalarRelationFilter, ProjectWhereInput> | null
+    task?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
+    adjustedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }, "id">
 
   export type AttendanceOrderByWithAggregationInput = {
@@ -16710,6 +18132,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: SortOrderInput | SortOrder
     totalHours?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
+    projectId?: SortOrderInput | SortOrder
+    taskId?: SortOrderInput | SortOrder
+    manuallyAdjusted?: SortOrder
+    adjustedById?: SortOrderInput | SortOrder
+    adjustmentReason?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AttendanceCountOrderByAggregateInput
@@ -16739,8 +18166,91 @@ export namespace Prisma {
     checkOutDeviceInfo?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
     totalHours?: FloatNullableWithAggregatesFilter<"Attendance"> | number | null
     notes?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
+    projectId?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
+    taskId?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
+    manuallyAdjusted?: BoolWithAggregatesFilter<"Attendance"> | boolean
+    adjustedById?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
+    adjustmentReason?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Attendance"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Attendance"> | Date | string
+  }
+
+  export type AttendanceSettingsWhereInput = {
+    AND?: AttendanceSettingsWhereInput | AttendanceSettingsWhereInput[]
+    OR?: AttendanceSettingsWhereInput[]
+    NOT?: AttendanceSettingsWhereInput | AttendanceSettingsWhereInput[]
+    id?: StringFilter<"AttendanceSettings"> | string
+    userId?: StringFilter<"AttendanceSettings"> | string
+    workStartTime?: StringFilter<"AttendanceSettings"> | string
+    workEndTime?: StringFilter<"AttendanceSettings"> | string
+    workDaysPerWeek?: IntFilter<"AttendanceSettings"> | number
+    targetHoursPerDay?: FloatFilter<"AttendanceSettings"> | number
+    reminderEnabled?: BoolFilter<"AttendanceSettings"> | boolean
+    createdAt?: DateTimeFilter<"AttendanceSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"AttendanceSettings"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type AttendanceSettingsOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    workStartTime?: SortOrder
+    workEndTime?: SortOrder
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+    reminderEnabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    _relevance?: AttendanceSettingsOrderByRelevanceInput
+  }
+
+  export type AttendanceSettingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    AND?: AttendanceSettingsWhereInput | AttendanceSettingsWhereInput[]
+    OR?: AttendanceSettingsWhereInput[]
+    NOT?: AttendanceSettingsWhereInput | AttendanceSettingsWhereInput[]
+    workStartTime?: StringFilter<"AttendanceSettings"> | string
+    workEndTime?: StringFilter<"AttendanceSettings"> | string
+    workDaysPerWeek?: IntFilter<"AttendanceSettings"> | number
+    targetHoursPerDay?: FloatFilter<"AttendanceSettings"> | number
+    reminderEnabled?: BoolFilter<"AttendanceSettings"> | boolean
+    createdAt?: DateTimeFilter<"AttendanceSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"AttendanceSettings"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "userId">
+
+  export type AttendanceSettingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    workStartTime?: SortOrder
+    workEndTime?: SortOrder
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+    reminderEnabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AttendanceSettingsCountOrderByAggregateInput
+    _avg?: AttendanceSettingsAvgOrderByAggregateInput
+    _max?: AttendanceSettingsMaxOrderByAggregateInput
+    _min?: AttendanceSettingsMinOrderByAggregateInput
+    _sum?: AttendanceSettingsSumOrderByAggregateInput
+  }
+
+  export type AttendanceSettingsScalarWhereWithAggregatesInput = {
+    AND?: AttendanceSettingsScalarWhereWithAggregatesInput | AttendanceSettingsScalarWhereWithAggregatesInput[]
+    OR?: AttendanceSettingsScalarWhereWithAggregatesInput[]
+    NOT?: AttendanceSettingsScalarWhereWithAggregatesInput | AttendanceSettingsScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AttendanceSettings"> | string
+    userId?: StringWithAggregatesFilter<"AttendanceSettings"> | string
+    workStartTime?: StringWithAggregatesFilter<"AttendanceSettings"> | string
+    workEndTime?: StringWithAggregatesFilter<"AttendanceSettings"> | string
+    workDaysPerWeek?: IntWithAggregatesFilter<"AttendanceSettings"> | number
+    targetHoursPerDay?: FloatWithAggregatesFilter<"AttendanceSettings"> | number
+    reminderEnabled?: BoolWithAggregatesFilter<"AttendanceSettings"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"AttendanceSettings"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AttendanceSettings"> | Date | string
   }
 
   export type ActivityWhereInput = {
@@ -16845,6 +18355,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -16867,6 +18379,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -16889,6 +18403,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -16911,6 +18427,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -17235,6 +18753,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateInput = {
@@ -17252,6 +18771,7 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUpdateInput = {
@@ -17269,6 +18789,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateInput = {
@@ -17286,6 +18807,7 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectCreateManyInput = {
@@ -17335,6 +18857,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
@@ -17353,6 +18876,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -17369,6 +18893,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
@@ -17387,6 +18912,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -17697,9 +19223,14 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutAttendanceRecordsInput
+    project?: ProjectCreateNestedOneWithoutAttendancesInput
+    task?: TaskCreateNestedOneWithoutAttendancesInput
+    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
   }
 
   export type AttendanceUncheckedCreateInput = {
@@ -17719,6 +19250,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17739,9 +19275,14 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
+    project?: ProjectUpdateOneWithoutAttendancesNestedInput
+    task?: TaskUpdateOneWithoutAttendancesNestedInput
+    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
   }
 
   export type AttendanceUncheckedUpdateInput = {
@@ -17761,6 +19302,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17782,6 +19328,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17802,6 +19353,8 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17823,6 +19376,94 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceSettingsCreateInput = {
+    id?: string
+    workStartTime?: string
+    workEndTime?: string
+    workDaysPerWeek?: number
+    targetHoursPerDay?: number
+    reminderEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAttendanceSettingsInput
+  }
+
+  export type AttendanceSettingsUncheckedCreateInput = {
+    id?: string
+    userId: string
+    workStartTime?: string
+    workEndTime?: string
+    workDaysPerWeek?: number
+    targetHoursPerDay?: number
+    reminderEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceSettingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAttendanceSettingsNestedInput
+  }
+
+  export type AttendanceSettingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceSettingsCreateManyInput = {
+    id?: string
+    userId: string
+    workStartTime?: string
+    workEndTime?: string
+    workDaysPerWeek?: number
+    targetHoursPerDay?: number
+    reminderEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceSettingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceSettingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18012,6 +19653,11 @@ export namespace Prisma {
     every?: AttendanceWhereInput
     some?: AttendanceWhereInput
     none?: AttendanceWhereInput
+  }
+
+  export type AttendanceSettingsNullableScalarRelationFilter = {
+    is?: AttendanceSettingsWhereInput | null
+    isNot?: AttendanceSettingsWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -18689,6 +20335,11 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type ProjectNullableScalarRelationFilter = {
+    is?: ProjectWhereInput | null
+    isNot?: ProjectWhereInput | null
+  }
+
   export type AttendanceOrderByRelevanceInput = {
     fields: AttendanceOrderByRelevanceFieldEnum | AttendanceOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -18712,6 +20363,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: SortOrder
     totalHours?: SortOrder
     notes?: SortOrder
+    projectId?: SortOrder
+    taskId?: SortOrder
+    manuallyAdjusted?: SortOrder
+    adjustedById?: SortOrder
+    adjustmentReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18741,6 +20397,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: SortOrder
     totalHours?: SortOrder
     notes?: SortOrder
+    projectId?: SortOrder
+    taskId?: SortOrder
+    manuallyAdjusted?: SortOrder
+    adjustedById?: SortOrder
+    adjustmentReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18762,6 +20423,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: SortOrder
     totalHours?: SortOrder
     notes?: SortOrder
+    projectId?: SortOrder
+    taskId?: SortOrder
+    manuallyAdjusted?: SortOrder
+    adjustedById?: SortOrder
+    adjustmentReason?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18790,9 +20456,83 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
-  export type ProjectNullableScalarRelationFilter = {
-    is?: ProjectWhereInput | null
-    isNot?: ProjectWhereInput | null
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type AttendanceSettingsOrderByRelevanceInput = {
+    fields: AttendanceSettingsOrderByRelevanceFieldEnum | AttendanceSettingsOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type AttendanceSettingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    workStartTime?: SortOrder
+    workEndTime?: SortOrder
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+    reminderEnabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AttendanceSettingsAvgOrderByAggregateInput = {
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+  }
+
+  export type AttendanceSettingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    workStartTime?: SortOrder
+    workEndTime?: SortOrder
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+    reminderEnabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AttendanceSettingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    workStartTime?: SortOrder
+    workEndTime?: SortOrder
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+    reminderEnabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AttendanceSettingsSumOrderByAggregateInput = {
+    workDaysPerWeek?: SortOrder
+    targetHoursPerDay?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type ActivityOrderByRelevanceInput = {
@@ -18900,6 +20640,19 @@ export namespace Prisma {
     connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
   }
 
+  export type AttendanceCreateNestedManyWithoutAdjustedByInput = {
+    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
+    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+  }
+
+  export type AttendanceSettingsCreateNestedOneWithoutUserInput = {
+    create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
+    connect?: AttendanceSettingsWhereUniqueInput
+  }
+
   export type ProjectUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<ProjectCreateWithoutCreatedByInput, ProjectUncheckedCreateWithoutCreatedByInput> | ProjectCreateWithoutCreatedByInput[] | ProjectUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutCreatedByInput | ProjectCreateOrConnectWithoutCreatedByInput[]
@@ -18961,6 +20714,19 @@ export namespace Prisma {
     connectOrCreate?: AttendanceCreateOrConnectWithoutUserInput | AttendanceCreateOrConnectWithoutUserInput[]
     createMany?: AttendanceCreateManyUserInputEnvelope
     connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+  }
+
+  export type AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput = {
+    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
+    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+  }
+
+  export type AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
+    connect?: AttendanceSettingsWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -19105,6 +20871,30 @@ export namespace Prisma {
     deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
   }
 
+  export type AttendanceUpdateManyWithoutAdjustedByNestedInput = {
+    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput | AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput[]
+    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput | AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutAdjustedByInput | AttendanceUpdateManyWithWhereWithoutAdjustedByInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
+  export type AttendanceSettingsUpdateOneWithoutUserNestedInput = {
+    create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
+    upsert?: AttendanceSettingsUpsertWithoutUserInput
+    disconnect?: AttendanceSettingsWhereInput | boolean
+    delete?: AttendanceSettingsWhereInput | boolean
+    connect?: AttendanceSettingsWhereUniqueInput
+    update?: XOR<XOR<AttendanceSettingsUpdateToOneWithWhereWithoutUserInput, AttendanceSettingsUpdateWithoutUserInput>, AttendanceSettingsUncheckedUpdateWithoutUserInput>
+  }
+
   export type ProjectUncheckedUpdateManyWithoutCreatedByNestedInput = {
     create?: XOR<ProjectCreateWithoutCreatedByInput, ProjectUncheckedCreateWithoutCreatedByInput> | ProjectCreateWithoutCreatedByInput[] | ProjectUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutCreatedByInput | ProjectCreateOrConnectWithoutCreatedByInput[]
@@ -19229,6 +21019,30 @@ export namespace Prisma {
     update?: AttendanceUpdateWithWhereUniqueWithoutUserInput | AttendanceUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AttendanceUpdateManyWithWhereWithoutUserInput | AttendanceUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
+  export type AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput = {
+    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput | AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput[]
+    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput | AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutAdjustedByInput | AttendanceUpdateManyWithWhereWithoutAdjustedByInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
+  export type AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
+    upsert?: AttendanceSettingsUpsertWithoutUserInput
+    disconnect?: AttendanceSettingsWhereInput | boolean
+    delete?: AttendanceSettingsWhereInput | boolean
+    connect?: AttendanceSettingsWhereUniqueInput
+    update?: XOR<XOR<AttendanceSettingsUpdateToOneWithWhereWithoutUserInput, AttendanceSettingsUpdateWithoutUserInput>, AttendanceSettingsUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedOneWithoutAccountsInput = {
@@ -19360,6 +21174,13 @@ export namespace Prisma {
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
   }
 
+  export type AttendanceCreateNestedManyWithoutProjectInput = {
+    create?: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput> | AttendanceCreateWithoutProjectInput[] | AttendanceUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutProjectInput | AttendanceCreateOrConnectWithoutProjectInput[]
+    createMany?: AttendanceCreateManyProjectInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+  }
+
   export type TaskUncheckedCreateNestedManyWithoutProjectInput = {
     create?: XOR<TaskCreateWithoutProjectInput, TaskUncheckedCreateWithoutProjectInput> | TaskCreateWithoutProjectInput[] | TaskUncheckedCreateWithoutProjectInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutProjectInput | TaskCreateOrConnectWithoutProjectInput[]
@@ -19393,6 +21214,13 @@ export namespace Prisma {
     connectOrCreate?: ActivityCreateOrConnectWithoutProjectInput | ActivityCreateOrConnectWithoutProjectInput[]
     createMany?: ActivityCreateManyProjectInputEnvelope
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
+  }
+
+  export type AttendanceUncheckedCreateNestedManyWithoutProjectInput = {
+    create?: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput> | AttendanceCreateWithoutProjectInput[] | AttendanceUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutProjectInput | AttendanceCreateOrConnectWithoutProjectInput[]
+    createMany?: AttendanceCreateManyProjectInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
   }
 
   export type ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput = {
@@ -19481,6 +21309,20 @@ export namespace Prisma {
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
   }
 
+  export type AttendanceUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput> | AttendanceCreateWithoutProjectInput[] | AttendanceUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutProjectInput | AttendanceCreateOrConnectWithoutProjectInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutProjectInput | AttendanceUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: AttendanceCreateManyProjectInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutProjectInput | AttendanceUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutProjectInput | AttendanceUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
   export type TaskUncheckedUpdateManyWithoutProjectNestedInput = {
     create?: XOR<TaskCreateWithoutProjectInput, TaskUncheckedCreateWithoutProjectInput> | TaskCreateWithoutProjectInput[] | TaskUncheckedCreateWithoutProjectInput[]
     connectOrCreate?: TaskCreateOrConnectWithoutProjectInput | TaskCreateOrConnectWithoutProjectInput[]
@@ -19551,6 +21393,20 @@ export namespace Prisma {
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
   }
 
+  export type AttendanceUncheckedUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput> | AttendanceCreateWithoutProjectInput[] | AttendanceUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutProjectInput | AttendanceCreateOrConnectWithoutProjectInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutProjectInput | AttendanceUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: AttendanceCreateManyProjectInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutProjectInput | AttendanceUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutProjectInput | AttendanceUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
   export type ProjectCreateNestedOneWithoutTasksInput = {
     create?: XOR<ProjectCreateWithoutTasksInput, ProjectUncheckedCreateWithoutTasksInput>
     connectOrCreate?: ProjectCreateOrConnectWithoutTasksInput
@@ -19575,6 +21431,13 @@ export namespace Prisma {
     connectOrCreate?: TaskAssigneeCreateOrConnectWithoutTaskInput | TaskAssigneeCreateOrConnectWithoutTaskInput[]
     createMany?: TaskAssigneeCreateManyTaskInputEnvelope
     connect?: TaskAssigneeWhereUniqueInput | TaskAssigneeWhereUniqueInput[]
+  }
+
+  export type AttendanceCreateNestedManyWithoutTaskInput = {
+    create?: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput> | AttendanceCreateWithoutTaskInput[] | AttendanceUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutTaskInput | AttendanceCreateOrConnectWithoutTaskInput[]
+    createMany?: AttendanceCreateManyTaskInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
   }
 
   export type TaskCreateNestedOneWithoutSubtasksInput = {
@@ -19602,6 +21465,13 @@ export namespace Prisma {
     connectOrCreate?: TaskAssigneeCreateOrConnectWithoutTaskInput | TaskAssigneeCreateOrConnectWithoutTaskInput[]
     createMany?: TaskAssigneeCreateManyTaskInputEnvelope
     connect?: TaskAssigneeWhereUniqueInput | TaskAssigneeWhereUniqueInput[]
+  }
+
+  export type AttendanceUncheckedCreateNestedManyWithoutTaskInput = {
+    create?: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput> | AttendanceCreateWithoutTaskInput[] | AttendanceUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutTaskInput | AttendanceCreateOrConnectWithoutTaskInput[]
+    createMany?: AttendanceCreateManyTaskInputEnvelope
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
   }
 
   export type TaskUncheckedCreateNestedManyWithoutParentInput = {
@@ -19665,6 +21535,20 @@ export namespace Prisma {
     deleteMany?: TaskAssigneeScalarWhereInput | TaskAssigneeScalarWhereInput[]
   }
 
+  export type AttendanceUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput> | AttendanceCreateWithoutTaskInput[] | AttendanceUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutTaskInput | AttendanceCreateOrConnectWithoutTaskInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutTaskInput | AttendanceUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: AttendanceCreateManyTaskInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutTaskInput | AttendanceUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutTaskInput | AttendanceUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
+  }
+
   export type TaskUpdateOneWithoutSubtasksNestedInput = {
     create?: XOR<TaskCreateWithoutSubtasksInput, TaskUncheckedCreateWithoutSubtasksInput>
     connectOrCreate?: TaskCreateOrConnectWithoutSubtasksInput
@@ -19715,6 +21599,20 @@ export namespace Prisma {
     update?: TaskAssigneeUpdateWithWhereUniqueWithoutTaskInput | TaskAssigneeUpdateWithWhereUniqueWithoutTaskInput[]
     updateMany?: TaskAssigneeUpdateManyWithWhereWithoutTaskInput | TaskAssigneeUpdateManyWithWhereWithoutTaskInput[]
     deleteMany?: TaskAssigneeScalarWhereInput | TaskAssigneeScalarWhereInput[]
+  }
+
+  export type AttendanceUncheckedUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput> | AttendanceCreateWithoutTaskInput[] | AttendanceUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: AttendanceCreateOrConnectWithoutTaskInput | AttendanceCreateOrConnectWithoutTaskInput[]
+    upsert?: AttendanceUpsertWithWhereUniqueWithoutTaskInput | AttendanceUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: AttendanceCreateManyTaskInputEnvelope
+    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
+    update?: AttendanceUpdateWithWhereUniqueWithoutTaskInput | AttendanceUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: AttendanceUpdateManyWithWhereWithoutTaskInput | AttendanceUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
   }
 
   export type TaskUncheckedUpdateManyWithoutParentNestedInput = {
@@ -19837,6 +21735,24 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type ProjectCreateNestedOneWithoutAttendancesInput = {
+    create?: XOR<ProjectCreateWithoutAttendancesInput, ProjectUncheckedCreateWithoutAttendancesInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutAttendancesInput
+    connect?: ProjectWhereUniqueInput
+  }
+
+  export type TaskCreateNestedOneWithoutAttendancesInput = {
+    create?: XOR<TaskCreateWithoutAttendancesInput, TaskUncheckedCreateWithoutAttendancesInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutAttendancesInput
+    connect?: TaskWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutAttendanceAdjustmentsInput = {
+    create?: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAttendanceAdjustmentsInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -19851,6 +21767,58 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutAttendanceRecordsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAttendanceRecordsInput, UserUpdateWithoutAttendanceRecordsInput>, UserUncheckedUpdateWithoutAttendanceRecordsInput>
+  }
+
+  export type ProjectUpdateOneWithoutAttendancesNestedInput = {
+    create?: XOR<ProjectCreateWithoutAttendancesInput, ProjectUncheckedCreateWithoutAttendancesInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutAttendancesInput
+    upsert?: ProjectUpsertWithoutAttendancesInput
+    disconnect?: ProjectWhereInput | boolean
+    delete?: ProjectWhereInput | boolean
+    connect?: ProjectWhereUniqueInput
+    update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutAttendancesInput, ProjectUpdateWithoutAttendancesInput>, ProjectUncheckedUpdateWithoutAttendancesInput>
+  }
+
+  export type TaskUpdateOneWithoutAttendancesNestedInput = {
+    create?: XOR<TaskCreateWithoutAttendancesInput, TaskUncheckedCreateWithoutAttendancesInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutAttendancesInput
+    upsert?: TaskUpsertWithoutAttendancesInput
+    disconnect?: TaskWhereInput | boolean
+    delete?: TaskWhereInput | boolean
+    connect?: TaskWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutAttendancesInput, TaskUpdateWithoutAttendancesInput>, TaskUncheckedUpdateWithoutAttendancesInput>
+  }
+
+  export type UserUpdateOneWithoutAttendanceAdjustmentsNestedInput = {
+    create?: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAttendanceAdjustmentsInput
+    upsert?: UserUpsertWithoutAttendanceAdjustmentsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAttendanceAdjustmentsInput, UserUpdateWithoutAttendanceAdjustmentsInput>, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
+  }
+
+  export type UserCreateNestedOneWithoutAttendanceSettingsInput = {
+    create?: XOR<UserCreateWithoutAttendanceSettingsInput, UserUncheckedCreateWithoutAttendanceSettingsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAttendanceSettingsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutAttendanceSettingsNestedInput = {
+    create?: XOR<UserCreateWithoutAttendanceSettingsInput, UserUncheckedCreateWithoutAttendanceSettingsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAttendanceSettingsInput
+    upsert?: UserUpsertWithoutAttendanceSettingsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAttendanceSettingsInput, UserUpdateWithoutAttendanceSettingsInput>, UserUncheckedUpdateWithoutAttendanceSettingsInput>
   }
 
   export type UserCreateNestedOneWithoutActivitiesInput = {
@@ -20120,6 +22088,22 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type ProjectCreateWithoutCreatedByInput = {
     id?: string
     title: string
@@ -20134,6 +22118,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutCreatedByInput = {
@@ -20150,6 +22135,7 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutCreatedByInput = {
@@ -20174,6 +22160,7 @@ export namespace Prisma {
     project: ProjectCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
@@ -20191,6 +22178,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -20390,8 +22378,13 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    project?: ProjectCreateNestedOneWithoutAttendancesInput
+    task?: TaskCreateNestedOneWithoutAttendancesInput
+    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
   }
 
   export type AttendanceUncheckedCreateWithoutUserInput = {
@@ -20410,6 +22403,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20422,6 +22420,93 @@ export namespace Prisma {
   export type AttendanceCreateManyUserInputEnvelope = {
     data: AttendanceCreateManyUserInput | AttendanceCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type AttendanceCreateWithoutAdjustedByInput = {
+    id?: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAttendanceRecordsInput
+    project?: ProjectCreateNestedOneWithoutAttendancesInput
+    task?: TaskCreateNestedOneWithoutAttendancesInput
+  }
+
+  export type AttendanceUncheckedCreateWithoutAdjustedByInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceCreateOrConnectWithoutAdjustedByInput = {
+    where: AttendanceWhereUniqueInput
+    create: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput>
+  }
+
+  export type AttendanceCreateManyAdjustedByInputEnvelope = {
+    data: AttendanceCreateManyAdjustedByInput | AttendanceCreateManyAdjustedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AttendanceSettingsCreateWithoutUserInput = {
+    id?: string
+    workStartTime?: string
+    workEndTime?: string
+    workDaysPerWeek?: number
+    targetHoursPerDay?: number
+    reminderEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceSettingsUncheckedCreateWithoutUserInput = {
+    id?: string
+    workStartTime?: string
+    workEndTime?: string
+    workDaysPerWeek?: number
+    targetHoursPerDay?: number
+    reminderEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceSettingsCreateOrConnectWithoutUserInput = {
+    where: AttendanceSettingsWhereUniqueInput
+    create: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
   }
 
   export type ProjectUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -20699,8 +22784,62 @@ export namespace Prisma {
     checkOutDeviceInfo?: StringNullableFilter<"Attendance"> | string | null
     totalHours?: FloatNullableFilter<"Attendance"> | number | null
     notes?: StringNullableFilter<"Attendance"> | string | null
+    projectId?: StringNullableFilter<"Attendance"> | string | null
+    taskId?: StringNullableFilter<"Attendance"> | string | null
+    manuallyAdjusted?: BoolFilter<"Attendance"> | boolean
+    adjustedById?: StringNullableFilter<"Attendance"> | string | null
+    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     createdAt?: DateTimeFilter<"Attendance"> | Date | string
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
+  }
+
+  export type AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput = {
+    where: AttendanceWhereUniqueInput
+    update: XOR<AttendanceUpdateWithoutAdjustedByInput, AttendanceUncheckedUpdateWithoutAdjustedByInput>
+    create: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput>
+  }
+
+  export type AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput = {
+    where: AttendanceWhereUniqueInput
+    data: XOR<AttendanceUpdateWithoutAdjustedByInput, AttendanceUncheckedUpdateWithoutAdjustedByInput>
+  }
+
+  export type AttendanceUpdateManyWithWhereWithoutAdjustedByInput = {
+    where: AttendanceScalarWhereInput
+    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutAdjustedByInput>
+  }
+
+  export type AttendanceSettingsUpsertWithoutUserInput = {
+    update: XOR<AttendanceSettingsUpdateWithoutUserInput, AttendanceSettingsUncheckedUpdateWithoutUserInput>
+    create: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
+    where?: AttendanceSettingsWhereInput
+  }
+
+  export type AttendanceSettingsUpdateToOneWithWhereWithoutUserInput = {
+    where?: AttendanceSettingsWhereInput
+    data: XOR<AttendanceSettingsUpdateWithoutUserInput, AttendanceSettingsUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AttendanceSettingsUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceSettingsUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workStartTime?: StringFieldUpdateOperationsInput | string
+    workEndTime?: StringFieldUpdateOperationsInput | string
+    workDaysPerWeek?: IntFieldUpdateOperationsInput | number
+    targetHoursPerDay?: FloatFieldUpdateOperationsInput | number
+    reminderEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -20722,6 +22861,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -20743,6 +22884,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -20780,6 +22923,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -20801,6 +22946,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -20822,6 +22969,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -20843,6 +22992,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -20880,6 +23031,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -20901,6 +23054,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ProjectCreateWithoutStatusInput = {
@@ -20917,6 +23072,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutStatusInput = {
@@ -20933,6 +23089,7 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutStatusInput = {
@@ -21005,6 +23162,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProjectsInput = {
@@ -21026,6 +23185,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProjectsInput = {
@@ -21045,6 +23206,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
@@ -21062,6 +23224,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -21189,6 +23352,66 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AttendanceCreateWithoutProjectInput = {
+    id?: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAttendanceRecordsInput
+    task?: TaskCreateNestedOneWithoutAttendancesInput
+    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
+  }
+
+  export type AttendanceUncheckedCreateWithoutProjectInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceCreateOrConnectWithoutProjectInput = {
+    where: AttendanceWhereUniqueInput
+    create: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput>
+  }
+
+  export type AttendanceCreateManyProjectInputEnvelope = {
+    data: AttendanceCreateManyProjectInput | AttendanceCreateManyProjectInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProjectStatusUpsertWithoutProjectsInput = {
     update: XOR<ProjectStatusUpdateWithoutProjectsInput, ProjectStatusUncheckedUpdateWithoutProjectsInput>
     create: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
@@ -21250,6 +23473,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProjectsInput = {
@@ -21271,6 +23496,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
@@ -21366,6 +23593,22 @@ export namespace Prisma {
     data: XOR<ActivityUpdateManyMutationInput, ActivityUncheckedUpdateManyWithoutProjectInput>
   }
 
+  export type AttendanceUpsertWithWhereUniqueWithoutProjectInput = {
+    where: AttendanceWhereUniqueInput
+    update: XOR<AttendanceUpdateWithoutProjectInput, AttendanceUncheckedUpdateWithoutProjectInput>
+    create: XOR<AttendanceCreateWithoutProjectInput, AttendanceUncheckedCreateWithoutProjectInput>
+  }
+
+  export type AttendanceUpdateWithWhereUniqueWithoutProjectInput = {
+    where: AttendanceWhereUniqueInput
+    data: XOR<AttendanceUpdateWithoutProjectInput, AttendanceUncheckedUpdateWithoutProjectInput>
+  }
+
+  export type AttendanceUpdateManyWithWhereWithoutProjectInput = {
+    where: AttendanceScalarWhereInput
+    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutProjectInput>
+  }
+
   export type ProjectCreateWithoutTasksInput = {
     id?: string
     title: string
@@ -21380,6 +23623,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutTasksInput = {
@@ -21396,6 +23640,7 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutTasksInput = {
@@ -21422,6 +23667,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTasksInput = {
@@ -21443,6 +23690,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTasksInput = {
@@ -21506,6 +23755,66 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AttendanceCreateWithoutTaskInput = {
+    id?: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAttendanceRecordsInput
+    project?: ProjectCreateNestedOneWithoutAttendancesInput
+    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
+  }
+
+  export type AttendanceUncheckedCreateWithoutTaskInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    projectId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceCreateOrConnectWithoutTaskInput = {
+    where: AttendanceWhereUniqueInput
+    create: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput>
+  }
+
+  export type AttendanceCreateManyTaskInputEnvelope = {
+    data: AttendanceCreateManyTaskInput | AttendanceCreateManyTaskInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TaskCreateWithoutSubtasksInput = {
     id?: string
     title: string
@@ -21519,6 +23828,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
   }
 
@@ -21536,6 +23846,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutSubtasksInput = {
@@ -21556,6 +23867,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
 
@@ -21572,6 +23884,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -21610,6 +23923,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutTasksInput = {
@@ -21626,6 +23940,7 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type UserUpsertWithoutTasksInput = {
@@ -21658,6 +23973,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTasksInput = {
@@ -21679,6 +23996,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ActivityUpsertWithWhereUniqueWithoutTaskInput = {
@@ -21713,6 +24032,22 @@ export namespace Prisma {
     data: XOR<TaskAssigneeUpdateManyMutationInput, TaskAssigneeUncheckedUpdateManyWithoutTaskInput>
   }
 
+  export type AttendanceUpsertWithWhereUniqueWithoutTaskInput = {
+    where: AttendanceWhereUniqueInput
+    update: XOR<AttendanceUpdateWithoutTaskInput, AttendanceUncheckedUpdateWithoutTaskInput>
+    create: XOR<AttendanceCreateWithoutTaskInput, AttendanceUncheckedCreateWithoutTaskInput>
+  }
+
+  export type AttendanceUpdateWithWhereUniqueWithoutTaskInput = {
+    where: AttendanceWhereUniqueInput
+    data: XOR<AttendanceUpdateWithoutTaskInput, AttendanceUncheckedUpdateWithoutTaskInput>
+  }
+
+  export type AttendanceUpdateManyWithWhereWithoutTaskInput = {
+    where: AttendanceScalarWhereInput
+    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutTaskInput>
+  }
+
   export type TaskUpsertWithoutSubtasksInput = {
     update: XOR<TaskUpdateWithoutSubtasksInput, TaskUncheckedUpdateWithoutSubtasksInput>
     create: XOR<TaskCreateWithoutSubtasksInput, TaskUncheckedCreateWithoutSubtasksInput>
@@ -21737,6 +24072,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
   }
 
@@ -21754,6 +24090,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUpsertWithWhereUniqueWithoutParentInput = {
@@ -21784,6 +24121,7 @@ export namespace Prisma {
     project: ProjectCreateNestedOneWithoutTasksInput
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     activities?: ActivityCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
@@ -21801,6 +24139,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -21828,6 +24167,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTaskAssignmentsInput = {
@@ -21849,6 +24190,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTaskAssignmentsInput = {
@@ -21879,6 +24222,7 @@ export namespace Prisma {
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
@@ -21896,6 +24240,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -21929,6 +24274,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTaskAssignmentsInput = {
@@ -21950,6 +24297,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutTeamsInput = {
@@ -21971,6 +24320,8 @@ export namespace Prisma {
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTeamsInput = {
@@ -21992,6 +24343,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTeamsInput = {
@@ -22013,6 +24366,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutTeamMembersInput = {
@@ -22029,6 +24383,7 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutTeamMembersInput = {
@@ -22066,6 +24421,8 @@ export namespace Prisma {
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTeamsInput = {
@@ -22087,6 +24444,8 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ProjectUpsertWithoutTeamMembersInput = {
@@ -22114,6 +24473,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutTeamMembersInput = {
@@ -22130,6 +24490,7 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectCreateWithoutResourcesInput = {
@@ -22146,6 +24507,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutResourcesInput = {
@@ -22162,6 +24524,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutResourcesInput = {
@@ -22188,6 +24551,8 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutResourcesInput = {
@@ -22209,6 +24574,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutResourcesInput = {
@@ -22241,6 +24608,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutResourcesInput = {
@@ -22257,6 +24625,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type UserUpsertWithoutResourcesInput = {
@@ -22289,6 +24658,8 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutResourcesInput = {
@@ -22310,6 +24681,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ProjectCreateWithoutEventsInput = {
@@ -22326,6 +24699,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
     activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutEventsInput = {
@@ -22342,6 +24716,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutEventsInput = {
@@ -22374,6 +24749,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutEventsInput = {
@@ -22390,6 +24766,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type UserCreateWithoutAttendanceRecordsInput = {
@@ -22411,6 +24788,8 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAttendanceRecordsInput = {
@@ -22432,11 +24811,142 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAttendanceRecordsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutAttendanceRecordsInput, UserUncheckedCreateWithoutAttendanceRecordsInput>
+  }
+
+  export type ProjectCreateWithoutAttendancesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status: ProjectStatusCreateNestedOneWithoutProjectsInput
+    createdBy: UserCreateNestedOneWithoutProjectsInput
+    tasks?: TaskCreateNestedManyWithoutProjectInput
+    teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
+    events?: EventCreateNestedManyWithoutProjectInput
+    resources?: ResourceCreateNestedManyWithoutProjectInput
+    activities?: ActivityCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectUncheckedCreateWithoutAttendancesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    statusId: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdById: string
+    tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
+    teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
+    events?: EventUncheckedCreateNestedManyWithoutProjectInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectCreateOrConnectWithoutAttendancesInput = {
+    where: ProjectWhereUniqueInput
+    create: XOR<ProjectCreateWithoutAttendancesInput, ProjectUncheckedCreateWithoutAttendancesInput>
+  }
+
+  export type TaskCreateWithoutAttendancesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    priority?: string
+    dueDate?: Date | string | null
+    order?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    project: ProjectCreateNestedOneWithoutTasksInput
+    assignedTo?: UserCreateNestedOneWithoutTasksInput
+    activities?: ActivityCreateNestedManyWithoutTaskInput
+    assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    parent?: TaskCreateNestedOneWithoutSubtasksInput
+    subtasks?: TaskCreateNestedManyWithoutParentInput
+  }
+
+  export type TaskUncheckedCreateWithoutAttendancesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    priority?: string
+    dueDate?: Date | string | null
+    projectId: string
+    assignedToId?: string | null
+    parentId?: string | null
+    order?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
+    assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
+  }
+
+  export type TaskCreateOrConnectWithoutAttendancesInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutAttendancesInput, TaskUncheckedCreateWithoutAttendancesInput>
+  }
+
+  export type UserCreateWithoutAttendanceAdjustmentsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
+    teams?: TeamMemberCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
+    attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAttendanceAdjustmentsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
+    attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAttendanceAdjustmentsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
   }
 
   export type UserUpsertWithoutAttendanceRecordsInput = {
@@ -22469,6 +24979,8 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAttendanceRecordsInput = {
@@ -22490,6 +25002,263 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type ProjectUpsertWithoutAttendancesInput = {
+    update: XOR<ProjectUpdateWithoutAttendancesInput, ProjectUncheckedUpdateWithoutAttendancesInput>
+    create: XOR<ProjectCreateWithoutAttendancesInput, ProjectUncheckedCreateWithoutAttendancesInput>
+    where?: ProjectWhereInput
+  }
+
+  export type ProjectUpdateToOneWithWhereWithoutAttendancesInput = {
+    where?: ProjectWhereInput
+    data: XOR<ProjectUpdateWithoutAttendancesInput, ProjectUncheckedUpdateWithoutAttendancesInput>
+  }
+
+  export type ProjectUpdateWithoutAttendancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
+    tasks?: TaskUpdateManyWithoutProjectNestedInput
+    teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
+    events?: EventUpdateManyWithoutProjectNestedInput
+    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    activities?: ActivityUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectUncheckedUpdateWithoutAttendancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
+    teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
+    events?: EventUncheckedUpdateManyWithoutProjectNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
+  export type TaskUpsertWithoutAttendancesInput = {
+    update: XOR<TaskUpdateWithoutAttendancesInput, TaskUncheckedUpdateWithoutAttendancesInput>
+    create: XOR<TaskCreateWithoutAttendancesInput, TaskUncheckedCreateWithoutAttendancesInput>
+    where?: TaskWhereInput
+  }
+
+  export type TaskUpdateToOneWithWhereWithoutAttendancesInput = {
+    where?: TaskWhereInput
+    data: XOR<TaskUpdateWithoutAttendancesInput, TaskUncheckedUpdateWithoutAttendancesInput>
+  }
+
+  export type TaskUpdateWithoutAttendancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    assignedTo?: UserUpdateOneWithoutTasksNestedInput
+    activities?: ActivityUpdateManyWithoutTaskNestedInput
+    assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    parent?: TaskUpdateOneWithoutSubtasksNestedInput
+    subtasks?: TaskUpdateManyWithoutParentNestedInput
+  }
+
+  export type TaskUncheckedUpdateWithoutAttendancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
+    assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
+  }
+
+  export type UserUpsertWithoutAttendanceAdjustmentsInput = {
+    update: XOR<UserUpdateWithoutAttendanceAdjustmentsInput, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
+    create: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAttendanceAdjustmentsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAttendanceAdjustmentsInput, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
+  }
+
+  export type UserUpdateWithoutAttendanceAdjustmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
+    attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAttendanceAdjustmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
+    attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutAttendanceSettingsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
+    teams?: TeamMemberCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    activities?: ActivityCreateNestedManyWithoutUserInput
+    resources?: ResourceCreateNestedManyWithoutAssignedToInput
+    attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+  }
+
+  export type UserUncheckedCreateWithoutAttendanceSettingsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
+    attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+  }
+
+  export type UserCreateOrConnectWithoutAttendanceSettingsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAttendanceSettingsInput, UserUncheckedCreateWithoutAttendanceSettingsInput>
+  }
+
+  export type UserUpsertWithoutAttendanceSettingsInput = {
+    update: XOR<UserUpdateWithoutAttendanceSettingsInput, UserUncheckedUpdateWithoutAttendanceSettingsInput>
+    create: XOR<UserCreateWithoutAttendanceSettingsInput, UserUncheckedCreateWithoutAttendanceSettingsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAttendanceSettingsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAttendanceSettingsInput, UserUncheckedUpdateWithoutAttendanceSettingsInput>
+  }
+
+  export type UserUpdateWithoutAttendanceSettingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    activities?: ActivityUpdateManyWithoutUserNestedInput
+    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
+    attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAttendanceSettingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
+    attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
   }
 
   export type UserCreateWithoutActivitiesInput = {
@@ -22511,6 +25280,8 @@ export namespace Prisma {
     sessions?: SessionCreateNestedManyWithoutUserInput
     resources?: ResourceCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutActivitiesInput = {
@@ -22532,6 +25303,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutActivitiesInput = {
@@ -22553,6 +25326,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     resources?: ResourceCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectUncheckedCreateWithoutActivitiesInput = {
@@ -22569,6 +25343,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
     resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutActivitiesInput = {
@@ -22588,6 +25363,7 @@ export namespace Prisma {
     project: ProjectCreateNestedOneWithoutTasksInput
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
   }
@@ -22605,6 +25381,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
   }
 
@@ -22643,6 +25420,8 @@ export namespace Prisma {
     sessions?: SessionUpdateManyWithoutUserNestedInput
     resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutActivitiesInput = {
@@ -22664,6 +25443,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ProjectUpsertWithoutActivitiesInput = {
@@ -22691,6 +25472,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutActivitiesInput = {
@@ -22707,6 +25489,7 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type TaskUpsertWithoutActivitiesInput = {
@@ -22732,6 +25515,7 @@ export namespace Prisma {
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
@@ -22749,6 +25533,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -22847,6 +25632,36 @@ export namespace Prisma {
     checkOutDeviceInfo?: string | null
     totalHours?: number | null
     notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AttendanceCreateManyAdjustedByInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    projectId?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustmentReason?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -22865,6 +25680,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutCreatedByInput = {
@@ -22881,6 +25697,7 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateManyWithoutCreatedByInput = {
@@ -22906,6 +25723,7 @@ export namespace Prisma {
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
@@ -22923,6 +25741,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -23120,8 +25939,13 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneWithoutAttendancesNestedInput
+    task?: TaskUpdateOneWithoutAttendancesNestedInput
+    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
   }
 
   export type AttendanceUncheckedUpdateWithoutUserInput = {
@@ -23140,6 +25964,11 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23160,6 +25989,86 @@ export namespace Prisma {
     checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
     totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceUpdateWithoutAdjustedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
+    project?: ProjectUpdateOneWithoutAttendancesNestedInput
+    task?: TaskUpdateOneWithoutAttendancesNestedInput
+  }
+
+  export type AttendanceUncheckedUpdateWithoutAdjustedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceUncheckedUpdateManyWithoutAdjustedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23189,6 +26098,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     resources?: ResourceUpdateManyWithoutProjectNestedInput
     activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateWithoutStatusInput = {
@@ -23205,6 +26115,7 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectUncheckedUpdateManyWithoutStatusInput = {
@@ -23268,6 +26179,31 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type AttendanceCreateManyProjectInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    taskId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type TaskUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -23280,6 +26216,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
@@ -23297,6 +26234,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 
@@ -23424,6 +26362,81 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AttendanceUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
+    task?: TaskUpdateOneWithoutAttendancesNestedInput
+    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
+  }
+
+  export type AttendanceUncheckedUpdateWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceUncheckedUpdateManyWithoutProjectInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    taskId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ActivityCreateManyTaskInput = {
     id?: string
     action: string
@@ -23440,6 +26453,31 @@ export namespace Prisma {
     userId: string
     role?: string | null
     createdAt?: Date | string
+  }
+
+  export type AttendanceCreateManyTaskInput = {
+    id?: string
+    userId: string
+    checkInTime?: Date | string
+    checkOutTime?: Date | string | null
+    checkInLatitude?: number | null
+    checkInLongitude?: number | null
+    checkInLocationName?: string | null
+    checkOutLatitude?: number | null
+    checkOutLongitude?: number | null
+    checkOutLocationName?: string | null
+    checkInIpAddress?: string | null
+    checkOutIpAddress?: string | null
+    checkInDeviceInfo?: string | null
+    checkOutDeviceInfo?: string | null
+    totalHours?: number | null
+    notes?: string | null
+    projectId?: string | null
+    manuallyAdjusted?: boolean
+    adjustedById?: string | null
+    adjustmentReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type TaskCreateManyParentInput = {
@@ -23509,6 +26547,81 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AttendanceUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
+    project?: ProjectUpdateOneWithoutAttendancesNestedInput
+    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
+  }
+
+  export type AttendanceUncheckedUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AttendanceUncheckedUpdateManyWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    projectId?: NullableStringFieldUpdateOperationsInput | string | null
+    manuallyAdjusted?: BoolFieldUpdateOperationsInput | boolean
+    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
+    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type TaskUpdateWithoutParentInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -23522,6 +26635,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     activities?: ActivityUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
   }
 
@@ -23538,6 +26652,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
   }
 

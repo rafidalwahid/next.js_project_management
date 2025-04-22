@@ -31,6 +31,22 @@ export async function GET(req: NextRequest) {
       orderBy: {
         checkInTime: 'desc',
       },
+      include: {
+        project: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          }
+        },
+        task: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          }
+        }
+      }
     });
 
     // If no attendance record found for today
@@ -43,17 +59,33 @@ export async function GET(req: NextRequest) {
         orderBy: {
           checkInTime: 'desc',
         },
+        include: {
+          project: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            }
+          },
+          task: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            }
+          }
+        }
       });
 
-      return NextResponse.json({ 
-        message: "No attendance record found for today", 
-        attendance: lastAttendance 
+      return NextResponse.json({
+        message: "No attendance record found for today",
+        attendance: lastAttendance
       });
     }
 
-    return NextResponse.json({ 
-      message: "Current attendance record retrieved", 
-      attendance 
+    return NextResponse.json({
+      message: "Current attendance record retrieved",
+      attendance
     });
   } catch (error) {
     console.error("Get current attendance error:", error);

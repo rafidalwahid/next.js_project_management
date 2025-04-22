@@ -29,6 +29,11 @@ const routeMappings: Record<string, string> = {
   kanban: "Kanban Board",
   new: "New",
   edit: "Edit",
+  attendance: "Attendance",
+  history: "History",
+  reports: "Reports",
+  statistics: "Statistics",
+  settings: "Settings",
 }
 
 interface BreadcrumbItem {
@@ -137,6 +142,18 @@ export function Breadcrumbs() {
                 if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
                   label = 'Task Details'
                 }
+              }
+            }
+            // For attendance pages
+            else if (segments[0] === 'attendance' && index === 1) {
+              if (segment === 'dashboard') {
+                label = 'Dashboard'
+              } else if (segment === 'reports') {
+                label = 'Reports'
+              } else if (segment === 'settings') {
+                label = 'Settings'
+              } else if (segment === 'team') {
+                label = 'Team Attendance'
               }
             }
           }

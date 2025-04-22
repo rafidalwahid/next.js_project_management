@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { latitude, longitude, attendanceId } = body;
+    const { latitude, longitude, attendanceId, notes } = body;
 
     // Find the active attendance record
     const attendance = attendanceId
@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
         checkOutIpAddress: req.headers.get("x-forwarded-for") || req.ip || null,
         checkOutDeviceInfo: req.headers.get("user-agent") || null,
         totalHours,
+        notes: notes || attendance.notes, // Update notes if provided
       },
     });
 

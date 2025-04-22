@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { latitude, longitude } = body;
+    const { latitude, longitude, projectId, taskId, notes } = body;
 
     // Check if user already has an active attendance record (checked in but not checked out)
     const existingAttendance = await prisma.attendance.findFirst({
@@ -59,6 +59,9 @@ export async function POST(req: NextRequest) {
         checkInLocationName: locationName,
         checkInIpAddress: req.headers.get("x-forwarded-for") || req.ip || null,
         checkInDeviceInfo: req.headers.get("user-agent") || null,
+        projectId: projectId || null,
+        taskId: taskId || null,
+        notes: notes || null,
       },
     });
 

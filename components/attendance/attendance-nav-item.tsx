@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2 } from "lucide-react"
+import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, FileText, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Collapsible,
@@ -21,14 +21,29 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
 
   const subItems = [
     {
+      title: "Dashboard",
+      href: "/attendance/dashboard",
+      icon: Home,
+    },
+    {
       title: "History",
-      href: "/attendance",
+      href: "/attendance/history",
       icon: ClipboardCheck,
     },
     {
       title: "Statistics",
-      href: "/attendance?tab=stats",
+      href: "/attendance/statistics",
       icon: BarChart2,
+    },
+    {
+      title: "Reports",
+      href: "/attendance/reports",
+      icon: FileText,
+    },
+    {
+      title: "Settings",
+      href: "/attendance/settings",
+      icon: Settings,
     },
   ]
 
@@ -79,9 +94,7 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
         <div className="flex flex-col gap-1 pt-1">
           {subItems.map((item) => {
             const Icon = item.icon
-            const subItemActive = pathname === item.href || 
-              (item.href.includes("?tab=") && pathname.startsWith("/attendance") && 
-               pathname.includes(item.href.split("?")[1]))
+            const subItemActive = pathname === item.href || pathname.startsWith(item.href)
 
             return (
               <Link

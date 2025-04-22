@@ -20,18 +20,22 @@ model User {
   image         String?
   password      String?
   role          String    @default("user") // admin, manager, member
+  lastLogin     DateTime? // Track the last time the user logged in
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  projects        Project[]
-  tasks           Task[]         @relation("TaskAssignedTo") // Renamed to avoid conflicts
-  taskAssignments TaskAssignee[] // New relation for tasks assigned to this user
-  teams           TeamMember[]
-  accounts        Account[]
-  sessions        Session[]
-  activities      Activity[]
-  resources       Resource[] // Adding missing relation to Resource model
+  projects              Project[]
+  tasks                 Task[]              @relation("TaskAssignedTo") // Renamed to avoid conflicts
+  taskAssignments       TaskAssignee[] // New relation for tasks assigned to this user
+  teams                 TeamMember[]
+  accounts              Account[]
+  sessions              Session[]
+  activities            Activity[]
+  resources             Resource[] // Adding missing relation to Resource model
+  attendanceRecords     Attendance[] // User's attendance records
+  attendanceAdjustments Attendance[]        @relation("AttendanceAdjustments") // Records adjusted by this user
+  attendanceSettings    AttendanceSettings? // User's attendance preferences
 
   @@map("user")
 }
@@ -113,6 +117,7 @@ model Project {
   events      Event[]
   resources   Resource[]
   activities  Activity[]
+  attendances Attendance[]
 
   @@index([statusId])
   @@index([createdById])
@@ -134,10 +139,11 @@ model Task {
   updatedAt    DateTime  @updatedAt
 
   // Relations
-  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  activities Activity[]
-  assignees  TaskAssignee[] // Relation for multiple assignees
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo  User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  activities  Activity[]
+  assignees   TaskAssignee[] // Relation for multiple assignees
+  attendances Attendance[] // Attendance records tagged with this task
 
   // Self-relation for parent-child tasks - fixed naming
   parent   Task?  @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
@@ -221,6 +227,64 @@ model Event {
   @@index([projectId])
   @@index([date])
   @@map("event")
+}
+
+// Attendance model for tracking check-ins and check-outs with geolocation
+model Attendance {
+  id                   String    @id @default(cuid())
+  userId               String
+  checkInTime          DateTime  @default(now())
+  checkOutTime         DateTime?
+  checkInLatitude      Float?
+  checkInLongitude     Float?
+  checkInLocationName  String?   @db.Text
+  checkOutLatitude     Float?
+  checkOutLongitude    Float?
+  checkOutLocationName String?   @db.Text
+  checkInIpAddress     String?
+  checkOutIpAddress    String?
+  checkInDeviceInfo    String?   @db.Text
+  checkOutDeviceInfo   String?   @db.Text
+  totalHours           Float? // Calculated field
+  notes                String?   @db.Text
+  projectId            String? // For session tagging
+  taskId               String? // For session tagging
+  manuallyAdjusted     Boolean   @default(false)
+  adjustedById         String? // Admin who adjusted the record
+  adjustmentReason     String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id])
+  project    Project? @relation(fields: [projectId], references: [id])
+  task       Task?    @relation(fields: [taskId], references: [id])
+  adjustedBy User?    @relation("AttendanceAdjustments", fields: [adjustedById], references: [id])
+
+  @@index([userId])
+  @@index([checkInTime])
+  @@index([projectId])
+  @@index([taskId])
+  @@map("attendance")
+}
+
+// AttendanceSettings model for user preferences
+model AttendanceSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  workStartTime     String   @default("09:00") // Expected work start time
+  workEndTime       String   @default("17:00") // Expected work end time
+  workDaysPerWeek   Int      @default(5)
+  targetHoursPerDay Float    @default(8)
+  reminderEnabled   Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("attendancesettings")
 }
 
 // Activity log for tracking actions
