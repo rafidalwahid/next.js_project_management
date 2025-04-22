@@ -25,7 +25,6 @@ export const userMinimalSelectFields = {
 export const projectSelectFields = {
   id: true,
   title: true,
-  status: true,
 };
 
 /**
@@ -89,7 +88,6 @@ export function getTaskIncludeObject(
       select: {
         id: true,
         title: true,
-        status: true,
       }
     }
   };

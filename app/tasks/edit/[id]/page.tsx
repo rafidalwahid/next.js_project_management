@@ -36,11 +36,10 @@ export default function EditTaskPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    status: "pending",
     priority: "medium",
     dueDate: "",
     projectId: "",
-    assignedToId: "", // Keep for backward compatibility
+    assignedToId: null, // Keep for backward compatibility but use null instead of empty string
     assigneeIds: [] as string[], // New field for multiple assignees
     parentId: null as string | null,
   })
@@ -55,11 +54,10 @@ export default function EditTaskPage() {
       setFormData({
         title: response.task.title,
         description: response.task.description || "",
-        status: response.task.status,
         priority: response.task.priority,
         dueDate: response.task.dueDate || "",
         projectId: response.task.projectId,
-        assignedToId: response.task.assignedToId || "",
+        assignedToId: response.task.assignedToId || null,
         assigneeIds: response.task.assignees && Array.isArray(response.task.assignees) ? response.task.assignees.map((a: any) => a.userId) : [],
         parentId: response.task.parentId,
       })
@@ -257,23 +255,6 @@ export default function EditTaskPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={handleSelectChange("status")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid gap-2">
                   <Label htmlFor="priority">Priority</Label>
                   <Select
                     value={formData.priority}
@@ -289,9 +270,7 @@ export default function EditTaskPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="dueDate">Due Date</Label>
                   <DatePicker
@@ -299,7 +278,9 @@ export default function EditTaskPage() {
                     defaultDate={formData.dueDate ? new Date(formData.dueDate) : undefined}
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="assigneeIds">Assigned To (Multiple)</Label>
                   <MultiSelect
@@ -315,9 +296,7 @@ export default function EditTaskPage() {
                     You can assign multiple users to this task
                   </p>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="projectId">Project</Label>
                   <Select

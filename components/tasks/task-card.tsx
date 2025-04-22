@@ -19,7 +19,6 @@ import { formatDistanceToNow } from "date-fns"
 interface Subtask {
   id: string
   title: string
-  status: string
   priority: string
   assignedToId?: string | null
   assignedTo?: {
@@ -34,7 +33,6 @@ interface TaskCardProps {
     id: string
     title: string
     description: string | null
-    status: string
     priority: string
     dueDate: string | null
     projectId: string
@@ -65,20 +63,6 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
     }
 
     return nameParts[0].substring(0, 2).toUpperCase()
-  }
-
-  // Get status badge variant
-  const getStatusBadgeVariant = () => {
-    switch (task.status.toLowerCase()) {
-      case "completed":
-        return "success"
-      case "in-progress":
-        return "default"
-      case "pending":
-        return "secondary"
-      default:
-        return "outline"
-    }
   }
 
   // Get priority badge variant
@@ -163,10 +147,6 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Badge variant={getStatusBadgeVariant()} className="capitalize">
-              {task.status}
-            </Badge>
-
             <Badge variant={getPriorityBadgeVariant()} className="capitalize">
               {task.priority} priority
             </Badge>
@@ -208,7 +188,7 @@ export function TaskCard({ task, onDelete }: TaskCardProps) {
             <div className="flex items-center text-sm text-muted-foreground">
               <CheckCircle2 className="mr-2 h-4 w-4" />
               <span>
-                {task.subtasks.filter(st => st.status === "completed").length} of {task.subtasks.length} subtasks completed
+                {task.subtasks.length} subtasks
               </span>
             </div>
           )}

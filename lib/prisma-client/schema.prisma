@@ -124,7 +124,6 @@ model Task {
   id           String    @id @default(cuid())
   title        String
   description  String?   @db.Text
-  status       String    @default("pending") // pending, in-progress, completed
   priority     String    @default("medium") // low, medium, high
   dueDate      DateTime?
   projectId    String
@@ -147,7 +146,6 @@ model Task {
   @@index([projectId])
   @@index([assignedToId])
   @@index([parentId])
-  @@index([status])
   @@map("task")
 }
 

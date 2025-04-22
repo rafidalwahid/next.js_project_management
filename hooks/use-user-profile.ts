@@ -37,7 +37,6 @@ export type UserProfileData = {
   tasks: Array<{
     id: string;
     title: string;
-    status: string;
     priority: string;
     dueDate: string | null;
     project: {
@@ -96,23 +95,23 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     async () => {
       try {
         const response = await userApi.getUserProfile(userId);
-        
+
         // Transform the API response to match our expected format
         // The API returns the user data directly with stats property
         // But our client code expects a 'user' property
         if (!response || typeof response !== 'object') {
           throw new Error('Invalid profile data received');
         }
-        
+
         // If response has already the correct structure, use it directly
         if (response.user) {
           return response as UserProfileData;
         }
-        
+
         // Otherwise, transform it to match our expected structure
         // Extract stats and other fields from the response
         const { stats, projects, tasks, activities, ...userData } = response;
-        
+
         return {
           user: userData as UserProfile,
           projects: projects || [],

@@ -201,8 +201,12 @@ export async function POST(req: NextRequest) {
       data: {
         title: validationResult.data.title,
         description: validationResult.data.description,
-        startDate: validationResult.data.startDate,
-        endDate: validationResult.data.endDate,
+        startDate: validationResult.data.startDate && validationResult.data.startDate.trim() !== "" 
+          ? new Date(validationResult.data.startDate) 
+          : null,
+        endDate: validationResult.data.endDate && validationResult.data.endDate.trim() !== "" 
+          ? new Date(validationResult.data.endDate) 
+          : null,
         statusId: statusId,
         createdById: user.id,
         teamMembers: {

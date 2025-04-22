@@ -12,9 +12,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
-import { DashboardNav } from "@/components/dashboard-nav"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { useProjects } from "@/hooks/use-data"
 import { taskApi } from "@/lib/api"
@@ -31,10 +31,9 @@ export default function NewTaskPage() {
     title: "",
     description: "",
     projectId: "",
-    assignedToId: "", // Keep for backward compatibility
+    assignedToId: null, // Keep for backward compatibility but use null instead of empty string
     assigneeIds: [] as string[], // New field for multiple assignees
     dueDate: "",
-    status: "pending", // Default status
     priority: "medium", // Default priority
     parentId: null as string | null, // For subtasks
   })
@@ -105,7 +104,20 @@ export default function NewTaskPage() {
     e.preventDefault()
 
     try {
-      await taskApi.createTask(taskData)
+      // Validate required fields
+      if (!taskData.title || !taskData.projectId) {
+        toast({
+          title: "Validation Error",
+          description: "Title and Project are required fields",
+          variant: "destructive",
+        })
+        return
+      }
+
+      console.log("Submitting task data:", taskData)
+      const result = await taskApi.createTask(taskData)
+      console.log("Task creation response:", result)
+
       toast({
         title: "Task created",
         description: "New task has been created successfully",
@@ -126,22 +138,32 @@ export default function NewTaskPage() {
         router.push("/tasks")
       }
     } catch (error) {
+      console.error("Task creation error:", error)
+
+      let errorMessage = "Failed to create task"
+
+      if (error instanceof Error) {
+        try {
+          // Try to parse the error message as JSON
+          const parsedError = JSON.parse(error.message)
+          errorMessage = parsedError.message || errorMessage
+        } catch (e) {
+          // If parsing fails, use the error message directly
+          errorMessage = error.message || errorMessage
+        }
+      }
+
       toast({
         title: "Error",
-        description: "Failed to create task",
+        description: errorMessage,
         variant: "destructive",
       })
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header y navegación... */}
-      <div className="grid flex-1 md:grid-cols-[220px_1fr]">
-        <aside className="hidden border-r bg-muted/40 md:block">
-          <DashboardNav />
-        </aside>
-        <main className="flex flex-col gap-6 p-6">
+    <div>
+      <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-bold tracking-tight">New Task</h1>
             <div className="flex items-center gap-2">
@@ -230,23 +252,6 @@ export default function NewTaskPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      onValueChange={handleSelectChange("status")}
-                      value={taskData.status}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
                     <Label htmlFor="priority">Priority</Label>
                     <Select
                       onValueChange={handleSelectChange("priority")}
@@ -270,13 +275,13 @@ export default function NewTaskPage() {
                     <h3 className="text-sm font-medium mb-2">Parent Task</h3>
                     <div className="flex items-center gap-2">
                       <Badge variant={
-                        parentTask.status === "completed"
-                          ? "success"
-                          : parentTask.status === "in-progress"
+                        parentTask.priority === "high"
+                          ? "destructive"
+                          : parentTask.priority === "medium"
                             ? "default"
                             : "secondary"
                       }>
-                        {parentTask.status}
+                        {parentTask.priority}
                       </Badge>
                       <span className="font-medium">{parentTask.title}</span>
                     </div>
@@ -296,7 +301,6 @@ export default function NewTaskPage() {
               </CardFooter>
             </form>
           </Card>
-        </main>
       </div>
     </div>
   )

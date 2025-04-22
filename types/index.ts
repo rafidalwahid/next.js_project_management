@@ -5,7 +5,6 @@ export interface Task {
   projectId: string
   assignedTo: string
   dueDate: string
-  status: string
   priority?: "low" | "medium" | "high"
 }
 

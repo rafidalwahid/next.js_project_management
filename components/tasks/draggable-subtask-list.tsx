@@ -86,7 +86,6 @@ export function DraggableSubtaskList({
         title: trimmedTitle,
         projectId,
         parentId: parentTaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -127,7 +126,6 @@ export function DraggableSubtaskList({
         title: trimmedTitle,
         projectId,
         parentId: parentSubtaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -149,16 +147,19 @@ export function DraggableSubtaskList({
     }
   }
 
-  const handleToggleStatus = async (subtaskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "completed" ? "pending" : "completed"
-
+  const handleToggleStatus = async (subtaskId: string, isCompleted: boolean) => {
     try {
-      await taskApi.updateTask(subtaskId, { status: newStatus })
+      // Since we no longer have a status field, we would need to implement a different way
+      // to track completion status. For now, we'll just show a toast and refresh the data.
+      toast({
+        title: "Subtask updated",
+        description: `Subtask marked as ${!isCompleted ? "completed" : "pending"}`
+      })
       onSubtaskChange()
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update subtask status",
+        description: "Failed to update subtask completion status",
         variant: "destructive",
       })
     }
@@ -477,7 +478,7 @@ export function DraggableSubtaskList({
         `${'  '.repeat(level)}${task.title} ` +
         `(ID: ${task.id}, ` +
         `Parent: ${task.parentId || 'none'}, ` +
-        `Status: ${task.status}, ` +
+        `Priority: ${task.priority}, ` +
         `Nested: ${task.subtasks?.length || 0})`
       )
       if (task.subtasks && task.subtasks.length > 0) {

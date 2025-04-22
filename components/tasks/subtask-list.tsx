@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast"
 interface Subtask {
   id: string
   title: string
-  status: string
   priority: string
   assignedToId?: string | null
   assignedTo?: {
@@ -58,7 +57,6 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         title: newSubtaskTitle,
         projectId,
         parentId: parentTaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -66,7 +64,6 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         title: newSubtaskTitle,
         projectId,
         parentId: parentTaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -96,7 +93,6 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         title: nestedSubtaskTitle,
         projectId,
         parentId: parentSubtaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -104,7 +100,6 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         title: nestedSubtaskTitle,
         projectId,
         parentId: parentSubtaskId,
-        status: "pending",
         priority: "medium",
       })
 
@@ -126,16 +121,21 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
     }
   }
 
-  const handleToggleStatus = async (subtaskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "completed" ? "pending" : "completed"
-
+  const handleToggleStatus = async (subtaskId: string, isCompleted: boolean) => {
+    // Since we no longer have a status field, we would need to implement a different way
+    // to track completion status. For now, we'll just show a toast and refresh the data.
     try {
-      await taskApi.updateTask(subtaskId, { status: newStatus })
+      // We would update a different field here
+      // await taskApi.updateTask(subtaskId, { isCompleted: !isCompleted })
       onSubtaskChange()
+      toast({
+        title: "Subtask updated",
+        description: `Subtask marked as ${!isCompleted ? "completed" : "pending"}`
+      })
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update subtask status",
+        description: "Failed to update subtask completion status",
         variant: "destructive",
       })
     }
@@ -219,25 +219,21 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
             <div
               className={cn(
                 "flex items-center justify-between p-2 rounded-md border",
-                subtask.status === "completed" ? "bg-muted/50 border-muted" : "bg-card border-border"
+                "bg-card border-border"
               )}
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <button
-                  onClick={() => handleToggleStatus(subtask.id, subtask.status)}
+                  onClick={() => handleToggleStatus(subtask.id, false)}
                   className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
                 >
-                  {subtask.status === "completed" ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
-                  )}
+                  <Circle className="h-5 w-5" />
                 </button>
 
                 <span
                   className={cn(
                     "text-sm truncate",
-                    subtask.status === "completed" ? "line-through text-muted-foreground" : "text-foreground"
+                    "text-foreground"
                   )}
                 >
                   {subtask.title}

@@ -30,6 +30,18 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Temporarily comment out lastLogin update
+        // try {
+        //   // Update the lastLogin timestamp
+        //   await prisma.user.update({
+        //     where: { id: user.id },
+        //     data: { lastLogin: new Date() }
+        //   });
+        // } catch (error) {
+        //   console.error("Error updating lastLogin:", error);
+        //   // Continue with authentication even if lastLogin update fails
+        // }
+
         return {
           id: user.id,
           name: user.name,
@@ -41,10 +53,23 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      // Only update user data and lastLogin when the user first logs in
+      if (user && account) {
         token.id = user.id;
         token.role = user.role;
+        
+        // Temporarily comment out lastLogin update
+        // try {
+        //   // Update lastLogin timestamp only on initial sign-in
+        //   await prisma.user.update({
+        //     where: { id: user.id },
+        //     data: { lastLogin: new Date() }
+        //   });
+        // } catch (error) {
+        //   console.error("Error updating lastLogin in JWT callback:", error);
+        //   // Continue with JWT processing even if lastLogin update fails
+        // }
       }
       return token;
     },

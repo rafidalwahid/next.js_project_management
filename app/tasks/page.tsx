@@ -19,19 +19,19 @@ import { useToast } from "@/hooks/use-toast"
 export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [priorityFilter, setPriorityFilter] = useState<string>("all")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 12
   const { tasks: allTasks, isLoading, isError, mutate } = useTasks(1, 100) // Increased limit
   const { toast } = useToast()
 
-  // Filter tasks by status and search query
+  // Filter tasks by priority and search query
   const filteredTasks = allTasks.filter(task => {
-    const matchesStatus = statusFilter === "all" || task.status.toLowerCase() === statusFilter.toLowerCase()
+    const matchesPriority = priorityFilter === "all" || task.priority.toLowerCase() === priorityFilter.toLowerCase()
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesStatus && matchesSearch
+    return matchesPriority && matchesSearch
   })
 
   // Calculate pagination
@@ -117,37 +117,37 @@ export default function TasksPage() {
 
         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription>Completed</CardDescription>
+            <CardDescription>High Priority</CardDescription>
             <CardTitle className="text-3xl">
-              {allTasks.filter(t => t.status.toLowerCase() === 'completed').length}
+              {allTasks.filter(t => t.priority.toLowerCase() === 'high').length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Tasks marked as completed</p>
+            <p className="text-xs text-muted-foreground">Tasks with high priority</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription>In Progress</CardDescription>
+            <CardDescription>Medium Priority</CardDescription>
             <CardTitle className="text-3xl">
-              {allTasks.filter(t => t.status.toLowerCase() === 'in-progress').length}
+              {allTasks.filter(t => t.priority.toLowerCase() === 'medium').length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Tasks currently in progress</p>
+            <p className="text-xs text-muted-foreground">Tasks with medium priority</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/50 dark:to-rose-950/50 border-0 shadow-sm">
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription>Pending</CardDescription>
+            <CardDescription>Low Priority</CardDescription>
             <CardTitle className="text-3xl">
-              {allTasks.filter(t => t.status.toLowerCase() === 'pending').length}
+              {allTasks.filter(t => t.priority.toLowerCase() === 'low').length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Tasks waiting to be started</p>
+            <p className="text-xs text-muted-foreground">Tasks with low priority</p>
           </CardContent>
         </Card>
       </div>
@@ -163,7 +163,7 @@ export default function TasksPage() {
             </div>
             <div className="text-sm text-muted-foreground">
               Showing {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
-              {statusFilter !== 'all' && ` with status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`}
+              {priorityFilter !== 'all' && ` with priority: ${priorityFilter.charAt(0).toUpperCase() + priorityFilter.slice(1)}`}
               {searchQuery && ` matching: "${searchQuery}"`}
             </div>
           </div>
@@ -183,13 +183,13 @@ export default function TasksPage() {
               <div className="flex items-center gap-2">
                 <select
                   className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
                 >
-                  <option value="all">All Statuses</option>
-                  <option value="completed">Completed</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="pending">Pending</option>
+                  <option value="all">All Priorities</option>
+                  <option value="high">High Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="low">Low Priority</option>
                 </select>
               </div>
             </div>

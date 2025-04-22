@@ -74,28 +74,6 @@ export default function TaskDetailPage() {
     }
   }
 
-  const handleToggleStatus = async () => {
-    if (!task) return
-
-    const newStatus = task.status === "completed" ? "pending" : "completed"
-
-    try {
-      await taskApi.updateTask(taskId, { status: newStatus })
-      fetchTask() // Refresh task data
-
-      toast({
-        title: "Status updated",
-        description: `Task marked as ${newStatus}`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update task status",
-        variant: "destructive",
-      })
-    }
-  }
-
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
     if (!name) return "U"
@@ -105,21 +83,7 @@ export default function TaskDetailPage() {
       return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
     }
 
-    return nameParts[0].substring(0, 2).toUpperCase()
-  }
-
-  // Get status badge variant
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "success"
-      case "in-progress":
-        return "default"
-      case "pending":
-        return "secondary"
-      default:
-        return "outline"
-    }
+    return name.substring(0, 2).toUpperCase()
   }
 
   // Get priority badge variant
@@ -205,15 +169,6 @@ export default function TaskDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant={task.status === "completed" ? "outline" : "default"}
-            size="sm"
-            onClick={handleToggleStatus}
-          >
-            <CheckCircle2 className="mr-2 h-4 w-4" />
-            {task.status === "completed" ? "Mark Incomplete" : "Mark Complete"}
-          </Button>
-
           <Button variant="outline" size="sm" asChild>
             <Link href={`/tasks/edit/${task.id}`}>
               <Edit className="mr-2 h-4 w-4" />
@@ -243,10 +198,6 @@ export default function TaskDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Badge variant={getStatusBadgeVariant(task.status)} className="capitalize">
-                {task.status}
-              </Badge>
-
               <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize">
                 {task.priority} priority
               </Badge>

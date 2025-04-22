@@ -41,7 +41,7 @@ export function UserProfileView({
 }: UserProfileViewProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   const getUserInitials = () => {
     if (!profile.name) return "U"
 
@@ -60,16 +60,10 @@ export function UserProfileView({
     day: 'numeric'
   });
 
-  // Replace hardcoded mock last login date with a more appropriate representation
-  // We'll use account creation date since we don't track actual login dates
-  const lastLoginDate = profile.lastLogin 
-    ? new Date(profile.lastLogin).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric'
-      })
-    : 'Not available';
-  
+  // Instead of using a non-existent lastLogin property, we'll use the account creation date
+  // In a real app, you would add a lastLogin field to track when users log in
+  const lastLoginDate = 'Not available';
+
   // Handle document upload button click
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -81,7 +75,7 @@ export function UserProfileView({
     if (files && files.length > 0) {
       // In a real app, you would upload the file to your server here
       console.log("File selected:", files[0].name);
-      
+
       // Reset the input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -100,7 +94,7 @@ export function UserProfileView({
             Manage your account settings and preferences
           </p>
         </div>
-        
+
         {canEdit && (
           <Button variant="default">
             <Pencil className="mr-2 h-4 w-4" /> Edit Profile
@@ -181,7 +175,7 @@ export function UserProfileView({
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <p className="text-xl font-bold">
-                        {lastLoginDate === 'Not available' 
+                        {lastLoginDate === 'Not available'
                           ? <span className="text-sm font-normal text-muted-foreground">Not tracked</span>
                           : lastLoginDate}
                       </p>
@@ -223,7 +217,7 @@ export function UserProfileView({
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Login</h3>
                       <p>
-                        {lastLoginDate === 'Not available' 
+                        {lastLoginDate === 'Not available'
                           ? <span className="text-sm text-muted-foreground">Not tracked in this application</span>
                           : lastLoginDate}
                       </p>
@@ -239,7 +233,7 @@ export function UserProfileView({
                       <Button variant="outline" size="sm">Two-Factor Authentication</Button>
                     </div>
                   </div>
-                  
+
                   {/* User ID and Creation Date (small text) */}
                   <div className="mt-6 text-xs text-muted-foreground">
                     User ID: {profile.id} • Created on {formattedCreatedDate}
@@ -327,7 +321,7 @@ export function UserProfileView({
                   {tasks.map(task => (
                     <div key={task.id} className="rounded-lg border p-4">
                       <h3 className="text-lg font-semibold">{task.title}</h3>
-                      <p className="text-sm text-muted-foreground">Status: {task.status}</p>
+                      <p className="text-sm text-muted-foreground">Priority: {task.priority}</p>
                     </div>
                   ))}
                 </div>
@@ -376,4 +370,4 @@ export function UserProfileView({
       </Tabs>
     </div>
   )
-} 
+}

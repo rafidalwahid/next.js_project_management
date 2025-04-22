@@ -19,7 +19,6 @@ interface Task {
   id: string
   title: string
   description: string | null
-  status: string
   priority: string
   dueDate: string | null
   project?: {
@@ -51,20 +50,6 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
     return name.substring(0, 2).toUpperCase()
   }
 
-  // Get status badge variant
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "success"
-      case "in-progress":
-        return "default"
-      case "pending":
-        return "secondary"
-      default:
-        return "outline"
-    }
-  }
-
   // Get priority badge variant
   const getPriorityBadgeVariant = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -87,7 +72,6 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
             <TableRow>
               <TableHead>Title</TableHead>
               <TableHead>Project</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead>Assigned To</TableHead>
@@ -96,7 +80,7 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 No tasks found.
               </TableCell>
             </TableRow>
@@ -113,7 +97,6 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Project</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
             <TableHead>Due Date</TableHead>
             <TableHead>Assigned To</TableHead>
@@ -147,11 +130,6 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                 ) : (
                   <span className="text-sm text-muted-foreground">—</span>
                 )}
-              </TableCell>
-              <TableCell>
-                <Badge variant={getStatusBadgeVariant(task.status)} className="capitalize">
-                  {task.status}
-                </Badge>
               </TableCell>
               <TableCell>
                 <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize">

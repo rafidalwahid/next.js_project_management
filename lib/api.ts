@@ -6,29 +6,29 @@
  * Fetches data from the API with proper error handling
  */
 export async function fetchAPI(url: string, options: RequestInit = {}) {
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Content-Type': 'application/json',
-      },
-    });
+  // Set default headers for JSON requests if not provided
+  options.headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
 
-    // Try to parse the response as JSON
+  console.log(`API Request: ${options.method || 'GET'} ${url}`);
+  
+  try {
+    const response = await fetch(url, options);
+    console.log(`API Response status: ${response.status} ${response.statusText}`);
+
+    // Try to parse JSON response
     let data;
     try {
-      data = await response.json();
-    } catch (parseError) {
-      // If the response is not valid JSON, create a generic error
-      const error = {
-        status: response.status,
-        statusText: response.statusText,
-        message: 'Invalid response format',
-        details: { parseError: parseError instanceof Error ? parseError.message : String(parseError) }
-      };
+      const textResponse = await response.text();
+      console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
+      
+      // Handle empty responses
+      data = textResponse ? JSON.parse(textResponse) : {};
+    } catch (error) {
       console.error('API Error (parse failure):', error);
-      throw new Error(JSON.stringify(error));
+      throw new Error(`Failed to parse API response: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     if (!response.ok) {
@@ -36,7 +36,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       const error = {
         status: response.status,
         statusText: response.statusText,
-        message: data?.error || 'Unknown error occurred',
+        message: data?.error || `Request failed with status ${response.status}`,
         details: data?.details || {}
       };
 
@@ -202,18 +202,22 @@ export const taskApi = {
   },
 
   createTask: async (task: any) => {
+    // Remove status if present
+    const { status, ...taskWithoutStatus } = task;
     return fetchAPI('/api/tasks', {
       method: 'POST',
-      body: JSON.stringify(task),
+      body: JSON.stringify(taskWithoutStatus),
     });
   },
 
   updateTask: async (id: string, task: any) => {
     console.log('API client: Updating task with ID:', id, 'Data:', task);
     try {
+      // Remove status if present
+      const { status, ...taskWithoutStatus } = task;
       const result = await fetchAPI(`/api/tasks/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(task),
+        body: JSON.stringify(taskWithoutStatus),
       });
       console.log('API client: Update task response:', result);
       return result;
@@ -221,13 +225,6 @@ export const taskApi = {
       console.error('API client: Error updating task:', error);
       throw error;
     }
-  },
-
-  updateTaskStatus: async (id: string, status: string) => {
-    return fetchAPI(`/api/tasks/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
   },
 
   deleteTask: async (id: string) => {

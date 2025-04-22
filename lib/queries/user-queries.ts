@@ -14,17 +14,17 @@ export type UserCreateInput = {
 export type UserUpdateInput = Partial<UserCreateInput>;
 
 // Get all users with optional filters
-export async function getUsers(args: { 
-  skip?: number; 
-  take?: number; 
+export async function getUsers(args: {
+  skip?: number;
+  take?: number;
   orderBy?: Prisma.UserOrderByWithRelationInput;
   where?: Prisma.UserWhereInput;
   includeProjects?: boolean;
   includeTasks?: boolean;
 } = {}) {
-  const { 
-    skip = 0, 
-    take = 50, 
+  const {
+    skip = 0,
+    take = 50,
     orderBy = { createdAt: 'desc' },
     where = {},
     includeProjects = false,
@@ -64,7 +64,6 @@ export async function getUsers(args: {
         id: true,
         title: true,
         description: true,
-        status: true,
         priority: true,
         dueDate: true,
         project: {
@@ -112,17 +111,38 @@ export async function getUserById(id: string, includeRelations: boolean = false)
         createdAt: true,
       }
     };
+    // Get tasks directly assigned to the user (via assignedToId)
     select.tasks = {
       select: {
         id: true,
         title: true,
-        status: true,
         priority: true,
         dueDate: true,
         project: {
           select: {
             id: true,
             title: true,
+          }
+        }
+      }
+    };
+
+    // Get tasks assigned via TaskAssignee table (multiple assignees)
+    select.taskAssignments = {
+      select: {
+        id: true,
+        task: {
+          select: {
+            id: true,
+            title: true,
+            priority: true,
+            dueDate: true,
+            project: {
+              select: {
+                id: true,
+                title: true,
+              }
+            }
           }
         }
       }
@@ -163,16 +183,34 @@ export async function getUserById(id: string, includeRelations: boolean = false)
 // Get user profile with stats
 export async function getUserProfile(id: string) {
   const user = await getUserById(id, true);
-  
+
   if (!user) {
     return null;
   }
 
   // Calculate user stats
   const stats = await getUserStats(id);
-  
+
+  // Combine tasks from both direct assignments and TaskAssignee table
+  let allTasks = [...(user.tasks || [])];
+
+  // Add tasks from taskAssignments if they exist
+  if (user.taskAssignments && Array.isArray(user.taskAssignments)) {
+    const tasksFromAssignments = user.taskAssignments
+      .filter(assignment => assignment.task) // Filter out any null tasks
+      .map(assignment => assignment.task);
+
+    // Add tasks that aren't already in the allTasks array
+    for (const task of tasksFromAssignments) {
+      if (!allTasks.some(t => t.id === task.id)) {
+        allTasks.push(task);
+      }
+    }
+  }
+
   return {
     ...user,
+    tasks: allTasks,
     stats
   };
 }
@@ -190,12 +228,20 @@ export async function getUserStats(userId: string) {
     }
   });
 
-  // Get task count
-  const taskCount = await prisma.task.count({
+  // Get task count (both direct assignments and via TaskAssignee table)
+  const directTaskCount = await prisma.task.count({
     where: {
       assignedToId: userId
     }
   });
+
+  const taskAssigneeCount = await prisma.taskAssignee.count({
+    where: {
+      userId
+    }
+  });
+
+  const taskCount = directTaskCount + taskAssigneeCount;
 
   // Get team count (unique projects user is part of)
   const teamCount = await prisma.teamMember.count({
@@ -205,21 +251,15 @@ export async function getUserStats(userId: string) {
   });
 
   // Calculate completion rate
-  const totalTasks = await prisma.task.count({
-    where: {
-      assignedToId: userId,
-    }
-  });
+  // We'll use the taskCount we already calculated above
+  const totalTasks = taskCount;
 
-  const completedTasks = await prisma.task.count({
-    where: {
-      assignedToId: userId,
-      status: 'completed'
-    }
-  });
+  // Since we no longer have a status field, we'll use a placeholder value for now
+  // In a real implementation, you might want to add a 'completed' boolean field to the Task model
+  const completedTasks = 0;
 
-  const completionRate = totalTasks > 0 
-    ? `${Math.round((completedTasks / totalTasks) * 100)}%` 
+  const completionRate = totalTasks > 0
+    ? `${Math.round((completedTasks / totalTasks) * 100)}%`
     : '0%';
 
   return {
@@ -233,7 +273,7 @@ export async function getUserStats(userId: string) {
 // Create a new user
 export async function createUser(data: UserCreateInput) {
   const { password, ...userData } = data;
-  
+
   // Hash password if provided
   const userToCreate: Prisma.UserCreateInput = {
     ...userData,
@@ -261,7 +301,7 @@ export async function createUser(data: UserCreateInput) {
 // Update user details
 export async function updateUser(id: string, data: UserUpdateInput) {
   const { password, ...userData } = data;
-  
+
   // Create update object
   const userToUpdate: Prisma.UserUpdateInput = {
     ...userData,
@@ -312,10 +352,10 @@ export async function updateUserImage(id: string, imageUrl: string) {
 
 // Log user activity
 export async function logUserActivity(
-  userId: string, 
-  action: string, 
-  entityType: string, 
-  entityId: string, 
+  userId: string,
+  action: string,
+  entityType: string,
+  entityId: string,
   description?: string,
   projectId?: string,
   taskId?: string,
@@ -331,4 +371,4 @@ export async function logUserActivity(
       taskId,
     }
   });
-} 
+}

@@ -12,7 +12,7 @@ import { Subtask } from "@/types/task"
 interface DraggableSubtaskProps {
   subtask: Subtask
   getUserInitials: (name: string | null) => string
-  onToggleStatus: (id: string, status: string) => void
+  onToggleStatus: (id: string, isCompleted: boolean) => void
   onDelete: (id: string) => void
   onAddNested: (id: string) => void
 }
@@ -58,10 +58,7 @@ export function DraggableSubtask({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "flex items-center justify-between p-2 rounded-md border",
-        subtask.status === "completed" ? "bg-muted/50 border-muted" : "bg-card border-border"
-      )}
+      className="flex items-center justify-between p-2 rounded-md border bg-card border-border"
     >
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <div
@@ -73,22 +70,13 @@ export function DraggableSubtask({
         </div>
 
         <button
-          onClick={() => onToggleStatus(subtask.id, subtask.status)}
+          onClick={() => onToggleStatus(subtask.id, false)}
           className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
         >
-          {subtask.status === "completed" ? (
-            <CheckCircle2 className="h-5 w-5" />
-          ) : (
-            <Circle className="h-5 w-5" />
-          )}
+          <Circle className="h-5 w-5" />
         </button>
 
-        <span
-          className={cn(
-            "text-sm truncate",
-            subtask.status === "completed" ? "line-through text-muted-foreground" : "text-foreground"
-          )}
-        >
+        <span className="text-sm truncate text-foreground">
           {subtask.title}
         </span>
 

@@ -1,7 +1,6 @@
 export interface Subtask {
   id: string
   title: string
-  status: string
   priority: string
   assignedToId?: string | null
   assignedTo?: {

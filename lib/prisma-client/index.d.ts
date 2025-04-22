@@ -2032,6 +2032,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
+    lastLogin: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2044,6 +2045,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
+    lastLogin: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2056,6 +2058,7 @@ export namespace Prisma {
     image: number
     password: number
     role: number
+    lastLogin: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2070,6 +2073,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2082,6 +2086,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2094,6 +2099,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    lastLogin?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2179,6 +2185,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string
+    lastLogin: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -2208,6 +2215,7 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     projects?: boolean | User$projectsArgs<ExtArgs>
@@ -2231,11 +2239,12 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
+    lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projects?: boolean | User$projectsArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
@@ -2268,6 +2277,7 @@ export namespace Prisma {
       image: string | null
       password: string | null
       role: string
+      lastLogin: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2654,6 +2664,7 @@ export namespace Prisma {
     readonly image: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'String'>
+    readonly lastLogin: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -8147,7 +8158,6 @@ export namespace Prisma {
     id: string | null
     title: string | null
     description: string | null
-    status: string | null
     priority: string | null
     dueDate: Date | null
     projectId: string | null
@@ -8162,7 +8172,6 @@ export namespace Prisma {
     id: string | null
     title: string | null
     description: string | null
-    status: string | null
     priority: string | null
     dueDate: Date | null
     projectId: string | null
@@ -8177,7 +8186,6 @@ export namespace Prisma {
     id: number
     title: number
     description: number
-    status: number
     priority: number
     dueDate: number
     projectId: number
@@ -8202,7 +8210,6 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
-    status?: true
     priority?: true
     dueDate?: true
     projectId?: true
@@ -8217,7 +8224,6 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
-    status?: true
     priority?: true
     dueDate?: true
     projectId?: true
@@ -8232,7 +8238,6 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
-    status?: true
     priority?: true
     dueDate?: true
     projectId?: true
@@ -8334,7 +8339,6 @@ export namespace Prisma {
     id: string
     title: string
     description: string | null
-    status: string
     priority: string
     dueDate: Date | null
     projectId: string
@@ -8368,7 +8372,6 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
-    status?: boolean
     priority?: boolean
     dueDate?: boolean
     projectId?: boolean
@@ -8392,7 +8395,6 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
-    status?: boolean
     priority?: boolean
     dueDate?: boolean
     projectId?: boolean
@@ -8403,7 +8405,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "status" | "priority" | "dueDate" | "projectId" | "assignedToId" | "parentId" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "priority" | "dueDate" | "projectId" | "assignedToId" | "parentId" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     project?: boolean | ProjectDefaultArgs<ExtArgs>
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
@@ -8428,7 +8430,6 @@ export namespace Prisma {
       id: string
       title: string
       description: string | null
-      status: string
       priority: string
       dueDate: Date | null
       projectId: string
@@ -8815,7 +8816,6 @@ export namespace Prisma {
     readonly id: FieldRef<"Task", 'String'>
     readonly title: FieldRef<"Task", 'String'>
     readonly description: FieldRef<"Task", 'String'>
-    readonly status: FieldRef<"Task", 'String'>
     readonly priority: FieldRef<"Task", 'String'>
     readonly dueDate: FieldRef<"Task", 'DateTime'>
     readonly projectId: FieldRef<"Task", 'String'>
@@ -14172,6 +14172,7 @@ export namespace Prisma {
     image: 'image',
     password: 'password',
     role: 'role',
+    lastLogin: 'lastLogin',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -14248,7 +14249,6 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
-    status: 'status',
     priority: 'priority',
     dueDate: 'dueDate',
     projectId: 'projectId',
@@ -14413,7 +14413,6 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
-    status: 'status',
     priority: 'priority',
     projectId: 'projectId',
     assignedToId: 'assignedToId',
@@ -14532,6 +14531,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
+    lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     projects?: ProjectListRelationFilter
@@ -14552,6 +14552,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
+    lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     projects?: ProjectOrderByRelationAggregateInput
@@ -14576,6 +14577,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
+    lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     projects?: ProjectListRelationFilter
@@ -14596,6 +14598,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
+    lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -14614,6 +14617,7 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: StringWithAggregatesFilter<"User"> | string
+    lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -14974,7 +14978,6 @@ export namespace Prisma {
     id?: StringFilter<"Task"> | string
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
-    status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     projectId?: StringFilter<"Task"> | string
@@ -14995,7 +14998,6 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
-    status?: SortOrder
     priority?: SortOrder
     dueDate?: SortOrderInput | SortOrder
     projectId?: SortOrder
@@ -15020,7 +15022,6 @@ export namespace Prisma {
     NOT?: TaskWhereInput | TaskWhereInput[]
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
-    status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     projectId?: StringFilter<"Task"> | string
@@ -15041,7 +15042,6 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
-    status?: SortOrder
     priority?: SortOrder
     dueDate?: SortOrderInput | SortOrder
     projectId?: SortOrder
@@ -15064,7 +15064,6 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Task"> | string
     title?: StringWithAggregatesFilter<"Task"> | string
     description?: StringNullableWithAggregatesFilter<"Task"> | string | null
-    status?: StringWithAggregatesFilter<"Task"> | string
     priority?: StringWithAggregatesFilter<"Task"> | string
     dueDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     projectId?: StringWithAggregatesFilter<"Task"> | string
@@ -15427,6 +15426,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -15447,6 +15447,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -15467,6 +15468,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -15487,6 +15489,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -15507,6 +15510,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15519,6 +15523,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15531,6 +15536,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15909,7 +15915,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -15927,7 +15932,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -15945,7 +15949,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -15963,7 +15966,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -15981,7 +15983,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -15996,7 +15997,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -16008,7 +16008,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -16503,6 +16502,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16515,6 +16515,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16527,6 +16528,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    lastLogin?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16889,7 +16891,6 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    status?: SortOrder
     priority?: SortOrder
     dueDate?: SortOrder
     projectId?: SortOrder
@@ -16908,7 +16909,6 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    status?: SortOrder
     priority?: SortOrder
     dueDate?: SortOrder
     projectId?: SortOrder
@@ -16923,7 +16923,6 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    status?: SortOrder
     priority?: SortOrder
     dueDate?: SortOrder
     projectId?: SortOrder
@@ -18408,7 +18407,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -18425,7 +18423,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -18672,7 +18669,6 @@ export namespace Prisma {
     id?: StringFilter<"Task"> | string
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
-    status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     projectId?: StringFilter<"Task"> | string
@@ -18866,6 +18862,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -18885,6 +18882,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -18920,6 +18918,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -18939,6 +18938,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -18958,6 +18958,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -18977,6 +18978,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -19012,6 +19014,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -19031,6 +19034,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -19133,6 +19137,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -19152,6 +19157,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -19172,7 +19178,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -19189,7 +19194,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     assignedToId?: string | null
@@ -19376,6 +19380,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -19395,6 +19400,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -19544,6 +19550,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -19563,6 +19570,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -19639,7 +19647,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -19656,7 +19663,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -19678,7 +19684,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -19695,7 +19700,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -19780,6 +19784,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -19799,6 +19804,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -19857,7 +19863,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -19874,7 +19879,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -19907,7 +19911,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -19924,7 +19927,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -19950,6 +19952,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -19969,6 +19972,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -20000,7 +20004,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -20017,7 +20020,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -20049,6 +20051,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -20068,6 +20071,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -20087,6 +20091,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -20106,6 +20111,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -20178,6 +20184,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -20197,6 +20204,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -20296,6 +20304,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -20315,6 +20324,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -20393,6 +20403,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -20412,6 +20423,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -20511,6 +20523,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
@@ -20530,6 +20543,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    lastLogin?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
@@ -20587,7 +20601,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     order?: number
@@ -20604,7 +20617,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -20641,6 +20653,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
@@ -20660,6 +20673,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -20729,7 +20743,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -20746,7 +20759,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -20774,7 +20786,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -20886,7 +20897,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -20903,7 +20913,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -20920,7 +20929,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -21153,7 +21161,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     assignedToId?: string | null
@@ -21204,7 +21211,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -21221,7 +21227,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21238,7 +21243,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21381,7 +21385,6 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    status?: string
     priority?: string
     dueDate?: Date | string | null
     projectId: string
@@ -21449,7 +21452,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     order?: IntFieldUpdateOperationsInput | number
@@ -21466,7 +21468,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string
@@ -21483,7 +21484,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     projectId?: StringFieldUpdateOperationsInput | string

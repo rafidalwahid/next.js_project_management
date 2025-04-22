@@ -68,7 +68,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
 const updateTaskSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").optional(),
   description: z.string().optional(),
-  status: z.enum(["pending", "in-progress", "completed"]).optional(),
   priority: z.enum(["low", "medium", "high"]).optional(),
   dueDate: z.string().optional().nullable(),
   assignedToId: z.string().optional().nullable(), // Kept for backward compatibility
@@ -102,17 +101,35 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
     }
 
-    const { title, description, status, priority, dueDate, assignedToId, assigneeIds, projectId, parentId } = validationResult.data;
+    const { title, description, priority, dueDate, assignedToId, assigneeIds, projectId, parentId } = validationResult.data;
 
     // Prepare update data
     const updateData: any = {};
 
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
-    if (status !== undefined) updateData.status = status;
     if (priority !== undefined) updateData.priority = priority;
-    if (dueDate !== undefined) updateData.dueDate = dueDate ? new Date(dueDate) : null;
-    if (assignedToId !== undefined) updateData.assignedToId = assignedToId;
+    if (dueDate !== undefined) updateData.dueDate = dueDate && dueDate.trim() !== "" ? new Date(dueDate) : null;
+
+    // Validate assignedToId if it's being updated
+    if (assignedToId !== undefined) {
+      if (assignedToId === null || assignedToId === "") {
+        updateData.assignedToId = null;
+      } else {
+        const userExists = await prisma.user.findUnique({
+          where: { id: assignedToId },
+          select: { id: true }
+        });
+
+        if (!userExists) {
+          return NextResponse.json(
+            { error: "Invalid assignedToId: User not found" },
+            { status: 400 }
+          );
+        }
+        updateData.assignedToId = assignedToId;
+      }
+    }
 
     // Handle parentId changes
     if (parentId !== undefined) {
@@ -187,15 +204,31 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Create activity description
     let activityDescription = "Task was updated";
-    if (status && status !== task.status) {
-      activityDescription = `Task status changed from "${task.status}" to "${status}"`;
-    } else if (assignedToId && assignedToId !== task.assignedToId) {
+    if (assignedToId && assignedToId !== task.assignedToId) {
       activityDescription = "Task was reassigned";
     }
 
     // Handle assigneeIds if provided
     if (assigneeIds !== undefined) {
       try {
+        // Validate that all assigneeIds refer to existing users
+        if (assigneeIds.length > 0) {
+          const userCount = await prisma.user.count({
+            where: {
+              id: {
+                in: assigneeIds
+              }
+            }
+          });
+
+          if (userCount !== assigneeIds.length) {
+            return NextResponse.json(
+              { error: "One or more users in assigneeIds not found" },
+              { status: 400 }
+            );
+          }
+        }
+
         // TaskAssignee table should now exist in the schema
         const hasTaskAssigneeTable = true;
 

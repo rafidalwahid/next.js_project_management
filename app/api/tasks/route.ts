@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
-import { getTaskIncludeObject, getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
+import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
 import { getNextOrderValue } from "@/lib/ordering/task-ordering";
 
 // GET handler to list tasks
@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
     // Get search params
     const searchParams = req.nextUrl.searchParams;
     const projectId = searchParams.get("projectId");
-    const status = searchParams.get("status");
     const assignedToId = searchParams.get("assignedToId");
     const priority = searchParams.get("priority");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -32,10 +31,6 @@ export async function GET(req: NextRequest) {
 
     if (projectId) {
       where.projectId = projectId;
-    }
-
-    if (status) {
-      where.status = status;
     }
 
     if (assignedToId) {
@@ -89,9 +84,8 @@ export async function GET(req: NextRequest) {
 
 // Validation schema for creating a task
 const createTaskSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
+  title: z.string().min(1),
   description: z.string().optional(),
-  status: z.enum(["pending", "in-progress", "completed"]).default("pending"),
   priority: z.enum(["low", "medium", "high"]).default("medium"),
   dueDate: z.string().optional().nullable(),
   projectId: z.string(),
@@ -105,32 +99,67 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    console.log('Session:', JSON.stringify(session, null, 2));
+    console.log('POST /api/tasks: Session user ID:', session?.user?.id);
 
     if (!session || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
+    console.log('POST /api/tasks: Request body:', JSON.stringify(body, null, 2));
 
     // Validate request body
     const validationResult = createTaskSchema.safeParse(body);
 
     if (!validationResult.success) {
+      console.log('POST /api/tasks: Validation error:', validationResult.error.format());
       return NextResponse.json(
         { error: "Validation error", details: validationResult.error.format() },
         { status: 400 }
       );
     }
 
-    const { title, description, status, priority, dueDate, projectId, assignedToId, assigneeIds, parentId } = validationResult.data;
+    const { title, description, priority, dueDate, projectId, assignedToId, assigneeIds, parentId } = validationResult.data;
+    console.log('POST /api/tasks: Parsed data:', { title, projectId, assignedToId, assigneeIds });
 
     // Check project permission
-    const { hasPermission, project, error } = await checkProjectPermission(projectId, session, 'update');
-    // We'll use the project object later for activity creation
+    const { hasPermission, error } = await checkProjectPermission(projectId, session, 'update');
 
     if (!hasPermission) {
       return NextResponse.json({ error }, { status: error === "Project not found" ? 404 : 403 });
+    }
+
+    // Validate assignedToId if provided
+    if (assignedToId) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: assignedToId },
+        select: { id: true }
+      });
+
+      if (!userExists) {
+        return NextResponse.json(
+          { error: "Invalid assignedToId: User not found" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate assigneeIds if provided
+    if (assigneeIds && assigneeIds.length > 0) {
+      const userCount = await prisma.user.count({
+        where: {
+          id: {
+            in: assigneeIds
+          }
+        }
+      });
+
+      if (userCount !== assigneeIds.length) {
+        return NextResponse.json(
+          { error: "One or more users in assigneeIds not found" },
+          { status: 400 }
+        );
+      }
     }
 
     // If this is a subtask, verify parent task exists and belongs to the same project
@@ -157,22 +186,60 @@ export async function POST(req: NextRequest) {
     // Get the next order value for the new task
     const initialOrder = await getNextOrderValue(projectId, parentId || null);
 
+    // Ensure the current user is a team member of the project
+    const isTeamMember = await prisma.teamMember.findUnique({
+      where: {
+        userId_projectId: {
+          userId: session.user.id,
+          projectId
+        }
+      }
+    });
+
+    if (!isTeamMember) {
+      // Add the user as a team member if they're not already
+      await prisma.teamMember.create({
+        data: {
+          userId: session.user.id,
+          projectId,
+          role: 'member' // Default role
+        }
+      });
+    }
+
     // Create task
     const task = await prisma.task.create({
       data: {
         title,
         description,
-        status,
         priority,
-        dueDate: dueDate ? new Date(dueDate) : null,
+        dueDate: dueDate && dueDate.trim() !== "" ? new Date(dueDate) : null,
         projectId,
-        assignedToId, // Keep for backward compatibility
+        assignedToId: assignedToId && assignedToId.trim() !== "" ? assignedToId : null,
         parentId,
-        order: initialOrder, // Set the initial order value
-        // We'll create the activity separately after the task is created
-        // to ensure we have the entityId
+        order: initialOrder,
       },
-      include: getTaskIncludeObject(2) // Include 2 levels of subtasks
+      include: {
+        project: true,
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        parent: {
+          select: {
+            id: true,
+            title: true,
+            priority: true,
+            projectId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
     });
 
     // Now create the activity with the task's ID as entityId
@@ -205,68 +272,73 @@ export async function POST(req: NextRequest) {
       console.error('Error creating activity:', activityError);
     }
 
-    // Create task assignees if assigneeIds is provided
-    if (assigneeIds && assigneeIds.length > 0) {
-      try {
-        // TaskAssignee table should now exist in the schema
-        const hasTaskAssigneeTable = true;
+    // Create task assignees
+    try {
+      // Prepare the list of assignees
+      let allAssigneeIds = assigneeIds && assigneeIds.length > 0 ? [...assigneeIds] : [];
 
-        if (hasTaskAssigneeTable) {
-          // Create task assignees
-          await Promise.all(
-            assigneeIds.map(async (userId) => {
-              return prisma.taskAssignee.create({
-                data: {
-                  taskId: task.id,
-                  userId,
-                }
-              });
-            })
-          );
+      // Add the current user as an assignee if they're not already in the list
+      if (!allAssigneeIds.includes(session.user.id)) {
+        allAssigneeIds.push(session.user.id);
+      }
 
-          // Fetch the task with assignees to get the complete data
-          const updatedTask = await prisma.task.findUnique({
-            where: { id: task.id },
-            include: {
-              assignees: {
-                include: {
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      email: true,
-                      image: true,
-                    }
+      // Create task assignees
+      if (allAssigneeIds.length > 0) {
+        await Promise.all(
+          allAssigneeIds.map(async (userId) => {
+            return prisma.taskAssignee.create({
+              data: {
+                taskId: task.id,
+                userId,
+              }
+            });
+          })
+        );
+
+        // Fetch the task with assignees to get the complete data
+        const updatedTask = await prisma.task.findUnique({
+          where: { id: task.id },
+          include: {
+            assignees: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
                   }
                 }
               }
             }
-          });
-
-          if (updatedTask && 'assignees' in updatedTask && updatedTask.assignees) {
-            // Use type assertion to handle the dynamic property
-            (task as any).assignees = updatedTask.assignees;
           }
-        } else {
-          console.warn('TaskAssignee table does not exist yet. Skipping assignee creation.');
+        });
+
+        if (updatedTask && 'assignees' in updatedTask && updatedTask.assignees) {
+          // Use type assertion to handle the dynamic property
+          (task as any).assignees = updatedTask.assignees;
         }
-      } catch (error) {
-        console.error("Error creating task assignees:", error);
-        // Don't fail the task creation if assignee creation fails
       }
+    } catch (error) {
+      console.error("Error creating task assignees:", error);
+      // Don't fail the task creation if assignee creation fails
     }
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
     console.error("Error creating task:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace available");
 
     // Provide more detailed error information
     let errorMessage = "An error occurred while creating the task";
-    let errorDetails = {};
+    let errorDetails: any = {};
 
     if (error instanceof Error) {
       errorMessage = error.message;
-      errorDetails = { stack: error.stack };
+      errorDetails = {
+        stack: error.stack,
+        name: error.name
+      };
 
       // Check for Prisma-specific errors
       if (error.message.includes("Unknown field `parentId`")) {
@@ -275,6 +347,16 @@ export async function POST(req: NextRequest) {
           ...errorDetails,
           hint: "The Prisma client needs to be regenerated. Run 'npx prisma generate' to update it."
         };
+      } else if (error.message.includes("foreign key constraint")) {
+        // Add specific handling for foreign key errors
+        if (error.message.includes("User")) {
+          errorMessage = "Invalid user reference: The specified user does not exist";
+        } else if (error.message.includes("Project")) {
+          errorMessage = "Invalid project reference: The specified project does not exist";
+        } else {
+          errorMessage = "A database constraint error occurred";
+        }
+        errorDetails.constraint = "foreign key";
       }
     }
 
