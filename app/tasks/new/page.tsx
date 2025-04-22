@@ -25,7 +25,7 @@ export default function NewTaskPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { projects } = useProjects(1, 100)
-  const { users } = useUsers()
+  const { users } = useUsers("", 100) // Empty search string, limit of 100 users
   const { toast } = useToast()
   const [taskData, setTaskData] = useState({
     title: "",

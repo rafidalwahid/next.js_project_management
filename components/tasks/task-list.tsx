@@ -30,6 +30,14 @@ interface Task {
     name: string | null
     image: string | null
   } | null
+  assignees?: {
+    id: string
+    user: {
+      id: string
+      name: string | null
+      image: string | null
+    }
+  }[]
 }
 
 interface TaskListProps {
@@ -146,7 +154,23 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                 )}
               </TableCell>
               <TableCell>
-                {task.assignedTo ? (
+                {task.assignees && task.assignees.length > 0 ? (
+                  <div className="flex items-center gap-1">
+                    {task.assignees.slice(0, 3).map((assignee) => (
+                      <Avatar key={assignee.id} className="h-6 w-6 border border-black/10">
+                        {assignee.user.image ? (
+                          <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                        ) : null}
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                          {getUserInitials(assignee.user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {task.assignees.length > 3 && (
+                      <span className="text-xs text-muted-foreground ml-1">+{task.assignees.length - 3}</span>
+                    )}
+                  </div>
+                ) : task.assignedTo ? (
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6 border border-black/10">
                       {task.assignedTo.image ? (

@@ -193,10 +193,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         newProject.teamMembers.length > 0;
 
       if (!hasProjectAccess) {
-        return NextResponse.json(
-          { error: "You don't have permission to move this task to the target project" },
-          { status: 403 }
-        );
+        // Instead of denying access, add the user as a team member
+        await prisma.teamMember.create({
+          data: {
+            userId: session.user.id,
+            projectId,
+            role: 'member' // Default role
+          }
+        });
+        console.log(`Added user ${session.user.id} as team member to project ${projectId}`);
       }
 
       updateData.projectId = projectId;
@@ -211,17 +216,26 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Handle assigneeIds if provided
     if (assigneeIds !== undefined) {
       try {
+        // Ensure the current user is included in the assignees list
+        let allAssigneeIds = [...assigneeIds];
+
+        // Add the current user as an assignee if they're not already in the list
+        if (session && session.user.id && !allAssigneeIds.includes(session.user.id)) {
+          allAssigneeIds.push(session.user.id);
+          console.log(`Added current user ${session.user.id} to assignees list`);
+        }
+
         // Validate that all assigneeIds refer to existing users
-        if (assigneeIds.length > 0) {
+        if (allAssigneeIds.length > 0) {
           const userCount = await prisma.user.count({
             where: {
               id: {
-                in: assigneeIds
+                in: allAssigneeIds
               }
             }
           });
 
-          if (userCount !== assigneeIds.length) {
+          if (userCount !== allAssigneeIds.length) {
             return NextResponse.json(
               { error: "One or more users in assigneeIds not found" },
               { status: 400 }
@@ -229,30 +243,46 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           }
         }
 
-        // TaskAssignee table should now exist in the schema
-        const hasTaskAssigneeTable = true;
+        // First, delete all existing assignees
+        await prisma.taskAssignee.deleteMany({
+          where: { taskId: id }
+        });
 
-        if (hasTaskAssigneeTable) {
-          // First, delete all existing assignees
-          await prisma.taskAssignee.deleteMany({
-            where: { taskId: id }
-          });
+        // Then create new assignees and add them as team members of the project
+        if (allAssigneeIds.length > 0) {
+          await Promise.all(
+            allAssigneeIds.map(async (userId) => {
+              // Create task assignee
+              await prisma.taskAssignee.create({
+                data: {
+                  taskId: id,
+                  userId,
+                }
+              });
 
-          // Then create new assignees
-          if (assigneeIds.length > 0) {
-            await Promise.all(
-              assigneeIds.map(async (userId) => {
-                return prisma.taskAssignee.create({
-                  data: {
-                    taskId: id,
+              // Check if user is already a team member of the project
+              const existingTeamMember = await prisma.teamMember.findUnique({
+                where: {
+                  userId_projectId: {
                     userId,
+                    projectId: task.projectId
+                  }
+                }
+              });
+
+              // If not, add them as a team member
+              if (!existingTeamMember) {
+                await prisma.teamMember.create({
+                  data: {
+                    userId,
+                    projectId: task.projectId,
+                    role: 'member' // Default role
                   }
                 });
-              })
-            );
-          }
-        } else {
-          console.warn('TaskAssignee table does not exist yet. Skipping assignee updates.');
+                console.log(`Added user ${userId} as team member to project ${task.projectId} during task update`);
+              }
+            })
+          );
         }
       } catch (assigneeError) {
         console.error('Error handling assignees:', assigneeError);
@@ -263,6 +293,57 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Ensure session exists before creating activity
     if (!session || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // If assigneeIds wasn't provided, ensure the current user is an assignee
+    if (assigneeIds === undefined) {
+      try {
+        // Check if the current user is already an assignee
+        const existingAssignee = await prisma.taskAssignee.findUnique({
+          where: {
+            taskId_userId: {
+              taskId: id,
+              userId: session.user.id
+            }
+          }
+        });
+
+        // If not, add them
+        if (!existingAssignee) {
+          await prisma.taskAssignee.create({
+            data: {
+              taskId: id,
+              userId: session.user.id
+            }
+          });
+          console.log(`Added current user ${session.user.id} as assignee (fallback)`);
+
+          // Also check if the user is a team member of the project
+          const existingTeamMember = await prisma.teamMember.findUnique({
+            where: {
+              userId_projectId: {
+                userId: session.user.id,
+                projectId: task.projectId
+              }
+            }
+          });
+
+          // If not, add them as a team member
+          if (!existingTeamMember) {
+            await prisma.teamMember.create({
+              data: {
+                userId: session.user.id,
+                projectId: task.projectId,
+                role: 'member' // Default role
+              }
+            });
+            console.log(`Added current user ${session.user.id} as team member to project ${task.projectId} (fallback)`);
+          }
+        }
+      } catch (error) {
+        console.error('Error ensuring current user is assignee:', error);
+        // Continue with the task update even if this fails
+      }
     }
 
     // Update task

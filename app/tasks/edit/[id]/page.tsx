@@ -26,7 +26,7 @@ export default function EditTaskPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { projects } = useProjects(1, 100)
-  const { users } = useUsers(100)
+  const { users } = useUsers("", 100) // Empty search string, limit of 100 users
 
   const [task, setTask] = useState<any>(null)
   const [loading, setLoading] = useState(true)

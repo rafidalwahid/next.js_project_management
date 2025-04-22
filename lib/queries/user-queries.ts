@@ -208,9 +208,37 @@ export async function getUserProfile(id: string) {
     }
   }
 
+  // Get all projects the user is a member of via TeamMember table
+  const teamProjects = await prisma.project.findMany({
+    where: {
+      teamMembers: {
+        some: {
+          userId: id
+        }
+      }
+    },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      startDate: true,
+      endDate: true,
+      createdAt: true,
+    }
+  });
+
+  // Combine with any projects already in the user object
+  const allProjects = [...(user.projects || []), ...teamProjects];
+
+  // Remove duplicates by project ID
+  const uniqueProjects = allProjects.filter((project, index, self) =>
+    index === self.findIndex((p) => p.id === project.id)
+  );
+
   return {
     ...user,
     tasks: allTasks,
+    projects: uniqueProjects,
     stats
   };
 }

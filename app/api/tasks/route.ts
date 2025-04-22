@@ -282,16 +282,39 @@ export async function POST(req: NextRequest) {
         allAssigneeIds.push(session.user.id);
       }
 
-      // Create task assignees
+      // Create task assignees and add them as team members of the project
       if (allAssigneeIds.length > 0) {
         await Promise.all(
           allAssigneeIds.map(async (userId) => {
-            return prisma.taskAssignee.create({
+            // Create task assignee
+            await prisma.taskAssignee.create({
               data: {
                 taskId: task.id,
                 userId,
               }
             });
+
+            // Check if user is already a team member of the project
+            const existingTeamMember = await prisma.teamMember.findUnique({
+              where: {
+                userId_projectId: {
+                  userId,
+                  projectId
+                }
+              }
+            });
+
+            // If not, add them as a team member
+            if (!existingTeamMember) {
+              await prisma.teamMember.create({
+                data: {
+                  userId,
+                  projectId,
+                  role: 'member' // Default role
+                }
+              });
+              console.log(`Added user ${userId} as team member to project ${projectId} during task creation`);
+            }
           })
         );
 
