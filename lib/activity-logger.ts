@@ -1,0 +1,172 @@
+import prisma from '@/lib/prisma';
+
+/**
+ * Interface for activity log parameters
+ */
+interface ActivityLogParams {
+  userId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  description?: string;
+  projectId?: string;
+  taskId?: string;
+}
+
+/**
+ * Log an activity to the database
+ * @param params Activity log parameters
+ * @returns The created activity log
+ */
+export async function logActivity(params: ActivityLogParams) {
+  const { userId, action, entityType, entityId, description, projectId, taskId } = params;
+  
+  try {
+    const activity = await prisma.activity.create({
+      data: {
+        userId,
+        action,
+        entityType,
+        entityId,
+        description,
+        projectId,
+        taskId,
+      },
+    });
+    
+    return activity;
+  } catch (error) {
+    console.error('Failed to log activity:', error);
+    // Don't throw the error - logging should never break the main functionality
+    return null;
+  }
+}
+
+/**
+ * Get recent activities for a user
+ * @param userId User ID
+ * @param limit Number of activities to return
+ * @returns List of recent activities
+ */
+export async function getUserActivities(userId: string, limit = 10) {
+  try {
+    const activities = await prisma.activity.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+      include: {
+        project: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        task: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+    
+    return activities;
+  } catch (error) {
+    console.error('Failed to get user activities:', error);
+    return [];
+  }
+}
+
+/**
+ * Get recent activities for a project
+ * @param projectId Project ID
+ * @param limit Number of activities to return
+ * @returns List of recent activities
+ */
+export async function getProjectActivities(projectId: string, limit = 20) {
+  try {
+    const activities = await prisma.activity.findMany({
+      where: {
+        projectId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        task: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+    
+    return activities;
+  } catch (error) {
+    console.error('Failed to get project activities:', error);
+    return [];
+  }
+}
+
+/**
+ * Get recent activities for a specific entity
+ * @param entityType Entity type (e.g., 'Project', 'Task', 'TeamMember')
+ * @param entityId Entity ID
+ * @param limit Number of activities to return
+ * @returns List of recent activities
+ */
+export async function getEntityActivities(entityType: string, entityId: string, limit = 10) {
+  try {
+    const activities = await prisma.activity.findMany({
+      where: {
+        entityType,
+        entityId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        task: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+    
+    return activities;
+  } catch (error) {
+    console.error(`Failed to get activities for ${entityType} ${entityId}:`, error);
+    return [];
+  }
+}

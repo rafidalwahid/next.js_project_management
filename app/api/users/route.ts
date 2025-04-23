@@ -16,15 +16,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // For regular users, only return team members they work with
-    // Managers and admins can see all users
-    const userRole = session.user.role;
-    if (userRole !== 'admin' && userRole !== 'manager') {
-      // For regular users, we'll need to add logic to only show team members
-      // This is a simplified version - in a real app, you'd query for projects the user is part of
-      // and then find all users who are also part of those projects
-    }
-
     // Get query parameters
     const searchParams = req.nextUrl.searchParams;
     const skip = searchParams.get('skip') ? parseInt(searchParams.get('skip')!) : undefined;
@@ -36,6 +27,35 @@ export async function GET(req: NextRequest) {
     const role = searchParams.get('role');
     const search = searchParams.get('search');
     const projectId = searchParams.get('projectId');
+
+    // For regular users, only return team members they work with
+    // Managers and admins can see all users
+    const userRole = session.user.role;
+
+    // If not admin/manager and no specific project is requested,
+    // limit to users who are in the same projects as the current user
+    if (userRole !== 'admin' && userRole !== 'manager' && !projectId) {
+      // Get projects the user is part of
+      const userProjects = await prisma.teamMember.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        select: {
+          projectId: true,
+        },
+      });
+
+      const userProjectIds = userProjects.map(p => p.projectId);
+
+      // Only show users who are in the same projects
+      where.teams = {
+        some: {
+          projectId: {
+            in: userProjectIds,
+          },
+        },
+      };
+    }
 
     // Build the where clause
     const where: any = {};
@@ -90,18 +110,26 @@ export async function GET(req: NextRequest) {
 // POST /api/users - Create a new user
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication and authorization (admin only)
+    // Check authentication
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'admin') {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized: Admin access required' },
-        { status: 403 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
     // Parse request body
     const body = await req.json();
     const { name, email, password, role, image } = body;
+
+    // Only admins can set roles other than 'user'
+    if (role && role !== 'user' && session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only admins can create users with elevated roles' },
+        { status: 403 }
+      );
+    };
 
     // Validate required fields
     if (!name || !email) {

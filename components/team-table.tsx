@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from "lucide-react"
-import { useTeamMembers } from "@/hooks/use-data"
+import { useTeamMembers } from "@/hooks/use-team"
 import { Input } from "@/components/ui/input"
 import { teamApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "@/components/ui/spinner"
+import { RoleManagementDialog } from "@/components/team/role-management-dialog"
 
 interface TeamTableProps {
   projectId?: string
@@ -29,6 +30,8 @@ export function TeamTable({ projectId }: TeamTableProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const { teamMembers, isLoading, isError, mutate, pagination } = useTeamMembers(projectId, page, 10)
   const { toast } = useToast()
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false)
+  const [selectedTeamMember, setSelectedTeamMember] = useState<any>(null)
 
   // Handle member removal
   const handleRemoveMember = async (memberId: string) => {
@@ -100,7 +103,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
           Add Member
         </Button>
       </div>
-      
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -150,7 +153,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm">{new Date(member.joinedAt).toLocaleDateString()}</span>
+                    <span className="text-sm">{new Date(member.createdAt).toLocaleDateString()}</span>
                   </div>
                 </TableCell>
                 <TableCell>{member.taskCount || 0} tasks</TableCell>
@@ -163,11 +166,24 @@ export function TeamTable({ projectId }: TeamTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Change Role</DropdownMenuItem>
-                      <DropdownMenuItem>Assign Tasks</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => window.open(`/team/profile/${member.user?.id}`, '_blank')}
+                      >
+                        View Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedTeamMember(member)
+                          setRoleDialogOpen(true)
+                        }}
+                      >
+                        Change Role
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        Assign Tasks
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => handleRemoveMember(member.id)}
                       >
@@ -181,7 +197,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
           )}
         </TableBody>
       </Table>
-      
+
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center space-x-2 py-4">
           <Button
@@ -205,6 +221,14 @@ export function TeamTable({ projectId }: TeamTableProps) {
           </Button>
         </div>
       )}
+
+      {/* Role Management Dialog */}
+      <RoleManagementDialog
+        open={roleDialogOpen}
+        onOpenChange={setRoleDialogOpen}
+        teamMember={selectedTeamMember}
+        onRoleUpdated={mutate}
+      />
     </div>
   )
 }

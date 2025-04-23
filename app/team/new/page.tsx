@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { useProjects } from "@/hooks/use-data"
+import { useUsers } from "@/hooks/use-users"
 import { teamApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
@@ -23,6 +24,7 @@ export default function NewTeamMemberPage() {
   const router = useRouter()
   const { data: session } = useSession()
   const { projects } = useProjects(1, 100)
+  const { users } = useUsers()
   const { toast } = useToast()
 
   // Check if user has permission to add team members
@@ -37,9 +39,17 @@ export default function NewTeamMemberPage() {
     }
   }, [session, router, toast])
   const [memberData, setMemberData] = useState({
+    userId: "",
+    projectId: "",
+    role: "member",
+  })
+
+  const [createNewUser, setCreateNewUser] = useState(false)
+  const [newUserData, setNewUserData] = useState({
     name: "",
     email: "",
-    role: "",
+    password: "",
+    role: "user",
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,16 +65,66 @@ export default function NewTeamMemberPage() {
     e.preventDefault()
 
     try {
-      await teamApi.addTeamMember(memberData)
-      toast({
-        title: "Team member added",
-        description: "New team member has been added successfully",
-      })
+      if (createNewUser) {
+        // First create the user
+        if (!newUserData.name || !newUserData.email || !newUserData.password) {
+          toast({
+            title: "Validation Error",
+            description: "Please fill in all required fields for the new user",
+            variant: "destructive",
+          })
+          return
+        }
+
+        // Create the user via API
+        const response = await fetch('/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newUserData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to create user')
+        }
+
+        const userData = await response.json()
+
+        // Now add the newly created user to the team
+        await teamApi.addTeamMember({
+          ...memberData,
+          userId: userData.id,
+        })
+
+        toast({
+          title: "Success",
+          description: `User ${newUserData.name} created and added to the team`,
+        })
+      } else {
+        // Just add existing user to team
+        if (!memberData.userId || !memberData.projectId) {
+          toast({
+            title: "Validation Error",
+            description: "Please select both a user and a project",
+            variant: "destructive",
+          })
+          return
+        }
+
+        await teamApi.addTeamMember(memberData)
+        toast({
+          title: "Team member added",
+          description: "Team member has been added successfully",
+        })
+      }
+
       router.push("/team")
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add team member",
+        description: error.message || "Failed to add team member",
         variant: "destructive",
       })
     }
@@ -91,39 +151,131 @@ export default function NewTeamMemberPage() {
             <CardDescription>Enter the details of the new team member</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={memberData.name}
-                onChange={handleInputChange}
-                placeholder="Enter the member's name"
-              />
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={!createNewUser ? "default" : "outline"}
+                    onClick={() => setCreateNewUser(false)}
+                    className="w-full"
+                  >
+                    Existing User
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={createNewUser ? "default" : "outline"}
+                    onClick={() => setCreateNewUser(true)}
+                    className="w-full"
+                  >
+                    Create New User
+                  </Button>
+                </div>
+              </div>
+
+              {!createNewUser ? (
+                <div className="grid gap-2">
+                  <Label htmlFor="userId">Select User</Label>
+                  <Select name="userId" onValueChange={(value) => setMemberData(prev => ({ ...prev, userId: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a user" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name || user.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-4 border rounded-md p-4">
+                  <h3 className="text-sm font-medium">New User Information</h3>
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={newUserData.name}
+                      onChange={(e) => setNewUserData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter user's name"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={newUserData.email}
+                      onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="Enter user's email"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={newUserData.password}
+                      onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
+                      placeholder="Enter password"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="userRole">User Role</Label>
+                    <Select
+                      name="userRole"
+                      defaultValue="user"
+                      onValueChange={(value) => setNewUserData(prev => ({ ...prev, role: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">Regular User</SelectItem>
+                        {session?.user?.role === "admin" && (
+                          <>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="admin">Administrator</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={memberData.email}
-                onChange={handleInputChange}
-                placeholder="Enter the email"
-              />
+              <Label htmlFor="projectId">Project</Label>
+              <Select name="projectId" onValueChange={(value) => setMemberData(prev => ({ ...prev, projectId: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects?.projects?.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
-              <Select onValueChange={handleSelectChange}>
+              <Select name="role" defaultValue="member" onValueChange={handleSelectChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select the role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">Regular User</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
                   {session?.user?.role === "admin" && (
                     <>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="owner">Owner</SelectItem>
                     </>
                   )}
                 </SelectContent>

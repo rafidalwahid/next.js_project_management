@@ -33,6 +33,7 @@ export async function getUsers(args: {
   where?: Prisma.UserWhereInput;
   includeProjects?: boolean;
   includeTasks?: boolean;
+  includeTeams?: boolean;
 } = {}) {
   const {
     skip = 0,
@@ -40,7 +41,8 @@ export async function getUsers(args: {
     orderBy = { createdAt: 'desc' },
     where = {},
     includeProjects = false,
-    includeTasks = false
+    includeTasks = false,
+    includeTeams = false
   } = args;
 
   const select: Prisma.UserSelect = {
@@ -84,6 +86,23 @@ export async function getUsers(args: {
             title: true,
           }
         }
+      }
+    };
+  }
+
+  // Include team memberships if requested
+  if (includeTeams) {
+    select.teams = {
+      select: {
+        id: true,
+        role: true,
+        project: {
+          select: {
+            id: true,
+            title: true,
+          }
+        },
+        createdAt: true,
       }
     };
   }

@@ -303,11 +303,18 @@ export const taskApi = {
  * Team API functions
  */
 export const teamApi = {
-  getTeamMembers: async (projectId?: string, page = 1, limit = 10) => {
+  // Generic fetcher for SWR
+  fetcher: async (url: string) => {
+    return fetchAPI(url);
+  },
+
+  getTeamMembers: async (projectId?: string, page = 1, limit = 10, search?: string, role?: string) => {
     const params = new URLSearchParams();
     if (projectId) params.append('projectId', projectId);
     params.append('page', page.toString());
     params.append('limit', limit.toString());
+    if (search) params.append('search', search);
+    if (role) params.append('role', role);
 
     return fetchAPI(`/api/team?${params.toString()}`);
   },
@@ -324,16 +331,28 @@ export const teamApi = {
   },
 
   updateTeamMember: async (id: string, teamMember: any) => {
-    return fetchAPI(`/api/team/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(teamMember),
-    });
+    console.log(`Updating team member ${id} with data:`, teamMember);
+    try {
+      const result = await fetchAPI(`/api/team/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(teamMember),
+      });
+      console.log('Team member update result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      throw error;
+    }
   },
 
   removeTeamMember: async (id: string) => {
     return fetchAPI(`/api/team/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  checkProjectMembership: async (projectId: string) => {
+    return fetchAPI(`/api/projects/${projectId}/membership`);
   },
 };
 

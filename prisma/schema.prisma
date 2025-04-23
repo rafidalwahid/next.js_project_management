@@ -247,6 +247,9 @@ model TeamMember {
   @@unique([projectId, userId])
   @@index([projectId])
   @@index([userId])
+  @@index([role])
+  @@index([projectId, role])
+  @@index([userId, role])
   @@map("team_member")
 }
 

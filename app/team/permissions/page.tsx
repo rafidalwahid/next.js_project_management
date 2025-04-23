@@ -157,8 +157,8 @@ export default function RolePermissionsPage() {
     })
   }
 
-  const [allPermissions, setAllPermissions] = useState<any[]>([])
-  const [allRoles, setAllRoles] = useState<any[]>([])
+  const [allPermissions, setAllPermissions] = useState<any[]>(PERMISSIONS)
+  const [allRoles, setAllRoles] = useState<any[]>(ROLES)
   const [loading, setLoading] = useState(true)
   const [newPermissionDialogOpen, setNewPermissionDialogOpen] = useState(false)
   const [newPermissionData, setNewPermissionData] = useState({
@@ -179,40 +179,60 @@ export default function RolePermissionsPage() {
         setLoading(true)
 
         // Fetch all roles first
-        const allRolesResponse = await fetch("/api/roles")
-        if (!allRolesResponse.ok) {
-          throw new Error("Failed to fetch all roles")
+        try {
+          const allRolesResponse = await fetch("/api/roles")
+          if (allRolesResponse.ok) {
+            const allRolesData = await allRolesResponse.json()
+            setAllRoles(allRolesData.length > 0 ? allRolesData : ROLES)
+          } else {
+            console.warn("Using default roles due to API error")
+            setAllRoles(ROLES)
+          }
+        } catch (error) {
+          console.warn("Using default roles due to API error:", error)
+          setAllRoles(ROLES)
         }
-        const allRolesData = await allRolesResponse.json()
-        setAllRoles(allRolesData)
 
         // Fetch all permissions
-        const allPermissionsResponse = await fetch("/api/permissions")
-        if (!allPermissionsResponse.ok) {
-          throw new Error("Failed to fetch all permissions")
+        try {
+          const allPermissionsResponse = await fetch("/api/permissions")
+          if (allPermissionsResponse.ok) {
+            const allPermissionsData = await allPermissionsResponse.json()
+            setAllPermissions(allPermissionsData.length > 0 ? allPermissionsData : PERMISSIONS)
+          } else {
+            console.warn("Using default permissions due to API error")
+            setAllPermissions(PERMISSIONS)
+          }
+        } catch (error) {
+          console.warn("Using default permissions due to API error:", error)
+          setAllPermissions(PERMISSIONS)
         }
-        const allPermissionsData = await allPermissionsResponse.json()
-        setAllPermissions(allPermissionsData)
 
         // Fetch permissions matrix
-        const permissionsResponse = await fetch("/api/roles/permissions")
-        if (!permissionsResponse.ok) {
-          throw new Error("Failed to fetch permissions")
+        try {
+          const permissionsResponse = await fetch("/api/roles/permissions")
+          if (permissionsResponse.ok) {
+            const permissionsData = await permissionsResponse.json()
+            setRolePermissions(Object.keys(permissionsData).length > 0 ? permissionsData : PERMISSION_MATRIX)
+          } else {
+            console.warn("Using default permission matrix due to API error")
+            setRolePermissions(PERMISSION_MATRIX)
+          }
+        } catch (error) {
+          console.warn("Using default permission matrix due to API error:", error)
+          setRolePermissions(PERMISSION_MATRIX)
         }
-        const permissionsData = await permissionsResponse.json()
-        setRolePermissions(permissionsData)
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error("Error in fetchData:", error)
         toast({
           title: "Error",
           description: error instanceof Error ? error.message : "Failed to load role permissions",
           variant: "destructive"
         })
         // Set default values if API calls fail
-        setAllRoles(prevRoles => prevRoles.length ? prevRoles : ROLES)
-        setRolePermissions(prevPermissions =>
-          Object.keys(prevPermissions).length ? prevPermissions : PERMISSION_MATRIX
-        )
+        setAllRoles(ROLES)
+        setAllPermissions(PERMISSIONS)
+        setRolePermissions(PERMISSION_MATRIX)
       } finally {
         setLoading(false)
       }
@@ -221,7 +241,7 @@ export default function RolePermissionsPage() {
     if (session?.user?.id) {
       fetchData()
     }
-  }, [session, toast, allRoles.length])
+  }, [session, toast])
 
   // Save role permissions
   const saveRolePermissions = async () => {
@@ -471,7 +491,7 @@ export default function RolePermissionsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Permission</TableHead>
-                      {ROLES.map((role) => (
+                      {allRoles.map((role) => (
                         <TableHead key={role.id} className="text-center">
                           {getRoleBadge(role.id)}
                         </TableHead>
@@ -479,7 +499,7 @@ export default function RolePermissionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {PERMISSIONS.map((permission) => (
+                    {allPermissions.map((permission) => (
                       <TableRow key={permission.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
@@ -496,7 +516,7 @@ export default function RolePermissionsPage() {
                             </TooltipProvider>
                           </div>
                         </TableCell>
-                        {ROLES.map((role) => (
+                        {allRoles.map((role) => (
                           <TableCell key={role.id} className="text-center">
                             {rolePermissions[role.id]?.includes(permission.id) ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
@@ -579,13 +599,13 @@ export default function RolePermissionsPage() {
                         {allRoles.map((role) => (
                           <TableCell key={role.id} className="text-center">
                             <Button
-                              variant={rolePermissions[role.name]?.includes(permission.name) ? "default" : "outline"}
+                              variant={rolePermissions[role.id]?.includes(permission.id) ? "default" : "outline"}
                               size="sm"
-                              className={rolePermissions[role.name]?.includes(permission.name) ? "bg-green-500 hover:bg-green-600" : ""}
-                              onClick={() => togglePermission(role.name, permission.name)}
-                              disabled={role.isSystem && permission.isSystem}
+                              className={rolePermissions[role.id]?.includes(permission.id) ? "bg-green-500 hover:bg-green-600" : ""}
+                              onClick={() => togglePermission(role.id, permission.id)}
+                              disabled={role.id === "admin"} // Admin always has all permissions
                             >
-                              {rolePermissions[role.name]?.includes(permission.name) ? (
+                              {rolePermissions[role.id]?.includes(permission.id) ? (
                                 <CheckCircle2 className="h-4 w-4" />
                               ) : (
                                 <XCircle className="h-4 w-4" />
