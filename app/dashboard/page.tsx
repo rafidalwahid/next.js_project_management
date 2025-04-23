@@ -1,117 +1,90 @@
-import Link from "next/link"
-import { BarChart3, Calendar, CheckSquare, Clock, Plus, Users } from "lucide-react"
+'use client';
 
-import { Button } from "@/components/ui/button"
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  Briefcase
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DashboardNav } from "@/components/dashboard-nav"
-import { UserNav } from "@/components/user-nav"
 import { ProjectCard } from "@/components/project-card"
-import { RecentActivity } from "@/components/recent-activity"
+import { Progress } from "@/components/ui/progress"
+import { useDashboardStats } from "@/hooks/use-dashboard-stats"
+import { Button } from "@/components/ui/button"
 
 export default function DashboardPage() {
+  const { stats, isLoading, isError } = useDashboardStats();
+
+  // Remove loading state since we have fallback data
+  if (isError) {
+    return <div>Error loading dashboard data</div>;
+  }
+
   return (
-    <>
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
       </div>
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="w-full justify-start overflow-x-auto">
+
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="bg-muted/50 p-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="attendance" asChild>
-            <Link href="/attendance/dashboard">Attendance</Link>
-          </TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          {/* Dashboard Stats Cards */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-                <CheckSquare className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">+2 since last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">34</div>
-                <p className="text-xs text-muted-foreground">-4 since last week</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Team Members</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">+4 since last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">7</div>
-                <p className="text-xs text-muted-foreground">+2 since last week</p>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium text-muted-foreground">Total Projects</span>
+                    <span className="text-2xl font-bold">{stats.totalProjects}</span>
+                  </div>
+                  <div className="p-3 bg-primary/10 text-primary rounded-full">
+                    <Briefcase className="h-5 w-5" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className={`flex items-center ${stats.projectGrowth >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {stats.projectGrowth >= 0 ? (
+                      <ArrowUpRight className="h-4 w-4" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4" />
+                    )}
+                    <span className="text-sm font-medium">{Math.abs(stats.projectGrowth)}%</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Recent Projects</CardTitle>
-                <CardDescription>You currently have 12 active projects</CardDescription>
+
+          {/* Projects Section */}
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-7">
+            <Card className="col-span-1 lg:col-span-4 hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+                <div>
+                  <CardTitle>Recent Projects</CardTitle>
+                  <CardDescription>
+                    You have {stats.totalProjects} active projects
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm">View All</Button>
               </CardHeader>
-              <CardContent className="grid gap-4">
-                <ProjectCard
-                  title="Website Redesign"
-                  description="Complete update of the corporate website"
-                  progress={75}
-                  dueDate="15 Mar 2025"
-                  team={5}
-                  tasks={24}
-                  completedTasks={18}
-                />
-                <ProjectCard
-                  title="CRM Implementation"
-                  description="Integration of the new CRM system with existing systems"
-                  progress={45}
-                  dueDate="30 Abr 2025"
-                  team={8}
-                  tasks={42}
-                  completedTasks={19}
-                />
-                <ProjectCard
-                  title="Q2 Marketing Campaign"
-                  description="Planning and execution of the second quarter campaign"
-                  progress={20}
-                  dueDate="10 May 2025"
-                  team={4}
-                  tasks={18}
-                  completedTasks={4}
-                />
-              </CardContent>
-            </Card>
-            <Card className="col-span-1 lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest updates in your projects</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RecentActivity />
+              <CardContent className="space-y-6">
+                {stats.recentProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description || ''}
+                    progress={project.progress}
+                    team={project.teamCount}
+                    tasks={project.taskCount}
+                    completedTasks={project.completedTaskCount}
+                  />
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -194,6 +167,6 @@ export default function DashboardPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </>
+    </div>
   )
 }

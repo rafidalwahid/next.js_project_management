@@ -1,15 +1,19 @@
+import { GalleryVerticalEnd } from "lucide-react"
+
+import { LoginForm } from "@/components/login-form"
+
 export default function LoginPage() {
   return (
-    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Welcome to Project Management
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Sign in to your account to continue
-        </p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <a href="/" className="flex items-center gap-2 self-center font-medium">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="h-4 w-4" />
+          </div>
+          Project Management
+        </a>
+        <LoginForm />
       </div>
-      {/* Rest of your login form */}
     </div>
   )
 }

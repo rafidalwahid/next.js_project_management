@@ -1,25 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle2, Clock, Edit, MoreHorizontal, Trash, Search, Filter } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { useProjects } from "@/hooks/use-data"
-import { Input } from "@/components/ui/input"
-import { projectApi } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "@/components/ui/spinner"
+import { useToast } from "@/components/ui/use-toast"
+import { Clock } from "lucide-react"
+import { useProjects } from "@/hooks/use-projects"
 
 export function ProjectTable() {
   const [page, setPage] = useState(1)
@@ -35,8 +23,6 @@ export function ProjectTable() {
     const totalTasks = project._count.tasks || 0
     if (totalTasks === 0) return 0
     
-    // If we don't have completed tasks count, default to 0
-    // In a real application, this would come from the API
     return Math.round((project.completedTasks || 0) / totalTasks * 100)
   }
 
@@ -228,3 +214,4 @@ export function ProjectTable() {
     </div>
   )
 }
+

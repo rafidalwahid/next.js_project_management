@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, Clock, MapPin, Search, Filter, ChevronLeft, ChevronRight, Laptop, Info, ExternalLink } from "lucide-react"
+import { Calendar, Clock, MapPin, Search, Filter, ChevronLeft, ChevronRight, Laptop, Info, ExternalLink, MoreHorizontal } from "lucide-react"
 import { startOfWeek, endOfWeek } from "date-fns"
 import { getDeviceInfo } from "@/lib/geo-utils"
 import { LocationMap } from "@/components/attendance/location-map"
@@ -20,9 +20,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { useIsMobile } from "@/hooks/use-mobile"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function AttendanceHistory() {
   const { toast } = useToast()
+  const isMobile = useIsMobile()
   const [loading, setLoading] = useState(true)
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([])
   const [groupedRecords, setGroupedRecords] = useState<any[]>([])
@@ -147,8 +155,8 @@ export function AttendanceHistory() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <form onSubmit={handleSearch} className="flex items-center gap-4 flex-1">
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -164,7 +172,7 @@ export function AttendanceHistory() {
           </Button>
         </form>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-end md:self-auto">
           <span className="text-sm whitespace-nowrap">Group by:</span>
           <select
             className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -197,13 +205,14 @@ export function AttendanceHistory() {
             </div>
           ) : groupBy ? (
             <>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Period</TableHead>
                     <TableHead>Check-ins</TableHead>
-                    <TableHead>Total Hours</TableHead>
-                    <TableHead>Avg. Hours/Day</TableHead>
+                    {!isMobile && <TableHead>Total Hours</TableHead>}
+                    {!isMobile && <TableHead>Avg. Hours/Day</TableHead>}
                     <TableHead>Details</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -224,12 +233,16 @@ export function AttendanceHistory() {
                       <TableCell>
                         {group.checkInCount} check-ins
                       </TableCell>
-                      <TableCell>
-                        {group.totalHours.toFixed(2)} hours
-                      </TableCell>
-                      <TableCell>
-                        {group.averageHoursPerDay.toFixed(2)} hours/day
-                      </TableCell>
+                      {!isMobile && (
+                        <TableCell>
+                          {group.totalHours.toFixed(2)} hours
+                        </TableCell>
+                      )}
+                      {!isMobile && (
+                        <TableCell>
+                          {group.averageHoursPerDay.toFixed(2)} hours/day
+                        </TableCell>
+                      )}
                       <TableCell>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -309,17 +322,20 @@ export function AttendanceHistory() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </>
           ) : (
             <>
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>Check In</TableHead>
-                    <TableHead>Check Out</TableHead>
-                    <TableHead>Duration</TableHead>
+                    {!isMobile && <TableHead>Check Out</TableHead>}
+                    {!isMobile && <TableHead>Duration</TableHead>}
                     <TableHead>Location</TableHead>
+                    {isMobile && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -331,14 +347,18 @@ export function AttendanceHistory() {
                       <TableCell>
                         {safeFormat(record.checkInTime, "h:mm a")}
                       </TableCell>
-                      <TableCell>
-                        {record.checkOutTime
-                          ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
-                          : "In progress"}
-                      </TableCell>
-                      <TableCell>
-                        {calculateDuration(record.checkInTime, record.checkOutTime)}
-                      </TableCell>
+                      {!isMobile && (
+                        <TableCell>
+                          {record.checkOutTime
+                            ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
+                            : "In progress"}
+                        </TableCell>
+                      )}
+                      {!isMobile && (
+                        <TableCell>
+                          {calculateDuration(record.checkInTime, record.checkOutTime)}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -469,12 +489,36 @@ export function AttendanceHistory() {
                           </DialogContent>
                         </Dialog>
                       </TableCell>
+                      {isMobile && (
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Clock className="h-3.5 w-3.5 mr-2" />
+                                {record.checkOutTime
+                                  ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
+                                  : "In progress"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Info className="h-3.5 w-3.5 mr-2" />
+                                {calculateDuration(record.checkInTime, record.checkOutTime)}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
 
-              <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
                 <div className="text-sm text-muted-foreground">
                   Page {page} of {totalPages}
                 </div>
@@ -485,8 +529,8 @@ export function AttendanceHistory() {
                     onClick={handlePreviousPage}
                     disabled={page <= 1}
                   >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    {!isMobile && "Previous"}
                   </Button>
                   <Button
                     variant="outline"
@@ -494,8 +538,8 @@ export function AttendanceHistory() {
                     onClick={handleNextPage}
                     disabled={page >= totalPages}
                   >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
+                    {!isMobile && "Next"}
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
               </div>

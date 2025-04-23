@@ -137,6 +137,7 @@ model Task {
   order        Int       @default(0) // Explicit field for ordering tasks
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  completed    Boolean   @default(false)
 
   // Relations
   project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)

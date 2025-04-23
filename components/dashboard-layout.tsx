@@ -8,7 +8,7 @@ import { PanelLeft, PanelLeftClose, Menu } from "lucide-react"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 
 interface DashboardLayoutProps {
@@ -16,7 +16,14 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  // Use localStorage to persist sidebar state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarCollapsed')
+      return saved ? JSON.parse(saved) : false
+    }
+    return false
+  })
   const [mobileOpen, setMobileOpen] = useState(false)
   const isMobile = useIsMobile()
 
@@ -30,7 +37,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     if (isMobile) {
       setMobileOpen(!mobileOpen)
     } else {
-      setSidebarCollapsed(!sidebarCollapsed)
+      const newState = !sidebarCollapsed
+      setSidebarCollapsed(newState)
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebarCollapsed', JSON.stringify(newState))
+      }
     }
   }
 
@@ -55,25 +67,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex-1 flex">
         {/* Mobile Sidebar */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent 
-            side="left" 
+          <SheetContent
+            side="left"
             className="w-[280px] p-0"
           >
             <div className="flex flex-col h-full">
               <div className="flex h-14 items-center border-b px-6 bg-primary text-primary-foreground">
-                <span className="font-bold text-lg">Project Management</span>
+                <SheetTitle className="font-bold text-lg text-primary-foreground">Project Management</SheetTitle>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto">
                 <div className="flex flex-col gap-2 p-4">
                   <DashboardNav collapsed={false} />
                 </div>
               </div>
-              
+
               <div className="border-t bg-muted/50 p-4">
-                <UserNav 
-                  showName={true} 
-                  className="w-full p-2 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors" 
+                <UserNav
+                  showName={true}
+                  className="w-full p-2 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                 />
               </div>
             </div>
@@ -128,7 +140,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             "border-t bg-muted/50",
             sidebarCollapsed ? "p-2" : "p-4"
           )}>
-            <UserNav 
+            <UserNav
               compact={sidebarCollapsed}
               showName={!sidebarCollapsed}
               className={cn(

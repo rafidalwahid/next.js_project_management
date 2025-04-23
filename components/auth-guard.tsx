@@ -28,9 +28,9 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     // Check role-based access if roles are specified
     if (
       status === "authenticated" &&
-      allowedRoles && 
-      allowedRoles.length > 0 && 
-      session?.user?.role && 
+      allowedRoles &&
+      allowedRoles.length > 0 &&
+      session?.user?.role &&
       !allowedRoles.includes(session.user.role)
     ) {
       // User is logged in but doesn't have the required role
@@ -38,20 +38,20 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
   }, [status, router, pathname, session, allowedRoles])
 
-  // Show loading state while checking authentication
+  // Show minimal loading state while checking authentication
   if (status === "loading") {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <Spinner size="lg" />
+        <Spinner size="md" />
       </div>
     )
   }
 
   // Show children if user is authenticated and has the required roles (if any)
   if (
-    status === "authenticated" && 
-    (!allowedRoles || 
-     allowedRoles.length === 0 || 
+    status === "authenticated" &&
+    (!allowedRoles ||
+     allowedRoles.length === 0 ||
      (session?.user?.role && allowedRoles.includes(session.user.role)))
   ) {
     return <>{children}</>
@@ -64,4 +64,4 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
   // Default - show nothing while redirecting
   return null
-} 
+}
