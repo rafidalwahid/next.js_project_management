@@ -4,9 +4,12 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { Button } from "@/components/ui/button"
-import { PanelLeft, PanelLeftClose } from "lucide-react"
-import { useState } from "react"
+import { PanelLeft, PanelLeftClose, Menu } from "lucide-react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Separator } from "@/components/ui/separator"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -14,65 +17,140 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const isMobile = useIsMobile()
 
-  // No need for header padding updates anymore
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileOpen(false)
+    }
+  }, [isMobile])
 
   const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed)
+    if (isMobile) {
+      setMobileOpen(!mobileOpen)
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed)
+    }
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <div className="flex-1 relative">
-        <aside className="fixed left-0 top-0 bottom-0 z-30 hidden border-r bg-muted/40 md:flex flex-col h-screen overflow-hidden" style={{ width: sidebarCollapsed ? '64px' : '240px' }}>
-          <div className={cn(
-            "flex items-center h-14 border-b bg-muted/60 backdrop-blur",
-            sidebarCollapsed ? "justify-center px-2" : "px-4"
-          )}>
-            {sidebarCollapsed ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center justify-center h-8 w-8 p-0 rounded-md bg-background/80 hover:bg-background"
-                onClick={toggleSidebar}
-                aria-label="Panel Left Open"
-              >
-                <PanelLeft className="h-4 w-4" />
-                <span className="sr-only">Panel Left Open</span>
-              </Button>
-            ) : (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center">
-                  <span className="font-semibold">Project Management</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center justify-center h-8 w-8 p-0 rounded-md bg-background/80 hover:bg-background ml-2"
-                  onClick={toggleSidebar}
-                  aria-label="Panel Left Close"
-                >
-                  <PanelLeftClose className="h-4 w-4" />
-                  <span className="sr-only">Panel Left Close</span>
-                </Button>
+    <div className="min-h-screen flex flex-col">
+      {/* Mobile Header */}
+      <header className="sticky top-0 z-50 w-full md:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-14 items-center px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-3"
+            onClick={toggleSidebar}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+          <span className="font-semibold">Project Management</span>
+        </div>
+      </header>
+
+      <div className="flex-1 flex">
+        {/* Mobile Sidebar */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent 
+            side="left" 
+            className="w-[280px] p-0"
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex h-14 items-center border-b px-6 bg-primary text-primary-foreground">
+                <span className="font-bold text-lg">Project Management</span>
               </div>
-            )}
-          </div>
-          <div className="flex-1 overflow-y-auto py-2 scrollbar-thin">
-            <DashboardNav collapsed={sidebarCollapsed} />
-          </div>
-          <div className="border-t bg-muted/60 backdrop-blur">
+              
+              <div className="flex-1 overflow-y-auto">
+                <div className="flex flex-col gap-2 p-4">
+                  <DashboardNav collapsed={false} />
+                </div>
+              </div>
+              
+              <div className="border-t bg-muted/50 p-4">
+                <UserNav 
+                  showName={true} 
+                  className="w-full p-2 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors" 
+                />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Desktop Sidebar */}
+        <aside
+          className={cn(
+            "fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r",
+            sidebarCollapsed ? "w-[64px]" : "w-[280px]"
+          )}
+        >
+          <div className="flex h-14 items-center border-b px-4 bg-primary text-primary-foreground">
             <div className={cn(
-              "flex items-center py-3",
-              sidebarCollapsed ? "justify-center px-2" : "px-4 justify-start"
+              "flex w-full items-center",
+              sidebarCollapsed ? "justify-center" : "justify-between"
             )}>
-              <UserNav compact={sidebarCollapsed} showName={!sidebarCollapsed} />
+              {!sidebarCollapsed && (
+                <span className="font-bold text-lg truncate">
+                  Project Management
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10 rounded-md"
+              >
+                {sidebarCollapsed ? (
+                  <PanelLeft className="h-4 w-4" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                </span>
+              </Button>
             </div>
           </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <div className={cn(
+              "flex flex-col gap-2",
+              sidebarCollapsed ? "px-2 py-4" : "p-4"
+            )}>
+              <DashboardNav collapsed={sidebarCollapsed} />
+            </div>
+          </div>
+
+          <div className={cn(
+            "border-t bg-muted/50",
+            sidebarCollapsed ? "p-2" : "p-4"
+          )}>
+            <UserNav 
+              compact={sidebarCollapsed}
+              showName={!sidebarCollapsed}
+              className={cn(
+                "w-full hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                sidebarCollapsed ? "p-2" : "p-3"
+              )}
+            />
+          </div>
         </aside>
-        <main className="flex flex-col gap-6 p-6 transition-all duration-300 ease-in-out min-h-screen" style={{ marginLeft: sidebarCollapsed ? '64px' : '240px' }}>
-          <Breadcrumbs />
-          {children}
+
+        {/* Main Content */}
+        <main
+          className={cn(
+            "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out",
+            isMobile ? "w-full mt-14" : "",
+            !isMobile && (sidebarCollapsed ? "ml-[64px]" : "ml-[280px]")
+          )}
+        >
+          <div className="flex-1 p-4 md:p-6 space-y-6">
+            <Breadcrumbs />
+            {children}
+          </div>
         </main>
       </div>
     </div>

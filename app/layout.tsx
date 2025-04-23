@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ProjectPro",
+  title: "Project Management",
   description: "Enterprise Project Management System",
   generator: 'v0.dev'
 }

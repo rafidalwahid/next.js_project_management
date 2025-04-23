@@ -1,0 +1,9 @@
+{
+  "name": "Project Management",
+  "short_name": "Project Mgmt",
+  "description": "Enterprise Project Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000"
+}

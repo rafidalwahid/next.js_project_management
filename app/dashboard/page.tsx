@@ -14,10 +14,10 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
       </div>
-      <Tabs defaultValue="overview">
-        <TabsList>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -25,9 +25,9 @@ export default function DashboardPage() {
             <Link href="/attendance/dashboard">Attendance</Link>
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-4">
           {/* Dashboard Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
@@ -69,8 +69,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+            <Card className="col-span-1 lg:col-span-4">
               <CardHeader>
                 <CardTitle>Recent Projects</CardTitle>
                 <CardDescription>You currently have 12 active projects</CardDescription>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                 />
               </CardContent>
             </Card>
-            <Card className="col-span-3">
+            <Card className="col-span-1 lg:col-span-3">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
                 <CardDescription>Latest updates in your projects</CardDescription>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="analytics" className="space-y-4">
-          <Card>
+          <Card className="col-span-1">
             <CardHeader>
               <CardTitle>Project Performance</CardTitle>
               <CardDescription>Analysis of functionality and usability metrics</CardDescription>

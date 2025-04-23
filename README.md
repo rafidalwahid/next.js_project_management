@@ -1,4 +1,4 @@
-# ProjectPro - Project Management System
+# Project Management System
 
 A comprehensive project management application built with Next.js, Prisma, and MySQL.
 

@@ -85,13 +85,12 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
       collapsed ? "px-2" : "px-3"
     )}>
       {navItems.map((item) => {
-        // Special handling for Attendance with dropdown
+        const Icon = item.icon
+        const isActive = pathname === item.href
+
         if (item.title === "Attendance") {
           return <AttendanceNavItem key={item.href} collapsed={collapsed} />
         }
-
-        const Icon = item.icon
-        const isActive = pathname === item.href
 
         return (
           <Link
