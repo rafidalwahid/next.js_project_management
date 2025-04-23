@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { MoreHorizontal, Edit, Trash, User, Mail, Shield, Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { MoreHorizontal, Edit, Trash, User, Mail, Shield, Calendar, ShieldCheck } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,9 @@ interface UserCardProps {
 
 export function UserCard({ user, onDelete }: UserCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const { data: session } = useSession()
+  const currentUserRole = session?.user?.role || "user"
+  const currentUserId = session?.user?.id
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -97,18 +101,32 @@ export function UserCard({ user, onDelete }: UserCardProps) {
                   View Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit User
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => onDelete(user.id)}
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete User
-              </DropdownMenuItem>
+              {(currentUserRole === "admin" || currentUserRole === "manager") && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/team/edit/${user.id}`} className="cursor-pointer">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit User
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {currentUserRole === "admin" && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/team/roles" className="cursor-pointer">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Manage Role
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => onDelete(user.id)}
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete User
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

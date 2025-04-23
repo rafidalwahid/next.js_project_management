@@ -47,14 +47,14 @@ export async function GET(
     // Check if user is requesting their own profile or if they are an admin
     const isOwnProfile = session.user.id === userId;
     const isAdmin = session.user.role === 'admin';
-    
+
     if (!isOwnProfile && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied: You can only view your own profile or you need admin privileges' },
         { status: 403 }
       );
     }
-    
+
     // Get detailed profile or just user info
     const user = includeProfile
       ? await getUserProfile(userId)
@@ -95,11 +95,11 @@ export async function PUT(
     // Await the params
     const params = await Promise.resolve(context.params);
     const userId = params.id;
-    
+
     // Check if user is updating their own profile or if they are an admin
     const isOwnProfile = session.user.id === userId;
     const isAdmin = session.user.role === 'admin';
-    
+
     if (!isOwnProfile && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied: You can only update your own profile or you need admin privileges' },
@@ -109,16 +109,26 @@ export async function PUT(
 
     // Parse request body
     const body = await req.json();
-    
+
+    // If updating role, only admin can do it
+    if (body.role && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied: Only admins can change user roles' },
+        { status: 403 }
+      );
+    }
+
     // If not an admin, restrict fields that can be updated
     if (!isAdmin) {
-      // Regular users can only update their name, bio, and password
-      const { name, password, bio } = body;
-      const updatedUser = await updateUser(userId, { name, password, bio });
+      // Regular users can only update their profile fields but not role or other sensitive fields
+      const { name, password, bio, jobTitle, department, location, phone, skills, socialLinks, image } = body;
+      const updatedUser = await updateUser(userId, {
+        name, password, bio, jobTitle, department, location, phone, skills, socialLinks, image
+      });
       return NextResponse.json(updatedUser);
     }
-    
-    // Admin can update all fields
+
+    // Admin can update all fields including role
     const updatedUser = await updateUser(userId, body);
     return NextResponse.json(updatedUser);
   } catch (error: any) {
@@ -148,7 +158,7 @@ export async function DELETE(
     // Await the params
     const params = await Promise.resolve(context.params);
     const userId = params.id;
-    
+
     // Don't allow deleting the current user
     if (session.user.id === userId) {
       return NextResponse.json(
@@ -156,10 +166,10 @@ export async function DELETE(
         { status: 400 }
       );
     }
-    
+
     // Delete user
     await deleteUser(userId);
-    
+
     return NextResponse.json({ success: true, message: 'User deleted successfully' });
   } catch (error: any) {
     console.error('Error deleting user:', error);

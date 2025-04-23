@@ -43,7 +43,8 @@ export default function TeamPage() {
   }
   const { toast } = useToast()
   const router = useRouter()
-  const { status } = useSession()
+  const { data: session, status } = useSession()
+  const userRole = session?.user?.role || "user"
 
   useEffect(() => {
     // If user is not authenticated, redirect to login
@@ -95,10 +96,14 @@ export default function TeamPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
         <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
         <div className="flex items-center gap-2">
-          <Button className="bg-black hover:bg-black/90 text-white">
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Member
-          </Button>
+          {(userRole === "admin" || userRole === "manager") && (
+            <Link href="/team/new">
+              <Button className="bg-black hover:bg-black/90 text-white">
+                <Plus className="mr-2 h-4 w-4" />
+                Add New Member
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

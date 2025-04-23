@@ -17,6 +17,7 @@ import {
 }
 from "lucide-react"
 import { AttendanceNavItem } from "@/components/attendance/attendance-nav-item"
+import { TeamNavItem } from "@/components/team/team-nav-item"
 
 function getNavItems(userId?: string) {
   return [
@@ -39,6 +40,7 @@ function getNavItems(userId?: string) {
       title: "Team",
       href: "/team",
       icon: Users,
+      isExpandable: true,
     },
     {
       title: "Attendance",
@@ -51,11 +53,7 @@ function getNavItems(userId?: string) {
       href: "/resources",
       icon: LibraryBig,
     },
-    {
-      title: "My Profile",
-      href: userId ? `/profile/${userId}` : "/profile",
-      icon: UserCircle,
-    },
+
     {
       title: "Settings",
       href: "/settings",
@@ -90,6 +88,10 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
 
         if (item.title === "Attendance") {
           return <AttendanceNavItem key={item.href} collapsed={collapsed} />
+        }
+
+        if (item.title === "Team") {
+          return <TeamNavItem key={item.href} collapsed={collapsed} />
         }
 
         return (

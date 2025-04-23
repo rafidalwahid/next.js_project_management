@@ -2,8 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { BarChart3, Save, X } from "lucide-react"
 
@@ -20,8 +21,21 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function NewTeamMemberPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const { projects } = useProjects(1, 100)
   const { toast } = useToast()
+
+  // Check if user has permission to add team members
+  useEffect(() => {
+    if (session?.user?.role !== "admin" && session?.user?.role !== "manager") {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to add team members",
+        variant: "destructive"
+      })
+      router.push("/team")
+    }
+  }, [session, router, toast])
   const [memberData, setMemberData] = useState({
     name: "",
     email: "",
@@ -57,68 +71,73 @@ export default function NewTeamMemberPage() {
   }
 
   return (
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-bold tracking-tight">New Team Member</h1>
-            <div className="flex items-center gap-2">
-              <Link href="/team">
-                <Button variant="outline">
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </Button>
-              </Link>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">New Team Member</h1>
+        <div className="flex items-center gap-2">
+          <Link href="/team">
+            <Button variant="outline">
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-          <Card>
-            <form onSubmit={handleSubmit}>
-              <CardHeader>
-                <CardTitle>Member Information</CardTitle>
-                <CardDescription>Enter the details of the new team member</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={memberData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter the member's name"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={memberData.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter the email"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select onValueChange={handleSelectChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select the role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="developer">Developer</SelectItem>
-                      <SelectItem value="designer">Designer</SelectItem>
-                      <SelectItem value="manager">Project Manager</SelectItem>
-                      <SelectItem value="tester">Tester</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Member
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+      <Card>
+        <form onSubmit={handleSubmit}>
+          <CardHeader>
+            <CardTitle>Member Information</CardTitle>
+            <CardDescription>Enter the details of the new team member</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={memberData.name}
+                onChange={handleInputChange}
+                placeholder="Enter the member's name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={memberData.email}
+                onChange={handleInputChange}
+                placeholder="Enter the email"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="role">Role</Label>
+              <Select onValueChange={handleSelectChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select the role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Regular User</SelectItem>
+                  {session?.user?.role === "admin" && (
+                    <>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button type="submit">
+              <Save className="mr-2 h-4 w-4" />
+              Save Member
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   )
 }

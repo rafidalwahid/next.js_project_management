@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CreditCard, LogOut, Settings, User } from "lucide-react"
+import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 
 interface UserNavProps {
@@ -24,7 +25,7 @@ interface UserNavProps {
 export function UserNav({ compact = false, showName = true, className }: UserNavProps) {
   const { data: session } = useSession()
   const user = session?.user
-  
+
   const userInitials = user?.name
     ? user.name
         .split(" ")
@@ -49,7 +50,7 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
               <AvatarImage src={user?.image} alt={user?.name ?? ""} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
-            
+
             {showName && (
               <div className="flex flex-col items-start text-left">
                 <span className="text-sm font-medium leading-none">
@@ -76,9 +77,11 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+          <DropdownMenuItem asChild>
+            <Link href={`/profile/${session?.user?.id}`}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />

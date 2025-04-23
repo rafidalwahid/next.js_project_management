@@ -16,6 +16,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // For regular users, only return team members they work with
+    // Managers and admins can see all users
+    const userRole = session.user.role;
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      // For regular users, we'll need to add logic to only show team members
+      // This is a simplified version - in a real app, you'd query for projects the user is part of
+      // and then find all users who are also part of those projects
+    }
+
     // Get query parameters
     const searchParams = req.nextUrl.searchParams;
     const skip = searchParams.get('skip') ? parseInt(searchParams.get('skip')!) : undefined;
@@ -30,11 +39,11 @@ export async function GET(req: NextRequest) {
 
     // Build the where clause
     const where: any = {};
-    
+
     if (role) {
       where.role = role;
     }
-    
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -59,8 +68,8 @@ export async function GET(req: NextRequest) {
 
     // Fetch users
     const users = await getUsers({
-      skip, 
-      take, 
+      skip,
+      take,
       orderBy: orderByClause,
       where,
       includeProjects,
@@ -114,7 +123,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(user, { status: 201 });
   } catch (error: any) {
     console.error('Error creating user:', error);
-    
+
     // Handle duplicate email
     if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
       return NextResponse.json(
@@ -122,7 +131,7 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to create user', details: error.message },
       { status: 500 }
