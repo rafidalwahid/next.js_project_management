@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/prisma-client"
@@ -11,36 +8,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for authentication and user management
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String         @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String         @default("user") // admin, manager, member
-  lastLogin     DateTime?      // Track the last time the user logged in
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  // Relations
-  projects             Project[]
-  tasks                Task[]                 @relation("TaskAssignedTo") // Renamed to avoid conflicts
-  taskAssignments      TaskAssignee[]         // New relation for tasks assigned to this user
-  teams                TeamMember[]
-  accounts             Account[]
-  sessions             Session[]
-  activities           Activity[]
-  resources            Resource[]             // Adding missing relation to Resource model
-  attendanceRecords    Attendance[]           // User's attendance records
-  attendanceAdjustments Attendance[]          @relation("AttendanceAdjustments") // Records adjusted by this user
-  attendanceSettings   AttendanceSettings?    // User's attendance preferences
+  id                    String              @id @default(cuid())
+  name                  String?
+  email                 String              @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  role                  String              @default("user")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  lastLogin             DateTime?
+  accounts              Account[]
+  activities            Activity[]
+  attendanceAdjustments Attendance[]        @relation("AttendanceAdjustments")
+  attendanceRecords     Attendance[]
+  attendanceSettings    AttendanceSettings?
+  projects              Project[]
+  resources             Resource[]
+  sessions              Session[]
+  tasks                 Task[]              @relation("TaskAssignedTo")
+  taskAssignments       TaskAssignee[]
+  teams                 TeamMember[]
+  userPermissions       UserPermission[]
+  userRoles             UserRole[]
 
   @@map("user")
 }
 
-// NextAuth models for authentication
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -54,10 +49,10 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId], map: "account_userId_fkey")
   @@map("account")
 }
 
@@ -68,6 +63,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId], map: "session_userId_fkey")
   @@map("session")
 }
 
@@ -80,139 +76,191 @@ model VerificationToken {
   @@map("verificationtoken")
 }
 
-// ProjectStatus model for flexible status management
-model ProjectStatus {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  color       String    @default("#6E56CF") // Default color for status badges
-  description String?
-  isDefault   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Role {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  description     String?
+  isSystem        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
 
-  // Relations
-  projects Project[]
-
-  @@map("projectstatus")
-  @@index([name])
+  @@map("role")
 }
 
-// Project model
+model Permission {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  description     String?
+  category        String?
+  isSystem        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  @@map("permission")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_role")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permission")
+}
+
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  granted      Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@index([userId])
+  @@index([permissionId])
+  @@map("user_permission")
+}
+
 model Project {
-  id          String    @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   description String?
   statusId    String
   startDate   DateTime?
   endDate     DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   createdById String
-
-  // Relations
-  status      ProjectStatus @relation(fields: [statusId], references: [id])
-  createdBy   User          @relation(fields: [createdById], references: [id])
-  tasks       Task[]
-  teamMembers TeamMember[]
-  events      Event[]
-  resources   Resource[]
   activities  Activity[]
   attendances Attendance[]
+  events      Event[]
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  status      ProjectStatus @relation(fields: [statusId], references: [id])
+  resources   Resource[]
+  tasks       Task[]
+  teamMembers TeamMember[]
 
-  @@map("project")
   @@index([statusId])
   @@index([createdById])
+  @@map("project")
 }
 
-// Task model
+model ProjectStatus {
+  id          String    @id @default(cuid())
+  name        String
+  color       String?
+  description String?
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[]
+
+  @@map("project_status")
+}
+
 model Task {
   id           String         @id @default(cuid())
   title        String
   description  String?        @db.Text
-  priority     String         @default("medium") // low, medium, high
+  priority     String         @default("medium")
   dueDate      DateTime?
   projectId    String
   assignedToId String?
-  parentId     String?        // Field for parent task reference
-  order        Int            @default(0) // Explicit field for ordering tasks
+  parentId     String?
+  order        Int            @default(0)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   completed    Boolean        @default(false)
+  activities   Activity[]
+  attendances  Attendance[]
+  assignedTo   User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  parent       Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks     Task[]         @relation("SubTasks")
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignees    TaskAssignee[]
 
-  // Relations
-  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  activities Activity[]
-  assignees  TaskAssignee[] // Relation for multiple assignees
-  attendances Attendance[]  // Attendance records tagged with this task
-
-  // Self-relation for parent-child tasks - fixed naming
-  parent   Task?  @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks Task[] @relation("SubTasks")
-
-  @@map("task")
   @@index([projectId])
   @@index([assignedToId])
   @@index([parentId])
+  @@map("task")
 }
 
-// TaskAssignee model for many-to-many relationship between tasks and users
 model TaskAssignee {
   id        String   @id @default(cuid())
   taskId    String
   userId    String
-  role      String? // Optional role for the assignee (e.g., "responsible", "reviewer", etc.)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([taskId, userId]) // Prevent duplicate assignments
-  @@map("taskassignee")
+  @@unique([taskId, userId])
   @@index([taskId])
   @@index([userId])
+  @@map("task_assignee")
 }
 
-// Team Member model (for project-specific roles)
 model TeamMember {
   id        String   @id @default(cuid())
-  role      String // owner, admin, member
-  userId    String
   projectId String
-  joinedAt  DateTime @default(now())
+  userId    String
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, projectId])
-  @@map("teammember")
-  @@index([userId])
+  @@unique([projectId, userId])
   @@index([projectId])
+  @@index([userId])
+  @@map("team_member")
 }
 
-// Resource model
 model Resource {
   id           String   @id @default(cuid())
   name         String
-  type         String // hardware, software, human, etc.
+  type         String
   quantity     Int      @default(1)
   projectId    String
   assignedToId String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // Relations
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignedTo User?   @relation(fields: [assignedToId], references: [id]) // Fixed missing relation
-
-  @@map("resource")
   @@index([projectId])
   @@index([assignedToId])
+  @@map("resource")
 }
 
-// Event model
 model Event {
   id          String   @id @default(cuid())
   title       String
@@ -221,94 +269,83 @@ model Event {
   projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // Relations
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@map("event")
   @@index([projectId])
   @@index([date])
+  @@map("event")
 }
 
-// Attendance model for tracking check-ins and check-outs with geolocation
 model Attendance {
-  id                  String    @id @default(cuid())
-  userId              String
-  checkInTime         DateTime  @default(now())
-  checkOutTime        DateTime?
-  checkInLatitude     Float?
-  checkInLongitude    Float?
-  checkInLocationName String?   @db.Text
-  checkOutLatitude    Float?
-  checkOutLongitude   Float?
+  id                   String    @id @default(cuid())
+  userId               String
+  checkInTime          DateTime  @default(now())
+  checkOutTime         DateTime?
+  checkInLatitude      Float?
+  checkInLongitude     Float?
+  checkOutLatitude     Float?
+  checkOutLongitude    Float?
+  checkInIpAddress     String?
+  checkOutIpAddress    String?
+  checkInDeviceInfo    String?   @db.Text
+  checkOutDeviceInfo   String?   @db.Text
+  totalHours           Float?
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  checkInLocationName  String?   @db.Text
   checkOutLocationName String?   @db.Text
-  checkInIpAddress    String?
-  checkOutIpAddress   String?
-  checkInDeviceInfo   String?   @db.Text
-  checkOutDeviceInfo  String?   @db.Text
-  totalHours          Float?    // Calculated field
-  notes               String?   @db.Text
-  projectId           String?   // For session tagging
-  taskId              String?   // For session tagging
-  manuallyAdjusted    Boolean   @default(false)
-  adjustedById        String?   // Admin who adjusted the record
-  adjustmentReason    String?   @db.Text
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  adjustedById         String?
+  adjustmentReason     String?   @db.Text
+  projectId            String?
+  taskId               String?
+  adjustedBy           User?     @relation("AttendanceAdjustments", fields: [adjustedById], references: [id])
+  project              Project?  @relation(fields: [projectId], references: [id])
+  task                 Task?     @relation(fields: [taskId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user                User      @relation(fields: [userId], references: [id])
-  project             Project?  @relation(fields: [projectId], references: [id])
-  task                Task?     @relation(fields: [taskId], references: [id])
-  adjustedBy          User?     @relation("AttendanceAdjustments", fields: [adjustedById], references: [id])
-
-  @@map("attendance")
   @@index([userId])
-  @@index([checkInTime])
   @@index([projectId])
   @@index([taskId])
+  @@index([checkInTime])
+  @@index([adjustedById])
+  @@map("attendance")
 }
 
-// AttendanceSettings model for user preferences
 model AttendanceSettings {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  workStartTime     String   @default("09:00") // Expected work start time
-  workEndTime       String   @default("17:00") // Expected work end time
-  workDaysPerWeek   Int      @default(5)
-  targetHoursPerDay Float    @default(8)
-  reminderEnabled   Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  workHoursPerDay     Float    @default(8)
+  workDays            String   @default("1,2,3,4,5")
+  reminderEnabled     Boolean  @default(true)
+  reminderTime        String?
+  autoCheckoutEnabled Boolean  @default(false)
+  autoCheckoutTime    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("attendancesettings")
-  @@index([userId])
+  @@map("attendance_settings")
 }
 
-// Activity log for tracking actions
 model Activity {
   id          String   @id @default(cuid())
-  action      String // created, updated, deleted, assigned, etc.
-  entityType  String // project, task, resource, etc.
+  action      String
+  entityType  String
   entityId    String
   description String?
   userId      String
   projectId   String?
   taskId      String?
   createdAt   DateTime @default(now())
+  project     Project? @relation(fields: [projectId], references: [id])
+  task        Task?    @relation(fields: [taskId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  task    Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
-
-  @@map("activity")
   @@index([userId])
   @@index([projectId])
   @@index([taskId])
   @@index([createdAt])
   @@index([entityType, entityId])
+  @@map("activity")
 }

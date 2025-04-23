@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-
-// This is a mock implementation. In a real app, you would store this in a database
-const PERMISSION_MATRIX = {
-  admin: [
-    "user_management", "project_creation", "task_assignment", "task_management", 
-    "view_projects", "edit_profile", "system_settings", "project_management"
-  ],
-  manager: [
-    "user_management", "project_creation", "task_assignment", "task_management", 
-    "view_projects", "edit_profile", "project_management"
-  ],
-  user: [
-    "task_management", "view_projects", "edit_profile"
-  ],
-  guest: [
-    "view_projects"
-  ]
-};
+import { RolePermissionService } from "@/lib/services/role-permission-service";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -32,16 +15,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Only admins can view role permissions
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to view role permissions
+    const hasPermission = await RolePermissionService.hasPermission(
+      session.user.id,
+      'manage_roles'
+    );
+
+    if (!hasPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
+        { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
       );
     }
 
+    // Get the permission matrix from the database
+    const permissionMatrix = await RolePermissionService.getPermissionMatrix();
+
     // Return the permission matrix
-    return NextResponse.json(PERMISSION_MATRIX);
+    return NextResponse.json(permissionMatrix);
   } catch (error: any) {
     console.error('Error fetching role permissions:', error);
     return NextResponse.json(
@@ -63,10 +54,15 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Only admins can update role permissions
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to update role permissions
+    const hasPermission = await RolePermissionService.hasPermission(
+      session.user.id,
+      'manage_roles'
+    );
+
+    if (!hasPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
+        { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
       );
     }
@@ -83,13 +79,22 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // In a real app, you would update the permissions in the database
-    // For this mock implementation, we'll just return success
-    
+    // Update the permissions in the database
+    const results = {};
+    for (const [roleName, permissionNames] of Object.entries(permissions)) {
+      if (Array.isArray(permissionNames)) {
+        const success = await RolePermissionService.updateRolePermissions(
+          roleName,
+          permissionNames as string[]
+        );
+        results[roleName] = success;
+      }
+    }
+
     // Return success
     return NextResponse.json({
       message: 'Role permissions updated successfully',
-      permissions
+      results
     });
   } catch (error: any) {
     console.error('Error updating role permissions:', error);

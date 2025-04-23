@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle2, XCircle, Edit, Info, ShieldAlert, ShieldCheck, Shield } from "lucide-react"
+import { CheckCircle2, XCircle, Edit, Info, ShieldAlert, ShieldCheck, Shield, Plus, UserPlus, Loader2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Dialog,
@@ -25,6 +25,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Define role types and permissions
 const ROLES = [
@@ -148,32 +152,65 @@ export default function RolePermissionsPage() {
     })
   }
 
+  const [allPermissions, setAllPermissions] = useState<any[]>([])
+  const [allRoles, setAllRoles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newPermissionDialogOpen, setNewPermissionDialogOpen] = useState(false)
+  const [newPermissionData, setNewPermissionData] = useState({
+    name: "",
+    description: "",
+    category: "general"
+  })
+  const [newRoleDialogOpen, setNewRoleDialogOpen] = useState(false)
+  const [newRoleData, setNewRoleData] = useState({
+    name: "",
+    description: ""
+  })
+
   // Fetch role permissions from API
   useEffect(() => {
-    const fetchPermissions = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/roles/permissions")
-        if (!response.ok) throw new Error("Failed to fetch permissions")
-        const data = await response.json()
-        setRolePermissions(data)
+        setLoading(true)
+
+        // Fetch permissions matrix
+        const permissionsResponse = await fetch("/api/roles/permissions")
+        if (!permissionsResponse.ok) throw new Error("Failed to fetch permissions")
+        const permissionsData = await permissionsResponse.json()
+        setRolePermissions(permissionsData)
+
+        // Fetch all permissions
+        const allPermissionsResponse = await fetch("/api/permissions")
+        if (!allPermissionsResponse.ok) throw new Error("Failed to fetch all permissions")
+        const allPermissionsData = await allPermissionsResponse.json()
+        setAllPermissions(allPermissionsData)
+
+        // Fetch all roles
+        const allRolesResponse = await fetch("/api/roles")
+        if (!allRolesResponse.ok) throw new Error("Failed to fetch all roles")
+        const allRolesData = await allRolesResponse.json()
+        setAllRoles(allRolesData)
       } catch (error) {
-        console.error("Error fetching permissions:", error)
+        console.error("Error fetching data:", error)
         toast({
           title: "Error",
           description: "Failed to load role permissions",
           variant: "destructive"
         })
+      } finally {
+        setLoading(false)
       }
     }
 
-    if (session?.user?.role === "admin") {
-      fetchPermissions()
+    if (session?.user?.id) {
+      fetchData()
     }
   }, [session, toast])
 
   // Save role permissions
   const saveRolePermissions = async () => {
     try {
+      setLoading(true)
       const response = await fetch("/api/roles/permissions", {
         method: "PUT",
         headers: {
@@ -198,6 +235,94 @@ export default function RolePermissionsPage() {
         description: "Failed to update permissions",
         variant: "destructive"
       })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Create a new permission
+  const createPermission = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/permissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newPermissionData)
+      })
+
+      if (!response.ok) throw new Error("Failed to create permission")
+
+      toast({
+        title: "Permission Created",
+        description: `Permission '${newPermissionData.name}' has been created successfully`,
+      })
+
+      // Reset form and close dialog
+      setNewPermissionData({ name: "", description: "", category: "general" })
+      setNewPermissionDialogOpen(false)
+
+      // Refresh data
+      const allPermissionsResponse = await fetch("/api/permissions")
+      if (!allPermissionsResponse.ok) throw new Error("Failed to fetch all permissions")
+      const allPermissionsData = await allPermissionsResponse.json()
+      setAllPermissions(allPermissionsData)
+    } catch (error) {
+      console.error("Error creating permission:", error)
+      toast({
+        title: "Error",
+        description: "Failed to create permission",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Create a new role
+  const createRole = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/roles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newRoleData)
+      })
+
+      if (!response.ok) throw new Error("Failed to create role")
+
+      toast({
+        title: "Role Created",
+        description: `Role '${newRoleData.name}' has been created successfully`,
+      })
+
+      // Reset form and close dialog
+      setNewRoleData({ name: "", description: "" })
+      setNewRoleDialogOpen(false)
+
+      // Refresh data
+      const allRolesResponse = await fetch("/api/roles")
+      if (!allRolesResponse.ok) throw new Error("Failed to fetch all roles")
+      const allRolesData = await allRolesResponse.json()
+      setAllRoles(allRolesData)
+
+      // Update permission matrix
+      const permissionsResponse = await fetch("/api/roles/permissions")
+      if (!permissionsResponse.ok) throw new Error("Failed to fetch permissions")
+      const permissionsData = await permissionsResponse.json()
+      setRolePermissions(permissionsData)
+    } catch (error) {
+      console.error("Error creating role:", error)
+      toast({
+        title: "Error",
+        description: "Failed to create role",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -370,10 +495,18 @@ export default function RolePermissionsPage() {
                 </Table>
               </div>
 
-              <div className="mt-6">
+                      <div className="mt-6 flex flex-wrap gap-2">
                 <Button onClick={() => setEditDialogOpen(true)}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Permissions
+                </Button>
+                <Button variant="outline" onClick={() => setNewPermissionDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Permission
+                </Button>
+                <Button variant="outline" onClick={() => setNewRoleDialogOpen(true)}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Role
                 </Button>
               </div>
             </CardContent>
@@ -381,6 +514,7 @@ export default function RolePermissionsPage() {
         </TabsContent>
       </Tabs>
 
+      {/* Edit Permissions Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
@@ -390,64 +524,198 @@ export default function RolePermissionsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Permission</TableHead>
-                    {ROLES.map((role) => (
-                      <TableHead key={role.id} className="text-center">
-                        {getRoleBadge(role.id)}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {PERMISSIONS.map((permission) => (
-                    <TableRow key={permission.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {permission.name}
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Info className="h-4 w-4 text-muted-foreground" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{permission.description}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                      {ROLES.map((role) => (
-                        <TableCell key={role.id} className="text-center">
-                          <Button
-                            variant={rolePermissions[role.id].includes(permission.id) ? "default" : "outline"}
-                            size="sm"
-                            className={rolePermissions[role.id].includes(permission.id) ? "bg-green-500 hover:bg-green-600" : ""}
-                            onClick={() => togglePermission(role.id, permission.id)}
-                          >
-                            {rolePermissions[role.id].includes(permission.id) ? (
-                              <CheckCircle2 className="h-4 w-4" />
-                            ) : (
-                              <XCircle className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2">Loading permissions...</span>
+              </div>
+            ) : (
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Permission</TableHead>
+                      {allRoles.map((role) => (
+                        <TableHead key={role.id} className="text-center">
+                          {getRoleBadge(role.name)}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {allPermissions.map((permission) => (
+                      <TableRow key={permission.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {permission.name}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{permission.description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>
+                        {allRoles.map((role) => (
+                          <TableCell key={role.id} className="text-center">
+                            <Button
+                              variant={rolePermissions[role.name]?.includes(permission.name) ? "default" : "outline"}
+                              size="sm"
+                              className={rolePermissions[role.name]?.includes(permission.name) ? "bg-green-500 hover:bg-green-600" : ""}
+                              onClick={() => togglePermission(role.name, permission.name)}
+                              disabled={role.isSystem && permission.isSystem}
+                            >
+                              {rolePermissions[role.name]?.includes(permission.name) ? (
+                                <CheckCircle2 className="h-4 w-4" />
+                              ) : (
+                                <XCircle className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={saveRolePermissions}>
-              Save Changes
+            <Button onClick={saveRolePermissions} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Permission Dialog */}
+      <Dialog open={newPermissionDialogOpen} onOpenChange={setNewPermissionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Permission</DialogTitle>
+            <DialogDescription>
+              Create a new permission that can be assigned to roles
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="permission-name">Permission Name</Label>
+              <Input
+                id="permission-name"
+                placeholder="e.g. manage_projects"
+                value={newPermissionData.name}
+                onChange={(e) => setNewPermissionData({ ...newPermissionData, name: e.target.value })}
+              />
+              <p className="text-sm text-muted-foreground">
+                Use lowercase letters and underscores, no spaces
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="permission-description">Description</Label>
+              <Textarea
+                id="permission-description"
+                placeholder="Describe what this permission allows"
+                value={newPermissionData.description}
+                onChange={(e) => setNewPermissionData({ ...newPermissionData, description: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="permission-category">Category</Label>
+              <Select
+                value={newPermissionData.category}
+                onValueChange={(value) => setNewPermissionData({ ...newPermissionData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="users">Users</SelectItem>
+                  <SelectItem value="projects">Projects</SelectItem>
+                  <SelectItem value="tasks">Tasks</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                  <SelectItem value="attendance">Attendance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewPermissionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createPermission} disabled={loading || !newPermissionData.name}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Permission"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Role Dialog */}
+      <Dialog open={newRoleDialogOpen} onOpenChange={setNewRoleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Role</DialogTitle>
+            <DialogDescription>
+              Create a new role with custom permissions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="role-name">Role Name</Label>
+              <Input
+                id="role-name"
+                placeholder="e.g. project_manager"
+                value={newRoleData.name}
+                onChange={(e) => setNewRoleData({ ...newRoleData, name: e.target.value })}
+              />
+              <p className="text-sm text-muted-foreground">
+                Use lowercase letters and underscores, no spaces
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role-description">Description</Label>
+              <Textarea
+                id="role-description"
+                placeholder="Describe this role's responsibilities"
+                value={newRoleData.description}
+                onChange={(e) => setNewRoleData({ ...newRoleData, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewRoleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createRole} disabled={loading || !newRoleData.name}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Role"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

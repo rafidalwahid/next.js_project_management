@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "migrate-permissions": "node scripts/migrate-permissions.js",
+    "migrate-db": "prisma migrate dev",
+    "migrate-all": "npm run migrate-db && npm run migrate-permissions"
+  }
+}

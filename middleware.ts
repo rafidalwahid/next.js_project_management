@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { RolePermissionService } from '@/lib/services/role-permission-service'
+import { PermissionsMiddleware } from '@/lib/permissions-middleware'
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -30,24 +30,42 @@ export async function middleware(request: NextRequest) {
   // Role-based access control for specific paths
   if (token) {
     const userRole = token.role as string || 'guest'
+    const userId = token.sub as string
 
     // Admin-only routes
     if (pathname.startsWith('/team/permissions') || pathname.startsWith('/team/roles')) {
-      if (userRole !== 'admin') {
+      // Use the middleware-compatible permission check
+      const hasManageRolesPermission = PermissionsMiddleware.hasPermission(userRole, 'manage_roles')
+      if (!hasManageRolesPermission) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     }
 
     // Manager and admin routes
     if (pathname.startsWith('/team/new')) {
-      if (userRole !== 'admin' && userRole !== 'manager') {
+      const hasUserManagementPermission = PermissionsMiddleware.hasPermission(userRole, 'user_management')
+      if (!hasUserManagementPermission) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     }
 
     // Check permissions for specific API routes
-    if (pathname.startsWith('/api/roles') || pathname.startsWith('/api/users')) {
-      const hasUserManagementPermission = RolePermissionService.hasPermission(userRole, 'user_management')
+    if (pathname.startsWith('/api/roles') || pathname.startsWith('/api/permissions')) {
+      const hasManageRolesPermission = PermissionsMiddleware.hasPermission(userRole, 'manage_roles')
+      if (!hasManageRolesPermission) {
+        return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
+      }
+    }
+
+    // Check permissions for user management API routes
+    if (pathname.startsWith('/api/users')) {
+      // Allow users to access their own data
+      const userIdInPath = pathname.match(/\/api\/users\/([^\/]+)/)?.[1]
+      if (userIdInPath && userIdInPath === userId) {
+        return NextResponse.next()
+      }
+
+      const hasUserManagementPermission = PermissionsMiddleware.hasPermission(userRole, 'user_management')
       if (!hasUserManagementPermission) {
         return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
       }
