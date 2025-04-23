@@ -9,7 +9,7 @@ async function createUsers() {
     // First, delete any existing users
     console.log('Cleaning up existing users...');
     await prisma.user.deleteMany();
-    
+
     console.log('Creating users...');
 
     // Create admin user
@@ -20,6 +20,11 @@ async function createUsers() {
         email: 'admin@example.com',
         password: adminPassword,
         role: 'admin',
+        bio: 'Administrator of the system with full access to all features.',
+        jobTitle: 'System Administrator',
+        department: 'IT',
+        location: 'Dhaka',
+        phone: '+8801700000000',
       },
     });
     console.log('Admin user created');
@@ -32,6 +37,11 @@ async function createUsers() {
         email: 'manager@example.com',
         password: managerPassword,
         role: 'manager',
+        bio: 'Project manager responsible for overseeing project execution.',
+        jobTitle: 'Project Manager',
+        department: 'Project Management',
+        location: 'Dhaka',
+        phone: '+8801700000002',
       },
     });
     console.log('Manager user created');
@@ -44,6 +54,11 @@ async function createUsers() {
         email: 'user@example.com',
         password: userPassword,
         role: 'user',
+        bio: 'Regular user with limited access to system features.',
+        jobTitle: 'Developer',
+        department: 'Engineering',
+        location: 'Dhaka',
+        phone: '+8801700000001',
       },
     });
     console.log('Regular user created');

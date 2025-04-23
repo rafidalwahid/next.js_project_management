@@ -1,15 +1,19 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Pencil, Shield, Clock, Calendar, FileText, Upload, User, CalendarClock, X, File, Clock4 } from "lucide-react"
+import { Pencil, Shield, Clock, Calendar, FileText, Upload, User, CalendarClock, X, File, Clock4, Save, Camera, Phone, MapPin } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { formatDate } from "@/lib/utils"
 import type { UserProfile } from "@/hooks/use-user-profile"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 interface UserProfileViewProps {
   profile: UserProfile
@@ -41,6 +45,15 @@ export function UserProfileView({
 }: UserProfileViewProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [profileData, setProfileData] = useState({
+    name: profile.name || "",
+    bio: profile.bio || "",
+    jobTitle: profile.jobTitle || "",
+    location: profile.location || "",
+    phone: profile.phone || "",
+    department: profile.department || ""
+  })
 
   const getUserInitials = () => {
     if (!profile.name) return "U"
@@ -60,9 +73,16 @@ export function UserProfileView({
     day: 'numeric'
   });
 
-  // Instead of using a non-existent lastLogin property, we'll use the account creation date
-  // In a real app, you would add a lastLogin field to track when users log in
-  const lastLoginDate = 'Not available';
+  // Format last login date if available
+  const lastLoginDate = profile.lastLogin
+    ? new Date(profile.lastLogin).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : 'Not available';
 
   // Handle document upload button click
   const handleUploadClick = () => {
@@ -83,8 +103,120 @@ export function UserProfileView({
     }
   };
 
+  // Handle profile edit dialog open
+  const handleEditProfileClick = () => {
+    // Reset form data to current profile values
+    setProfileData({
+      name: profile.name || "",
+      bio: profile.bio || "",
+      jobTitle: profile.jobTitle || "",
+      location: profile.location || "",
+      phone: profile.phone || "",
+      department: profile.department || ""
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Handle profile update
+  const handleProfileUpdate = async () => {
+    try {
+      await onUpdateProfile(profileData);
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your profile information below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={profileData.name}
+                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="jobTitle" className="text-right">
+                Job Title
+              </Label>
+              <Input
+                id="jobTitle"
+                value={profileData.jobTitle}
+                onChange={(e) => setProfileData({ ...profileData, jobTitle: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="department" className="text-right">
+                Department
+              </Label>
+              <Input
+                id="department"
+                value={profileData.department}
+                onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="location" className="text-right">
+                Location
+              </Label>
+              <Input
+                id="location"
+                value={profileData.location}
+                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phone" className="text-right">
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                value={profileData.phone}
+                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="bio" className="text-right">
+                Bio
+              </Label>
+              <Textarea
+                id="bio"
+                value={profileData.bio}
+                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                className="col-span-3"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleProfileUpdate}>
+              <Save className="mr-2 h-4 w-4" /> Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -96,7 +228,7 @@ export function UserProfileView({
         </div>
 
         {canEdit && (
-          <Button variant="default">
+          <Button variant="default" onClick={handleEditProfileClick}>
             <Pencil className="mr-2 h-4 w-4" /> Edit Profile
           </Button>
         )}
@@ -118,25 +250,79 @@ export function UserProfileView({
               <CardHeader>
                 <CardTitle>Profile</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col items-center text-center">
-                <Avatar className="h-24 w-24 mb-4">
-                  {profile.image ? (
-                    <AvatarImage src={profile.image} alt={profile.name || "User"} />
-                  ) : (
-                    <AvatarFallback className="text-lg font-semibold">
-                      {getUserInitials()}
-                    </AvatarFallback>
+              <CardContent>
+                <div className="flex flex-col items-center text-center mb-6">
+                  <div className="relative">
+                    <Avatar className="h-24 w-24 mb-4">
+                      {profile.image ? (
+                        <AvatarImage src={profile.image} alt={profile.name || "User"} />
+                      ) : (
+                        <AvatarFallback className="text-lg font-semibold">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    {canEdit && (
+                      <div className="absolute bottom-4 right-0 bg-primary text-white rounded-full p-1 cursor-pointer"
+                           onClick={() => fileInputRef.current?.click()}>
+                        <Camera className="h-4 w-4" />
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className="hidden"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                await onUploadImage(file);
+                                // Clear the input value so the same file can be selected again
+                                if (fileInputRef.current) {
+                                  fileInputRef.current.value = "";
+                                }
+                              } catch (error) {
+                                console.error('Error uploading image:', error);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-bold">{profile.name || "Admin User"}</h2>
+                  <p className="text-sm text-muted-foreground">{profile.email}</p>
+                </div>
+
+                <div className="flex flex-col gap-3 text-sm border-t pt-4">
+                  {profile.bio && (
+                    <div className="mb-2">
+                      <p className="text-muted-foreground italic">"{profile.bio}"</p>
+                    </div>
                   )}
-                </Avatar>
-                <h2 className="text-xl font-bold">{profile.name || "Admin User"}</h2>
-                <p className="text-sm text-muted-foreground">{profile.email}</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="secondary">
-                    {profile.role === "admin" ? "Admin" : profile.role}
-                  </Badge>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    Active
-                  </Badge>
+                  {profile.jobTitle && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-muted-foreground font-medium">{profile.jobTitle}</p>
+                    </div>
+                  )}
+                  {profile.department && (
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">{profile.department}</p>
+                    </div>
+                  )}
+                  {profile.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">{profile.phone}</p>
+                    </div>
+                  )}
+                  {profile.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">{profile.location}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

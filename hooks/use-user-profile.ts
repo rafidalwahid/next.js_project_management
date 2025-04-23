@@ -13,6 +13,11 @@ export type UserProfile = {
   updatedAt: string;
   bio?: string | null;
   jobTitle?: string | null;
+  department?: string | null;
+  location?: string | null;
+  phone?: string | null;
+  skills?: string | null;
+  lastLogin?: string | null;
   // Additional profile fields would be added here
 };
 

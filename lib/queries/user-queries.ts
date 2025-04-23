@@ -9,6 +9,18 @@ export type UserCreateInput = {
   password?: string;
   image?: string;
   role?: string;
+  bio?: string;
+  jobTitle?: string;
+  department?: string;
+  location?: string;
+  phone?: string;
+  skills?: string[];
+  socialLinks?: {
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+    website?: string;
+  };
 };
 
 export type UserUpdateInput = Partial<UserCreateInput>;
@@ -93,6 +105,12 @@ export async function getUserById(id: string, includeRelations: boolean = false)
     email: true,
     image: true,
     role: true,
+    bio: true,
+    jobTitle: true,
+    department: true,
+    location: true,
+    phone: true,
+    skills: true,
     createdAt: true,
     updatedAt: true,
     emailVerified: true,
@@ -188,6 +206,23 @@ export async function getUserProfile(id: string) {
     return null;
   }
 
+  // Add profile fields if they don't exist
+  const profileFields = {
+    bio: user.bio || null,
+    jobTitle: user.jobTitle || null,
+    department: user.department || null,
+    location: user.location || null,
+    phone: user.phone || null,
+    skills: user.skills || null,
+  };
+
+  // Get last login from attendance records
+  const lastAttendance = await prisma.attendance.findFirst({
+    where: { userId: id },
+    orderBy: { checkInTime: 'desc' },
+    select: { checkInTime: true }
+  });
+
   // Calculate user stats
   const stats = await getUserStats(id);
 
@@ -237,9 +272,11 @@ export async function getUserProfile(id: string) {
 
   return {
     ...user,
+    ...profileFields,
     tasks: allTasks,
     projects: uniqueProjects,
-    stats
+    stats,
+    lastLogin: lastAttendance?.checkInTime || null
   };
 }
 
@@ -340,6 +377,8 @@ export async function updateUser(id: string, data: UserUpdateInput) {
     userToUpdate.password = await hash(password, 10);
   }
 
+  console.log('Updating user with data:', userToUpdate);
+
   const user = await prisma.user.update({
     where: { id },
     data: userToUpdate,
@@ -349,6 +388,12 @@ export async function updateUser(id: string, data: UserUpdateInput) {
       email: true,
       image: true,
       role: true,
+      bio: true,
+      jobTitle: true,
+      department: true,
+      location: true,
+      phone: true,
+      skills: true,
       createdAt: true,
       updatedAt: true,
     }

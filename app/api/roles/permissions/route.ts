@@ -15,15 +15,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Check if user has permission to view role permissions
-    const hasPermission = await RolePermissionService.hasPermission(
-      session.user.id,
-      'manage_roles'
-    );
-
-    if (!hasPermission) {
+    // For now, allow any authenticated user to access this endpoint
+    // We'll check for admin role instead of specific permission
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
+        { error: 'Forbidden: Admin access required' },
         { status: 403 }
       );
     }
@@ -54,15 +50,10 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Check if user has permission to update role permissions
-    const hasPermission = await RolePermissionService.hasPermission(
-      session.user.id,
-      'manage_roles'
-    );
-
-    if (!hasPermission) {
+    // For now, allow any authenticated admin to access this endpoint
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
+        { error: 'Forbidden: Admin access required' },
         { status: 403 }
       );
     }
@@ -80,21 +71,18 @@ export async function PUT(req: NextRequest) {
     }
 
     // Update the permissions in the database
-    const results = {};
-    for (const [roleName, permissionNames] of Object.entries(permissions)) {
-      if (Array.isArray(permissionNames)) {
-        const success = await RolePermissionService.updateRolePermissions(
-          roleName,
-          permissionNames as string[]
-        );
-        results[roleName] = success;
-      }
+    const success = await RolePermissionService.updateAllRolePermissions(permissions);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to update role permissions' },
+        { status: 500 }
+      );
     }
 
     // Return success
     return NextResponse.json({
-      message: 'Role permissions updated successfully',
-      results
+      message: 'Role permissions updated successfully'
     });
   } catch (error: any) {
     console.error('Error updating role permissions:', error);

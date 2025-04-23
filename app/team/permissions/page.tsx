@@ -140,6 +140,11 @@ export default function RolePermissionsPage() {
     setRolePermissions(prev => {
       const newPermissions = { ...prev }
 
+      // Initialize the role's permissions array if it doesn't exist
+      if (!newPermissions[role]) {
+        newPermissions[role] = []
+      }
+
       if (newPermissions[role].includes(permission)) {
         // Remove permission
         newPermissions[role] = newPermissions[role].filter(p => p !== permission)
@@ -173,30 +178,41 @@ export default function RolePermissionsPage() {
       try {
         setLoading(true)
 
-        // Fetch permissions matrix
-        const permissionsResponse = await fetch("/api/roles/permissions")
-        if (!permissionsResponse.ok) throw new Error("Failed to fetch permissions")
-        const permissionsData = await permissionsResponse.json()
-        setRolePermissions(permissionsData)
+        // Fetch all roles first
+        const allRolesResponse = await fetch("/api/roles")
+        if (!allRolesResponse.ok) {
+          throw new Error("Failed to fetch all roles")
+        }
+        const allRolesData = await allRolesResponse.json()
+        setAllRoles(allRolesData)
 
         // Fetch all permissions
         const allPermissionsResponse = await fetch("/api/permissions")
-        if (!allPermissionsResponse.ok) throw new Error("Failed to fetch all permissions")
+        if (!allPermissionsResponse.ok) {
+          throw new Error("Failed to fetch all permissions")
+        }
         const allPermissionsData = await allPermissionsResponse.json()
         setAllPermissions(allPermissionsData)
 
-        // Fetch all roles
-        const allRolesResponse = await fetch("/api/roles")
-        if (!allRolesResponse.ok) throw new Error("Failed to fetch all roles")
-        const allRolesData = await allRolesResponse.json()
-        setAllRoles(allRolesData)
+        // Fetch permissions matrix
+        const permissionsResponse = await fetch("/api/roles/permissions")
+        if (!permissionsResponse.ok) {
+          throw new Error("Failed to fetch permissions")
+        }
+        const permissionsData = await permissionsResponse.json()
+        setRolePermissions(permissionsData)
       } catch (error) {
         console.error("Error fetching data:", error)
         toast({
           title: "Error",
-          description: "Failed to load role permissions",
+          description: error instanceof Error ? error.message : "Failed to load role permissions",
           variant: "destructive"
         })
+        // Set default values if API calls fail
+        setAllRoles(prevRoles => prevRoles.length ? prevRoles : ROLES)
+        setRolePermissions(prevPermissions =>
+          Object.keys(prevPermissions).length ? prevPermissions : PERMISSION_MATRIX
+        )
       } finally {
         setLoading(false)
       }
@@ -205,7 +221,7 @@ export default function RolePermissionsPage() {
     if (session?.user?.id) {
       fetchData()
     }
-  }, [session, toast])
+  }, [session, toast, allRoles.length])
 
   // Save role permissions
   const saveRolePermissions = async () => {
@@ -482,7 +498,7 @@ export default function RolePermissionsPage() {
                         </TableCell>
                         {ROLES.map((role) => (
                           <TableCell key={role.id} className="text-center">
-                            {rolePermissions[role.id].includes(permission.id) ? (
+                            {rolePermissions[role.id]?.includes(permission.id) ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
                             ) : (
                               <XCircle className="h-5 w-5 text-red-500 mx-auto" />

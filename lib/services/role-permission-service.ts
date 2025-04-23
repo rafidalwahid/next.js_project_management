@@ -25,6 +25,17 @@ export class RolePermissionService {
    */
   static async hasPermission(userId: string, permissionName: string): Promise<boolean> {
     try {
+      // Get the user to check their role
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true }
+      });
+
+      // Admin role has all permissions
+      if (user?.role === 'admin') {
+        return true;
+      }
+
       // First check if the user has a direct permission override
       const userPermission = await prisma.userPermission.findFirst({
         where: {
@@ -68,6 +79,11 @@ export class RolePermissionService {
    * This is used for backward compatibility and middleware
    */
   static hasPermissionByRole(role: string, permission: string): boolean {
+    // Admin role has all permissions
+    if (role === 'admin') {
+      return true;
+    }
+
     // If role doesn't exist, return false
     if (!FALLBACK_PERMISSION_MATRIX[role as keyof typeof FALLBACK_PERMISSION_MATRIX]) {
       return false;
@@ -241,6 +257,35 @@ export class RolePermissionService {
   }
 
   /**
+   * Get all role permissions
+   */
+  static async getAllRolePermissions(): Promise<Record<string, string[]>> {
+    try {
+      return await this.getPermissionMatrix();
+    } catch (error) {
+      console.error('Error getting all role permissions:', error);
+      return FALLBACK_PERMISSION_MATRIX;
+    }
+  }
+
+  /**
+   * Update all role permissions
+   */
+  static async updateAllRolePermissions(permissionsMatrix: Record<string, string[]>): Promise<boolean> {
+    try {
+      // Update permissions for each role
+      for (const [roleName, permissions] of Object.entries(permissionsMatrix)) {
+        await this.updateRolePermissions(roleName, permissions);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating all role permissions:', error);
+      return false;
+    }
+  }
+
+  /**
    * Get all roles that have a specific permission
    */
   static async getRolesWithPermission(permissionName: string): Promise<string[]> {
@@ -323,16 +368,16 @@ export class RolePermissionService {
   /**
    * Create a new role
    */
-  static async createRole(name: string, description: string): Promise<any> {
+  static async createRole(data: { name: string, description: string }): Promise<any> {
     try {
       return await prisma.role.create({
         data: {
-          name,
-          description,
+          name: data.name,
+          description: data.description,
         },
       });
     } catch (error) {
-      console.error(`Error creating role ${name}:`, error);
+      console.error(`Error creating role ${data.name}:`, error);
       throw error;
     }
   }
@@ -340,17 +385,17 @@ export class RolePermissionService {
   /**
    * Create a new permission
    */
-  static async createPermission(name: string, description: string, category: string): Promise<any> {
+  static async createPermission(data: { name: string, description: string, category: string }): Promise<any> {
     try {
       return await prisma.permission.create({
         data: {
-          name,
-          description,
-          category,
+          name: data.name,
+          description: data.description,
+          category: data.category,
         },
       });
     } catch (error) {
-      console.error(`Error creating permission ${name}:`, error);
+      console.error(`Error creating permission ${data.name}:`, error);
       throw error;
     }
   }

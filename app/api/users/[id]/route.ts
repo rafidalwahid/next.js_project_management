@@ -82,6 +82,19 @@ export async function PUT(
   req: NextRequest,
   context: { params: { id: string } }
 ) {
+  return handleUpdate(req, context);
+}
+
+// PATCH /api/users/[id] - Update user (partial update)
+export async function PATCH(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  return handleUpdate(req, context);
+}
+
+// Helper function to handle both PUT and PATCH requests
+async function handleUpdate(req: NextRequest, context: { params: { id: string } }) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -109,6 +122,7 @@ export async function PUT(
 
     // Parse request body
     const body = await req.json();
+    console.log('Update user request body:', body);
 
     // If updating role, only admin can do it
     if (body.role && !isAdmin) {
@@ -125,11 +139,13 @@ export async function PUT(
       const updatedUser = await updateUser(userId, {
         name, password, bio, jobTitle, department, location, phone, skills, socialLinks, image
       });
+      console.log('Updated user (regular):', updatedUser);
       return NextResponse.json(updatedUser);
     }
 
     // Admin can update all fields including role
     const updatedUser = await updateUser(userId, body);
+    console.log('Updated user (admin):', updatedUser);
     return NextResponse.json(updatedUser);
   } catch (error: any) {
     console.error('Error updating user:', error);

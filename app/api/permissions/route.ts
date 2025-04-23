@@ -42,15 +42,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user has permission to create permissions
-    const hasPermission = await RolePermissionService.hasPermission(
-      session.user.id,
-      'manage_roles'
-    );
-
-    if (!hasPermission) {
+    // For now, allow any authenticated admin to access this endpoint
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
+        { error: 'Forbidden: Admin access required' },
         { status: 403 }
       );
     }
@@ -80,11 +75,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Create the permission
-    const permission = await RolePermissionService.createPermission(
+    const permission = await RolePermissionService.createPermission({
       name,
-      description || '',
-      category || 'general'
-    );
+      description: description || '',
+      category: category || 'general'
+    });
 
     // Return the created permission
     return NextResponse.json(permission, { status: 201 });
@@ -109,15 +104,10 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Check if user has permission to manage permissions
-    const hasPermission = await RolePermissionService.hasPermission(
-      session.user.id,
-      'manage_roles'
-    );
-
-    if (!hasPermission) {
+    // For now, allow any authenticated admin to access this endpoint
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
+        { error: 'Forbidden: Admin access required' },
         { status: 403 }
       );
     }

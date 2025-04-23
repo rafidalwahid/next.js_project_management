@@ -107,21 +107,45 @@ export const userApi = {
   },
 
   updateUserProfile: async (userId: string, profileData: any) => {
-    return fetchAPI(`/api/users/${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(profileData),
-    });
+    console.log('Updating user profile:', userId, profileData);
+    try {
+      const result = await fetchAPI(`/api/users/${userId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(profileData),
+      });
+      console.log('Update profile result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in updateUserProfile:', error);
+      throw error;
+    }
   },
 
   uploadProfileImage: async (userId: string, file: File) => {
+    console.log('Uploading profile image for user:', userId, 'File:', file.name, file.type, file.size);
     const formData = new FormData();
     formData.append('image', file);
 
-    // Use the correct endpoint format that matches our API structure
-    return fetch(`/api/users/${userId}/image`, {
-      method: 'PUT',
-      body: formData,
-    }).then(res => res.json());
+    try {
+      // Use the correct endpoint format that matches our API structure
+      const response = await fetch(`/api/users/${userId}/image`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Profile image upload failed:', response.status, errorText);
+        throw new Error(`Upload failed: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Profile image upload result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in uploadProfileImage:', error);
+      throw error;
+    }
   },
 };
 

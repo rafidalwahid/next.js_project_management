@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateUserImage, logUserActivity } from '@/lib/queries/user-queries';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir, access } from 'fs/promises';
 import { join } from 'path';
+import { constants } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 // PUT /api/users/[id]/image - Upload user profile image
@@ -24,11 +25,11 @@ export async function PUT(
     // Await the params
     const params = await Promise.resolve(context.params);
     const userId = params.id;
-    
+
     // Check if user is updating their own profile or if they are an admin
     const isOwnProfile = session.user.id === userId;
     const isAdmin = session.user.role === 'admin';
-    
+
     if (!isOwnProfile && !isAdmin) {
       return NextResponse.json(
         { error: 'Access denied: You can only update your own profile or you need admin privileges' },
@@ -67,24 +68,39 @@ export async function PUT(
     // Create a unique filename with the correct extension
     const fileExtension = fileType.split('/')[1];
     const fileName = `${uuidv4()}.${fileExtension}`;
-    
+
     // Determine public directory path
     const publicDir = join(process.cwd(), 'public');
     const uploadDir = join(publicDir, 'uploads', 'profile');
     const filePath = join(uploadDir, fileName);
-    
+
+    // Ensure upload directory exists
+    try {
+      await access(uploadDir, constants.F_OK);
+    } catch (error) {
+      console.log('Creating upload directory:', uploadDir);
+      await mkdir(uploadDir, { recursive: true });
+    }
+
     // Get file buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-    
+
+    console.log('Writing file to:', filePath);
     // Write file to disk
-    await writeFile(filePath, buffer);
-    
+    try {
+      await writeFile(filePath, buffer);
+      console.log('File written successfully');
+    } catch (error) {
+      console.error('Error writing file:', error);
+      throw error;
+    }
+
     // Get the URL path to the image (relative to public directory)
     const imageUrl = `/uploads/profile/${fileName}`;
-    
+
     // Update user profile image in database
     const updatedUser = await updateUserImage(userId, imageUrl);
-    
+
     // Log activity
     await logUserActivity(
       session.user.id,
@@ -93,7 +109,7 @@ export async function PUT(
       userId,
       'Updated profile image'
     );
-    
+
     return NextResponse.json({
       success: true,
       image: imageUrl
@@ -105,4 +121,4 @@ export async function PUT(
       { status: 500 }
     );
   }
-} 
+}
