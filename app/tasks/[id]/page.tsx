@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/date-picker"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { useProjects } from "@/hooks/use-data"
+import { DashboardLayout } from "@/components/dashboard-layout"
 import { useUsers } from "@/hooks/use-users"
 
 export default function TaskDetailPage() {
@@ -224,7 +225,7 @@ export default function TaskDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col p-6">
+      <DashboardLayout>
         <div className="flex items-center gap-2 mb-6">
           <Button variant="outline" size="sm" asChild>
             <Link href="/tasks">
@@ -236,13 +237,13 @@ export default function TaskDetailPage() {
         <div className="flex items-center justify-center h-64">
           <p className="text-muted-foreground">Loading task details...</p>
         </div>
-      </div>
+      </DashboardLayout>
     )
   }
 
   if (error || !task) {
     return (
-      <div className="flex min-h-screen flex-col p-6">
+      <DashboardLayout>
         <div className="flex items-center gap-2 mb-6">
           <Button variant="outline" size="sm" asChild>
             <Link href="/tasks">
@@ -265,12 +266,12 @@ export default function TaskDetailPage() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col p-6">
+    <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild>
@@ -587,6 +588,6 @@ export default function TaskDetailPage() {
           </>
         )}
       </Card>
-    </div>
+    </DashboardLayout>
   )
 }

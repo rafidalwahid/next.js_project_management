@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/date-picker"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { useProjects } from "@/hooks/use-data"
+import { DashboardLayout } from "@/components/dashboard-layout"
 import { taskApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { useUsers } from "@/hooks/use-users"
@@ -162,7 +163,7 @@ export default function NewTaskPage() {
   }
 
   return (
-    <div>
+    <DashboardLayout>
       <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-bold tracking-tight">New Task</h1>
@@ -302,6 +303,6 @@ export default function NewTaskPage() {
             </form>
           </Card>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -9,9 +9,7 @@ import {
   Briefcase,
   CheckSquare,
   Users,
-  LibraryBig,
   Settings,
-  HelpCircle,
   UserCircle,
   Clock
 }
@@ -49,20 +47,9 @@ function getNavItems(userId?: string) {
       isExpandable: true,
     },
     {
-      title: "Resources",
-      href: "/resources",
-      icon: LibraryBig,
-    },
-
-    {
       title: "Settings",
       href: "/settings",
       icon: Settings,
-    },
-    {
-      title: "Help & Support",
-      href: "/support",
-      icon: HelpCircle,
     },
   ];
 }
@@ -99,13 +86,13 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              "group flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+              "group flex items-center rounded-md py-2 text-xs font-medium transition-colors",
               isActive
                 ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
               collapsed
                 ? "justify-center h-9 w-9 mx-auto px-0"
-                : "px-3"
+                : "px-2"
             )}
             title={collapsed ? item.title : undefined}
           >

@@ -9,8 +9,18 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
-export function DatePicker() {
-  const [date, setDate] = React.useState<Date>()
+interface DatePickerProps {
+  onSelect?: (date: Date | undefined) => void;
+  defaultDate?: Date;
+}
+
+export function DatePicker({ onSelect, defaultDate }: DatePickerProps) {
+  const [date, setDate] = React.useState<Date | undefined>(defaultDate)
+
+  // Update date state when defaultDate prop changes
+  React.useEffect(() => {
+    setDate(defaultDate)
+  }, [defaultDate])
 
   return (
     <Popover>
@@ -24,7 +34,15 @@ export function DatePicker() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(newDate) => {
+            setDate(newDate);
+            if (onSelect) onSelect(newDate);
+          }}
+          initialFocus
+        />
       </PopoverContent>
     </Popover>
   )

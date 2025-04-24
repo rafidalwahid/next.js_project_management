@@ -40,8 +40,7 @@ export async function GET(req: NextRequest) {
       const status = await prisma.projectStatus.findFirst({
         where: {
           name: {
-            equals: statusParam,
-            mode: 'insensitive'
+            equals: statusParam
           }
         }
       });
@@ -77,7 +76,12 @@ export async function GET(req: NextRequest) {
               email: true,
             }
           },
-          status: true,
+          status: true, // Primary status
+          statuses: { // All statuses
+            include: {
+              status: true
+            }
+          },
           _count: {
             select: {
               tasks: true,
@@ -130,6 +134,7 @@ const createProjectSchema = z.object({
     .max(100, "Project title cannot exceed 100 characters"),
   description: z.string().optional(),
   statusId: z.string().optional(),
+  statusIds: z.array(z.string()).optional(), // Multiple status IDs
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
 });
@@ -201,19 +206,34 @@ export async function POST(req: NextRequest) {
       data: {
         title: validationResult.data.title,
         description: validationResult.data.description,
-        startDate: validationResult.data.startDate && validationResult.data.startDate.trim() !== "" 
-          ? new Date(validationResult.data.startDate) 
+        startDate: validationResult.data.startDate && validationResult.data.startDate.trim() !== ""
+          ? new Date(validationResult.data.startDate)
           : null,
-        endDate: validationResult.data.endDate && validationResult.data.endDate.trim() !== "" 
-          ? new Date(validationResult.data.endDate) 
+        endDate: validationResult.data.endDate && validationResult.data.endDate.trim() !== ""
+          ? new Date(validationResult.data.endDate)
           : null,
-        statusId: statusId,
+        statusId: statusId, // Primary status (for backward compatibility)
         createdById: user.id,
         teamMembers: {
           create: {
             userId: user.id,
             role: 'OWNER'
           }
+        },
+        // Create status links for multiple statuses
+        statuses: {
+          create: [
+            // Primary status link
+            {
+              statusId: statusId,
+              isPrimary: true
+            },
+            // Additional statuses if provided
+            ...(validationResult.data.statusIds?.filter(id => id !== statusId).map(id => ({
+              statusId: id,
+              isPrimary: false
+            })) || [])
+          ]
         }
       },
       include: {
@@ -233,6 +253,12 @@ export async function POST(req: NextRequest) {
                 email: true,
               }
             }
+          }
+        },
+        status: true, // Include primary status
+        statuses: { // Include all statuses
+          include: {
+            status: true
           }
         }
       }

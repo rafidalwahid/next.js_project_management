@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { DashboardLayout } from "@/components/dashboard-layout"
 
 export default function EditTaskRedirectPage() {
   const params = useParams()
@@ -14,8 +15,10 @@ export default function EditTaskRedirectPage() {
   }, [taskId, router])
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="text-muted-foreground">Redirecting to task details...</p>
-    </div>
+    <DashboardLayout>
+      <div className="flex items-center justify-center h-[70vh]">
+        <p className="text-muted-foreground">Redirecting to task details...</p>
+      </div>
+    </DashboardLayout>
   )
 }

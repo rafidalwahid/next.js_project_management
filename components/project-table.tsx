@@ -6,8 +6,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/components/ui/use-toast"
-import { Clock } from "lucide-react"
+import { Clock, Search, Filter, MoreHorizontal, Edit, CheckCircle2, Trash } from "lucide-react"
 import { useProjects } from "@/hooks/use-projects"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { projectApi } from "@/lib/api"
 
 export function ProjectTable() {
   const [page, setPage] = useState(1)
@@ -22,7 +26,7 @@ export function ProjectTable() {
     if (!project._count) return 0
     const totalTasks = project._count.tasks || 0
     if (totalTasks === 0) return 0
-    
+
     return Math.round((project.completedTasks || 0) / totalTasks * 100)
   }
 
@@ -55,7 +59,7 @@ export function ProjectTable() {
   // Get status badge style based on status name
   const getStatusBadge = (status: any) => {
     if (!status) return "bg-gray-50 text-gray-700 border-gray-200"
-    
+
     switch (status.name?.toLowerCase()) {
       case "completed":
         return "bg-green-50 text-green-700 border-green-200"
@@ -94,7 +98,7 @@ export function ProjectTable() {
           <Filter className="h-4 w-4" />
         </Button>
       </div>
-      
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -123,14 +127,32 @@ export function ProjectTable() {
           ) : (
             projects.map((project) => {
               const progress = calculateProgress(project)
-              
+
               return (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.title}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={getStatusBadge(project.status)}>
-                      {project.status?.name || "Unknown"}
-                    </Badge>
+                    <div className="flex flex-wrap gap-1">
+                      {/* Primary status */}
+                      <Badge variant="outline" className={getStatusBadge(project.status)}>
+                        {project.status?.name || "Unknown"}
+                      </Badge>
+
+                      {/* Additional statuses */}
+                      {project.statuses?.filter((link: any) => !link.isPrimary).map((link: any) => (
+                        <Badge
+                          key={link.id}
+                          variant="outline"
+                          style={{
+                            backgroundColor: `${link.status.color}15`,
+                            color: link.status.color,
+                            borderColor: link.status.color
+                          }}
+                        >
+                          {link.status.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -171,7 +193,7 @@ export function ProjectTable() {
                           Mark as Completed
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => handleDeleteProject(project.id)}
                         >
@@ -187,7 +209,7 @@ export function ProjectTable() {
           )}
         </TableBody>
       </Table>
-      
+
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-center space-x-2 py-4">
           <Button

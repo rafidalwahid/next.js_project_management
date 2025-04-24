@@ -5,6 +5,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
+interface Status {
+  id: string
+  name: string
+  color: string
+}
+
 interface ProjectCardProps {
   title: string
   description: string
@@ -13,6 +19,8 @@ interface ProjectCardProps {
   team: number
   tasks: number
   completedTasks: number
+  status?: Status // Primary status
+  statuses?: Status[] // Additional statuses
 }
 
 export function ProjectCard({
@@ -23,6 +31,8 @@ export function ProjectCard({
   team,
   tasks,
   completedTasks,
+  status,
+  statuses = [],
 }: ProjectCardProps) {
   const getProgressColor = (progress: number) => {
     if (progress >= 75) return "bg-emerald-500"
@@ -46,7 +56,31 @@ export function ProjectCard({
             <h3 className="font-semibold leading-none tracking-tight">{title}</h3>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
-          <Badge variant={getBadgeVariant(progress)}>{progress}%</Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={getBadgeVariant(progress)}>{progress}%</Badge>
+            {/* Display statuses */}
+            <div className="flex flex-wrap gap-1 justify-end">
+              {status && (
+                <div
+                  className="px-2 py-0.5 text-xs rounded-full border flex items-center gap-1"
+                  style={{ borderColor: status.color, color: status.color }}
+                >
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+                  {status.name}
+                </div>
+              )}
+              {statuses.map(s => (
+                <div
+                  key={s.id}
+                  className="px-2 py-0.5 text-xs rounded-full border flex items-center gap-1"
+                  style={{ borderColor: s.color, color: s.color }}
+                >
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                  {s.name}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">

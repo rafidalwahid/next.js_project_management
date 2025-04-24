@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR from 'swr';
-import { projectApi, taskApi, teamApi, eventApi, resourceApi } from '@/lib/api';
+import { projectApi, taskApi, teamApi, eventApi } from '@/lib/api';
 
 /**
  * Hook to fetch projects
@@ -57,8 +57,15 @@ export function useProject(id: string | null) {
     id ? `/api/projects/${id}` : null,
     async () => {
       if (!id) return null;
-      const response = await projectApi.getProject(id);
-      return response;
+      console.log('Fetching project with ID:', id);
+      try {
+        const response = await projectApi.getProject(id);
+        console.log('Project fetch response:', response);
+        return response;
+      } catch (err) {
+        console.error('Error in useProject hook:', err);
+        throw err;
+      }
     }
   );
 
@@ -171,23 +178,4 @@ export function useEvents(projectId?: string, page = 1, limit = 10) {
   };
 }
 
-/**
- * Hook to fetch resources
- */
-export function useResources(page = 1, limit = 10, filters = {}) {
-  const { data, error, isLoading, mutate } = useSWR(
-    `/api/resources?page=${page}&limit=${limit}&${new URLSearchParams(filters as Record<string, string>).toString()}`,
-    async () => {
-      const response = await resourceApi.getResources(page, limit, filters);
-      return response;
-    }
-  );
 
-  return {
-    resources: data?.resources || [],
-    pagination: data?.pagination,
-    isLoading,
-    isError: error,
-    mutate,
-  };
-}

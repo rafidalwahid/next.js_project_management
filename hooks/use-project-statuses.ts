@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { fetchAPI } from '@/lib/api';
+import { fetchAPI, projectStatusApi } from '@/lib/api';
 
 export interface ProjectStatus {
   id: string;
@@ -14,7 +14,7 @@ export interface ProjectStatus {
 export function useProjectStatuses() {
   const { data, error, isLoading, mutate } = useSWR(
     '/api/project-statuses',
-    fetchAPI
+    projectStatusApi.getProjectStatuses
   );
 
   return {

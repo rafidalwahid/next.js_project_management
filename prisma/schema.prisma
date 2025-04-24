@@ -31,7 +31,7 @@ model User {
   attendanceRecords     Attendance[]
   attendanceSettings    AttendanceSettings?
   projects              Project[]
-  resources             Resource[]
+
   sessions              Session[]
   tasks                 Task[]              @relation("TaskAssignedTo")
   taskAssignments       TaskAssignee[]
@@ -156,21 +156,22 @@ model UserPermission {
 }
 
 model Project {
-  id          String        @id @default(cuid())
+  id          String              @id @default(cuid())
   title       String
   description String?
-  statusId    String
+  statusId    String              // Primary status (for backward compatibility)
   startDate   DateTime?
   endDate     DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   createdById String
   activities  Activity[]
   attendances Attendance[]
   events      Event[]
-  createdBy   User          @relation(fields: [createdById], references: [id])
-  status      ProjectStatus @relation(fields: [statusId], references: [id])
-  resources   Resource[]
+  createdBy   User                @relation(fields: [createdById], references: [id])
+  status      ProjectStatus       @relation(fields: [statusId], references: [id])
+  statuses    ProjectStatusLink[] // Multiple statuses
+
   tasks       Task[]
   teamMembers TeamMember[]
 
@@ -180,16 +181,33 @@ model Project {
 }
 
 model ProjectStatus {
-  id          String    @id @default(cuid())
+  id          String              @id @default(cuid())
   name        String
   color       String?
   description String?
-  isDefault   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  projects    Project[]
+  isDefault   Boolean             @default(false)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  projects    Project[]           // For backward compatibility
+  projectLinks ProjectStatusLink[] // Multiple projects
 
   @@map("project_status")
+}
+
+model ProjectStatusLink {
+  id          String        @id @default(cuid())
+  projectId   String
+  statusId    String
+  isPrimary   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status      ProjectStatus @relation(fields: [statusId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, statusId])
+  @@index([projectId])
+  @@index([statusId])
+  @@map("project_status_link")
 }
 
 model Task {
@@ -253,22 +271,7 @@ model TeamMember {
   @@map("team_member")
 }
 
-model Resource {
-  id           String   @id @default(cuid())
-  name         String
-  type         String
-  quantity     Int      @default(1)
-  projectId    String
-  assignedToId String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
-  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@index([projectId])
-  @@index([assignedToId])
-  @@map("resource")
-}
 
 model Event {
   id          String   @id @default(cuid())

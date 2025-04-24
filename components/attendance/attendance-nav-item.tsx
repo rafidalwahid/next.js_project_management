@@ -54,7 +54,7 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
       <Link
         href="/attendance"
         className={cn(
-          "group flex items-center justify-center rounded-md py-2 h-9 w-9 mx-auto px-0 text-sm font-medium transition-colors",
+          "group flex items-center justify-center rounded-md py-2 h-9 w-9 mx-auto px-0 text-xs font-medium transition-colors",
           isActive
             ? "bg-accent text-accent-foreground"
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
@@ -74,7 +74,7 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
     >
       <CollapsibleTrigger
         className={cn(
-          "flex w-full items-center justify-between rounded-md py-2 px-3 text-sm font-medium transition-colors",
+          "flex w-full items-center justify-between rounded-md py-2 px-2 text-xs font-medium transition-colors",
           isActive
             ? "bg-accent text-accent-foreground"
             : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
@@ -101,7 +101,7 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center rounded-md py-1.5 px-3 text-sm transition-colors",
+                  "flex items-center rounded-md py-1.5 px-2 text-xs transition-colors",
                   subItemActive
                     ? "bg-accent/50 text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent/30 hover:text-foreground"

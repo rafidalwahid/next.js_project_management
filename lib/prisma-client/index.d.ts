@@ -69,6 +69,11 @@ export type Project = $Result.DefaultSelection<Prisma.$ProjectPayload>
  */
 export type ProjectStatus = $Result.DefaultSelection<Prisma.$ProjectStatusPayload>
 /**
+ * Model ProjectStatusLink
+ * 
+ */
+export type ProjectStatusLink = $Result.DefaultSelection<Prisma.$ProjectStatusLinkPayload>
+/**
  * Model Task
  * 
  */
@@ -83,11 +88,6 @@ export type TaskAssignee = $Result.DefaultSelection<Prisma.$TaskAssigneePayload>
  * 
  */
 export type TeamMember = $Result.DefaultSelection<Prisma.$TeamMemberPayload>
-/**
- * Model Resource
- * 
- */
-export type Resource = $Result.DefaultSelection<Prisma.$ResourcePayload>
 /**
  * Model Event
  * 
@@ -345,6 +345,16 @@ export class PrismaClient<
   get projectStatus(): Prisma.ProjectStatusDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.projectStatusLink`: Exposes CRUD operations for the **ProjectStatusLink** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProjectStatusLinks
+    * const projectStatusLinks = await prisma.projectStatusLink.findMany()
+    * ```
+    */
+  get projectStatusLink(): Prisma.ProjectStatusLinkDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.task`: Exposes CRUD operations for the **Task** model.
     * Example usage:
     * ```ts
@@ -373,16 +383,6 @@ export class PrismaClient<
     * ```
     */
   get teamMember(): Prisma.TeamMemberDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.resource`: Exposes CRUD operations for the **Resource** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Resources
-    * const resources = await prisma.resource.findMany()
-    * ```
-    */
-  get resource(): Prisma.ResourceDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.event`: Exposes CRUD operations for the **Event** model.
@@ -874,10 +874,10 @@ export namespace Prisma {
     UserPermission: 'UserPermission',
     Project: 'Project',
     ProjectStatus: 'ProjectStatus',
+    ProjectStatusLink: 'ProjectStatusLink',
     Task: 'Task',
     TaskAssignee: 'TaskAssignee',
     TeamMember: 'TeamMember',
-    Resource: 'Resource',
     Event: 'Event',
     Attendance: 'Attendance',
     AttendanceSettings: 'AttendanceSettings',
@@ -900,7 +900,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "role" | "permission" | "userRole" | "rolePermission" | "userPermission" | "project" | "projectStatus" | "task" | "taskAssignee" | "teamMember" | "resource" | "event" | "attendance" | "attendanceSettings" | "activity"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "role" | "permission" | "userRole" | "rolePermission" | "userPermission" | "project" | "projectStatus" | "projectStatusLink" | "task" | "taskAssignee" | "teamMember" | "event" | "attendance" | "attendanceSettings" | "activity"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1630,6 +1630,72 @@ export namespace Prisma {
           }
         }
       }
+      ProjectStatusLink: {
+        payload: Prisma.$ProjectStatusLinkPayload<ExtArgs>
+        fields: Prisma.ProjectStatusLinkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProjectStatusLinkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          findFirst: {
+            args: Prisma.ProjectStatusLinkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          findMany: {
+            args: Prisma.ProjectStatusLinkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>[]
+          }
+          create: {
+            args: Prisma.ProjectStatusLinkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          createMany: {
+            args: Prisma.ProjectStatusLinkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.ProjectStatusLinkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          update: {
+            args: Prisma.ProjectStatusLinkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProjectStatusLinkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProjectStatusLinkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ProjectStatusLinkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
+          }
+          aggregate: {
+            args: Prisma.ProjectStatusLinkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProjectStatusLink>
+          }
+          groupBy: {
+            args: Prisma.ProjectStatusLinkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProjectStatusLinkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProjectStatusLinkCountArgs<ExtArgs>
+            result: $Utils.Optional<ProjectStatusLinkCountAggregateOutputType> | number
+          }
+        }
+      }
       Task: {
         payload: Prisma.$TaskPayload<ExtArgs>
         fields: Prisma.TaskFieldRefs
@@ -1825,72 +1891,6 @@ export namespace Prisma {
           count: {
             args: Prisma.TeamMemberCountArgs<ExtArgs>
             result: $Utils.Optional<TeamMemberCountAggregateOutputType> | number
-          }
-        }
-      }
-      Resource: {
-        payload: Prisma.$ResourcePayload<ExtArgs>
-        fields: Prisma.ResourceFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ResourceFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ResourceFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          findFirst: {
-            args: Prisma.ResourceFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ResourceFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          findMany: {
-            args: Prisma.ResourceFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>[]
-          }
-          create: {
-            args: Prisma.ResourceCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          createMany: {
-            args: Prisma.ResourceCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.ResourceDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          update: {
-            args: Prisma.ResourceUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          deleteMany: {
-            args: Prisma.ResourceDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ResourceUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.ResourceUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ResourcePayload>
-          }
-          aggregate: {
-            args: Prisma.ResourceAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateResource>
-          }
-          groupBy: {
-            args: Prisma.ResourceGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ResourceGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ResourceCountArgs<ExtArgs>
-            result: $Utils.Optional<ResourceCountAggregateOutputType> | number
           }
         }
       }
@@ -2253,10 +2253,10 @@ export namespace Prisma {
     userPermission?: UserPermissionOmit
     project?: ProjectOmit
     projectStatus?: ProjectStatusOmit
+    projectStatusLink?: ProjectStatusLinkOmit
     task?: TaskOmit
     taskAssignee?: TaskAssigneeOmit
     teamMember?: TeamMemberOmit
-    resource?: ResourceOmit
     event?: EventOmit
     attendance?: AttendanceOmit
     attendanceSettings?: AttendanceSettingsOmit
@@ -2360,7 +2360,6 @@ export namespace Prisma {
     attendanceAdjustments: number
     attendanceRecords: number
     projects: number
-    resources: number
     sessions: number
     tasks: number
     taskAssignments: number
@@ -2375,7 +2374,6 @@ export namespace Prisma {
     attendanceAdjustments?: boolean | UserCountOutputTypeCountAttendanceAdjustmentsArgs
     attendanceRecords?: boolean | UserCountOutputTypeCountAttendanceRecordsArgs
     projects?: boolean | UserCountOutputTypeCountProjectsArgs
-    resources?: boolean | UserCountOutputTypeCountResourcesArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     tasks?: boolean | UserCountOutputTypeCountTasksArgs
     taskAssignments?: boolean | UserCountOutputTypeCountTaskAssignmentsArgs
@@ -2428,13 +2426,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountProjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProjectWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountResourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ResourceWhereInput
   }
 
   /**
@@ -2568,7 +2559,7 @@ export namespace Prisma {
     activities: number
     attendances: number
     events: number
-    resources: number
+    statuses: number
     tasks: number
     teamMembers: number
   }
@@ -2577,7 +2568,7 @@ export namespace Prisma {
     activities?: boolean | ProjectCountOutputTypeCountActivitiesArgs
     attendances?: boolean | ProjectCountOutputTypeCountAttendancesArgs
     events?: boolean | ProjectCountOutputTypeCountEventsArgs
-    resources?: boolean | ProjectCountOutputTypeCountResourcesArgs
+    statuses?: boolean | ProjectCountOutputTypeCountStatusesArgs
     tasks?: boolean | ProjectCountOutputTypeCountTasksArgs
     teamMembers?: boolean | ProjectCountOutputTypeCountTeamMembersArgs
   }
@@ -2617,8 +2608,8 @@ export namespace Prisma {
   /**
    * ProjectCountOutputType without action
    */
-  export type ProjectCountOutputTypeCountResourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ResourceWhereInput
+  export type ProjectCountOutputTypeCountStatusesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProjectStatusLinkWhereInput
   }
 
   /**
@@ -2642,10 +2633,12 @@ export namespace Prisma {
 
   export type ProjectStatusCountOutputType = {
     projects: number
+    projectLinks: number
   }
 
   export type ProjectStatusCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projects?: boolean | ProjectStatusCountOutputTypeCountProjectsArgs
+    projectLinks?: boolean | ProjectStatusCountOutputTypeCountProjectLinksArgs
   }
 
   // Custom InputTypes
@@ -2664,6 +2657,13 @@ export namespace Prisma {
    */
   export type ProjectStatusCountOutputTypeCountProjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProjectWhereInput
+  }
+
+  /**
+   * ProjectStatusCountOutputType without action
+   */
+  export type ProjectStatusCountOutputTypeCountProjectLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProjectStatusLinkWhereInput
   }
 
 
@@ -2987,7 +2987,6 @@ export namespace Prisma {
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     projects?: boolean | User$projectsArgs<ExtArgs>
-    resources?: boolean | User$resourcesArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
     taskAssignments?: boolean | User$taskAssignmentsArgs<ExtArgs>
@@ -3026,7 +3025,6 @@ export namespace Prisma {
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     projects?: boolean | User$projectsArgs<ExtArgs>
-    resources?: boolean | User$resourcesArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
     taskAssignments?: boolean | User$taskAssignmentsArgs<ExtArgs>
@@ -3045,7 +3043,6 @@ export namespace Prisma {
       attendanceRecords: Prisma.$AttendancePayload<ExtArgs>[]
       attendanceSettings: Prisma.$AttendanceSettingsPayload<ExtArgs> | null
       projects: Prisma.$ProjectPayload<ExtArgs>[]
-      resources: Prisma.$ResourcePayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       tasks: Prisma.$TaskPayload<ExtArgs>[]
       taskAssignments: Prisma.$TaskAssigneePayload<ExtArgs>[]
@@ -3416,7 +3413,6 @@ export namespace Prisma {
     attendanceRecords<T extends User$attendanceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceSettings<T extends User$attendanceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceSettingsArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     projects<T extends User$projectsArgs<ExtArgs> = {}>(args?: Subset<T, User$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    resources<T extends User$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, User$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tasks<T extends User$tasksArgs<ExtArgs> = {}>(args?: Subset<T, User$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskAssignments<T extends User$taskAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$taskAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAssigneePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3947,30 +3943,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[]
-  }
-
-  /**
-   * User.resources
-   */
-  export type User$resourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    where?: ResourceWhereInput
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    cursor?: ResourceWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
   }
 
   /**
@@ -11964,7 +11936,7 @@ export namespace Prisma {
     events?: boolean | Project$eventsArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
     status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
-    resources?: boolean | Project$resourcesArgs<ExtArgs>
+    statuses?: boolean | Project$statusesArgs<ExtArgs>
     tasks?: boolean | Project$tasksArgs<ExtArgs>
     teamMembers?: boolean | Project$teamMembersArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
@@ -11991,7 +11963,7 @@ export namespace Prisma {
     events?: boolean | Project$eventsArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
     status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
-    resources?: boolean | Project$resourcesArgs<ExtArgs>
+    statuses?: boolean | Project$statusesArgs<ExtArgs>
     tasks?: boolean | Project$tasksArgs<ExtArgs>
     teamMembers?: boolean | Project$teamMembersArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
@@ -12005,7 +11977,7 @@ export namespace Prisma {
       events: Prisma.$EventPayload<ExtArgs>[]
       createdBy: Prisma.$UserPayload<ExtArgs>
       status: Prisma.$ProjectStatusPayload<ExtArgs>
-      resources: Prisma.$ResourcePayload<ExtArgs>[]
+      statuses: Prisma.$ProjectStatusLinkPayload<ExtArgs>[]
       tasks: Prisma.$TaskPayload<ExtArgs>[]
       teamMembers: Prisma.$TeamMemberPayload<ExtArgs>[]
     }
@@ -12364,7 +12336,7 @@ export namespace Prisma {
     events<T extends Project$eventsArgs<ExtArgs> = {}>(args?: Subset<T, Project$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     status<T extends ProjectStatusDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatusDefaultArgs<ExtArgs>>): Prisma__ProjectStatusClient<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    resources<T extends Project$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, Project$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    statuses<T extends Project$statusesArgs<ExtArgs> = {}>(args?: Subset<T, Project$statusesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tasks<T extends Project$tasksArgs<ExtArgs> = {}>(args?: Subset<T, Project$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     teamMembers<T extends Project$teamMembersArgs<ExtArgs> = {}>(args?: Subset<T, Project$teamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -12820,27 +12792,27 @@ export namespace Prisma {
   }
 
   /**
-   * Project.resources
+   * Project.statuses
    */
-  export type Project$resourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Project$statusesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Resource
+     * Select specific fields to fetch from the ProjectStatusLink
      */
-    select?: ResourceSelect<ExtArgs> | null
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Resource
+     * Omit specific fields from the ProjectStatusLink
      */
-    omit?: ResourceOmit<ExtArgs> | null
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: ResourceInclude<ExtArgs> | null
-    where?: ResourceWhereInput
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    cursor?: ResourceWhereUniqueInput
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    where?: ProjectStatusLinkWhereInput
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    cursor?: ProjectStatusLinkWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
+    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
   }
 
   /**
@@ -13091,6 +13063,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     projects?: boolean | ProjectStatus$projectsArgs<ExtArgs>
+    projectLinks?: boolean | ProjectStatus$projectLinksArgs<ExtArgs>
     _count?: boolean | ProjectStatusCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["projectStatus"]>
 
@@ -13109,6 +13082,7 @@ export namespace Prisma {
   export type ProjectStatusOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "color" | "description" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["projectStatus"]>
   export type ProjectStatusInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projects?: boolean | ProjectStatus$projectsArgs<ExtArgs>
+    projectLinks?: boolean | ProjectStatus$projectLinksArgs<ExtArgs>
     _count?: boolean | ProjectStatusCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -13116,6 +13090,7 @@ export namespace Prisma {
     name: "ProjectStatus"
     objects: {
       projects: Prisma.$ProjectPayload<ExtArgs>[]
+      projectLinks: Prisma.$ProjectStatusLinkPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13466,6 +13441,7 @@ export namespace Prisma {
   export interface Prisma__ProjectStatusClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     projects<T extends ProjectStatus$projectsArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatus$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    projectLinks<T extends ProjectStatus$projectLinksArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatus$projectLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13869,6 +13845,30 @@ export namespace Prisma {
   }
 
   /**
+   * ProjectStatus.projectLinks
+   */
+  export type ProjectStatus$projectLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    where?: ProjectStatusLinkWhereInput
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    cursor?: ProjectStatusLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+  }
+
+  /**
    * ProjectStatus without action
    */
   export type ProjectStatusDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13884,6 +13884,950 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ProjectStatusInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProjectStatusLink
+   */
+
+  export type AggregateProjectStatusLink = {
+    _count: ProjectStatusLinkCountAggregateOutputType | null
+    _min: ProjectStatusLinkMinAggregateOutputType | null
+    _max: ProjectStatusLinkMaxAggregateOutputType | null
+  }
+
+  export type ProjectStatusLinkMinAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    statusId: string | null
+    isPrimary: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProjectStatusLinkMaxAggregateOutputType = {
+    id: string | null
+    projectId: string | null
+    statusId: string | null
+    isPrimary: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProjectStatusLinkCountAggregateOutputType = {
+    id: number
+    projectId: number
+    statusId: number
+    isPrimary: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ProjectStatusLinkMinAggregateInputType = {
+    id?: true
+    projectId?: true
+    statusId?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProjectStatusLinkMaxAggregateInputType = {
+    id?: true
+    projectId?: true
+    statusId?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProjectStatusLinkCountAggregateInputType = {
+    id?: true
+    projectId?: true
+    statusId?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ProjectStatusLinkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProjectStatusLink to aggregate.
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProjectStatusLinks to fetch.
+     */
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProjectStatusLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProjectStatusLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProjectStatusLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProjectStatusLinks
+    **/
+    _count?: true | ProjectStatusLinkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProjectStatusLinkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProjectStatusLinkMaxAggregateInputType
+  }
+
+  export type GetProjectStatusLinkAggregateType<T extends ProjectStatusLinkAggregateArgs> = {
+        [P in keyof T & keyof AggregateProjectStatusLink]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProjectStatusLink[P]>
+      : GetScalarType<T[P], AggregateProjectStatusLink[P]>
+  }
+
+
+
+
+  export type ProjectStatusLinkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProjectStatusLinkWhereInput
+    orderBy?: ProjectStatusLinkOrderByWithAggregationInput | ProjectStatusLinkOrderByWithAggregationInput[]
+    by: ProjectStatusLinkScalarFieldEnum[] | ProjectStatusLinkScalarFieldEnum
+    having?: ProjectStatusLinkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProjectStatusLinkCountAggregateInputType | true
+    _min?: ProjectStatusLinkMinAggregateInputType
+    _max?: ProjectStatusLinkMaxAggregateInputType
+  }
+
+  export type ProjectStatusLinkGroupByOutputType = {
+    id: string
+    projectId: string
+    statusId: string
+    isPrimary: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: ProjectStatusLinkCountAggregateOutputType | null
+    _min: ProjectStatusLinkMinAggregateOutputType | null
+    _max: ProjectStatusLinkMaxAggregateOutputType | null
+  }
+
+  type GetProjectStatusLinkGroupByPayload<T extends ProjectStatusLinkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProjectStatusLinkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProjectStatusLinkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProjectStatusLinkGroupByOutputType[P]>
+            : GetScalarType<T[P], ProjectStatusLinkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProjectStatusLinkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectId?: boolean
+    statusId?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["projectStatusLink"]>
+
+
+
+  export type ProjectStatusLinkSelectScalar = {
+    id?: boolean
+    projectId?: boolean
+    statusId?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ProjectStatusLinkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "statusId" | "isPrimary" | "createdAt" | "updatedAt", ExtArgs["result"]["projectStatusLink"]>
+  export type ProjectStatusLinkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
+  }
+
+  export type $ProjectStatusLinkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProjectStatusLink"
+    objects: {
+      project: Prisma.$ProjectPayload<ExtArgs>
+      status: Prisma.$ProjectStatusPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      projectId: string
+      statusId: string
+      isPrimary: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["projectStatusLink"]>
+    composites: {}
+  }
+
+  type ProjectStatusLinkGetPayload<S extends boolean | null | undefined | ProjectStatusLinkDefaultArgs> = $Result.GetResult<Prisma.$ProjectStatusLinkPayload, S>
+
+  type ProjectStatusLinkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProjectStatusLinkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProjectStatusLinkCountAggregateInputType | true
+    }
+
+  export interface ProjectStatusLinkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProjectStatusLink'], meta: { name: 'ProjectStatusLink' } }
+    /**
+     * Find zero or one ProjectStatusLink that matches the filter.
+     * @param {ProjectStatusLinkFindUniqueArgs} args - Arguments to find a ProjectStatusLink
+     * @example
+     * // Get one ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProjectStatusLinkFindUniqueArgs>(args: SelectSubset<T, ProjectStatusLinkFindUniqueArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProjectStatusLink that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProjectStatusLinkFindUniqueOrThrowArgs} args - Arguments to find a ProjectStatusLink
+     * @example
+     * // Get one ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProjectStatusLinkFindUniqueOrThrowArgs>(args: SelectSubset<T, ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProjectStatusLink that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkFindFirstArgs} args - Arguments to find a ProjectStatusLink
+     * @example
+     * // Get one ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProjectStatusLinkFindFirstArgs>(args?: SelectSubset<T, ProjectStatusLinkFindFirstArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProjectStatusLink that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkFindFirstOrThrowArgs} args - Arguments to find a ProjectStatusLink
+     * @example
+     * // Get one ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProjectStatusLinkFindFirstOrThrowArgs>(args?: SelectSubset<T, ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProjectStatusLinks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProjectStatusLinks
+     * const projectStatusLinks = await prisma.projectStatusLink.findMany()
+     * 
+     * // Get first 10 ProjectStatusLinks
+     * const projectStatusLinks = await prisma.projectStatusLink.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const projectStatusLinkWithIdOnly = await prisma.projectStatusLink.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProjectStatusLinkFindManyArgs>(args?: SelectSubset<T, ProjectStatusLinkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProjectStatusLink.
+     * @param {ProjectStatusLinkCreateArgs} args - Arguments to create a ProjectStatusLink.
+     * @example
+     * // Create one ProjectStatusLink
+     * const ProjectStatusLink = await prisma.projectStatusLink.create({
+     *   data: {
+     *     // ... data to create a ProjectStatusLink
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProjectStatusLinkCreateArgs>(args: SelectSubset<T, ProjectStatusLinkCreateArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProjectStatusLinks.
+     * @param {ProjectStatusLinkCreateManyArgs} args - Arguments to create many ProjectStatusLinks.
+     * @example
+     * // Create many ProjectStatusLinks
+     * const projectStatusLink = await prisma.projectStatusLink.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProjectStatusLinkCreateManyArgs>(args?: SelectSubset<T, ProjectStatusLinkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a ProjectStatusLink.
+     * @param {ProjectStatusLinkDeleteArgs} args - Arguments to delete one ProjectStatusLink.
+     * @example
+     * // Delete one ProjectStatusLink
+     * const ProjectStatusLink = await prisma.projectStatusLink.delete({
+     *   where: {
+     *     // ... filter to delete one ProjectStatusLink
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProjectStatusLinkDeleteArgs>(args: SelectSubset<T, ProjectStatusLinkDeleteArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProjectStatusLink.
+     * @param {ProjectStatusLinkUpdateArgs} args - Arguments to update one ProjectStatusLink.
+     * @example
+     * // Update one ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProjectStatusLinkUpdateArgs>(args: SelectSubset<T, ProjectStatusLinkUpdateArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProjectStatusLinks.
+     * @param {ProjectStatusLinkDeleteManyArgs} args - Arguments to filter ProjectStatusLinks to delete.
+     * @example
+     * // Delete a few ProjectStatusLinks
+     * const { count } = await prisma.projectStatusLink.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProjectStatusLinkDeleteManyArgs>(args?: SelectSubset<T, ProjectStatusLinkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProjectStatusLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProjectStatusLinks
+     * const projectStatusLink = await prisma.projectStatusLink.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProjectStatusLinkUpdateManyArgs>(args: SelectSubset<T, ProjectStatusLinkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ProjectStatusLink.
+     * @param {ProjectStatusLinkUpsertArgs} args - Arguments to update or create a ProjectStatusLink.
+     * @example
+     * // Update or create a ProjectStatusLink
+     * const projectStatusLink = await prisma.projectStatusLink.upsert({
+     *   create: {
+     *     // ... data to create a ProjectStatusLink
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProjectStatusLink we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProjectStatusLinkUpsertArgs>(args: SelectSubset<T, ProjectStatusLinkUpsertArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProjectStatusLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkCountArgs} args - Arguments to filter ProjectStatusLinks to count.
+     * @example
+     * // Count the number of ProjectStatusLinks
+     * const count = await prisma.projectStatusLink.count({
+     *   where: {
+     *     // ... the filter for the ProjectStatusLinks we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProjectStatusLinkCountArgs>(
+      args?: Subset<T, ProjectStatusLinkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProjectStatusLinkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProjectStatusLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProjectStatusLinkAggregateArgs>(args: Subset<T, ProjectStatusLinkAggregateArgs>): Prisma.PrismaPromise<GetProjectStatusLinkAggregateType<T>>
+
+    /**
+     * Group by ProjectStatusLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProjectStatusLinkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProjectStatusLinkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProjectStatusLinkGroupByArgs['orderBy'] }
+        : { orderBy?: ProjectStatusLinkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProjectStatusLinkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProjectStatusLinkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProjectStatusLink model
+   */
+  readonly fields: ProjectStatusLinkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProjectStatusLink.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProjectStatusLinkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    status<T extends ProjectStatusDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatusDefaultArgs<ExtArgs>>): Prisma__ProjectStatusClient<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProjectStatusLink model
+   */
+  interface ProjectStatusLinkFieldRefs {
+    readonly id: FieldRef<"ProjectStatusLink", 'String'>
+    readonly projectId: FieldRef<"ProjectStatusLink", 'String'>
+    readonly statusId: FieldRef<"ProjectStatusLink", 'String'>
+    readonly isPrimary: FieldRef<"ProjectStatusLink", 'Boolean'>
+    readonly createdAt: FieldRef<"ProjectStatusLink", 'DateTime'>
+    readonly updatedAt: FieldRef<"ProjectStatusLink", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProjectStatusLink findUnique
+   */
+  export type ProjectStatusLinkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ProjectStatusLink to fetch.
+     */
+    where: ProjectStatusLinkWhereUniqueInput
+  }
+
+  /**
+   * ProjectStatusLink findUniqueOrThrow
+   */
+  export type ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ProjectStatusLink to fetch.
+     */
+    where: ProjectStatusLinkWhereUniqueInput
+  }
+
+  /**
+   * ProjectStatusLink findFirst
+   */
+  export type ProjectStatusLinkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ProjectStatusLink to fetch.
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProjectStatusLinks to fetch.
+     */
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProjectStatusLinks.
+     */
+    cursor?: ProjectStatusLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProjectStatusLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProjectStatusLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProjectStatusLinks.
+     */
+    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ProjectStatusLink findFirstOrThrow
+   */
+  export type ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ProjectStatusLink to fetch.
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProjectStatusLinks to fetch.
+     */
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProjectStatusLinks.
+     */
+    cursor?: ProjectStatusLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProjectStatusLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProjectStatusLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProjectStatusLinks.
+     */
+    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ProjectStatusLink findMany
+   */
+  export type ProjectStatusLinkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ProjectStatusLinks to fetch.
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProjectStatusLinks to fetch.
+     */
+    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProjectStatusLinks.
+     */
+    cursor?: ProjectStatusLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProjectStatusLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProjectStatusLinks.
+     */
+    skip?: number
+    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ProjectStatusLink create
+   */
+  export type ProjectStatusLinkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProjectStatusLink.
+     */
+    data: XOR<ProjectStatusLinkCreateInput, ProjectStatusLinkUncheckedCreateInput>
+  }
+
+  /**
+   * ProjectStatusLink createMany
+   */
+  export type ProjectStatusLinkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProjectStatusLinks.
+     */
+    data: ProjectStatusLinkCreateManyInput | ProjectStatusLinkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProjectStatusLink update
+   */
+  export type ProjectStatusLinkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProjectStatusLink.
+     */
+    data: XOR<ProjectStatusLinkUpdateInput, ProjectStatusLinkUncheckedUpdateInput>
+    /**
+     * Choose, which ProjectStatusLink to update.
+     */
+    where: ProjectStatusLinkWhereUniqueInput
+  }
+
+  /**
+   * ProjectStatusLink updateMany
+   */
+  export type ProjectStatusLinkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProjectStatusLinks.
+     */
+    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which ProjectStatusLinks to update
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * Limit how many ProjectStatusLinks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProjectStatusLink upsert
+   */
+  export type ProjectStatusLinkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProjectStatusLink to update in case it exists.
+     */
+    where: ProjectStatusLinkWhereUniqueInput
+    /**
+     * In case the ProjectStatusLink found by the `where` argument doesn't exist, create a new ProjectStatusLink with this data.
+     */
+    create: XOR<ProjectStatusLinkCreateInput, ProjectStatusLinkUncheckedCreateInput>
+    /**
+     * In case the ProjectStatusLink was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProjectStatusLinkUpdateInput, ProjectStatusLinkUncheckedUpdateInput>
+  }
+
+  /**
+   * ProjectStatusLink delete
+   */
+  export type ProjectStatusLinkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
+    /**
+     * Filter which ProjectStatusLink to delete.
+     */
+    where: ProjectStatusLinkWhereUniqueInput
+  }
+
+  /**
+   * ProjectStatusLink deleteMany
+   */
+  export type ProjectStatusLinkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProjectStatusLinks to delete
+     */
+    where?: ProjectStatusLinkWhereInput
+    /**
+     * Limit how many ProjectStatusLinks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProjectStatusLink without action
+   */
+  export type ProjectStatusLinkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatusLink
+     */
+    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatusLink
+     */
+    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusLinkInclude<ExtArgs> | null
   }
 
 
@@ -16961,1025 +17905,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TeamMemberInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model Resource
-   */
-
-  export type AggregateResource = {
-    _count: ResourceCountAggregateOutputType | null
-    _avg: ResourceAvgAggregateOutputType | null
-    _sum: ResourceSumAggregateOutputType | null
-    _min: ResourceMinAggregateOutputType | null
-    _max: ResourceMaxAggregateOutputType | null
-  }
-
-  export type ResourceAvgAggregateOutputType = {
-    quantity: number | null
-  }
-
-  export type ResourceSumAggregateOutputType = {
-    quantity: number | null
-  }
-
-  export type ResourceMinAggregateOutputType = {
-    id: string | null
-    name: string | null
-    type: string | null
-    quantity: number | null
-    projectId: string | null
-    assignedToId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type ResourceMaxAggregateOutputType = {
-    id: string | null
-    name: string | null
-    type: string | null
-    quantity: number | null
-    projectId: string | null
-    assignedToId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type ResourceCountAggregateOutputType = {
-    id: number
-    name: number
-    type: number
-    quantity: number
-    projectId: number
-    assignedToId: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type ResourceAvgAggregateInputType = {
-    quantity?: true
-  }
-
-  export type ResourceSumAggregateInputType = {
-    quantity?: true
-  }
-
-  export type ResourceMinAggregateInputType = {
-    id?: true
-    name?: true
-    type?: true
-    quantity?: true
-    projectId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type ResourceMaxAggregateInputType = {
-    id?: true
-    name?: true
-    type?: true
-    quantity?: true
-    projectId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type ResourceCountAggregateInputType = {
-    id?: true
-    name?: true
-    type?: true
-    quantity?: true
-    projectId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type ResourceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Resource to aggregate.
-     */
-    where?: ResourceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Resources to fetch.
-     */
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ResourceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Resources from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Resources.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Resources
-    **/
-    _count?: true | ResourceCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: ResourceAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: ResourceSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ResourceMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ResourceMaxAggregateInputType
-  }
-
-  export type GetResourceAggregateType<T extends ResourceAggregateArgs> = {
-        [P in keyof T & keyof AggregateResource]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateResource[P]>
-      : GetScalarType<T[P], AggregateResource[P]>
-  }
-
-
-
-
-  export type ResourceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ResourceWhereInput
-    orderBy?: ResourceOrderByWithAggregationInput | ResourceOrderByWithAggregationInput[]
-    by: ResourceScalarFieldEnum[] | ResourceScalarFieldEnum
-    having?: ResourceScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ResourceCountAggregateInputType | true
-    _avg?: ResourceAvgAggregateInputType
-    _sum?: ResourceSumAggregateInputType
-    _min?: ResourceMinAggregateInputType
-    _max?: ResourceMaxAggregateInputType
-  }
-
-  export type ResourceGroupByOutputType = {
-    id: string
-    name: string
-    type: string
-    quantity: number
-    projectId: string
-    assignedToId: string | null
-    createdAt: Date
-    updatedAt: Date
-    _count: ResourceCountAggregateOutputType | null
-    _avg: ResourceAvgAggregateOutputType | null
-    _sum: ResourceSumAggregateOutputType | null
-    _min: ResourceMinAggregateOutputType | null
-    _max: ResourceMaxAggregateOutputType | null
-  }
-
-  type GetResourceGroupByPayload<T extends ResourceGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ResourceGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ResourceGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ResourceGroupByOutputType[P]>
-            : GetScalarType<T[P], ResourceGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ResourceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    type?: boolean
-    quantity?: boolean
-    projectId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    assignedTo?: boolean | Resource$assignedToArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["resource"]>
-
-
-
-  export type ResourceSelectScalar = {
-    id?: boolean
-    name?: boolean
-    type?: boolean
-    quantity?: boolean
-    projectId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type ResourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "quantity" | "projectId" | "assignedToId" | "createdAt" | "updatedAt", ExtArgs["result"]["resource"]>
-  export type ResourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    assignedTo?: boolean | Resource$assignedToArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }
-
-  export type $ResourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Resource"
-    objects: {
-      assignedTo: Prisma.$UserPayload<ExtArgs> | null
-      project: Prisma.$ProjectPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      name: string
-      type: string
-      quantity: number
-      projectId: string
-      assignedToId: string | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["resource"]>
-    composites: {}
-  }
-
-  type ResourceGetPayload<S extends boolean | null | undefined | ResourceDefaultArgs> = $Result.GetResult<Prisma.$ResourcePayload, S>
-
-  type ResourceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ResourceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ResourceCountAggregateInputType | true
-    }
-
-  export interface ResourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Resource'], meta: { name: 'Resource' } }
-    /**
-     * Find zero or one Resource that matches the filter.
-     * @param {ResourceFindUniqueArgs} args - Arguments to find a Resource
-     * @example
-     * // Get one Resource
-     * const resource = await prisma.resource.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ResourceFindUniqueArgs>(args: SelectSubset<T, ResourceFindUniqueArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Resource that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ResourceFindUniqueOrThrowArgs} args - Arguments to find a Resource
-     * @example
-     * // Get one Resource
-     * const resource = await prisma.resource.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ResourceFindUniqueOrThrowArgs>(args: SelectSubset<T, ResourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Resource that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceFindFirstArgs} args - Arguments to find a Resource
-     * @example
-     * // Get one Resource
-     * const resource = await prisma.resource.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ResourceFindFirstArgs>(args?: SelectSubset<T, ResourceFindFirstArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Resource that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceFindFirstOrThrowArgs} args - Arguments to find a Resource
-     * @example
-     * // Get one Resource
-     * const resource = await prisma.resource.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ResourceFindFirstOrThrowArgs>(args?: SelectSubset<T, ResourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Resources that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Resources
-     * const resources = await prisma.resource.findMany()
-     * 
-     * // Get first 10 Resources
-     * const resources = await prisma.resource.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const resourceWithIdOnly = await prisma.resource.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ResourceFindManyArgs>(args?: SelectSubset<T, ResourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Resource.
-     * @param {ResourceCreateArgs} args - Arguments to create a Resource.
-     * @example
-     * // Create one Resource
-     * const Resource = await prisma.resource.create({
-     *   data: {
-     *     // ... data to create a Resource
-     *   }
-     * })
-     * 
-     */
-    create<T extends ResourceCreateArgs>(args: SelectSubset<T, ResourceCreateArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Resources.
-     * @param {ResourceCreateManyArgs} args - Arguments to create many Resources.
-     * @example
-     * // Create many Resources
-     * const resource = await prisma.resource.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ResourceCreateManyArgs>(args?: SelectSubset<T, ResourceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a Resource.
-     * @param {ResourceDeleteArgs} args - Arguments to delete one Resource.
-     * @example
-     * // Delete one Resource
-     * const Resource = await prisma.resource.delete({
-     *   where: {
-     *     // ... filter to delete one Resource
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ResourceDeleteArgs>(args: SelectSubset<T, ResourceDeleteArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Resource.
-     * @param {ResourceUpdateArgs} args - Arguments to update one Resource.
-     * @example
-     * // Update one Resource
-     * const resource = await prisma.resource.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ResourceUpdateArgs>(args: SelectSubset<T, ResourceUpdateArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Resources.
-     * @param {ResourceDeleteManyArgs} args - Arguments to filter Resources to delete.
-     * @example
-     * // Delete a few Resources
-     * const { count } = await prisma.resource.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ResourceDeleteManyArgs>(args?: SelectSubset<T, ResourceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Resources.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Resources
-     * const resource = await prisma.resource.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ResourceUpdateManyArgs>(args: SelectSubset<T, ResourceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one Resource.
-     * @param {ResourceUpsertArgs} args - Arguments to update or create a Resource.
-     * @example
-     * // Update or create a Resource
-     * const resource = await prisma.resource.upsert({
-     *   create: {
-     *     // ... data to create a Resource
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Resource we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ResourceUpsertArgs>(args: SelectSubset<T, ResourceUpsertArgs<ExtArgs>>): Prisma__ResourceClient<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Resources.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceCountArgs} args - Arguments to filter Resources to count.
-     * @example
-     * // Count the number of Resources
-     * const count = await prisma.resource.count({
-     *   where: {
-     *     // ... the filter for the Resources we want to count
-     *   }
-     * })
-    **/
-    count<T extends ResourceCountArgs>(
-      args?: Subset<T, ResourceCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ResourceCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Resource.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ResourceAggregateArgs>(args: Subset<T, ResourceAggregateArgs>): Prisma.PrismaPromise<GetResourceAggregateType<T>>
-
-    /**
-     * Group by Resource.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ResourceGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ResourceGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ResourceGroupByArgs['orderBy'] }
-        : { orderBy?: ResourceGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ResourceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetResourceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Resource model
-   */
-  readonly fields: ResourceFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Resource.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ResourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    assignedTo<T extends Resource$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Resource$assignedToArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Resource model
-   */
-  interface ResourceFieldRefs {
-    readonly id: FieldRef<"Resource", 'String'>
-    readonly name: FieldRef<"Resource", 'String'>
-    readonly type: FieldRef<"Resource", 'String'>
-    readonly quantity: FieldRef<"Resource", 'Int'>
-    readonly projectId: FieldRef<"Resource", 'String'>
-    readonly assignedToId: FieldRef<"Resource", 'String'>
-    readonly createdAt: FieldRef<"Resource", 'DateTime'>
-    readonly updatedAt: FieldRef<"Resource", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * Resource findUnique
-   */
-  export type ResourceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter, which Resource to fetch.
-     */
-    where: ResourceWhereUniqueInput
-  }
-
-  /**
-   * Resource findUniqueOrThrow
-   */
-  export type ResourceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter, which Resource to fetch.
-     */
-    where: ResourceWhereUniqueInput
-  }
-
-  /**
-   * Resource findFirst
-   */
-  export type ResourceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter, which Resource to fetch.
-     */
-    where?: ResourceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Resources to fetch.
-     */
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Resources.
-     */
-    cursor?: ResourceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Resources from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Resources.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Resources.
-     */
-    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
-  }
-
-  /**
-   * Resource findFirstOrThrow
-   */
-  export type ResourceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter, which Resource to fetch.
-     */
-    where?: ResourceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Resources to fetch.
-     */
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Resources.
-     */
-    cursor?: ResourceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Resources from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Resources.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Resources.
-     */
-    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
-  }
-
-  /**
-   * Resource findMany
-   */
-  export type ResourceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter, which Resources to fetch.
-     */
-    where?: ResourceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Resources to fetch.
-     */
-    orderBy?: ResourceOrderByWithRelationInput | ResourceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Resources.
-     */
-    cursor?: ResourceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Resources from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Resources.
-     */
-    skip?: number
-    distinct?: ResourceScalarFieldEnum | ResourceScalarFieldEnum[]
-  }
-
-  /**
-   * Resource create
-   */
-  export type ResourceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * The data needed to create a Resource.
-     */
-    data: XOR<ResourceCreateInput, ResourceUncheckedCreateInput>
-  }
-
-  /**
-   * Resource createMany
-   */
-  export type ResourceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Resources.
-     */
-    data: ResourceCreateManyInput | ResourceCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Resource update
-   */
-  export type ResourceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * The data needed to update a Resource.
-     */
-    data: XOR<ResourceUpdateInput, ResourceUncheckedUpdateInput>
-    /**
-     * Choose, which Resource to update.
-     */
-    where: ResourceWhereUniqueInput
-  }
-
-  /**
-   * Resource updateMany
-   */
-  export type ResourceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Resources.
-     */
-    data: XOR<ResourceUpdateManyMutationInput, ResourceUncheckedUpdateManyInput>
-    /**
-     * Filter which Resources to update
-     */
-    where?: ResourceWhereInput
-    /**
-     * Limit how many Resources to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Resource upsert
-   */
-  export type ResourceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * The filter to search for the Resource to update in case it exists.
-     */
-    where: ResourceWhereUniqueInput
-    /**
-     * In case the Resource found by the `where` argument doesn't exist, create a new Resource with this data.
-     */
-    create: XOR<ResourceCreateInput, ResourceUncheckedCreateInput>
-    /**
-     * In case the Resource was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ResourceUpdateInput, ResourceUncheckedUpdateInput>
-  }
-
-  /**
-   * Resource delete
-   */
-  export type ResourceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
-    /**
-     * Filter which Resource to delete.
-     */
-    where: ResourceWhereUniqueInput
-  }
-
-  /**
-   * Resource deleteMany
-   */
-  export type ResourceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Resources to delete
-     */
-    where?: ResourceWhereInput
-    /**
-     * Limit how many Resources to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Resource.assignedTo
-   */
-  export type Resource$assignedToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    where?: UserWhereInput
-  }
-
-  /**
-   * Resource without action
-   */
-  export type ResourceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Resource
-     */
-    select?: ResourceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Resource
-     */
-    omit?: ResourceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ResourceInclude<ExtArgs> | null
   }
 
 
@@ -22366,6 +22291,18 @@ export namespace Prisma {
   export type ProjectStatusScalarFieldEnum = (typeof ProjectStatusScalarFieldEnum)[keyof typeof ProjectStatusScalarFieldEnum]
 
 
+  export const ProjectStatusLinkScalarFieldEnum: {
+    id: 'id',
+    projectId: 'projectId',
+    statusId: 'statusId',
+    isPrimary: 'isPrimary',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ProjectStatusLinkScalarFieldEnum = (typeof ProjectStatusLinkScalarFieldEnum)[keyof typeof ProjectStatusLinkScalarFieldEnum]
+
+
   export const TaskScalarFieldEnum: {
     id: 'id',
     title: 'title',
@@ -22405,20 +22342,6 @@ export namespace Prisma {
   };
 
   export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
-
-
-  export const ResourceScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    type: 'type',
-    quantity: 'quantity',
-    projectId: 'projectId',
-    assignedToId: 'assignedToId',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type ResourceScalarFieldEnum = (typeof ResourceScalarFieldEnum)[keyof typeof ResourceScalarFieldEnum]
 
 
   export const EventScalarFieldEnum: {
@@ -22628,6 +22551,15 @@ export namespace Prisma {
   export type ProjectStatusOrderByRelevanceFieldEnum = (typeof ProjectStatusOrderByRelevanceFieldEnum)[keyof typeof ProjectStatusOrderByRelevanceFieldEnum]
 
 
+  export const ProjectStatusLinkOrderByRelevanceFieldEnum: {
+    id: 'id',
+    projectId: 'projectId',
+    statusId: 'statusId'
+  };
+
+  export type ProjectStatusLinkOrderByRelevanceFieldEnum = (typeof ProjectStatusLinkOrderByRelevanceFieldEnum)[keyof typeof ProjectStatusLinkOrderByRelevanceFieldEnum]
+
+
   export const TaskOrderByRelevanceFieldEnum: {
     id: 'id',
     title: 'title',
@@ -22658,17 +22590,6 @@ export namespace Prisma {
   };
 
   export type TeamMemberOrderByRelevanceFieldEnum = (typeof TeamMemberOrderByRelevanceFieldEnum)[keyof typeof TeamMemberOrderByRelevanceFieldEnum]
-
-
-  export const ResourceOrderByRelevanceFieldEnum: {
-    id: 'id',
-    name: 'name',
-    type: 'type',
-    projectId: 'projectId',
-    assignedToId: 'assignedToId'
-  };
-
-  export type ResourceOrderByRelevanceFieldEnum = (typeof ResourceOrderByRelevanceFieldEnum)[keyof typeof ResourceOrderByRelevanceFieldEnum]
 
 
   export const EventOrderByRelevanceFieldEnum: {
@@ -22794,7 +22715,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
     projects?: ProjectListRelationFilter
-    resources?: ResourceListRelationFilter
     sessions?: SessionListRelationFilter
     tasks?: TaskListRelationFilter
     taskAssignments?: TaskAssigneeListRelationFilter
@@ -22826,7 +22746,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceOrderByRelationAggregateInput
     attendanceSettings?: AttendanceSettingsOrderByWithRelationInput
     projects?: ProjectOrderByRelationAggregateInput
-    resources?: ResourceOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     tasks?: TaskOrderByRelationAggregateInput
     taskAssignments?: TaskAssigneeOrderByRelationAggregateInput
@@ -22862,7 +22781,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
     projects?: ProjectListRelationFilter
-    resources?: ResourceListRelationFilter
     sessions?: SessionListRelationFilter
     tasks?: TaskListRelationFilter
     taskAssignments?: TaskAssigneeListRelationFilter
@@ -23440,7 +23358,7 @@ export namespace Prisma {
     events?: EventListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-    resources?: ResourceListRelationFilter
+    statuses?: ProjectStatusLinkListRelationFilter
     tasks?: TaskListRelationFilter
     teamMembers?: TeamMemberListRelationFilter
   }
@@ -23460,7 +23378,7 @@ export namespace Prisma {
     events?: EventOrderByRelationAggregateInput
     createdBy?: UserOrderByWithRelationInput
     status?: ProjectStatusOrderByWithRelationInput
-    resources?: ResourceOrderByRelationAggregateInput
+    statuses?: ProjectStatusLinkOrderByRelationAggregateInput
     tasks?: TaskOrderByRelationAggregateInput
     teamMembers?: TeamMemberOrderByRelationAggregateInput
     _relevance?: ProjectOrderByRelevanceInput
@@ -23484,7 +23402,7 @@ export namespace Prisma {
     events?: EventListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-    resources?: ResourceListRelationFilter
+    statuses?: ProjectStatusLinkListRelationFilter
     tasks?: TaskListRelationFilter
     teamMembers?: TeamMemberListRelationFilter
   }, "id">
@@ -23531,6 +23449,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     projects?: ProjectListRelationFilter
+    projectLinks?: ProjectStatusLinkListRelationFilter
   }
 
   export type ProjectStatusOrderByWithRelationInput = {
@@ -23542,6 +23461,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     projects?: ProjectOrderByRelationAggregateInput
+    projectLinks?: ProjectStatusLinkOrderByRelationAggregateInput
     _relevance?: ProjectStatusOrderByRelevanceInput
   }
 
@@ -23557,6 +23477,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     projects?: ProjectListRelationFilter
+    projectLinks?: ProjectStatusLinkListRelationFilter
   }, "id">
 
   export type ProjectStatusOrderByWithAggregationInput = {
@@ -23583,6 +23504,71 @@ export namespace Prisma {
     isDefault?: BoolWithAggregatesFilter<"ProjectStatus"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ProjectStatus"> | Date | string
+  }
+
+  export type ProjectStatusLinkWhereInput = {
+    AND?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
+    OR?: ProjectStatusLinkWhereInput[]
+    NOT?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
+    id?: StringFilter<"ProjectStatusLink"> | string
+    projectId?: StringFilter<"ProjectStatusLink"> | string
+    statusId?: StringFilter<"ProjectStatusLink"> | string
+    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
+    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
+  }
+
+  export type ProjectStatusLinkOrderByWithRelationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    project?: ProjectOrderByWithRelationInput
+    status?: ProjectStatusOrderByWithRelationInput
+    _relevance?: ProjectStatusLinkOrderByRelevanceInput
+  }
+
+  export type ProjectStatusLinkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    projectId_statusId?: ProjectStatusLinkProjectIdStatusIdCompoundUniqueInput
+    AND?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
+    OR?: ProjectStatusLinkWhereInput[]
+    NOT?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
+    projectId?: StringFilter<"ProjectStatusLink"> | string
+    statusId?: StringFilter<"ProjectStatusLink"> | string
+    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
+    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
+  }, "id" | "projectId_statusId">
+
+  export type ProjectStatusLinkOrderByWithAggregationInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ProjectStatusLinkCountOrderByAggregateInput
+    _max?: ProjectStatusLinkMaxOrderByAggregateInput
+    _min?: ProjectStatusLinkMinOrderByAggregateInput
+  }
+
+  export type ProjectStatusLinkScalarWhereWithAggregatesInput = {
+    AND?: ProjectStatusLinkScalarWhereWithAggregatesInput | ProjectStatusLinkScalarWhereWithAggregatesInput[]
+    OR?: ProjectStatusLinkScalarWhereWithAggregatesInput[]
+    NOT?: ProjectStatusLinkScalarWhereWithAggregatesInput | ProjectStatusLinkScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
+    projectId?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
+    statusId?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
+    isPrimary?: BoolWithAggregatesFilter<"ProjectStatusLink"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"ProjectStatusLink"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ProjectStatusLink"> | Date | string
   }
 
   export type TaskWhereInput = {
@@ -23819,82 +23805,6 @@ export namespace Prisma {
     role?: StringWithAggregatesFilter<"TeamMember"> | string
     createdAt?: DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
-  }
-
-  export type ResourceWhereInput = {
-    AND?: ResourceWhereInput | ResourceWhereInput[]
-    OR?: ResourceWhereInput[]
-    NOT?: ResourceWhereInput | ResourceWhereInput[]
-    id?: StringFilter<"Resource"> | string
-    name?: StringFilter<"Resource"> | string
-    type?: StringFilter<"Resource"> | string
-    quantity?: IntFilter<"Resource"> | number
-    projectId?: StringFilter<"Resource"> | string
-    assignedToId?: StringNullableFilter<"Resource"> | string | null
-    createdAt?: DateTimeFilter<"Resource"> | Date | string
-    updatedAt?: DateTimeFilter<"Resource"> | Date | string
-    assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
-  }
-
-  export type ResourceOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    type?: SortOrder
-    quantity?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    assignedTo?: UserOrderByWithRelationInput
-    project?: ProjectOrderByWithRelationInput
-    _relevance?: ResourceOrderByRelevanceInput
-  }
-
-  export type ResourceWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: ResourceWhereInput | ResourceWhereInput[]
-    OR?: ResourceWhereInput[]
-    NOT?: ResourceWhereInput | ResourceWhereInput[]
-    name?: StringFilter<"Resource"> | string
-    type?: StringFilter<"Resource"> | string
-    quantity?: IntFilter<"Resource"> | number
-    projectId?: StringFilter<"Resource"> | string
-    assignedToId?: StringNullableFilter<"Resource"> | string | null
-    createdAt?: DateTimeFilter<"Resource"> | Date | string
-    updatedAt?: DateTimeFilter<"Resource"> | Date | string
-    assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
-    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
-  }, "id">
-
-  export type ResourceOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    type?: SortOrder
-    quantity?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: ResourceCountOrderByAggregateInput
-    _avg?: ResourceAvgOrderByAggregateInput
-    _max?: ResourceMaxOrderByAggregateInput
-    _min?: ResourceMinOrderByAggregateInput
-    _sum?: ResourceSumOrderByAggregateInput
-  }
-
-  export type ResourceScalarWhereWithAggregatesInput = {
-    AND?: ResourceScalarWhereWithAggregatesInput | ResourceScalarWhereWithAggregatesInput[]
-    OR?: ResourceScalarWhereWithAggregatesInput[]
-    NOT?: ResourceScalarWhereWithAggregatesInput | ResourceScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Resource"> | string
-    name?: StringWithAggregatesFilter<"Resource"> | string
-    type?: StringWithAggregatesFilter<"Resource"> | string
-    quantity?: IntWithAggregatesFilter<"Resource"> | number
-    projectId?: StringWithAggregatesFilter<"Resource"> | string
-    assignedToId?: StringNullableWithAggregatesFilter<"Resource"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"Resource"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Resource"> | Date | string
   }
 
   export type EventWhereInput = {
@@ -24303,7 +24213,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -24335,7 +24244,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -24367,7 +24275,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -24399,7 +24306,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -24990,7 +24896,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -25008,7 +24914,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -25026,7 +24932,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -25044,7 +24950,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -25092,6 +24998,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectCreateNestedManyWithoutStatusInput
+    projectLinks?: ProjectStatusLinkCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusUncheckedCreateInput = {
@@ -25103,6 +25010,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     projects?: ProjectUncheckedCreateNestedManyWithoutStatusInput
+    projectLinks?: ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusUpdateInput = {
@@ -25114,6 +25022,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUpdateManyWithoutStatusNestedInput
+    projectLinks?: ProjectStatusLinkUpdateManyWithoutStatusNestedInput
   }
 
   export type ProjectStatusUncheckedUpdateInput = {
@@ -25125,6 +25034,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projects?: ProjectUncheckedUpdateManyWithoutStatusNestedInput
+    projectLinks?: ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput
   }
 
   export type ProjectStatusCreateManyInput = {
@@ -25153,6 +25063,67 @@ export namespace Prisma {
     color?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectStatusLinkCreateInput = {
+    id?: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    project: ProjectCreateNestedOneWithoutStatusesInput
+    status: ProjectStatusCreateNestedOneWithoutProjectLinksInput
+  }
+
+  export type ProjectStatusLinkUncheckedCreateInput = {
+    id?: string
+    projectId: string
+    statusId: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProjectStatusLinkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
+    status?: ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput
+  }
+
+  export type ProjectStatusLinkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    statusId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectStatusLinkCreateManyInput = {
+    id?: string
+    projectId: string
+    statusId: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProjectStatusLinkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectStatusLinkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    statusId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25386,81 +25357,6 @@ export namespace Prisma {
     projectId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ResourceCreateInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    assignedTo?: UserCreateNestedOneWithoutResourcesInput
-    project: ProjectCreateNestedOneWithoutResourcesInput
-  }
-
-  export type ResourceUncheckedCreateInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    projectId: string
-    assignedToId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ResourceUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    assignedTo?: UserUpdateOneWithoutResourcesNestedInput
-    project?: ProjectUpdateOneRequiredWithoutResourcesNestedInput
-  }
-
-  export type ResourceUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ResourceCreateManyInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    projectId: string
-    assignedToId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ResourceUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ResourceUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25957,12 +25853,6 @@ export namespace Prisma {
     none?: ProjectWhereInput
   }
 
-  export type ResourceListRelationFilter = {
-    every?: ResourceWhereInput
-    some?: ResourceWhereInput
-    none?: ResourceWhereInput
-  }
-
   export type SessionListRelationFilter = {
     every?: SessionWhereInput
     some?: SessionWhereInput
@@ -26017,10 +25907,6 @@ export namespace Prisma {
   }
 
   export type ProjectOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ResourceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -26548,7 +26434,17 @@ export namespace Prisma {
     isNot?: ProjectStatusWhereInput
   }
 
+  export type ProjectStatusLinkListRelationFilter = {
+    every?: ProjectStatusLinkWhereInput
+    some?: ProjectStatusLinkWhereInput
+    none?: ProjectStatusLinkWhereInput
+  }
+
   export type EventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProjectStatusLinkOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -26630,6 +26526,49 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type ProjectScalarRelationFilter = {
+    is?: ProjectWhereInput
+    isNot?: ProjectWhereInput
+  }
+
+  export type ProjectStatusLinkOrderByRelevanceInput = {
+    fields: ProjectStatusLinkOrderByRelevanceFieldEnum | ProjectStatusLinkOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ProjectStatusLinkProjectIdStatusIdCompoundUniqueInput = {
+    projectId: string
+    statusId: string
+  }
+
+  export type ProjectStatusLinkCountOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProjectStatusLinkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProjectStatusLinkMinOrderByAggregateInput = {
+    id?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -26649,11 +26588,6 @@ export namespace Prisma {
   export type TaskNullableScalarRelationFilter = {
     is?: TaskWhereInput | null
     isNot?: TaskWhereInput | null
-  }
-
-  export type ProjectScalarRelationFilter = {
-    is?: ProjectWhereInput
-    isNot?: ProjectWhereInput
   }
 
   export type TaskOrderByRelevanceInput = {
@@ -26807,53 +26741,6 @@ export namespace Prisma {
     role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type ResourceOrderByRelevanceInput = {
-    fields: ResourceOrderByRelevanceFieldEnum | ResourceOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type ResourceCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    type?: SortOrder
-    quantity?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ResourceAvgOrderByAggregateInput = {
-    quantity?: SortOrder
-  }
-
-  export type ResourceMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    type?: SortOrder
-    quantity?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ResourceMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    type?: SortOrder
-    quantity?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ResourceSumOrderByAggregateInput = {
-    quantity?: SortOrder
   }
 
   export type EventOrderByRelevanceInput = {
@@ -27184,13 +27071,6 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
   }
 
-  export type ResourceCreateNestedManyWithoutAssignedToInput = {
-    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
-    createMany?: ResourceCreateManyAssignedToInputEnvelope
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-  }
-
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -27272,13 +27152,6 @@ export namespace Prisma {
     connectOrCreate?: ProjectCreateOrConnectWithoutCreatedByInput | ProjectCreateOrConnectWithoutCreatedByInput[]
     createMany?: ProjectCreateManyCreatedByInputEnvelope
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-  }
-
-  export type ResourceUncheckedCreateNestedManyWithoutAssignedToInput = {
-    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
-    createMany?: ResourceCreateManyAssignedToInputEnvelope
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
   }
 
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
@@ -27417,20 +27290,6 @@ export namespace Prisma {
     update?: ProjectUpdateWithWhereUniqueWithoutCreatedByInput | ProjectUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: ProjectUpdateManyWithWhereWithoutCreatedByInput | ProjectUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
-  }
-
-  export type ResourceUpdateManyWithoutAssignedToNestedInput = {
-    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
-    upsert?: ResourceUpsertWithWhereUniqueWithoutAssignedToInput | ResourceUpsertWithWhereUniqueWithoutAssignedToInput[]
-    createMany?: ResourceCreateManyAssignedToInputEnvelope
-    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    update?: ResourceUpdateWithWhereUniqueWithoutAssignedToInput | ResourceUpdateWithWhereUniqueWithoutAssignedToInput[]
-    updateMany?: ResourceUpdateManyWithWhereWithoutAssignedToInput | ResourceUpdateManyWithWhereWithoutAssignedToInput[]
-    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
   }
 
   export type SessionUpdateManyWithoutUserNestedInput = {
@@ -27595,20 +27454,6 @@ export namespace Prisma {
     update?: ProjectUpdateWithWhereUniqueWithoutCreatedByInput | ProjectUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: ProjectUpdateManyWithWhereWithoutCreatedByInput | ProjectUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
-  }
-
-  export type ResourceUncheckedUpdateManyWithoutAssignedToNestedInput = {
-    create?: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput> | ResourceCreateWithoutAssignedToInput[] | ResourceUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutAssignedToInput | ResourceCreateOrConnectWithoutAssignedToInput[]
-    upsert?: ResourceUpsertWithWhereUniqueWithoutAssignedToInput | ResourceUpsertWithWhereUniqueWithoutAssignedToInput[]
-    createMany?: ResourceCreateManyAssignedToInputEnvelope
-    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    update?: ResourceUpdateWithWhereUniqueWithoutAssignedToInput | ResourceUpdateWithWhereUniqueWithoutAssignedToInput[]
-    updateMany?: ResourceUpdateManyWithWhereWithoutAssignedToInput | ResourceUpdateManyWithWhereWithoutAssignedToInput[]
-    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
   }
 
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
@@ -28020,11 +27865,11 @@ export namespace Prisma {
     connect?: ProjectStatusWhereUniqueInput
   }
 
-  export type ResourceCreateNestedManyWithoutProjectInput = {
-    create?: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput> | ResourceCreateWithoutProjectInput[] | ResourceUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutProjectInput | ResourceCreateOrConnectWithoutProjectInput[]
-    createMany?: ResourceCreateManyProjectInputEnvelope
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+  export type ProjectStatusLinkCreateNestedManyWithoutProjectInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
+    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
   }
 
   export type TaskCreateNestedManyWithoutProjectInput = {
@@ -28062,11 +27907,11 @@ export namespace Prisma {
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
   }
 
-  export type ResourceUncheckedCreateNestedManyWithoutProjectInput = {
-    create?: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput> | ResourceCreateWithoutProjectInput[] | ResourceUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutProjectInput | ResourceCreateOrConnectWithoutProjectInput[]
-    createMany?: ResourceCreateManyProjectInputEnvelope
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
+  export type ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
+    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
   }
 
   export type TaskUncheckedCreateNestedManyWithoutProjectInput = {
@@ -28141,18 +27986,18 @@ export namespace Prisma {
     update?: XOR<XOR<ProjectStatusUpdateToOneWithWhereWithoutProjectsInput, ProjectStatusUpdateWithoutProjectsInput>, ProjectStatusUncheckedUpdateWithoutProjectsInput>
   }
 
-  export type ResourceUpdateManyWithoutProjectNestedInput = {
-    create?: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput> | ResourceCreateWithoutProjectInput[] | ResourceUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutProjectInput | ResourceCreateOrConnectWithoutProjectInput[]
-    upsert?: ResourceUpsertWithWhereUniqueWithoutProjectInput | ResourceUpsertWithWhereUniqueWithoutProjectInput[]
-    createMany?: ResourceCreateManyProjectInputEnvelope
-    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    update?: ResourceUpdateWithWhereUniqueWithoutProjectInput | ResourceUpdateWithWhereUniqueWithoutProjectInput[]
-    updateMany?: ResourceUpdateManyWithWhereWithoutProjectInput | ResourceUpdateManyWithWhereWithoutProjectInput[]
-    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
+  export type ProjectStatusLinkUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
+    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
+    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput | ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
   }
 
   export type TaskUpdateManyWithoutProjectNestedInput = {
@@ -28225,18 +28070,18 @@ export namespace Prisma {
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
   }
 
-  export type ResourceUncheckedUpdateManyWithoutProjectNestedInput = {
-    create?: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput> | ResourceCreateWithoutProjectInput[] | ResourceUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ResourceCreateOrConnectWithoutProjectInput | ResourceCreateOrConnectWithoutProjectInput[]
-    upsert?: ResourceUpsertWithWhereUniqueWithoutProjectInput | ResourceUpsertWithWhereUniqueWithoutProjectInput[]
-    createMany?: ResourceCreateManyProjectInputEnvelope
-    set?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    disconnect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    delete?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    connect?: ResourceWhereUniqueInput | ResourceWhereUniqueInput[]
-    update?: ResourceUpdateWithWhereUniqueWithoutProjectInput | ResourceUpdateWithWhereUniqueWithoutProjectInput[]
-    updateMany?: ResourceUpdateManyWithWhereWithoutProjectInput | ResourceUpdateManyWithWhereWithoutProjectInput[]
-    deleteMany?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
+  export type ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
+    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
+    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput | ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
   }
 
   export type TaskUncheckedUpdateManyWithoutProjectNestedInput = {
@@ -28274,11 +28119,25 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
   }
 
+  export type ProjectStatusLinkCreateNestedManyWithoutStatusInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
+    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+  }
+
   export type ProjectUncheckedCreateNestedManyWithoutStatusInput = {
     create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
     createMany?: ProjectCreateManyStatusInputEnvelope
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
+  }
+
+  export type ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
+    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
   }
 
   export type ProjectUpdateManyWithoutStatusNestedInput = {
@@ -28295,6 +28154,20 @@ export namespace Prisma {
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
   }
 
+  export type ProjectStatusLinkUpdateManyWithoutStatusNestedInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
+    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput[]
+    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
+    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput[]
+    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput | ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput[]
+    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+  }
+
   export type ProjectUncheckedUpdateManyWithoutStatusNestedInput = {
     create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
@@ -28307,6 +28180,48 @@ export namespace Prisma {
     update?: ProjectUpdateWithWhereUniqueWithoutStatusInput | ProjectUpdateWithWhereUniqueWithoutStatusInput[]
     updateMany?: ProjectUpdateManyWithWhereWithoutStatusInput | ProjectUpdateManyWithWhereWithoutStatusInput[]
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
+  }
+
+  export type ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput = {
+    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
+    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput[]
+    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
+    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput[]
+    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput | ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput[]
+    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+  }
+
+  export type ProjectCreateNestedOneWithoutStatusesInput = {
+    create?: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutStatusesInput
+    connect?: ProjectWhereUniqueInput
+  }
+
+  export type ProjectStatusCreateNestedOneWithoutProjectLinksInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectLinksInput
+    connect?: ProjectStatusWhereUniqueInput
+  }
+
+  export type ProjectUpdateOneRequiredWithoutStatusesNestedInput = {
+    create?: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
+    connectOrCreate?: ProjectCreateOrConnectWithoutStatusesInput
+    upsert?: ProjectUpsertWithoutStatusesInput
+    connect?: ProjectWhereUniqueInput
+    update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutStatusesInput, ProjectUpdateWithoutStatusesInput>, ProjectUncheckedUpdateWithoutStatusesInput>
+  }
+
+  export type ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectLinksInput
+    upsert?: ProjectStatusUpsertWithoutProjectLinksInput
+    connect?: ProjectStatusWhereUniqueInput
+    update?: XOR<XOR<ProjectStatusUpdateToOneWithWhereWithoutProjectLinksInput, ProjectStatusUpdateWithoutProjectLinksInput>, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
   }
 
   export type ActivityCreateNestedManyWithoutTaskInput = {
@@ -28585,36 +28500,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutTeamsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTeamsInput, UserUpdateWithoutTeamsInput>, UserUncheckedUpdateWithoutTeamsInput>
-  }
-
-  export type UserCreateNestedOneWithoutResourcesInput = {
-    create?: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutResourcesInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type ProjectCreateNestedOneWithoutResourcesInput = {
-    create?: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
-    connectOrCreate?: ProjectCreateOrConnectWithoutResourcesInput
-    connect?: ProjectWhereUniqueInput
-  }
-
-  export type UserUpdateOneWithoutResourcesNestedInput = {
-    create?: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutResourcesInput
-    upsert?: UserUpsertWithoutResourcesInput
-    disconnect?: UserWhereInput | boolean
-    delete?: UserWhereInput | boolean
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutResourcesInput, UserUpdateWithoutResourcesInput>, UserUncheckedUpdateWithoutResourcesInput>
-  }
-
-  export type ProjectUpdateOneRequiredWithoutResourcesNestedInput = {
-    create?: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
-    connectOrCreate?: ProjectCreateOrConnectWithoutResourcesInput
-    upsert?: ProjectUpsertWithoutResourcesInput
-    connect?: ProjectWhereUniqueInput
-    update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutResourcesInput, ProjectUpdateWithoutResourcesInput>, ProjectUncheckedUpdateWithoutResourcesInput>
   }
 
   export type ProjectCreateNestedOneWithoutEventsInput = {
@@ -29233,7 +29118,7 @@ export namespace Prisma {
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -29250,7 +29135,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -29262,36 +29147,6 @@ export namespace Prisma {
 
   export type ProjectCreateManyCreatedByInputEnvelope = {
     data: ProjectCreateManyCreatedByInput | ProjectCreateManyCreatedByInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ResourceCreateWithoutAssignedToInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    project: ProjectCreateNestedOneWithoutResourcesInput
-  }
-
-  export type ResourceUncheckedCreateWithoutAssignedToInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    projectId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ResourceCreateOrConnectWithoutAssignedToInput = {
-    where: ResourceWhereUniqueInput
-    create: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput>
-  }
-
-  export type ResourceCreateManyAssignedToInputEnvelope = {
-    data: ResourceCreateManyAssignedToInput | ResourceCreateManyAssignedToInput[]
     skipDuplicates?: boolean
   }
 
@@ -29654,36 +29509,6 @@ export namespace Prisma {
     createdById?: StringFilter<"Project"> | string
   }
 
-  export type ResourceUpsertWithWhereUniqueWithoutAssignedToInput = {
-    where: ResourceWhereUniqueInput
-    update: XOR<ResourceUpdateWithoutAssignedToInput, ResourceUncheckedUpdateWithoutAssignedToInput>
-    create: XOR<ResourceCreateWithoutAssignedToInput, ResourceUncheckedCreateWithoutAssignedToInput>
-  }
-
-  export type ResourceUpdateWithWhereUniqueWithoutAssignedToInput = {
-    where: ResourceWhereUniqueInput
-    data: XOR<ResourceUpdateWithoutAssignedToInput, ResourceUncheckedUpdateWithoutAssignedToInput>
-  }
-
-  export type ResourceUpdateManyWithWhereWithoutAssignedToInput = {
-    where: ResourceScalarWhereInput
-    data: XOR<ResourceUpdateManyMutationInput, ResourceUncheckedUpdateManyWithoutAssignedToInput>
-  }
-
-  export type ResourceScalarWhereInput = {
-    AND?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
-    OR?: ResourceScalarWhereInput[]
-    NOT?: ResourceScalarWhereInput | ResourceScalarWhereInput[]
-    id?: StringFilter<"Resource"> | string
-    name?: StringFilter<"Resource"> | string
-    type?: StringFilter<"Resource"> | string
-    quantity?: IntFilter<"Resource"> | number
-    projectId?: StringFilter<"Resource"> | string
-    assignedToId?: StringNullableFilter<"Resource"> | string | null
-    createdAt?: DateTimeFilter<"Resource"> | Date | string
-    updatedAt?: DateTimeFilter<"Resource"> | Date | string
-  }
-
   export type SessionUpsertWithWhereUniqueWithoutUserInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
@@ -29876,7 +29701,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -29907,7 +29731,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -29954,7 +29777,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -29985,7 +29807,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -30017,7 +29838,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
     teams?: TeamMemberCreateNestedManyWithoutUserInput
@@ -30048,7 +29868,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
@@ -30095,7 +29914,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
@@ -30126,7 +29944,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -30355,7 +30172,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -30386,7 +30202,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -30464,7 +30279,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -30495,7 +30309,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -30669,7 +30482,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -30700,7 +30512,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -30780,7 +30591,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -30811,7 +30621,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -30959,7 +30768,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -30990,7 +30798,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -31012,6 +30819,7 @@ export namespace Prisma {
     isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    projectLinks?: ProjectStatusLinkCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusUncheckedCreateWithoutProjectsInput = {
@@ -31022,6 +30830,7 @@ export namespace Prisma {
     isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    projectLinks?: ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusCreateOrConnectWithoutProjectsInput = {
@@ -31029,33 +30838,29 @@ export namespace Prisma {
     create: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
   }
 
-  export type ResourceCreateWithoutProjectInput = {
+  export type ProjectStatusLinkCreateWithoutProjectInput = {
     id?: string
-    name: string
-    type: string
-    quantity?: number
+    isPrimary?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    assignedTo?: UserCreateNestedOneWithoutResourcesInput
+    status: ProjectStatusCreateNestedOneWithoutProjectLinksInput
   }
 
-  export type ResourceUncheckedCreateWithoutProjectInput = {
+  export type ProjectStatusLinkUncheckedCreateWithoutProjectInput = {
     id?: string
-    name: string
-    type: string
-    quantity?: number
-    assignedToId?: string | null
+    statusId: string
+    isPrimary?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type ResourceCreateOrConnectWithoutProjectInput = {
-    where: ResourceWhereUniqueInput
-    create: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput>
+  export type ProjectStatusLinkCreateOrConnectWithoutProjectInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    create: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput>
   }
 
-  export type ResourceCreateManyProjectInputEnvelope = {
-    data: ResourceCreateManyProjectInput | ResourceCreateManyProjectInput[]
+  export type ProjectStatusLinkCreateManyProjectInputEnvelope = {
+    data: ProjectStatusLinkCreateManyProjectInput | ProjectStatusLinkCreateManyProjectInput[]
     skipDuplicates?: boolean
   }
 
@@ -31225,7 +31030,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -31256,7 +31060,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -31284,6 +31087,7 @@ export namespace Prisma {
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projectLinks?: ProjectStatusLinkUpdateManyWithoutStatusNestedInput
   }
 
   export type ProjectStatusUncheckedUpdateWithoutProjectsInput = {
@@ -31294,22 +31098,35 @@ export namespace Prisma {
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projectLinks?: ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput
   }
 
-  export type ResourceUpsertWithWhereUniqueWithoutProjectInput = {
-    where: ResourceWhereUniqueInput
-    update: XOR<ResourceUpdateWithoutProjectInput, ResourceUncheckedUpdateWithoutProjectInput>
-    create: XOR<ResourceCreateWithoutProjectInput, ResourceUncheckedCreateWithoutProjectInput>
+  export type ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    update: XOR<ProjectStatusLinkUpdateWithoutProjectInput, ProjectStatusLinkUncheckedUpdateWithoutProjectInput>
+    create: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput>
   }
 
-  export type ResourceUpdateWithWhereUniqueWithoutProjectInput = {
-    where: ResourceWhereUniqueInput
-    data: XOR<ResourceUpdateWithoutProjectInput, ResourceUncheckedUpdateWithoutProjectInput>
+  export type ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    data: XOR<ProjectStatusLinkUpdateWithoutProjectInput, ProjectStatusLinkUncheckedUpdateWithoutProjectInput>
   }
 
-  export type ResourceUpdateManyWithWhereWithoutProjectInput = {
-    where: ResourceScalarWhereInput
-    data: XOR<ResourceUpdateManyMutationInput, ResourceUncheckedUpdateManyWithoutProjectInput>
+  export type ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput = {
+    where: ProjectStatusLinkScalarWhereInput
+    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyWithoutProjectInput>
+  }
+
+  export type ProjectStatusLinkScalarWhereInput = {
+    AND?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+    OR?: ProjectStatusLinkScalarWhereInput[]
+    NOT?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+    id?: StringFilter<"ProjectStatusLink"> | string
+    projectId?: StringFilter<"ProjectStatusLink"> | string
+    statusId?: StringFilter<"ProjectStatusLink"> | string
+    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
+    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
   }
 
   export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
@@ -31356,7 +31173,7 @@ export namespace Prisma {
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -31373,7 +31190,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -31385,6 +31202,32 @@ export namespace Prisma {
 
   export type ProjectCreateManyStatusInputEnvelope = {
     data: ProjectCreateManyStatusInput | ProjectCreateManyStatusInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProjectStatusLinkCreateWithoutStatusInput = {
+    id?: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    project: ProjectCreateNestedOneWithoutStatusesInput
+  }
+
+  export type ProjectStatusLinkUncheckedCreateWithoutStatusInput = {
+    id?: string
+    projectId: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProjectStatusLinkCreateOrConnectWithoutStatusInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    create: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput>
+  }
+
+  export type ProjectStatusLinkCreateManyStatusInputEnvelope = {
+    data: ProjectStatusLinkCreateManyStatusInput | ProjectStatusLinkCreateManyStatusInput[]
     skipDuplicates?: boolean
   }
 
@@ -31402,6 +31245,166 @@ export namespace Prisma {
   export type ProjectUpdateManyWithWhereWithoutStatusInput = {
     where: ProjectScalarWhereInput
     data: XOR<ProjectUpdateManyMutationInput, ProjectUncheckedUpdateManyWithoutStatusInput>
+  }
+
+  export type ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    update: XOR<ProjectStatusLinkUpdateWithoutStatusInput, ProjectStatusLinkUncheckedUpdateWithoutStatusInput>
+    create: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput>
+  }
+
+  export type ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput = {
+    where: ProjectStatusLinkWhereUniqueInput
+    data: XOR<ProjectStatusLinkUpdateWithoutStatusInput, ProjectStatusLinkUncheckedUpdateWithoutStatusInput>
+  }
+
+  export type ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput = {
+    where: ProjectStatusLinkScalarWhereInput
+    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyWithoutStatusInput>
+  }
+
+  export type ProjectCreateWithoutStatusesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    activities?: ActivityCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceCreateNestedManyWithoutProjectInput
+    events?: EventCreateNestedManyWithoutProjectInput
+    createdBy: UserCreateNestedOneWithoutProjectsInput
+    status: ProjectStatusCreateNestedOneWithoutProjectsInput
+    tasks?: TaskCreateNestedManyWithoutProjectInput
+    teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectUncheckedCreateWithoutStatusesInput = {
+    id?: string
+    title: string
+    description?: string | null
+    statusId: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdById: string
+    activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
+    events?: EventUncheckedCreateNestedManyWithoutProjectInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
+    teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
+  }
+
+  export type ProjectCreateOrConnectWithoutStatusesInput = {
+    where: ProjectWhereUniqueInput
+    create: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
+  }
+
+  export type ProjectStatusCreateWithoutProjectLinksInput = {
+    id?: string
+    name: string
+    color?: string | null
+    description?: string | null
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectCreateNestedManyWithoutStatusInput
+  }
+
+  export type ProjectStatusUncheckedCreateWithoutProjectLinksInput = {
+    id?: string
+    name: string
+    color?: string | null
+    description?: string | null
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    projects?: ProjectUncheckedCreateNestedManyWithoutStatusInput
+  }
+
+  export type ProjectStatusCreateOrConnectWithoutProjectLinksInput = {
+    where: ProjectStatusWhereUniqueInput
+    create: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
+  }
+
+  export type ProjectUpsertWithoutStatusesInput = {
+    update: XOR<ProjectUpdateWithoutStatusesInput, ProjectUncheckedUpdateWithoutStatusesInput>
+    create: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
+    where?: ProjectWhereInput
+  }
+
+  export type ProjectUpdateToOneWithWhereWithoutStatusesInput = {
+    where?: ProjectWhereInput
+    data: XOR<ProjectUpdateWithoutStatusesInput, ProjectUncheckedUpdateWithoutStatusesInput>
+  }
+
+  export type ProjectUpdateWithoutStatusesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    activities?: ActivityUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
+    events?: EventUpdateManyWithoutProjectNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
+    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
+    tasks?: TaskUpdateManyWithoutProjectNestedInput
+    teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectUncheckedUpdateWithoutStatusesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdById?: StringFieldUpdateOperationsInput | string
+    activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
+    events?: EventUncheckedUpdateManyWithoutProjectNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
+    teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectStatusUpsertWithoutProjectLinksInput = {
+    update: XOR<ProjectStatusUpdateWithoutProjectLinksInput, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
+    create: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
+    where?: ProjectStatusWhereInput
+  }
+
+  export type ProjectStatusUpdateToOneWithWhereWithoutProjectLinksInput = {
+    where?: ProjectStatusWhereInput
+    data: XOR<ProjectStatusUpdateWithoutProjectLinksInput, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
+  }
+
+  export type ProjectStatusUpdateWithoutProjectLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUpdateManyWithoutStatusNestedInput
+  }
+
+  export type ProjectStatusUncheckedUpdateWithoutProjectLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    projects?: ProjectUncheckedUpdateManyWithoutStatusNestedInput
   }
 
   export type ActivityCreateWithoutTaskInput = {
@@ -31517,7 +31520,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
     teams?: TeamMemberCreateNestedManyWithoutUserInput
@@ -31548,7 +31550,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
@@ -31661,7 +31662,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
 
@@ -31678,7 +31679,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
 
@@ -31777,7 +31778,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
@@ -31808,7 +31808,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -31903,7 +31902,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
 
@@ -31920,7 +31919,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
 
@@ -32004,7 +32003,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     teams?: TeamMemberCreateNestedManyWithoutUserInput
@@ -32035,7 +32033,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
@@ -32129,7 +32126,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     teams?: TeamMemberUpdateManyWithoutUserNestedInput
@@ -32160,7 +32156,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -32181,7 +32176,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
   }
 
@@ -32198,7 +32193,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
   }
 
@@ -32230,7 +32225,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -32261,7 +32255,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -32298,7 +32291,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
   }
 
@@ -32315,7 +32308,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
   }
 
@@ -32353,7 +32346,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -32384,236 +32376,11 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
     userPermissions?: UserPermissionUncheckedUpdateManyWithoutUserNestedInput
     userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserCreateWithoutResourcesInput = {
-    id?: string
-    name?: string | null
-    email: string
-    emailVerified?: Date | string | null
-    image?: string | null
-    password?: string | null
-    role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    lastLogin?: Date | string | null
-    accounts?: AccountCreateNestedManyWithoutUserInput
-    activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
-    attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
-    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
-    projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    sessions?: SessionCreateNestedManyWithoutUserInput
-    tasks?: TaskCreateNestedManyWithoutAssignedToInput
-    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
-    teams?: TeamMemberCreateNestedManyWithoutUserInput
-    userPermissions?: UserPermissionCreateNestedManyWithoutUserInput
-    userRoles?: UserRoleCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutResourcesInput = {
-    id?: string
-    name?: string | null
-    email: string
-    emailVerified?: Date | string | null
-    image?: string | null
-    password?: string | null
-    role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    lastLogin?: Date | string | null
-    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
-    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
-    attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
-    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
-    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
-    tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
-    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
-    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
-    userPermissions?: UserPermissionUncheckedCreateNestedManyWithoutUserInput
-    userRoles?: UserRoleUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutResourcesInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
-  }
-
-  export type ProjectCreateWithoutResourcesInput = {
-    id?: string
-    title: string
-    description?: string | null
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    activities?: ActivityCreateNestedManyWithoutProjectInput
-    attendances?: AttendanceCreateNestedManyWithoutProjectInput
-    events?: EventCreateNestedManyWithoutProjectInput
-    createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    tasks?: TaskCreateNestedManyWithoutProjectInput
-    teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
-  }
-
-  export type ProjectUncheckedCreateWithoutResourcesInput = {
-    id?: string
-    title: string
-    description?: string | null
-    statusId: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    createdById: string
-    activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
-    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
-    events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
-    teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
-  }
-
-  export type ProjectCreateOrConnectWithoutResourcesInput = {
-    where: ProjectWhereUniqueInput
-    create: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
-  }
-
-  export type UserUpsertWithoutResourcesInput = {
-    update: XOR<UserUpdateWithoutResourcesInput, UserUncheckedUpdateWithoutResourcesInput>
-    create: XOR<UserCreateWithoutResourcesInput, UserUncheckedCreateWithoutResourcesInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutResourcesInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutResourcesInput, UserUncheckedUpdateWithoutResourcesInput>
-  }
-
-  export type UserUpdateWithoutResourcesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    accounts?: AccountUpdateManyWithoutUserNestedInput
-    activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
-    attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
-    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
-    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    sessions?: SessionUpdateManyWithoutUserNestedInput
-    tasks?: TaskUpdateManyWithoutAssignedToNestedInput
-    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
-    teams?: TeamMemberUpdateManyWithoutUserNestedInput
-    userPermissions?: UserPermissionUpdateManyWithoutUserNestedInput
-    userRoles?: UserRoleUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutResourcesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
-    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
-    attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
-    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
-    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
-    tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
-    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
-    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-    userPermissions?: UserPermissionUncheckedUpdateManyWithoutUserNestedInput
-    userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type ProjectUpsertWithoutResourcesInput = {
-    update: XOR<ProjectUpdateWithoutResourcesInput, ProjectUncheckedUpdateWithoutResourcesInput>
-    create: XOR<ProjectCreateWithoutResourcesInput, ProjectUncheckedCreateWithoutResourcesInput>
-    where?: ProjectWhereInput
-  }
-
-  export type ProjectUpdateToOneWithWhereWithoutResourcesInput = {
-    where?: ProjectWhereInput
-    data: XOR<ProjectUpdateWithoutResourcesInput, ProjectUncheckedUpdateWithoutResourcesInput>
-  }
-
-  export type ProjectUpdateWithoutResourcesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    activities?: ActivityUpdateManyWithoutProjectNestedInput
-    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
-    events?: EventUpdateManyWithoutProjectNestedInput
-    createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    tasks?: TaskUpdateManyWithoutProjectNestedInput
-    teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
-  }
-
-  export type ProjectUncheckedUpdateWithoutResourcesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdById?: StringFieldUpdateOperationsInput | string
-    activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
-    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
-    events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
-    teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
 
   export type ProjectCreateWithoutEventsInput = {
@@ -32628,7 +32395,7 @@ export namespace Prisma {
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -32645,7 +32412,7 @@ export namespace Prisma {
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -32678,7 +32445,7 @@ export namespace Prisma {
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -32695,7 +32462,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -32722,7 +32489,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -32753,7 +32519,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -32779,7 +32544,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -32796,7 +32561,7 @@ export namespace Prisma {
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -32869,7 +32634,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -32900,7 +32664,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -32947,7 +32710,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -32978,7 +32740,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -33010,7 +32771,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -33027,7 +32788,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -33112,7 +32873,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -33143,7 +32903,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -33174,7 +32933,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -33205,7 +32963,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -33252,7 +33009,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -33283,7 +33039,6 @@ export namespace Prisma {
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -33304,7 +33059,7 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
     status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    resources?: ResourceCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -33321,7 +33076,7 @@ export namespace Prisma {
     createdById: string
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -33394,7 +33149,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceCreateNestedManyWithoutAssignedToInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -33425,7 +33179,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutAssignedToInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -33462,7 +33215,7 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -33479,7 +33232,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -33564,7 +33317,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -33595,7 +33347,6 @@ export namespace Prisma {
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutAssignedToNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -33684,16 +33435,6 @@ export namespace Prisma {
     statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ResourceCreateManyAssignedToInput = {
-    id?: string
-    name: string
-    type: string
-    quantity?: number
-    projectId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -33979,7 +33720,7 @@ export namespace Prisma {
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -33996,7 +33737,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -34008,36 +33749,6 @@ export namespace Prisma {
     statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ResourceUpdateWithoutAssignedToInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    project?: ProjectUpdateOneRequiredWithoutResourcesNestedInput
-  }
-
-  export type ResourceUncheckedUpdateWithoutAssignedToInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    projectId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ResourceUncheckedUpdateManyWithoutAssignedToInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    projectId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34360,12 +34071,10 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type ResourceCreateManyProjectInput = {
+  export type ProjectStatusLinkCreateManyProjectInput = {
     id?: string
-    name: string
-    type: string
-    quantity?: number
-    assignedToId?: string | null
+    statusId: string
+    isPrimary?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -34524,32 +34233,26 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ResourceUpdateWithoutProjectInput = {
+  export type ProjectStatusLinkUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    assignedTo?: UserUpdateOneWithoutResourcesNestedInput
+    status?: ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput
   }
 
-  export type ResourceUncheckedUpdateWithoutProjectInput = {
+  export type ProjectStatusLinkUncheckedUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ResourceUncheckedUpdateManyWithoutProjectInput = {
+  export type ProjectStatusLinkUncheckedUpdateManyWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34639,6 +34342,14 @@ export namespace Prisma {
     createdById: string
   }
 
+  export type ProjectStatusLinkCreateManyStatusInput = {
+    id?: string
+    projectId: string
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ProjectUpdateWithoutStatusInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -34651,7 +34362,7 @@ export namespace Prisma {
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    resources?: ResourceUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -34668,7 +34379,7 @@ export namespace Prisma {
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -34682,6 +34393,30 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ProjectStatusLinkUpdateWithoutStatusInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
+  }
+
+  export type ProjectStatusLinkUncheckedUpdateWithoutStatusInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProjectStatusLinkUncheckedUpdateManyWithoutStatusInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ActivityCreateManyTaskInput = {

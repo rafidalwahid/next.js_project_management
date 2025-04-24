@@ -25,7 +25,17 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
 
       // Handle empty responses
-      data = textResponse ? JSON.parse(textResponse) : {};
+      if (!textResponse || textResponse.trim() === '') {
+        console.warn('Empty response received from API');
+        data = {};
+      } else {
+        data = JSON.parse(textResponse);
+      }
+
+      // Check if data is empty or null
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+        console.warn('API Warning: Empty response data');
+      }
     } catch (error) {
       console.error('API Error (parse failure):', error);
       throw new Error(`Failed to parse API response: ${error instanceof Error ? error.message : String(error)}`);
@@ -156,6 +166,13 @@ export const projectStatusApi = {
   getProjectStatuses: async () => {
     return fetchAPI('/api/project-statuses');
   },
+
+  createStatus: async (status: any) => {
+    return fetchAPI('/api/project-statuses', {
+      method: 'POST',
+      body: JSON.stringify(status),
+    });
+  },
 };
 
 /**
@@ -180,7 +197,15 @@ export const projectApi = {
   },
 
   getProject: async (id: string) => {
-    return fetchAPI(`/api/projects/${id}`);
+    console.log('API client: Getting project with ID:', id);
+    try {
+      const result = await fetchAPI(`/api/projects/${id}`);
+      console.log('API client: Get project response:', result);
+      return result;
+    } catch (error) {
+      console.error('API client: Error getting project:', error);
+      throw error;
+    }
   },
 
   createProject: async (project: any) => {
@@ -191,10 +216,18 @@ export const projectApi = {
   },
 
   updateProject: async (id: string, project: any) => {
-    return fetchAPI(`/api/projects/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(project),
-    });
+    console.log('API client: Updating project with ID:', id, 'Data:', project);
+    try {
+      const result = await fetchAPI(`/api/projects/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(project),
+      });
+      console.log('API client: Update project response:', result);
+      return result;
+    } catch (error) {
+      console.error('API client: Error updating project:', error);
+      throw error;
+    }
   },
 
   deleteProject: async (id: string) => {
@@ -394,44 +427,4 @@ export const eventApi = {
   },
 };
 
-/**
- * Resource API functions
- */
-export const resourceApi = {
-  getResources: async (page = 1, limit = 10, filters: Record<string, any> = {}) => {
-    const params = new URLSearchParams();
-    params.append('page', page.toString());
-    params.append('limit', limit.toString());
 
-    // Add any additional filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value.toString());
-    });
-
-    return fetchAPI(`/api/resources?${params.toString()}`);
-  },
-
-  getResource: async (id: string) => {
-    return fetchAPI(`/api/resources/${id}`);
-  },
-
-  createResource: async (resource: any) => {
-    return fetchAPI('/api/resources', {
-      method: 'POST',
-      body: JSON.stringify(resource),
-    });
-  },
-
-  updateResource: async (id: string, resource: any) => {
-    return fetchAPI(`/api/resources/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(resource),
-    });
-  },
-
-  deleteResource: async (id: string) => {
-    return fetchAPI(`/api/resources/${id}`, {
-      method: 'DELETE',
-    });
-  },
-};

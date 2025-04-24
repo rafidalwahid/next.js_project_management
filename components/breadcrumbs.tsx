@@ -22,10 +22,8 @@ const routeMappings: Record<string, string> = {
   projects: "Projects",
   tasks: "Tasks",
   team: "Team",
-  resources: "Resources",
   profile: "Profile",
   settings: "Settings",
-  support: "Help & Support",
   kanban: "Kanban Board",
   new: "New",
   edit: "Edit",
@@ -33,7 +31,6 @@ const routeMappings: Record<string, string> = {
   history: "History",
   reports: "Reports",
   statistics: "Statistics",
-  settings: "Settings",
 }
 
 interface BreadcrumbItem {
@@ -72,10 +69,36 @@ export function Breadcrumbs() {
         currentPath += `/${segment}`
         const isLastSegment = index === segments.length - 1
 
+        // Check if segment is a UUID or ID (likely a dynamic route)
+        const isDynamic = /^[a-f0-9]{8,}$/i.test(segment) || segment === '[id]'
+
+        // Get a more readable label
+        let label = routeMappings[segment] || segment
+
+        // For dynamic segments, try to get a better label
+        if (isDynamic) {
+          // If it's a project ID, we could fetch the project title
+          if (segments.includes('projects') && segments.indexOf('projects') < index) {
+            label = 'Project Details'
+          }
+          // If it's a task ID
+          else if (segments.includes('tasks') && segments.indexOf('tasks') < index) {
+            label = 'Task Details'
+          }
+          // If it's a user profile
+          else if (segments.includes('profile') && segments.indexOf('profile') < index) {
+            label = 'User Profile'
+          }
+          else {
+            label = 'Details'
+          }
+        }
+
         breadcrumbItems.push({
           href: currentPath,
-          label: routeMappings[segment] || segment,
-          isLastSegment
+          label: label,
+          isLastSegment,
+          isDynamic
         })
       })
 
@@ -91,31 +114,32 @@ export function Breadcrumbs() {
   }
 
   return (
-    <nav className="flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto mb-4">
-      <Link
-        href="/dashboard"
-        className="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground"
-      >
-        Dashboard
-      </Link>
-      <span className="mx-1">/</span>
-      {breadcrumbs.map((item, index) => (
-        <React.Fragment key={item.href}>
-          {item.isLastSegment ? (
-            <span className="font-medium text-foreground">{item.label}</span>
-          ) : (
-            <>
-              <Link
-                href={item.href}
-                className="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-              <span className="mx-1">/</span>
-            </>
-          )}
-        </React.Fragment>
-      ))}
-    </nav>
+    <Breadcrumb className="mb-4">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/dashboard" className="flex items-center">
+              <Home className="h-3.5 w-3.5 mr-1" />
+              <span>Home</span>
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+
+        {breadcrumbs.map((item, index) => (
+          <React.Fragment key={item.href}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {item.isLastSegment ? (
+                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink asChild>
+                  <Link href={item.href}>{item.label}</Link>
+                </BreadcrumbLink>
+              )}
+            </BreadcrumbItem>
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
   )
 }
