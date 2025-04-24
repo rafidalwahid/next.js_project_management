@@ -7,6 +7,7 @@ import { MoreHorizontal, Edit, Trash, User, Mail, Shield, Calendar, ShieldCheck 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { RoleBadge } from "@/components/ui/role-badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -133,9 +134,7 @@ export function UserCard({ user, onDelete }: UserCardProps) {
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Badge variant={getRoleBadgeVariant()} className="capitalize">
-              {user.role}
-            </Badge>
+            <RoleBadge role={user.role} type="system" />
 
             {isHovered && (
               <div className="ml-auto">

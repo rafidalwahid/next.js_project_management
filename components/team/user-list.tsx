@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { RoleBadge } from "@/components/ui/role-badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,9 +119,7 @@ export function UserList({ users, onDelete }: UserListProps) {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
-                <Badge variant={getRoleBadgeVariant(user.role)} className="capitalize">
-                  {user.role}
-                </Badge>
+                <RoleBadge role={user.role} type="system" />
               </TableCell>
               <TableCell>
                 <DropdownMenu>

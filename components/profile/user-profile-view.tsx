@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { RoleBadge } from "@/components/ui/role-badge"
+import { UserProjectRoles } from "@/components/profile/user-project-roles"
 
 interface UserProfileViewProps {
   profile: UserProfile
@@ -332,12 +334,9 @@ export function UserProfileView({
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm text-muted-foreground">Role</p>
+                    <p className="text-sm text-muted-foreground">System Role</p>
                     <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-xl font-bold">
-                        {profile.role === "admin" ? "Admin" : profile.role}
-                      </p>
+                      <RoleBadge role={profile.role} type="system" showTooltip={true} />
                     </div>
                   </div>
                 </CardContent>
@@ -389,8 +388,10 @@ export function UserProfileView({
                       <p>{profile.email}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Role</h3>
-                      <p>{profile.role === "admin" ? "Admin" : profile.role}</p>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">System Role</h3>
+                      <div className="mt-1">
+                        <RoleBadge role={profile.role} type="system" />
+                      </div>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Status</h3>
@@ -408,6 +409,11 @@ export function UserProfileView({
                           : lastLoginDate}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Project Roles Section */}
+                  <div className="mt-6 pt-6 border-t">
+                    <UserProjectRoles userId={profile.id} />
                   </div>
 
                   {/* Account Actions */}

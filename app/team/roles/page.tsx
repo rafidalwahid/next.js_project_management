@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,7 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { Search, Plus, MoreHorizontal, ShieldCheck, ShieldAlert, Shield, UserCog } from "lucide-react"
+import { Search, Plus, MoreHorizontal, ShieldCheck, ShieldAlert, Shield, UserCog, HelpCircle } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
 // Define role types
@@ -185,14 +186,28 @@ export default function RoleManagementPage() {
             Manage user roles and permissions
           </p>
         </div>
+        <Link href="/team/roles/help">
+          <Button variant="outline" className="gap-2">
+            <HelpCircle className="h-4 w-4" />
+            Understanding Roles
+          </Button>
+        </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>User Roles</CardTitle>
-          <CardDescription>
-            Assign roles to control access levels for users
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>User Roles</CardTitle>
+              <CardDescription>
+                Assign roles to control access levels for users
+              </CardDescription>
+            </div>
+            <Link href="/team/roles/help" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+              <HelpCircle className="h-4 w-4" />
+              Help
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">

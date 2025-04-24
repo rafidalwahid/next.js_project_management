@@ -356,6 +356,10 @@ export const teamApi = {
     return fetchAPI(`/api/team/${id}`);
   },
 
+  getUserTeamMemberships: async (userId: string) => {
+    return fetchAPI(`/api/team/user/${userId}`);
+  },
+
   addTeamMember: async (teamMember: any) => {
     return fetchAPI('/api/team', {
       method: 'POST',
