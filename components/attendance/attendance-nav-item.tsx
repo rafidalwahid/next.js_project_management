@@ -3,7 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, FileText, Settings } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Collapsible,
@@ -19,33 +20,40 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(pathname.startsWith("/attendance"))
 
+  const { data: session } = useSession()
+  const userRole = session?.user?.role || "user"
+
   const subItems = [
     {
       title: "Dashboard",
       href: "/attendance/dashboard",
       icon: Home,
+      roles: ["user", "manager", "admin"],
     },
     {
       title: "History",
       href: "/attendance/history",
       icon: ClipboardCheck,
+      roles: ["user", "manager", "admin"],
     },
     {
       title: "Statistics",
       href: "/attendance/statistics",
       icon: BarChart2,
+      roles: ["user", "manager", "admin"],
     },
     {
-      title: "Reports",
-      href: "/attendance/reports",
-      icon: FileText,
-    },
-    {
-      title: "Settings",
-      href: "/attendance/settings",
-      icon: Settings,
+      title: "Admin",
+      href: "/attendance/admin",
+      icon: Users,
+      roles: ["manager", "admin"],
     },
   ]
+
+  // Filter items based on user role
+  const filteredSubItems = subItems.filter(item =>
+    item.roles.includes(userRole)
+  )
 
   const isActive = pathname.startsWith("/attendance")
 
@@ -92,7 +100,7 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
       </CollapsibleTrigger>
       <CollapsibleContent className="pl-8 pr-2">
         <div className="flex flex-col gap-1 pt-1">
-          {subItems.map((item) => {
+          {filteredSubItems.map((item) => {
             const Icon = item.icon
             const subItemActive = pathname === item.href || pathname.startsWith(item.href)
 

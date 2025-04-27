@@ -186,7 +186,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/10 rounded-md"
                 >
                   <PanelLeftClose className="h-4 w-4" />
-                  <span className="sr-only">Toggle sidebar</span>
+                  <span className="sr-only">Collapse sidebar</span>
                 </Button>
               </div>
             </div>

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RoleBadge } from "@/components/ui/role-badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 import { teamApi } from "@/lib/api"
 
 interface UserProjectRolesProps {
@@ -11,35 +11,56 @@ interface UserProjectRolesProps {
 }
 
 export function UserProjectRoles({ userId }: UserProjectRolesProps) {
-  const [projectRoles, setProjectRoles] = useState<Array<{
+  const [projects, setProjects] = useState<Array<{
     id: string
     projectId: string
     projectTitle: string
-    role: string
   }>>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchProjectRoles = async () => {
+    const fetchProjects = async () => {
       try {
         setIsLoading(true)
         // Fetch the user's team memberships
         const response = await teamApi.getUserTeamMemberships(userId)
-        setProjectRoles(response)
+        console.log("Team memberships response:", response)
+
+        // Handle different response formats
+        if (Array.isArray(response)) {
+          // Direct array response
+          setProjects(response)
+        } else if (response && Array.isArray(response.teamMemberships)) {
+          // Response with teamMemberships property
+          setProjects(response.teamMemberships)
+        } else if (response && typeof response === 'object') {
+          // Try to extract data from response object
+          const memberships = Object.values(response).find(val => Array.isArray(val))
+          if (memberships) {
+            setProjects(memberships)
+          } else {
+            console.error("Unexpected response format:", response)
+            setProjects([])
+          }
+        } else {
+          console.error("Unexpected response format:", response)
+          setProjects([])
+        }
       } catch (error) {
-        console.error("Error fetching project roles:", error)
+        console.error("Error fetching user projects:", error)
+        setProjects([])
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchProjectRoles()
+    fetchProjects()
   }, [userId])
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Project Roles</CardTitle>
+        <CardTitle>Project Memberships</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -48,18 +69,20 @@ export function UserProjectRoles({ userId }: UserProjectRolesProps) {
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
           </div>
-        ) : projectRoles.length === 0 ? (
+        ) : projects.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             This user is not a member of any projects.
           </p>
         ) : (
-          <div className="space-y-3">
-            {projectRoles.map((membership) => (
-              <div key={membership.id} className="flex items-center justify-between border-b pb-2 last:border-0">
-                <div className="font-medium">{membership.projectTitle}</div>
-                <RoleBadge role={membership.role} type="project" />
-              </div>
-            ))}
+          <div className="max-h-[200px] overflow-y-auto pr-1 scrollbar-thin">
+            <div className="space-y-3">
+              {projects.map((membership) => (
+                <div key={membership.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 last:border-0 gap-2">
+                  <div className="font-medium truncate">{membership.projectTitle}</div>
+                  <Badge variant="outline" className="w-fit">Member</Badge>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>

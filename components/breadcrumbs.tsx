@@ -45,6 +45,17 @@ export function Breadcrumbs() {
   const pathname = usePathname()
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([])
 
+  // Extract user ID from profile path if present
+  // Check both /profile/[userId] and /users/[userId] paths
+  const userIdMatch = pathname.match(/\/(profile|users)\/([a-zA-Z0-9_-]+)/)
+  const userId = userIdMatch ? userIdMatch[2] : null
+
+  // Check if we're on a user profile page
+  const isUserProfilePage = userIdMatch && (userIdMatch[1] === 'profile' || userIdMatch[1] === 'users')
+
+  // Fetch user profile if we're on a profile page
+  const { profile, isLoading } = useUserProfile(isUserProfilePage ? userId || '' : '')
+
   // Memoize breadcrumb generation to avoid unnecessary re-renders
   useEffect(() => {
     // Skip breadcrumb generation for dashboard page
@@ -85,9 +96,16 @@ export function Breadcrumbs() {
           else if (segments.includes('tasks') && segments.indexOf('tasks') < index) {
             label = 'Task Details'
           }
-          // If it's a user profile
-          else if (segments.includes('profile') && segments.indexOf('profile') < index) {
-            label = 'User Profile'
+          // If it's a user profile and we have the profile data
+          else if ((segments.includes('profile') && segments.indexOf('profile') < index) ||
+                  (segments.includes('users') && segments.indexOf('users') < index)) {
+            if (isLoading) {
+              label = 'Loading...'
+            } else if (profile && profile.name) {
+              label = profile.name
+            } else {
+              label = 'User Profile'
+            }
           }
           else {
             label = 'Details'
@@ -106,7 +124,7 @@ export function Breadcrumbs() {
     }
 
     generateBreadcrumbs()
-  }, [pathname])
+  }, [pathname, profile, isLoading])
 
   // Don't render anything if we're on the dashboard or have no breadcrumbs
   if (pathname === '/dashboard' || breadcrumbs.length === 0) {

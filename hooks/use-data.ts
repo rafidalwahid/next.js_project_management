@@ -1,7 +1,7 @@
 "use client"
 
 import useSWR from 'swr';
-import { projectApi, taskApi, teamApi, eventApi } from '@/lib/api';
+import { projectApi, taskApi, eventApi } from '@/lib/api';
 
 /**
  * Hook to fetch projects
@@ -26,22 +26,42 @@ export function useProjects(page = 1, limit = 10, filters: Record<string, string
     queryString,
     async () => {
       try {
-        const response = await projectApi.getProjects(page, limit, filters);
+        console.log('Fetching projects with params:', { page, limit, filters: cleanFilters });
+        const response = await projectApi.getProjects(page, limit, cleanFilters);
+        console.log('Projects fetch response:', response);
         return response;
       } catch (err) {
         console.error('Project fetch error:', err);
-        throw err;
+        // Create a more descriptive error
+        const errorMessage = err instanceof Error
+          ? `Failed to fetch projects: ${err.message}`
+          : 'Failed to fetch projects';
+        throw new Error(errorMessage);
       }
     },
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
       dedupingInterval: 5000,
+      onError: (err) => {
+        console.error('SWR error in useProjects:', err);
+      }
     }
   );
 
+  // Ensure we return the projects array in a consistent format
+  let projectsData = [];
+
+  if (data) {
+    if (Array.isArray(data)) {
+      projectsData = data;
+    } else if (data.projects && Array.isArray(data.projects)) {
+      projectsData = data.projects;
+    }
+  }
+
   return {
-    projects: data?.projects || [],
+    projects: projectsData,
     pagination: data?.pagination,
     isLoading,
     isError: error,
@@ -136,26 +156,7 @@ export function useTask(id: string | null) {
   };
 }
 
-/**
- * Hook to fetch team members
- */
-export function useTeamMembers(projectId?: string, page = 1, limit = 10) {
-  const { data, error, isLoading, mutate } = useSWR(
-    `/api/team?${projectId ? `projectId=${projectId}&` : ''}page=${page}&limit=${limit}`,
-    async () => {
-      const response = await teamApi.getTeamMembers(projectId, page, limit);
-      return response;
-    }
-  );
-
-  return {
-    teamMembers: data?.teamMembers || [],
-    pagination: data?.pagination,
-    isLoading,
-    isError: error,
-    mutate,
-  };
-}
+// Team member hooks moved to hooks/use-team.ts
 
 /**
  * Hook to fetch events

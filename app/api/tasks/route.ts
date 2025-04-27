@@ -87,10 +87,29 @@ export async function GET(req: NextRequest) {
 // Validation schema for creating a task
 const createTaskSchema = z.object({
   title: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   priority: z.enum(["low", "medium", "high"]).default("medium"),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
   dueDate: z.string().optional().nullable(),
+  estimatedTime: z.union([
+    z.number().optional().nullable(),
+    z.string().optional().nullable().transform(val => {
+      if (!val) return null;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    })
+  ]),
+  timeSpent: z.union([
+    z.number().optional().nullable(),
+    z.string().optional().nullable().transform(val => {
+      if (!val) return null;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    })
+  ]),
   projectId: z.string(),
+  statusId: z.string().optional().nullable(),
   assignedToId: z.string().optional().nullable(), // Kept for backward compatibility
   assigneeIds: z.array(z.string()).optional(), // New field for multiple assignees
   parentId: z.string().optional().nullable(), // New field for parent task reference
@@ -121,7 +140,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, priority, dueDate, projectId, assignedToId, assigneeIds, parentId } = validationResult.data;
+    const {
+      title,
+      description,
+      priority,
+      startDate,
+      endDate,
+      dueDate,
+      estimatedTime,
+      timeSpent,
+      projectId,
+      statusId,
+      assignedToId,
+      assigneeIds,
+      parentId
+    } = validationResult.data;
     console.log('POST /api/tasks: Parsed data:', { title, projectId, assignedToId, assigneeIds });
 
     // Check project permission
@@ -191,9 +224,9 @@ export async function POST(req: NextRequest) {
     // Ensure the current user is a team member of the project
     const isTeamMember = await prisma.teamMember.findUnique({
       where: {
-        userId_projectId: {
-          userId: session.user.id,
-          projectId
+        projectId_userId: {
+          projectId,
+          userId: session.user.id
         }
       }
     });
@@ -203,10 +236,24 @@ export async function POST(req: NextRequest) {
       await prisma.teamMember.create({
         data: {
           userId: session.user.id,
-          projectId,
-          role: 'member' // Default role
+          projectId
         }
       });
+    }
+
+    // If no status is provided, find the default status for the project
+    let finalStatusId = statusId;
+    if (!finalStatusId) {
+      const defaultStatus = await prisma.projectStatus.findFirst({
+        where: {
+          projectId,
+          isDefault: true
+        }
+      });
+
+      if (defaultStatus) {
+        finalStatusId = defaultStatus.id;
+      }
     }
 
     // Create task
@@ -215,22 +262,22 @@ export async function POST(req: NextRequest) {
         title,
         description,
         priority,
+        startDate: startDate && startDate.trim() !== "" ? new Date(startDate) : null,
+        endDate: endDate && endDate.trim() !== "" ? new Date(endDate) : null,
         dueDate: dueDate && dueDate.trim() !== "" ? new Date(dueDate) : null,
+        estimatedTime,
+        timeSpent,
         projectId,
-        assignedToId: assignedToId && assignedToId.trim() !== "" ? assignedToId : null,
+        statusId: finalStatusId,
+        // Note: assignedToId is deprecated in favor of the TaskAssignee model
+        // We'll keep it for backward compatibility but it's not the primary assignment method
+        assignedToId: null,
         parentId,
         order: initialOrder,
       },
       include: {
         project: true,
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          },
-        },
+        status: true,
         parent: {
           select: {
             id: true,
@@ -284,24 +331,54 @@ export async function POST(req: NextRequest) {
         allAssigneeIds.push(session.user.id);
       }
 
+      // Validate that all assigneeIds refer to existing users
+      if (allAssigneeIds.length > 0) {
+        const userCount = await prisma.user.count({
+          where: {
+            id: {
+              in: allAssigneeIds
+            }
+          }
+        });
+
+        if (userCount !== allAssigneeIds.length) {
+          console.warn("One or more users in assigneeIds not found. Proceeding with valid users only.");
+          // Get the valid user IDs
+          const validUsers = await prisma.user.findMany({
+            where: {
+              id: {
+                in: allAssigneeIds
+              }
+            },
+            select: { id: true }
+          });
+          allAssigneeIds = validUsers.map(user => user.id);
+        }
+      }
+
       // Create task assignees and add them as team members of the project
       if (allAssigneeIds.length > 0) {
-        await Promise.all(
-          allAssigneeIds.map(async (userId) => {
-            // Create task assignee
-            await prisma.taskAssignee.create({
+        // Create all task assignees in a single transaction
+        await prisma.$transaction(
+          allAssigneeIds.map(userId =>
+            prisma.taskAssignee.create({
               data: {
                 taskId: task.id,
                 userId,
               }
-            });
+            })
+          )
+        );
 
+        // Add users as team members if needed
+        await Promise.all(
+          allAssigneeIds.map(async (userId) => {
             // Check if user is already a team member of the project
             const existingTeamMember = await prisma.teamMember.findUnique({
               where: {
-                userId_projectId: {
-                  userId,
-                  projectId
+                projectId_userId: {
+                  projectId,
+                  userId
                 }
               }
             });
@@ -311,8 +388,7 @@ export async function POST(req: NextRequest) {
               await prisma.teamMember.create({
                 data: {
                   userId,
-                  projectId,
-                  role: 'member' // Default role
+                  projectId
                 }
               });
               console.log(`Added user ${userId} as team member to project ${projectId} during task creation`);

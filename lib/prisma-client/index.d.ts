@@ -69,11 +69,6 @@ export type Project = $Result.DefaultSelection<Prisma.$ProjectPayload>
  */
 export type ProjectStatus = $Result.DefaultSelection<Prisma.$ProjectStatusPayload>
 /**
- * Model ProjectStatusLink
- * 
- */
-export type ProjectStatusLink = $Result.DefaultSelection<Prisma.$ProjectStatusLinkPayload>
-/**
  * Model Task
  * 
  */
@@ -108,6 +103,11 @@ export type AttendanceSettings = $Result.DefaultSelection<Prisma.$AttendanceSett
  * 
  */
 export type Activity = $Result.DefaultSelection<Prisma.$ActivityPayload>
+/**
+ * Model Document
+ * 
+ */
+export type Document = $Result.DefaultSelection<Prisma.$DocumentPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -345,16 +345,6 @@ export class PrismaClient<
   get projectStatus(): Prisma.ProjectStatusDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.projectStatusLink`: Exposes CRUD operations for the **ProjectStatusLink** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ProjectStatusLinks
-    * const projectStatusLinks = await prisma.projectStatusLink.findMany()
-    * ```
-    */
-  get projectStatusLink(): Prisma.ProjectStatusLinkDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.task`: Exposes CRUD operations for the **Task** model.
     * Example usage:
     * ```ts
@@ -423,6 +413,16 @@ export class PrismaClient<
     * ```
     */
   get activity(): Prisma.ActivityDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.document`: Exposes CRUD operations for the **Document** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Documents
+    * const documents = await prisma.document.findMany()
+    * ```
+    */
+  get document(): Prisma.DocumentDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -874,14 +874,14 @@ export namespace Prisma {
     UserPermission: 'UserPermission',
     Project: 'Project',
     ProjectStatus: 'ProjectStatus',
-    ProjectStatusLink: 'ProjectStatusLink',
     Task: 'Task',
     TaskAssignee: 'TaskAssignee',
     TeamMember: 'TeamMember',
     Event: 'Event',
     Attendance: 'Attendance',
     AttendanceSettings: 'AttendanceSettings',
-    Activity: 'Activity'
+    Activity: 'Activity',
+    Document: 'Document'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -900,7 +900,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "role" | "permission" | "userRole" | "rolePermission" | "userPermission" | "project" | "projectStatus" | "projectStatusLink" | "task" | "taskAssignee" | "teamMember" | "event" | "attendance" | "attendanceSettings" | "activity"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "role" | "permission" | "userRole" | "rolePermission" | "userPermission" | "project" | "projectStatus" | "task" | "taskAssignee" | "teamMember" | "event" | "attendance" | "attendanceSettings" | "activity" | "document"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1630,72 +1630,6 @@ export namespace Prisma {
           }
         }
       }
-      ProjectStatusLink: {
-        payload: Prisma.$ProjectStatusLinkPayload<ExtArgs>
-        fields: Prisma.ProjectStatusLinkFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ProjectStatusLinkFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          findFirst: {
-            args: Prisma.ProjectStatusLinkFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          findMany: {
-            args: Prisma.ProjectStatusLinkFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>[]
-          }
-          create: {
-            args: Prisma.ProjectStatusLinkCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          createMany: {
-            args: Prisma.ProjectStatusLinkCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.ProjectStatusLinkDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          update: {
-            args: Prisma.ProjectStatusLinkUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          deleteMany: {
-            args: Prisma.ProjectStatusLinkDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ProjectStatusLinkUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.ProjectStatusLinkUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectStatusLinkPayload>
-          }
-          aggregate: {
-            args: Prisma.ProjectStatusLinkAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateProjectStatusLink>
-          }
-          groupBy: {
-            args: Prisma.ProjectStatusLinkGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ProjectStatusLinkGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ProjectStatusLinkCountArgs<ExtArgs>
-            result: $Utils.Optional<ProjectStatusLinkCountAggregateOutputType> | number
-          }
-        }
-      }
       Task: {
         payload: Prisma.$TaskPayload<ExtArgs>
         fields: Prisma.TaskFieldRefs
@@ -2158,6 +2092,72 @@ export namespace Prisma {
           }
         }
       }
+      Document: {
+        payload: Prisma.$DocumentPayload<ExtArgs>
+        fields: Prisma.DocumentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DocumentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DocumentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          findFirst: {
+            args: Prisma.DocumentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DocumentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          findMany: {
+            args: Prisma.DocumentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>[]
+          }
+          create: {
+            args: Prisma.DocumentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          createMany: {
+            args: Prisma.DocumentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.DocumentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          update: {
+            args: Prisma.DocumentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          deleteMany: {
+            args: Prisma.DocumentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DocumentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.DocumentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentPayload>
+          }
+          aggregate: {
+            args: Prisma.DocumentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDocument>
+          }
+          groupBy: {
+            args: Prisma.DocumentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DocumentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DocumentCountArgs<ExtArgs>
+            result: $Utils.Optional<DocumentCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2253,7 +2253,6 @@ export namespace Prisma {
     userPermission?: UserPermissionOmit
     project?: ProjectOmit
     projectStatus?: ProjectStatusOmit
-    projectStatusLink?: ProjectStatusLinkOmit
     task?: TaskOmit
     taskAssignee?: TaskAssigneeOmit
     teamMember?: TeamMemberOmit
@@ -2261,6 +2260,7 @@ export namespace Prisma {
     attendance?: AttendanceOmit
     attendanceSettings?: AttendanceSettingsOmit
     activity?: ActivityOmit
+    document?: DocumentOmit
   }
 
   /* Types for Logging */
@@ -2359,6 +2359,7 @@ export namespace Prisma {
     activities: number
     attendanceAdjustments: number
     attendanceRecords: number
+    documents: number
     projects: number
     sessions: number
     tasks: number
@@ -2373,6 +2374,7 @@ export namespace Prisma {
     activities?: boolean | UserCountOutputTypeCountActivitiesArgs
     attendanceAdjustments?: boolean | UserCountOutputTypeCountAttendanceAdjustmentsArgs
     attendanceRecords?: boolean | UserCountOutputTypeCountAttendanceRecordsArgs
+    documents?: boolean | UserCountOutputTypeCountDocumentsArgs
     projects?: boolean | UserCountOutputTypeCountProjectsArgs
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     tasks?: boolean | UserCountOutputTypeCountTasksArgs
@@ -2419,6 +2421,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountAttendanceRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AttendanceWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentWhereInput
   }
 
   /**
@@ -2609,7 +2618,7 @@ export namespace Prisma {
    * ProjectCountOutputType without action
    */
   export type ProjectCountOutputTypeCountStatusesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ProjectStatusLinkWhereInput
+    where?: ProjectStatusWhereInput
   }
 
   /**
@@ -2632,13 +2641,11 @@ export namespace Prisma {
    */
 
   export type ProjectStatusCountOutputType = {
-    projects: number
-    projectLinks: number
+    tasks: number
   }
 
   export type ProjectStatusCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    projects?: boolean | ProjectStatusCountOutputTypeCountProjectsArgs
-    projectLinks?: boolean | ProjectStatusCountOutputTypeCountProjectLinksArgs
+    tasks?: boolean | ProjectStatusCountOutputTypeCountTasksArgs
   }
 
   // Custom InputTypes
@@ -2655,15 +2662,8 @@ export namespace Prisma {
   /**
    * ProjectStatusCountOutputType without action
    */
-  export type ProjectStatusCountOutputTypeCountProjectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ProjectWhereInput
-  }
-
-  /**
-   * ProjectStatusCountOutputType without action
-   */
-  export type ProjectStatusCountOutputTypeCountProjectLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ProjectStatusLinkWhereInput
+  export type ProjectStatusCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TaskWhereInput
   }
 
 
@@ -2747,15 +2747,15 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
-    bio: string | null
-    jobTitle: string | null
-    department: string | null
-    location: string | null
-    phone: string | null
-    skills: string | null
     createdAt: Date | null
     updatedAt: Date | null
     lastLogin: Date | null
+    bio: string | null
+    department: string | null
+    jobTitle: string | null
+    location: string | null
+    phone: string | null
+    skills: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -2766,15 +2766,15 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
-    bio: string | null
-    jobTitle: string | null
-    department: string | null
-    location: string | null
-    phone: string | null
-    skills: string | null
     createdAt: Date | null
     updatedAt: Date | null
     lastLogin: Date | null
+    bio: string | null
+    department: string | null
+    jobTitle: string | null
+    location: string | null
+    phone: string | null
+    skills: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -2785,15 +2785,15 @@ export namespace Prisma {
     image: number
     password: number
     role: number
-    bio: number
-    jobTitle: number
-    department: number
-    location: number
-    phone: number
-    skills: number
     createdAt: number
     updatedAt: number
     lastLogin: number
+    bio: number
+    department: number
+    jobTitle: number
+    location: number
+    phone: number
+    skills: number
     _all: number
   }
 
@@ -2806,15 +2806,15 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
-    bio?: true
-    jobTitle?: true
-    department?: true
-    location?: true
-    phone?: true
-    skills?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
+    bio?: true
+    department?: true
+    jobTitle?: true
+    location?: true
+    phone?: true
+    skills?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -2825,15 +2825,15 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
-    bio?: true
-    jobTitle?: true
-    department?: true
-    location?: true
-    phone?: true
-    skills?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
+    bio?: true
+    department?: true
+    jobTitle?: true
+    location?: true
+    phone?: true
+    skills?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -2844,15 +2844,15 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
-    bio?: true
-    jobTitle?: true
-    department?: true
-    location?: true
-    phone?: true
-    skills?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
+    bio?: true
+    department?: true
+    jobTitle?: true
+    location?: true
+    phone?: true
+    skills?: true
     _all?: true
   }
 
@@ -2936,15 +2936,15 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string
-    bio: string | null
-    jobTitle: string | null
-    department: string | null
-    location: string | null
-    phone: string | null
-    skills: string | null
     createdAt: Date
     updatedAt: Date
     lastLogin: Date | null
+    bio: string | null
+    department: string | null
+    jobTitle: string | null
+    location: string | null
+    phone: string | null
+    skills: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -2972,20 +2972,21 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
-    bio?: boolean
-    jobTitle?: boolean
-    department?: boolean
-    location?: boolean
-    phone?: boolean
-    skills?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     lastLogin?: boolean
+    bio?: boolean
+    department?: boolean
+    jobTitle?: boolean
+    location?: boolean
+    phone?: boolean
+    skills?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
     attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
+    documents?: boolean | User$documentsArgs<ExtArgs>
     projects?: boolean | User$projectsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
@@ -3006,24 +3007,25 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
-    bio?: boolean
-    jobTitle?: boolean
-    department?: boolean
-    location?: boolean
-    phone?: boolean
-    skills?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     lastLogin?: boolean
+    bio?: boolean
+    department?: boolean
+    jobTitle?: boolean
+    location?: boolean
+    phone?: boolean
+    skills?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "bio" | "jobTitle" | "department" | "location" | "phone" | "skills" | "createdAt" | "updatedAt" | "lastLogin", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "createdAt" | "updatedAt" | "lastLogin" | "bio" | "department" | "jobTitle" | "location" | "phone" | "skills", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
     attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
+    documents?: boolean | User$documentsArgs<ExtArgs>
     projects?: boolean | User$projectsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tasks?: boolean | User$tasksArgs<ExtArgs>
@@ -3042,6 +3044,7 @@ export namespace Prisma {
       attendanceAdjustments: Prisma.$AttendancePayload<ExtArgs>[]
       attendanceRecords: Prisma.$AttendancePayload<ExtArgs>[]
       attendanceSettings: Prisma.$AttendanceSettingsPayload<ExtArgs> | null
+      documents: Prisma.$DocumentPayload<ExtArgs>[]
       projects: Prisma.$ProjectPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       tasks: Prisma.$TaskPayload<ExtArgs>[]
@@ -3058,15 +3061,15 @@ export namespace Prisma {
       image: string | null
       password: string | null
       role: string
-      bio: string | null
-      jobTitle: string | null
-      department: string | null
-      location: string | null
-      phone: string | null
-      skills: string | null
       createdAt: Date
       updatedAt: Date
       lastLogin: Date | null
+      bio: string | null
+      department: string | null
+      jobTitle: string | null
+      location: string | null
+      phone: string | null
+      skills: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -3412,6 +3415,7 @@ export namespace Prisma {
     attendanceAdjustments<T extends User$attendanceAdjustmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceAdjustmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceRecords<T extends User$attendanceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceSettings<T extends User$attendanceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceSettingsArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    documents<T extends User$documentsArgs<ExtArgs> = {}>(args?: Subset<T, User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     projects<T extends User$projectsArgs<ExtArgs> = {}>(args?: Subset<T, User$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tasks<T extends User$tasksArgs<ExtArgs> = {}>(args?: Subset<T, User$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3455,15 +3459,15 @@ export namespace Prisma {
     readonly image: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'String'>
-    readonly bio: FieldRef<"User", 'String'>
-    readonly jobTitle: FieldRef<"User", 'String'>
-    readonly department: FieldRef<"User", 'String'>
-    readonly location: FieldRef<"User", 'String'>
-    readonly phone: FieldRef<"User", 'String'>
-    readonly skills: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly lastLogin: FieldRef<"User", 'DateTime'>
+    readonly bio: FieldRef<"User", 'String'>
+    readonly department: FieldRef<"User", 'String'>
+    readonly jobTitle: FieldRef<"User", 'String'>
+    readonly location: FieldRef<"User", 'String'>
+    readonly phone: FieldRef<"User", 'String'>
+    readonly skills: FieldRef<"User", 'String'>
   }
     
 
@@ -3919,6 +3923,30 @@ export namespace Prisma {
      */
     include?: AttendanceSettingsInclude<ExtArgs> | null
     where?: AttendanceSettingsWhereInput
+  }
+
+  /**
+   * User.documents
+   */
+  export type User$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    where?: DocumentWhereInput
+    orderBy?: DocumentOrderByWithRelationInput | DocumentOrderByWithRelationInput[]
+    cursor?: DocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DocumentScalarFieldEnum | DocumentScalarFieldEnum[]
   }
 
   /**
@@ -11741,17 +11769,31 @@ export namespace Prisma {
 
   export type AggregateProject = {
     _count: ProjectCountAggregateOutputType | null
+    _avg: ProjectAvgAggregateOutputType | null
+    _sum: ProjectSumAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
+  }
+
+  export type ProjectAvgAggregateOutputType = {
+    totalTimeSpent: number | null
+    estimatedTime: number | null
+  }
+
+  export type ProjectSumAggregateOutputType = {
+    totalTimeSpent: number | null
+    estimatedTime: number | null
   }
 
   export type ProjectMinAggregateOutputType = {
     id: string | null
     title: string | null
     description: string | null
-    statusId: string | null
     startDate: Date | null
     endDate: Date | null
+    dueDate: Date | null
+    totalTimeSpent: number | null
+    estimatedTime: number | null
     createdAt: Date | null
     updatedAt: Date | null
     createdById: string | null
@@ -11761,9 +11803,11 @@ export namespace Prisma {
     id: string | null
     title: string | null
     description: string | null
-    statusId: string | null
     startDate: Date | null
     endDate: Date | null
+    dueDate: Date | null
+    totalTimeSpent: number | null
+    estimatedTime: number | null
     createdAt: Date | null
     updatedAt: Date | null
     createdById: string | null
@@ -11773,9 +11817,11 @@ export namespace Prisma {
     id: number
     title: number
     description: number
-    statusId: number
     startDate: number
     endDate: number
+    dueDate: number
+    totalTimeSpent: number
+    estimatedTime: number
     createdAt: number
     updatedAt: number
     createdById: number
@@ -11783,13 +11829,25 @@ export namespace Prisma {
   }
 
 
+  export type ProjectAvgAggregateInputType = {
+    totalTimeSpent?: true
+    estimatedTime?: true
+  }
+
+  export type ProjectSumAggregateInputType = {
+    totalTimeSpent?: true
+    estimatedTime?: true
+  }
+
   export type ProjectMinAggregateInputType = {
     id?: true
     title?: true
     description?: true
-    statusId?: true
     startDate?: true
     endDate?: true
+    dueDate?: true
+    totalTimeSpent?: true
+    estimatedTime?: true
     createdAt?: true
     updatedAt?: true
     createdById?: true
@@ -11799,9 +11857,11 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
-    statusId?: true
     startDate?: true
     endDate?: true
+    dueDate?: true
+    totalTimeSpent?: true
+    estimatedTime?: true
     createdAt?: true
     updatedAt?: true
     createdById?: true
@@ -11811,9 +11871,11 @@ export namespace Prisma {
     id?: true
     title?: true
     description?: true
-    statusId?: true
     startDate?: true
     endDate?: true
+    dueDate?: true
+    totalTimeSpent?: true
+    estimatedTime?: true
     createdAt?: true
     updatedAt?: true
     createdById?: true
@@ -11858,6 +11920,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: ProjectAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProjectSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: ProjectMinAggregateInputType
@@ -11888,6 +11962,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: ProjectCountAggregateInputType | true
+    _avg?: ProjectAvgAggregateInputType
+    _sum?: ProjectSumAggregateInputType
     _min?: ProjectMinAggregateInputType
     _max?: ProjectMaxAggregateInputType
   }
@@ -11896,13 +11972,17 @@ export namespace Prisma {
     id: string
     title: string
     description: string | null
-    statusId: string
     startDate: Date | null
     endDate: Date | null
+    dueDate: Date | null
+    totalTimeSpent: number | null
+    estimatedTime: number | null
     createdAt: Date
     updatedAt: Date
     createdById: string
     _count: ProjectCountAggregateOutputType | null
+    _avg: ProjectAvgAggregateOutputType | null
+    _sum: ProjectSumAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
   }
@@ -11925,9 +12005,11 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
-    statusId?: boolean
     startDate?: boolean
     endDate?: boolean
+    dueDate?: boolean
+    totalTimeSpent?: boolean
+    estimatedTime?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdById?: boolean
@@ -11935,7 +12017,6 @@ export namespace Prisma {
     attendances?: boolean | Project$attendancesArgs<ExtArgs>
     events?: boolean | Project$eventsArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
-    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
     statuses?: boolean | Project$statusesArgs<ExtArgs>
     tasks?: boolean | Project$tasksArgs<ExtArgs>
     teamMembers?: boolean | Project$teamMembersArgs<ExtArgs>
@@ -11948,21 +12029,22 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     description?: boolean
-    statusId?: boolean
     startDate?: boolean
     endDate?: boolean
+    dueDate?: boolean
+    totalTimeSpent?: boolean
+    estimatedTime?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdById?: boolean
   }
 
-  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "statusId" | "startDate" | "endDate" | "createdAt" | "updatedAt" | "createdById", ExtArgs["result"]["project"]>
+  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "startDate" | "endDate" | "dueDate" | "totalTimeSpent" | "estimatedTime" | "createdAt" | "updatedAt" | "createdById", ExtArgs["result"]["project"]>
   export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     activities?: boolean | Project$activitiesArgs<ExtArgs>
     attendances?: boolean | Project$attendancesArgs<ExtArgs>
     events?: boolean | Project$eventsArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
-    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
     statuses?: boolean | Project$statusesArgs<ExtArgs>
     tasks?: boolean | Project$tasksArgs<ExtArgs>
     teamMembers?: boolean | Project$teamMembersArgs<ExtArgs>
@@ -11976,8 +12058,7 @@ export namespace Prisma {
       attendances: Prisma.$AttendancePayload<ExtArgs>[]
       events: Prisma.$EventPayload<ExtArgs>[]
       createdBy: Prisma.$UserPayload<ExtArgs>
-      status: Prisma.$ProjectStatusPayload<ExtArgs>
-      statuses: Prisma.$ProjectStatusLinkPayload<ExtArgs>[]
+      statuses: Prisma.$ProjectStatusPayload<ExtArgs>[]
       tasks: Prisma.$TaskPayload<ExtArgs>[]
       teamMembers: Prisma.$TeamMemberPayload<ExtArgs>[]
     }
@@ -11985,9 +12066,11 @@ export namespace Prisma {
       id: string
       title: string
       description: string | null
-      statusId: string
       startDate: Date | null
       endDate: Date | null
+      dueDate: Date | null
+      totalTimeSpent: number | null
+      estimatedTime: number | null
       createdAt: Date
       updatedAt: Date
       createdById: string
@@ -12335,8 +12418,7 @@ export namespace Prisma {
     attendances<T extends Project$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, Project$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     events<T extends Project$eventsArgs<ExtArgs> = {}>(args?: Subset<T, Project$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    status<T extends ProjectStatusDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatusDefaultArgs<ExtArgs>>): Prisma__ProjectStatusClient<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    statuses<T extends Project$statusesArgs<ExtArgs> = {}>(args?: Subset<T, Project$statusesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    statuses<T extends Project$statusesArgs<ExtArgs> = {}>(args?: Subset<T, Project$statusesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tasks<T extends Project$tasksArgs<ExtArgs> = {}>(args?: Subset<T, Project$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     teamMembers<T extends Project$teamMembersArgs<ExtArgs> = {}>(args?: Subset<T, Project$teamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -12371,9 +12453,11 @@ export namespace Prisma {
     readonly id: FieldRef<"Project", 'String'>
     readonly title: FieldRef<"Project", 'String'>
     readonly description: FieldRef<"Project", 'String'>
-    readonly statusId: FieldRef<"Project", 'String'>
     readonly startDate: FieldRef<"Project", 'DateTime'>
     readonly endDate: FieldRef<"Project", 'DateTime'>
+    readonly dueDate: FieldRef<"Project", 'DateTime'>
+    readonly totalTimeSpent: FieldRef<"Project", 'Float'>
+    readonly estimatedTime: FieldRef<"Project", 'Float'>
     readonly createdAt: FieldRef<"Project", 'DateTime'>
     readonly updatedAt: FieldRef<"Project", 'DateTime'>
     readonly createdById: FieldRef<"Project", 'String'>
@@ -12796,23 +12880,23 @@ export namespace Prisma {
    */
   export type Project$statusesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the ProjectStatusLink
+     * Select specific fields to fetch from the ProjectStatus
      */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
+    select?: ProjectStatusSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ProjectStatusLink
+     * Omit specific fields from the ProjectStatus
      */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
+    omit?: ProjectStatusOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    where?: ProjectStatusLinkWhereInput
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    cursor?: ProjectStatusLinkWhereUniqueInput
+    include?: ProjectStatusInclude<ExtArgs> | null
+    where?: ProjectStatusWhereInput
+    orderBy?: ProjectStatusOrderByWithRelationInput | ProjectStatusOrderByWithRelationInput[]
+    cursor?: ProjectStatusWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+    distinct?: ProjectStatusScalarFieldEnum | ProjectStatusScalarFieldEnum[]
   }
 
   /**
@@ -12888,8 +12972,18 @@ export namespace Prisma {
 
   export type AggregateProjectStatus = {
     _count: ProjectStatusCountAggregateOutputType | null
+    _avg: ProjectStatusAvgAggregateOutputType | null
+    _sum: ProjectStatusSumAggregateOutputType | null
     _min: ProjectStatusMinAggregateOutputType | null
     _max: ProjectStatusMaxAggregateOutputType | null
+  }
+
+  export type ProjectStatusAvgAggregateOutputType = {
+    order: number | null
+  }
+
+  export type ProjectStatusSumAggregateOutputType = {
+    order: number | null
   }
 
   export type ProjectStatusMinAggregateOutputType = {
@@ -12897,7 +12991,9 @@ export namespace Prisma {
     name: string | null
     color: string | null
     description: string | null
+    order: number | null
     isDefault: boolean | null
+    projectId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12907,7 +13003,9 @@ export namespace Prisma {
     name: string | null
     color: string | null
     description: string | null
+    order: number | null
     isDefault: boolean | null
+    projectId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12917,19 +13015,31 @@ export namespace Prisma {
     name: number
     color: number
     description: number
+    order: number
     isDefault: number
+    projectId: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
 
+  export type ProjectStatusAvgAggregateInputType = {
+    order?: true
+  }
+
+  export type ProjectStatusSumAggregateInputType = {
+    order?: true
+  }
+
   export type ProjectStatusMinAggregateInputType = {
     id?: true
     name?: true
     color?: true
     description?: true
+    order?: true
     isDefault?: true
+    projectId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12939,7 +13049,9 @@ export namespace Prisma {
     name?: true
     color?: true
     description?: true
+    order?: true
     isDefault?: true
+    projectId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12949,7 +13061,9 @@ export namespace Prisma {
     name?: true
     color?: true
     description?: true
+    order?: true
     isDefault?: true
+    projectId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -12993,6 +13107,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: ProjectStatusAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProjectStatusSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: ProjectStatusMinAggregateInputType
@@ -13023,6 +13149,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: ProjectStatusCountAggregateInputType | true
+    _avg?: ProjectStatusAvgAggregateInputType
+    _sum?: ProjectStatusSumAggregateInputType
     _min?: ProjectStatusMinAggregateInputType
     _max?: ProjectStatusMaxAggregateInputType
   }
@@ -13032,10 +13160,14 @@ export namespace Prisma {
     name: string
     color: string | null
     description: string | null
+    order: number
     isDefault: boolean
+    projectId: string
     createdAt: Date
     updatedAt: Date
     _count: ProjectStatusCountAggregateOutputType | null
+    _avg: ProjectStatusAvgAggregateOutputType | null
+    _sum: ProjectStatusSumAggregateOutputType | null
     _min: ProjectStatusMinAggregateOutputType | null
     _max: ProjectStatusMaxAggregateOutputType | null
   }
@@ -13059,11 +13191,13 @@ export namespace Prisma {
     name?: boolean
     color?: boolean
     description?: boolean
+    order?: boolean
     isDefault?: boolean
+    projectId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    projects?: boolean | ProjectStatus$projectsArgs<ExtArgs>
-    projectLinks?: boolean | ProjectStatus$projectLinksArgs<ExtArgs>
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+    tasks?: boolean | ProjectStatus$tasksArgs<ExtArgs>
     _count?: boolean | ProjectStatusCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["projectStatus"]>
 
@@ -13074,30 +13208,34 @@ export namespace Prisma {
     name?: boolean
     color?: boolean
     description?: boolean
+    order?: boolean
     isDefault?: boolean
+    projectId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProjectStatusOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "color" | "description" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["projectStatus"]>
+  export type ProjectStatusOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "color" | "description" | "order" | "isDefault" | "projectId" | "createdAt" | "updatedAt", ExtArgs["result"]["projectStatus"]>
   export type ProjectStatusInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    projects?: boolean | ProjectStatus$projectsArgs<ExtArgs>
-    projectLinks?: boolean | ProjectStatus$projectLinksArgs<ExtArgs>
+    project?: boolean | ProjectDefaultArgs<ExtArgs>
+    tasks?: boolean | ProjectStatus$tasksArgs<ExtArgs>
     _count?: boolean | ProjectStatusCountOutputTypeDefaultArgs<ExtArgs>
   }
 
   export type $ProjectStatusPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ProjectStatus"
     objects: {
-      projects: Prisma.$ProjectPayload<ExtArgs>[]
-      projectLinks: Prisma.$ProjectStatusLinkPayload<ExtArgs>[]
+      project: Prisma.$ProjectPayload<ExtArgs>
+      tasks: Prisma.$TaskPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       color: string | null
       description: string | null
+      order: number
       isDefault: boolean
+      projectId: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["projectStatus"]>
@@ -13440,8 +13578,8 @@ export namespace Prisma {
    */
   export interface Prisma__ProjectStatusClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    projects<T extends ProjectStatus$projectsArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatus$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    projectLinks<T extends ProjectStatus$projectLinksArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatus$projectLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tasks<T extends ProjectStatus$tasksArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatus$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13475,7 +13613,9 @@ export namespace Prisma {
     readonly name: FieldRef<"ProjectStatus", 'String'>
     readonly color: FieldRef<"ProjectStatus", 'String'>
     readonly description: FieldRef<"ProjectStatus", 'String'>
+    readonly order: FieldRef<"ProjectStatus", 'Int'>
     readonly isDefault: FieldRef<"ProjectStatus", 'Boolean'>
+    readonly projectId: FieldRef<"ProjectStatus", 'String'>
     readonly createdAt: FieldRef<"ProjectStatus", 'DateTime'>
     readonly updatedAt: FieldRef<"ProjectStatus", 'DateTime'>
   }
@@ -13821,51 +13961,27 @@ export namespace Prisma {
   }
 
   /**
-   * ProjectStatus.projects
+   * ProjectStatus.tasks
    */
-  export type ProjectStatus$projectsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type ProjectStatus$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Project
+     * Select specific fields to fetch from the Task
      */
-    select?: ProjectSelect<ExtArgs> | null
+    select?: TaskSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Project
+     * Omit specific fields from the Task
      */
-    omit?: ProjectOmit<ExtArgs> | null
+    omit?: TaskOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: ProjectInclude<ExtArgs> | null
-    where?: ProjectWhereInput
-    orderBy?: ProjectOrderByWithRelationInput | ProjectOrderByWithRelationInput[]
-    cursor?: ProjectWhereUniqueInput
+    include?: TaskInclude<ExtArgs> | null
+    where?: TaskWhereInput
+    orderBy?: TaskOrderByWithRelationInput | TaskOrderByWithRelationInput[]
+    cursor?: TaskWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[]
-  }
-
-  /**
-   * ProjectStatus.projectLinks
-   */
-  export type ProjectStatus$projectLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    where?: ProjectStatusLinkWhereInput
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    cursor?: ProjectStatusLinkWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
+    distinct?: TaskScalarFieldEnum | TaskScalarFieldEnum[]
   }
 
   /**
@@ -13888,950 +14004,6 @@ export namespace Prisma {
 
 
   /**
-   * Model ProjectStatusLink
-   */
-
-  export type AggregateProjectStatusLink = {
-    _count: ProjectStatusLinkCountAggregateOutputType | null
-    _min: ProjectStatusLinkMinAggregateOutputType | null
-    _max: ProjectStatusLinkMaxAggregateOutputType | null
-  }
-
-  export type ProjectStatusLinkMinAggregateOutputType = {
-    id: string | null
-    projectId: string | null
-    statusId: string | null
-    isPrimary: boolean | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type ProjectStatusLinkMaxAggregateOutputType = {
-    id: string | null
-    projectId: string | null
-    statusId: string | null
-    isPrimary: boolean | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type ProjectStatusLinkCountAggregateOutputType = {
-    id: number
-    projectId: number
-    statusId: number
-    isPrimary: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type ProjectStatusLinkMinAggregateInputType = {
-    id?: true
-    projectId?: true
-    statusId?: true
-    isPrimary?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type ProjectStatusLinkMaxAggregateInputType = {
-    id?: true
-    projectId?: true
-    statusId?: true
-    isPrimary?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type ProjectStatusLinkCountAggregateInputType = {
-    id?: true
-    projectId?: true
-    statusId?: true
-    isPrimary?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type ProjectStatusLinkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ProjectStatusLink to aggregate.
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ProjectStatusLinks to fetch.
-     */
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ProjectStatusLinkWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ProjectStatusLinks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ProjectStatusLinks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned ProjectStatusLinks
-    **/
-    _count?: true | ProjectStatusLinkCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ProjectStatusLinkMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ProjectStatusLinkMaxAggregateInputType
-  }
-
-  export type GetProjectStatusLinkAggregateType<T extends ProjectStatusLinkAggregateArgs> = {
-        [P in keyof T & keyof AggregateProjectStatusLink]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateProjectStatusLink[P]>
-      : GetScalarType<T[P], AggregateProjectStatusLink[P]>
-  }
-
-
-
-
-  export type ProjectStatusLinkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ProjectStatusLinkWhereInput
-    orderBy?: ProjectStatusLinkOrderByWithAggregationInput | ProjectStatusLinkOrderByWithAggregationInput[]
-    by: ProjectStatusLinkScalarFieldEnum[] | ProjectStatusLinkScalarFieldEnum
-    having?: ProjectStatusLinkScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ProjectStatusLinkCountAggregateInputType | true
-    _min?: ProjectStatusLinkMinAggregateInputType
-    _max?: ProjectStatusLinkMaxAggregateInputType
-  }
-
-  export type ProjectStatusLinkGroupByOutputType = {
-    id: string
-    projectId: string
-    statusId: string
-    isPrimary: boolean
-    createdAt: Date
-    updatedAt: Date
-    _count: ProjectStatusLinkCountAggregateOutputType | null
-    _min: ProjectStatusLinkMinAggregateOutputType | null
-    _max: ProjectStatusLinkMaxAggregateOutputType | null
-  }
-
-  type GetProjectStatusLinkGroupByPayload<T extends ProjectStatusLinkGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ProjectStatusLinkGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ProjectStatusLinkGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ProjectStatusLinkGroupByOutputType[P]>
-            : GetScalarType<T[P], ProjectStatusLinkGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ProjectStatusLinkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    projectId?: boolean
-    statusId?: boolean
-    isPrimary?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["projectStatusLink"]>
-
-
-
-  export type ProjectStatusLinkSelectScalar = {
-    id?: boolean
-    projectId?: boolean
-    statusId?: boolean
-    isPrimary?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type ProjectStatusLinkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "statusId" | "isPrimary" | "createdAt" | "updatedAt", ExtArgs["result"]["projectStatusLink"]>
-  export type ProjectStatusLinkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    status?: boolean | ProjectStatusDefaultArgs<ExtArgs>
-  }
-
-  export type $ProjectStatusLinkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ProjectStatusLink"
-    objects: {
-      project: Prisma.$ProjectPayload<ExtArgs>
-      status: Prisma.$ProjectStatusPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      projectId: string
-      statusId: string
-      isPrimary: boolean
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["projectStatusLink"]>
-    composites: {}
-  }
-
-  type ProjectStatusLinkGetPayload<S extends boolean | null | undefined | ProjectStatusLinkDefaultArgs> = $Result.GetResult<Prisma.$ProjectStatusLinkPayload, S>
-
-  type ProjectStatusLinkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ProjectStatusLinkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ProjectStatusLinkCountAggregateInputType | true
-    }
-
-  export interface ProjectStatusLinkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProjectStatusLink'], meta: { name: 'ProjectStatusLink' } }
-    /**
-     * Find zero or one ProjectStatusLink that matches the filter.
-     * @param {ProjectStatusLinkFindUniqueArgs} args - Arguments to find a ProjectStatusLink
-     * @example
-     * // Get one ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ProjectStatusLinkFindUniqueArgs>(args: SelectSubset<T, ProjectStatusLinkFindUniqueArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ProjectStatusLink that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ProjectStatusLinkFindUniqueOrThrowArgs} args - Arguments to find a ProjectStatusLink
-     * @example
-     * // Get one ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ProjectStatusLinkFindUniqueOrThrowArgs>(args: SelectSubset<T, ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ProjectStatusLink that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkFindFirstArgs} args - Arguments to find a ProjectStatusLink
-     * @example
-     * // Get one ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ProjectStatusLinkFindFirstArgs>(args?: SelectSubset<T, ProjectStatusLinkFindFirstArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ProjectStatusLink that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkFindFirstOrThrowArgs} args - Arguments to find a ProjectStatusLink
-     * @example
-     * // Get one ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ProjectStatusLinkFindFirstOrThrowArgs>(args?: SelectSubset<T, ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ProjectStatusLinks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ProjectStatusLinks
-     * const projectStatusLinks = await prisma.projectStatusLink.findMany()
-     * 
-     * // Get first 10 ProjectStatusLinks
-     * const projectStatusLinks = await prisma.projectStatusLink.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const projectStatusLinkWithIdOnly = await prisma.projectStatusLink.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ProjectStatusLinkFindManyArgs>(args?: SelectSubset<T, ProjectStatusLinkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ProjectStatusLink.
-     * @param {ProjectStatusLinkCreateArgs} args - Arguments to create a ProjectStatusLink.
-     * @example
-     * // Create one ProjectStatusLink
-     * const ProjectStatusLink = await prisma.projectStatusLink.create({
-     *   data: {
-     *     // ... data to create a ProjectStatusLink
-     *   }
-     * })
-     * 
-     */
-    create<T extends ProjectStatusLinkCreateArgs>(args: SelectSubset<T, ProjectStatusLinkCreateArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ProjectStatusLinks.
-     * @param {ProjectStatusLinkCreateManyArgs} args - Arguments to create many ProjectStatusLinks.
-     * @example
-     * // Create many ProjectStatusLinks
-     * const projectStatusLink = await prisma.projectStatusLink.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ProjectStatusLinkCreateManyArgs>(args?: SelectSubset<T, ProjectStatusLinkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a ProjectStatusLink.
-     * @param {ProjectStatusLinkDeleteArgs} args - Arguments to delete one ProjectStatusLink.
-     * @example
-     * // Delete one ProjectStatusLink
-     * const ProjectStatusLink = await prisma.projectStatusLink.delete({
-     *   where: {
-     *     // ... filter to delete one ProjectStatusLink
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ProjectStatusLinkDeleteArgs>(args: SelectSubset<T, ProjectStatusLinkDeleteArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ProjectStatusLink.
-     * @param {ProjectStatusLinkUpdateArgs} args - Arguments to update one ProjectStatusLink.
-     * @example
-     * // Update one ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ProjectStatusLinkUpdateArgs>(args: SelectSubset<T, ProjectStatusLinkUpdateArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ProjectStatusLinks.
-     * @param {ProjectStatusLinkDeleteManyArgs} args - Arguments to filter ProjectStatusLinks to delete.
-     * @example
-     * // Delete a few ProjectStatusLinks
-     * const { count } = await prisma.projectStatusLink.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ProjectStatusLinkDeleteManyArgs>(args?: SelectSubset<T, ProjectStatusLinkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ProjectStatusLinks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ProjectStatusLinks
-     * const projectStatusLink = await prisma.projectStatusLink.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ProjectStatusLinkUpdateManyArgs>(args: SelectSubset<T, ProjectStatusLinkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one ProjectStatusLink.
-     * @param {ProjectStatusLinkUpsertArgs} args - Arguments to update or create a ProjectStatusLink.
-     * @example
-     * // Update or create a ProjectStatusLink
-     * const projectStatusLink = await prisma.projectStatusLink.upsert({
-     *   create: {
-     *     // ... data to create a ProjectStatusLink
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ProjectStatusLink we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ProjectStatusLinkUpsertArgs>(args: SelectSubset<T, ProjectStatusLinkUpsertArgs<ExtArgs>>): Prisma__ProjectStatusLinkClient<$Result.GetResult<Prisma.$ProjectStatusLinkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ProjectStatusLinks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkCountArgs} args - Arguments to filter ProjectStatusLinks to count.
-     * @example
-     * // Count the number of ProjectStatusLinks
-     * const count = await prisma.projectStatusLink.count({
-     *   where: {
-     *     // ... the filter for the ProjectStatusLinks we want to count
-     *   }
-     * })
-    **/
-    count<T extends ProjectStatusLinkCountArgs>(
-      args?: Subset<T, ProjectStatusLinkCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ProjectStatusLinkCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ProjectStatusLink.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ProjectStatusLinkAggregateArgs>(args: Subset<T, ProjectStatusLinkAggregateArgs>): Prisma.PrismaPromise<GetProjectStatusLinkAggregateType<T>>
-
-    /**
-     * Group by ProjectStatusLink.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ProjectStatusLinkGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ProjectStatusLinkGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ProjectStatusLinkGroupByArgs['orderBy'] }
-        : { orderBy?: ProjectStatusLinkGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ProjectStatusLinkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProjectStatusLinkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ProjectStatusLink model
-   */
-  readonly fields: ProjectStatusLinkFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ProjectStatusLink.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ProjectStatusLinkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    status<T extends ProjectStatusDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectStatusDefaultArgs<ExtArgs>>): Prisma__ProjectStatusClient<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ProjectStatusLink model
-   */
-  interface ProjectStatusLinkFieldRefs {
-    readonly id: FieldRef<"ProjectStatusLink", 'String'>
-    readonly projectId: FieldRef<"ProjectStatusLink", 'String'>
-    readonly statusId: FieldRef<"ProjectStatusLink", 'String'>
-    readonly isPrimary: FieldRef<"ProjectStatusLink", 'Boolean'>
-    readonly createdAt: FieldRef<"ProjectStatusLink", 'DateTime'>
-    readonly updatedAt: FieldRef<"ProjectStatusLink", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * ProjectStatusLink findUnique
-   */
-  export type ProjectStatusLinkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter, which ProjectStatusLink to fetch.
-     */
-    where: ProjectStatusLinkWhereUniqueInput
-  }
-
-  /**
-   * ProjectStatusLink findUniqueOrThrow
-   */
-  export type ProjectStatusLinkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter, which ProjectStatusLink to fetch.
-     */
-    where: ProjectStatusLinkWhereUniqueInput
-  }
-
-  /**
-   * ProjectStatusLink findFirst
-   */
-  export type ProjectStatusLinkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter, which ProjectStatusLink to fetch.
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ProjectStatusLinks to fetch.
-     */
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ProjectStatusLinks.
-     */
-    cursor?: ProjectStatusLinkWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ProjectStatusLinks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ProjectStatusLinks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ProjectStatusLinks.
-     */
-    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
-  }
-
-  /**
-   * ProjectStatusLink findFirstOrThrow
-   */
-  export type ProjectStatusLinkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter, which ProjectStatusLink to fetch.
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ProjectStatusLinks to fetch.
-     */
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ProjectStatusLinks.
-     */
-    cursor?: ProjectStatusLinkWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ProjectStatusLinks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ProjectStatusLinks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ProjectStatusLinks.
-     */
-    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
-  }
-
-  /**
-   * ProjectStatusLink findMany
-   */
-  export type ProjectStatusLinkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter, which ProjectStatusLinks to fetch.
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ProjectStatusLinks to fetch.
-     */
-    orderBy?: ProjectStatusLinkOrderByWithRelationInput | ProjectStatusLinkOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing ProjectStatusLinks.
-     */
-    cursor?: ProjectStatusLinkWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ProjectStatusLinks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ProjectStatusLinks.
-     */
-    skip?: number
-    distinct?: ProjectStatusLinkScalarFieldEnum | ProjectStatusLinkScalarFieldEnum[]
-  }
-
-  /**
-   * ProjectStatusLink create
-   */
-  export type ProjectStatusLinkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ProjectStatusLink.
-     */
-    data: XOR<ProjectStatusLinkCreateInput, ProjectStatusLinkUncheckedCreateInput>
-  }
-
-  /**
-   * ProjectStatusLink createMany
-   */
-  export type ProjectStatusLinkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ProjectStatusLinks.
-     */
-    data: ProjectStatusLinkCreateManyInput | ProjectStatusLinkCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ProjectStatusLink update
-   */
-  export type ProjectStatusLinkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ProjectStatusLink.
-     */
-    data: XOR<ProjectStatusLinkUpdateInput, ProjectStatusLinkUncheckedUpdateInput>
-    /**
-     * Choose, which ProjectStatusLink to update.
-     */
-    where: ProjectStatusLinkWhereUniqueInput
-  }
-
-  /**
-   * ProjectStatusLink updateMany
-   */
-  export type ProjectStatusLinkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ProjectStatusLinks.
-     */
-    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyInput>
-    /**
-     * Filter which ProjectStatusLinks to update
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * Limit how many ProjectStatusLinks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ProjectStatusLink upsert
-   */
-  export type ProjectStatusLinkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ProjectStatusLink to update in case it exists.
-     */
-    where: ProjectStatusLinkWhereUniqueInput
-    /**
-     * In case the ProjectStatusLink found by the `where` argument doesn't exist, create a new ProjectStatusLink with this data.
-     */
-    create: XOR<ProjectStatusLinkCreateInput, ProjectStatusLinkUncheckedCreateInput>
-    /**
-     * In case the ProjectStatusLink was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ProjectStatusLinkUpdateInput, ProjectStatusLinkUncheckedUpdateInput>
-  }
-
-  /**
-   * ProjectStatusLink delete
-   */
-  export type ProjectStatusLinkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-    /**
-     * Filter which ProjectStatusLink to delete.
-     */
-    where: ProjectStatusLinkWhereUniqueInput
-  }
-
-  /**
-   * ProjectStatusLink deleteMany
-   */
-  export type ProjectStatusLinkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ProjectStatusLinks to delete
-     */
-    where?: ProjectStatusLinkWhereInput
-    /**
-     * Limit how many ProjectStatusLinks to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ProjectStatusLink without action
-   */
-  export type ProjectStatusLinkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectStatusLink
-     */
-    select?: ProjectStatusLinkSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectStatusLink
-     */
-    omit?: ProjectStatusLinkOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectStatusLinkInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model Task
    */
 
@@ -14844,10 +14016,14 @@ export namespace Prisma {
   }
 
   export type TaskAvgAggregateOutputType = {
+    timeSpent: number | null
+    estimatedTime: number | null
     order: number | null
   }
 
   export type TaskSumAggregateOutputType = {
+    timeSpent: number | null
+    estimatedTime: number | null
     order: number | null
   }
 
@@ -14856,14 +14032,19 @@ export namespace Prisma {
     title: string | null
     description: string | null
     priority: string | null
+    startDate: Date | null
+    endDate: Date | null
     dueDate: Date | null
+    timeSpent: number | null
+    estimatedTime: number | null
     projectId: string | null
-    assignedToId: string | null
+    statusId: string | null
     parentId: string | null
     order: number | null
     createdAt: Date | null
     updatedAt: Date | null
     completed: boolean | null
+    assignedToId: string | null
   }
 
   export type TaskMaxAggregateOutputType = {
@@ -14871,14 +14052,19 @@ export namespace Prisma {
     title: string | null
     description: string | null
     priority: string | null
+    startDate: Date | null
+    endDate: Date | null
     dueDate: Date | null
+    timeSpent: number | null
+    estimatedTime: number | null
     projectId: string | null
-    assignedToId: string | null
+    statusId: string | null
     parentId: string | null
     order: number | null
     createdAt: Date | null
     updatedAt: Date | null
     completed: boolean | null
+    assignedToId: string | null
   }
 
   export type TaskCountAggregateOutputType = {
@@ -14886,23 +14072,32 @@ export namespace Prisma {
     title: number
     description: number
     priority: number
+    startDate: number
+    endDate: number
     dueDate: number
+    timeSpent: number
+    estimatedTime: number
     projectId: number
-    assignedToId: number
+    statusId: number
     parentId: number
     order: number
     createdAt: number
     updatedAt: number
     completed: number
+    assignedToId: number
     _all: number
   }
 
 
   export type TaskAvgAggregateInputType = {
+    timeSpent?: true
+    estimatedTime?: true
     order?: true
   }
 
   export type TaskSumAggregateInputType = {
+    timeSpent?: true
+    estimatedTime?: true
     order?: true
   }
 
@@ -14911,14 +14106,19 @@ export namespace Prisma {
     title?: true
     description?: true
     priority?: true
+    startDate?: true
+    endDate?: true
     dueDate?: true
+    timeSpent?: true
+    estimatedTime?: true
     projectId?: true
-    assignedToId?: true
+    statusId?: true
     parentId?: true
     order?: true
     createdAt?: true
     updatedAt?: true
     completed?: true
+    assignedToId?: true
   }
 
   export type TaskMaxAggregateInputType = {
@@ -14926,14 +14126,19 @@ export namespace Prisma {
     title?: true
     description?: true
     priority?: true
+    startDate?: true
+    endDate?: true
     dueDate?: true
+    timeSpent?: true
+    estimatedTime?: true
     projectId?: true
-    assignedToId?: true
+    statusId?: true
     parentId?: true
     order?: true
     createdAt?: true
     updatedAt?: true
     completed?: true
+    assignedToId?: true
   }
 
   export type TaskCountAggregateInputType = {
@@ -14941,14 +14146,19 @@ export namespace Prisma {
     title?: true
     description?: true
     priority?: true
+    startDate?: true
+    endDate?: true
     dueDate?: true
+    timeSpent?: true
+    estimatedTime?: true
     projectId?: true
-    assignedToId?: true
+    statusId?: true
     parentId?: true
     order?: true
     createdAt?: true
     updatedAt?: true
     completed?: true
+    assignedToId?: true
     _all?: true
   }
 
@@ -15043,14 +14253,19 @@ export namespace Prisma {
     title: string
     description: string | null
     priority: string
+    startDate: Date | null
+    endDate: Date | null
     dueDate: Date | null
+    timeSpent: number | null
+    estimatedTime: number | null
     projectId: string
-    assignedToId: string | null
+    statusId: string | null
     parentId: string | null
     order: number
     createdAt: Date
     updatedAt: Date
     completed: boolean
+    assignedToId: string | null
     _count: TaskCountAggregateOutputType | null
     _avg: TaskAvgAggregateOutputType | null
     _sum: TaskSumAggregateOutputType | null
@@ -15077,20 +14292,26 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     priority?: boolean
+    startDate?: boolean
+    endDate?: boolean
     dueDate?: boolean
+    timeSpent?: boolean
+    estimatedTime?: boolean
     projectId?: boolean
-    assignedToId?: boolean
+    statusId?: boolean
     parentId?: boolean
     order?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     completed?: boolean
+    assignedToId?: boolean
     activities?: boolean | Task$activitiesArgs<ExtArgs>
     attendances?: boolean | Task$attendancesArgs<ExtArgs>
     assignedTo?: boolean | Task$assignedToArgs<ExtArgs>
     parent?: boolean | Task$parentArgs<ExtArgs>
     subtasks?: boolean | Task$subtasksArgs<ExtArgs>
     project?: boolean | ProjectDefaultArgs<ExtArgs>
+    status?: boolean | Task$statusArgs<ExtArgs>
     assignees?: boolean | Task$assigneesArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
@@ -15102,17 +14323,22 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     priority?: boolean
+    startDate?: boolean
+    endDate?: boolean
     dueDate?: boolean
+    timeSpent?: boolean
+    estimatedTime?: boolean
     projectId?: boolean
-    assignedToId?: boolean
+    statusId?: boolean
     parentId?: boolean
     order?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     completed?: boolean
+    assignedToId?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "priority" | "dueDate" | "projectId" | "assignedToId" | "parentId" | "order" | "createdAt" | "updatedAt" | "completed", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "priority" | "startDate" | "endDate" | "dueDate" | "timeSpent" | "estimatedTime" | "projectId" | "statusId" | "parentId" | "order" | "createdAt" | "updatedAt" | "completed" | "assignedToId", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     activities?: boolean | Task$activitiesArgs<ExtArgs>
     attendances?: boolean | Task$attendancesArgs<ExtArgs>
@@ -15120,6 +14346,7 @@ export namespace Prisma {
     parent?: boolean | Task$parentArgs<ExtArgs>
     subtasks?: boolean | Task$subtasksArgs<ExtArgs>
     project?: boolean | ProjectDefaultArgs<ExtArgs>
+    status?: boolean | Task$statusArgs<ExtArgs>
     assignees?: boolean | Task$assigneesArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -15133,6 +14360,7 @@ export namespace Prisma {
       parent: Prisma.$TaskPayload<ExtArgs> | null
       subtasks: Prisma.$TaskPayload<ExtArgs>[]
       project: Prisma.$ProjectPayload<ExtArgs>
+      status: Prisma.$ProjectStatusPayload<ExtArgs> | null
       assignees: Prisma.$TaskAssigneePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -15140,14 +14368,19 @@ export namespace Prisma {
       title: string
       description: string | null
       priority: string
+      startDate: Date | null
+      endDate: Date | null
       dueDate: Date | null
+      timeSpent: number | null
+      estimatedTime: number | null
       projectId: string
-      assignedToId: string | null
+      statusId: string | null
       parentId: string | null
       order: number
       createdAt: Date
       updatedAt: Date
       completed: boolean
+      assignedToId: string | null
     }, ExtArgs["result"]["task"]>
     composites: {}
   }
@@ -15494,6 +14727,7 @@ export namespace Prisma {
     parent<T extends Task$parentArgs<ExtArgs> = {}>(args?: Subset<T, Task$parentArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     subtasks<T extends Task$subtasksArgs<ExtArgs> = {}>(args?: Subset<T, Task$subtasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     project<T extends ProjectDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProjectDefaultArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    status<T extends Task$statusArgs<ExtArgs> = {}>(args?: Subset<T, Task$statusArgs<ExtArgs>>): Prisma__ProjectStatusClient<$Result.GetResult<Prisma.$ProjectStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     assignees<T extends Task$assigneesArgs<ExtArgs> = {}>(args?: Subset<T, Task$assigneesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAssigneePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -15528,14 +14762,19 @@ export namespace Prisma {
     readonly title: FieldRef<"Task", 'String'>
     readonly description: FieldRef<"Task", 'String'>
     readonly priority: FieldRef<"Task", 'String'>
+    readonly startDate: FieldRef<"Task", 'DateTime'>
+    readonly endDate: FieldRef<"Task", 'DateTime'>
     readonly dueDate: FieldRef<"Task", 'DateTime'>
+    readonly timeSpent: FieldRef<"Task", 'Float'>
+    readonly estimatedTime: FieldRef<"Task", 'Float'>
     readonly projectId: FieldRef<"Task", 'String'>
-    readonly assignedToId: FieldRef<"Task", 'String'>
+    readonly statusId: FieldRef<"Task", 'String'>
     readonly parentId: FieldRef<"Task", 'String'>
     readonly order: FieldRef<"Task", 'Int'>
     readonly createdAt: FieldRef<"Task", 'DateTime'>
     readonly updatedAt: FieldRef<"Task", 'DateTime'>
     readonly completed: FieldRef<"Task", 'Boolean'>
+    readonly assignedToId: FieldRef<"Task", 'String'>
   }
     
 
@@ -15986,6 +15225,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskScalarFieldEnum | TaskScalarFieldEnum[]
+  }
+
+  /**
+   * Task.status
+   */
+  export type Task$statusArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProjectStatus
+     */
+    select?: ProjectStatusSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProjectStatus
+     */
+    omit?: ProjectStatusOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProjectStatusInclude<ExtArgs> | null
+    where?: ProjectStatusWhereInput
   }
 
   /**
@@ -16978,7 +16236,6 @@ export namespace Prisma {
     id: string | null
     projectId: string | null
     userId: string | null
-    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16987,7 +16244,6 @@ export namespace Prisma {
     id: string | null
     projectId: string | null
     userId: string | null
-    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -16996,7 +16252,6 @@ export namespace Prisma {
     id: number
     projectId: number
     userId: number
-    role: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -17007,7 +16262,6 @@ export namespace Prisma {
     id?: true
     projectId?: true
     userId?: true
-    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17016,7 +16270,6 @@ export namespace Prisma {
     id?: true
     projectId?: true
     userId?: true
-    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17025,7 +16278,6 @@ export namespace Prisma {
     id?: true
     projectId?: true
     userId?: true
-    role?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -17107,7 +16359,6 @@ export namespace Prisma {
     id: string
     projectId: string
     userId: string
-    role: string
     createdAt: Date
     updatedAt: Date
     _count: TeamMemberCountAggregateOutputType | null
@@ -17133,7 +16384,6 @@ export namespace Prisma {
     id?: boolean
     projectId?: boolean
     userId?: boolean
-    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     project?: boolean | ProjectDefaultArgs<ExtArgs>
@@ -17146,12 +16396,11 @@ export namespace Prisma {
     id?: boolean
     projectId?: boolean
     userId?: boolean
-    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TeamMemberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "userId" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["teamMember"]>
+  export type TeamMemberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectId" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["teamMember"]>
   export type TeamMemberInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     project?: boolean | ProjectDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -17167,7 +16416,6 @@ export namespace Prisma {
       id: string
       projectId: string
       userId: string
-      role: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["teamMember"]>
@@ -17544,7 +16792,6 @@ export namespace Prisma {
     readonly id: FieldRef<"TeamMember", 'String'>
     readonly projectId: FieldRef<"TeamMember", 'String'>
     readonly userId: FieldRef<"TeamMember", 'String'>
-    readonly role: FieldRef<"TeamMember", 'String'>
     readonly createdAt: FieldRef<"TeamMember", 'DateTime'>
     readonly updatedAt: FieldRef<"TeamMember", 'DateTime'>
   }
@@ -22132,6 +21379,1013 @@ export namespace Prisma {
 
 
   /**
+   * Model Document
+   */
+
+  export type AggregateDocument = {
+    _count: DocumentCountAggregateOutputType | null
+    _avg: DocumentAvgAggregateOutputType | null
+    _sum: DocumentSumAggregateOutputType | null
+    _min: DocumentMinAggregateOutputType | null
+    _max: DocumentMaxAggregateOutputType | null
+  }
+
+  export type DocumentAvgAggregateOutputType = {
+    fileSize: number | null
+  }
+
+  export type DocumentSumAggregateOutputType = {
+    fileSize: number | null
+  }
+
+  export type DocumentMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    fileType: string | null
+    fileSize: number | null
+    filePath: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DocumentMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    description: string | null
+    fileType: string | null
+    fileSize: number | null
+    filePath: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DocumentCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    fileType: number
+    fileSize: number
+    filePath: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DocumentAvgAggregateInputType = {
+    fileSize?: true
+  }
+
+  export type DocumentSumAggregateInputType = {
+    fileSize?: true
+  }
+
+  export type DocumentMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    fileType?: true
+    fileSize?: true
+    filePath?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DocumentMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    fileType?: true
+    fileSize?: true
+    filePath?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DocumentCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    fileType?: true
+    fileSize?: true
+    filePath?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DocumentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Document to aggregate.
+     */
+    where?: DocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Documents to fetch.
+     */
+    orderBy?: DocumentOrderByWithRelationInput | DocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Documents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Documents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Documents
+    **/
+    _count?: true | DocumentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DocumentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DocumentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DocumentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DocumentMaxAggregateInputType
+  }
+
+  export type GetDocumentAggregateType<T extends DocumentAggregateArgs> = {
+        [P in keyof T & keyof AggregateDocument]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDocument[P]>
+      : GetScalarType<T[P], AggregateDocument[P]>
+  }
+
+
+
+
+  export type DocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentWhereInput
+    orderBy?: DocumentOrderByWithAggregationInput | DocumentOrderByWithAggregationInput[]
+    by: DocumentScalarFieldEnum[] | DocumentScalarFieldEnum
+    having?: DocumentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DocumentCountAggregateInputType | true
+    _avg?: DocumentAvgAggregateInputType
+    _sum?: DocumentSumAggregateInputType
+    _min?: DocumentMinAggregateInputType
+    _max?: DocumentMaxAggregateInputType
+  }
+
+  export type DocumentGroupByOutputType = {
+    id: string
+    name: string
+    description: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    userId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: DocumentCountAggregateOutputType | null
+    _avg: DocumentAvgAggregateOutputType | null
+    _sum: DocumentSumAggregateOutputType | null
+    _min: DocumentMinAggregateOutputType | null
+    _max: DocumentMaxAggregateOutputType | null
+  }
+
+  type GetDocumentGroupByPayload<T extends DocumentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DocumentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DocumentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DocumentGroupByOutputType[P]>
+            : GetScalarType<T[P], DocumentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DocumentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    fileType?: boolean
+    fileSize?: boolean
+    filePath?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["document"]>
+
+
+
+  export type DocumentSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    fileType?: boolean
+    fileSize?: boolean
+    filePath?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "fileType" | "fileSize" | "filePath" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+  export type DocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $DocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Document"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      description: string | null
+      fileType: string
+      fileSize: number
+      filePath: string
+      userId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["document"]>
+    composites: {}
+  }
+
+  type DocumentGetPayload<S extends boolean | null | undefined | DocumentDefaultArgs> = $Result.GetResult<Prisma.$DocumentPayload, S>
+
+  type DocumentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DocumentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DocumentCountAggregateInputType | true
+    }
+
+  export interface DocumentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Document'], meta: { name: 'Document' } }
+    /**
+     * Find zero or one Document that matches the filter.
+     * @param {DocumentFindUniqueArgs} args - Arguments to find a Document
+     * @example
+     * // Get one Document
+     * const document = await prisma.document.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DocumentFindUniqueArgs>(args: SelectSubset<T, DocumentFindUniqueArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Document that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DocumentFindUniqueOrThrowArgs} args - Arguments to find a Document
+     * @example
+     * // Get one Document
+     * const document = await prisma.document.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DocumentFindUniqueOrThrowArgs>(args: SelectSubset<T, DocumentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Document that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentFindFirstArgs} args - Arguments to find a Document
+     * @example
+     * // Get one Document
+     * const document = await prisma.document.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DocumentFindFirstArgs>(args?: SelectSubset<T, DocumentFindFirstArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Document that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentFindFirstOrThrowArgs} args - Arguments to find a Document
+     * @example
+     * // Get one Document
+     * const document = await prisma.document.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DocumentFindFirstOrThrowArgs>(args?: SelectSubset<T, DocumentFindFirstOrThrowArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Documents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Documents
+     * const documents = await prisma.document.findMany()
+     * 
+     * // Get first 10 Documents
+     * const documents = await prisma.document.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const documentWithIdOnly = await prisma.document.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DocumentFindManyArgs>(args?: SelectSubset<T, DocumentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Document.
+     * @param {DocumentCreateArgs} args - Arguments to create a Document.
+     * @example
+     * // Create one Document
+     * const Document = await prisma.document.create({
+     *   data: {
+     *     // ... data to create a Document
+     *   }
+     * })
+     * 
+     */
+    create<T extends DocumentCreateArgs>(args: SelectSubset<T, DocumentCreateArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Documents.
+     * @param {DocumentCreateManyArgs} args - Arguments to create many Documents.
+     * @example
+     * // Create many Documents
+     * const document = await prisma.document.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DocumentCreateManyArgs>(args?: SelectSubset<T, DocumentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a Document.
+     * @param {DocumentDeleteArgs} args - Arguments to delete one Document.
+     * @example
+     * // Delete one Document
+     * const Document = await prisma.document.delete({
+     *   where: {
+     *     // ... filter to delete one Document
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DocumentDeleteArgs>(args: SelectSubset<T, DocumentDeleteArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Document.
+     * @param {DocumentUpdateArgs} args - Arguments to update one Document.
+     * @example
+     * // Update one Document
+     * const document = await prisma.document.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DocumentUpdateArgs>(args: SelectSubset<T, DocumentUpdateArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Documents.
+     * @param {DocumentDeleteManyArgs} args - Arguments to filter Documents to delete.
+     * @example
+     * // Delete a few Documents
+     * const { count } = await prisma.document.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DocumentDeleteManyArgs>(args?: SelectSubset<T, DocumentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Documents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Documents
+     * const document = await prisma.document.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DocumentUpdateManyArgs>(args: SelectSubset<T, DocumentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Document.
+     * @param {DocumentUpsertArgs} args - Arguments to update or create a Document.
+     * @example
+     * // Update or create a Document
+     * const document = await prisma.document.upsert({
+     *   create: {
+     *     // ... data to create a Document
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Document we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DocumentUpsertArgs>(args: SelectSubset<T, DocumentUpsertArgs<ExtArgs>>): Prisma__DocumentClient<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Documents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentCountArgs} args - Arguments to filter Documents to count.
+     * @example
+     * // Count the number of Documents
+     * const count = await prisma.document.count({
+     *   where: {
+     *     // ... the filter for the Documents we want to count
+     *   }
+     * })
+    **/
+    count<T extends DocumentCountArgs>(
+      args?: Subset<T, DocumentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DocumentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Document.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DocumentAggregateArgs>(args: Subset<T, DocumentAggregateArgs>): Prisma.PrismaPromise<GetDocumentAggregateType<T>>
+
+    /**
+     * Group by Document.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DocumentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DocumentGroupByArgs['orderBy'] }
+        : { orderBy?: DocumentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DocumentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDocumentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Document model
+   */
+  readonly fields: DocumentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Document.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Document model
+   */
+  interface DocumentFieldRefs {
+    readonly id: FieldRef<"Document", 'String'>
+    readonly name: FieldRef<"Document", 'String'>
+    readonly description: FieldRef<"Document", 'String'>
+    readonly fileType: FieldRef<"Document", 'String'>
+    readonly fileSize: FieldRef<"Document", 'Int'>
+    readonly filePath: FieldRef<"Document", 'String'>
+    readonly userId: FieldRef<"Document", 'String'>
+    readonly createdAt: FieldRef<"Document", 'DateTime'>
+    readonly updatedAt: FieldRef<"Document", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Document findUnique
+   */
+  export type DocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which Document to fetch.
+     */
+    where: DocumentWhereUniqueInput
+  }
+
+  /**
+   * Document findUniqueOrThrow
+   */
+  export type DocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which Document to fetch.
+     */
+    where: DocumentWhereUniqueInput
+  }
+
+  /**
+   * Document findFirst
+   */
+  export type DocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which Document to fetch.
+     */
+    where?: DocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Documents to fetch.
+     */
+    orderBy?: DocumentOrderByWithRelationInput | DocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Documents.
+     */
+    cursor?: DocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Documents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Documents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Documents.
+     */
+    distinct?: DocumentScalarFieldEnum | DocumentScalarFieldEnum[]
+  }
+
+  /**
+   * Document findFirstOrThrow
+   */
+  export type DocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which Document to fetch.
+     */
+    where?: DocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Documents to fetch.
+     */
+    orderBy?: DocumentOrderByWithRelationInput | DocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Documents.
+     */
+    cursor?: DocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Documents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Documents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Documents.
+     */
+    distinct?: DocumentScalarFieldEnum | DocumentScalarFieldEnum[]
+  }
+
+  /**
+   * Document findMany
+   */
+  export type DocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which Documents to fetch.
+     */
+    where?: DocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Documents to fetch.
+     */
+    orderBy?: DocumentOrderByWithRelationInput | DocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Documents.
+     */
+    cursor?: DocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Documents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Documents.
+     */
+    skip?: number
+    distinct?: DocumentScalarFieldEnum | DocumentScalarFieldEnum[]
+  }
+
+  /**
+   * Document create
+   */
+  export type DocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Document.
+     */
+    data: XOR<DocumentCreateInput, DocumentUncheckedCreateInput>
+  }
+
+  /**
+   * Document createMany
+   */
+  export type DocumentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Documents.
+     */
+    data: DocumentCreateManyInput | DocumentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Document update
+   */
+  export type DocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Document.
+     */
+    data: XOR<DocumentUpdateInput, DocumentUncheckedUpdateInput>
+    /**
+     * Choose, which Document to update.
+     */
+    where: DocumentWhereUniqueInput
+  }
+
+  /**
+   * Document updateMany
+   */
+  export type DocumentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Documents.
+     */
+    data: XOR<DocumentUpdateManyMutationInput, DocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which Documents to update
+     */
+    where?: DocumentWhereInput
+    /**
+     * Limit how many Documents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Document upsert
+   */
+  export type DocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Document to update in case it exists.
+     */
+    where: DocumentWhereUniqueInput
+    /**
+     * In case the Document found by the `where` argument doesn't exist, create a new Document with this data.
+     */
+    create: XOR<DocumentCreateInput, DocumentUncheckedCreateInput>
+    /**
+     * In case the Document was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DocumentUpdateInput, DocumentUncheckedUpdateInput>
+  }
+
+  /**
+   * Document delete
+   */
+  export type DocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+    /**
+     * Filter which Document to delete.
+     */
+    where: DocumentWhereUniqueInput
+  }
+
+  /**
+   * Document deleteMany
+   */
+  export type DocumentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Documents to delete
+     */
+    where?: DocumentWhereInput
+    /**
+     * Limit how many Documents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Document without action
+   */
+  export type DocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Document
+     */
+    select?: DocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Document
+     */
+    omit?: DocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -22153,15 +22407,15 @@ export namespace Prisma {
     image: 'image',
     password: 'password',
     role: 'role',
-    bio: 'bio',
-    jobTitle: 'jobTitle',
-    department: 'department',
-    location: 'location',
-    phone: 'phone',
-    skills: 'skills',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    lastLogin: 'lastLogin'
+    lastLogin: 'lastLogin',
+    bio: 'bio',
+    department: 'department',
+    jobTitle: 'jobTitle',
+    location: 'location',
+    phone: 'phone',
+    skills: 'skills'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -22267,9 +22521,11 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
-    statusId: 'statusId',
     startDate: 'startDate',
     endDate: 'endDate',
+    dueDate: 'dueDate',
+    totalTimeSpent: 'totalTimeSpent',
+    estimatedTime: 'estimatedTime',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     createdById: 'createdById'
@@ -22283,7 +22539,9 @@ export namespace Prisma {
     name: 'name',
     color: 'color',
     description: 'description',
+    order: 'order',
     isDefault: 'isDefault',
+    projectId: 'projectId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -22291,31 +22549,24 @@ export namespace Prisma {
   export type ProjectStatusScalarFieldEnum = (typeof ProjectStatusScalarFieldEnum)[keyof typeof ProjectStatusScalarFieldEnum]
 
 
-  export const ProjectStatusLinkScalarFieldEnum: {
-    id: 'id',
-    projectId: 'projectId',
-    statusId: 'statusId',
-    isPrimary: 'isPrimary',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type ProjectStatusLinkScalarFieldEnum = (typeof ProjectStatusLinkScalarFieldEnum)[keyof typeof ProjectStatusLinkScalarFieldEnum]
-
-
   export const TaskScalarFieldEnum: {
     id: 'id',
     title: 'title',
     description: 'description',
     priority: 'priority',
+    startDate: 'startDate',
+    endDate: 'endDate',
     dueDate: 'dueDate',
+    timeSpent: 'timeSpent',
+    estimatedTime: 'estimatedTime',
     projectId: 'projectId',
-    assignedToId: 'assignedToId',
+    statusId: 'statusId',
     parentId: 'parentId',
     order: 'order',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    completed: 'completed'
+    completed: 'completed',
+    assignedToId: 'assignedToId'
   };
 
   export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
@@ -22336,7 +22587,6 @@ export namespace Prisma {
     id: 'id',
     projectId: 'projectId',
     userId: 'userId',
-    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -22416,6 +22666,21 @@ export namespace Prisma {
   export type ActivityScalarFieldEnum = (typeof ActivityScalarFieldEnum)[keyof typeof ActivityScalarFieldEnum]
 
 
+  export const DocumentScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    fileType: 'fileType',
+    fileSize: 'fileSize',
+    filePath: 'filePath',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -22440,8 +22705,8 @@ export namespace Prisma {
     password: 'password',
     role: 'role',
     bio: 'bio',
-    jobTitle: 'jobTitle',
     department: 'department',
+    jobTitle: 'jobTitle',
     location: 'location',
     phone: 'phone',
     skills: 'skills'
@@ -22534,7 +22799,6 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     description: 'description',
-    statusId: 'statusId',
     createdById: 'createdById'
   };
 
@@ -22545,19 +22809,11 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     color: 'color',
-    description: 'description'
+    description: 'description',
+    projectId: 'projectId'
   };
 
   export type ProjectStatusOrderByRelevanceFieldEnum = (typeof ProjectStatusOrderByRelevanceFieldEnum)[keyof typeof ProjectStatusOrderByRelevanceFieldEnum]
-
-
-  export const ProjectStatusLinkOrderByRelevanceFieldEnum: {
-    id: 'id',
-    projectId: 'projectId',
-    statusId: 'statusId'
-  };
-
-  export type ProjectStatusLinkOrderByRelevanceFieldEnum = (typeof ProjectStatusLinkOrderByRelevanceFieldEnum)[keyof typeof ProjectStatusLinkOrderByRelevanceFieldEnum]
 
 
   export const TaskOrderByRelevanceFieldEnum: {
@@ -22566,8 +22822,9 @@ export namespace Prisma {
     description: 'description',
     priority: 'priority',
     projectId: 'projectId',
-    assignedToId: 'assignedToId',
-    parentId: 'parentId'
+    statusId: 'statusId',
+    parentId: 'parentId',
+    assignedToId: 'assignedToId'
   };
 
   export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
@@ -22585,8 +22842,7 @@ export namespace Prisma {
   export const TeamMemberOrderByRelevanceFieldEnum: {
     id: 'id',
     projectId: 'projectId',
-    userId: 'userId',
-    role: 'role'
+    userId: 'userId'
   };
 
   export type TeamMemberOrderByRelevanceFieldEnum = (typeof TeamMemberOrderByRelevanceFieldEnum)[keyof typeof TeamMemberOrderByRelevanceFieldEnum]
@@ -22646,6 +22902,18 @@ export namespace Prisma {
   export type ActivityOrderByRelevanceFieldEnum = (typeof ActivityOrderByRelevanceFieldEnum)[keyof typeof ActivityOrderByRelevanceFieldEnum]
 
 
+  export const DocumentOrderByRelevanceFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    fileType: 'fileType',
+    filePath: 'filePath',
+    userId: 'userId'
+  };
+
+  export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
   /**
    * Field references
    */
@@ -22700,20 +22968,21 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
-    bio?: StringNullableFilter<"User"> | string | null
-    jobTitle?: StringNullableFilter<"User"> | string | null
-    department?: StringNullableFilter<"User"> | string | null
-    location?: StringNullableFilter<"User"> | string | null
-    phone?: StringNullableFilter<"User"> | string | null
-    skills?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
+    bio?: StringNullableFilter<"User"> | string | null
+    department?: StringNullableFilter<"User"> | string | null
+    jobTitle?: StringNullableFilter<"User"> | string | null
+    location?: StringNullableFilter<"User"> | string | null
+    phone?: StringNullableFilter<"User"> | string | null
+    skills?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     activities?: ActivityListRelationFilter
     attendanceAdjustments?: AttendanceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
+    documents?: DocumentListRelationFilter
     projects?: ProjectListRelationFilter
     sessions?: SessionListRelationFilter
     tasks?: TaskListRelationFilter
@@ -22731,20 +23000,21 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
-    bio?: SortOrderInput | SortOrder
-    jobTitle?: SortOrderInput | SortOrder
-    department?: SortOrderInput | SortOrder
-    location?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
-    skills?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    bio?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
+    jobTitle?: SortOrderInput | SortOrder
+    location?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    skills?: SortOrderInput | SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     activities?: ActivityOrderByRelationAggregateInput
     attendanceAdjustments?: AttendanceOrderByRelationAggregateInput
     attendanceRecords?: AttendanceOrderByRelationAggregateInput
     attendanceSettings?: AttendanceSettingsOrderByWithRelationInput
+    documents?: DocumentOrderByRelationAggregateInput
     projects?: ProjectOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     tasks?: TaskOrderByRelationAggregateInput
@@ -22766,20 +23036,21 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
-    bio?: StringNullableFilter<"User"> | string | null
-    jobTitle?: StringNullableFilter<"User"> | string | null
-    department?: StringNullableFilter<"User"> | string | null
-    location?: StringNullableFilter<"User"> | string | null
-    phone?: StringNullableFilter<"User"> | string | null
-    skills?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
+    bio?: StringNullableFilter<"User"> | string | null
+    department?: StringNullableFilter<"User"> | string | null
+    jobTitle?: StringNullableFilter<"User"> | string | null
+    location?: StringNullableFilter<"User"> | string | null
+    phone?: StringNullableFilter<"User"> | string | null
+    skills?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     activities?: ActivityListRelationFilter
     attendanceAdjustments?: AttendanceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
+    documents?: DocumentListRelationFilter
     projects?: ProjectListRelationFilter
     sessions?: SessionListRelationFilter
     tasks?: TaskListRelationFilter
@@ -22797,15 +23068,15 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
-    bio?: SortOrderInput | SortOrder
-    jobTitle?: SortOrderInput | SortOrder
-    department?: SortOrderInput | SortOrder
-    location?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
-    skills?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    bio?: SortOrderInput | SortOrder
+    department?: SortOrderInput | SortOrder
+    jobTitle?: SortOrderInput | SortOrder
+    location?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    skills?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -22822,15 +23093,15 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: StringWithAggregatesFilter<"User"> | string
-    bio?: StringNullableWithAggregatesFilter<"User"> | string | null
-    jobTitle?: StringNullableWithAggregatesFilter<"User"> | string | null
-    department?: StringNullableWithAggregatesFilter<"User"> | string | null
-    location?: StringNullableWithAggregatesFilter<"User"> | string | null
-    phone?: StringNullableWithAggregatesFilter<"User"> | string | null
-    skills?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    bio?: StringNullableWithAggregatesFilter<"User"> | string | null
+    department?: StringNullableWithAggregatesFilter<"User"> | string | null
+    jobTitle?: StringNullableWithAggregatesFilter<"User"> | string | null
+    location?: StringNullableWithAggregatesFilter<"User"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"User"> | string | null
+    skills?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type AccountWhereInput = {
@@ -23347,9 +23618,11 @@ export namespace Prisma {
     id?: StringFilter<"Project"> | string
     title?: StringFilter<"Project"> | string
     description?: StringNullableFilter<"Project"> | string | null
-    statusId?: StringFilter<"Project"> | string
     startDate?: DateTimeNullableFilter<"Project"> | Date | string | null
     endDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    dueDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    totalTimeSpent?: FloatNullableFilter<"Project"> | number | null
+    estimatedTime?: FloatNullableFilter<"Project"> | number | null
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdById?: StringFilter<"Project"> | string
@@ -23357,8 +23630,7 @@ export namespace Prisma {
     attendances?: AttendanceListRelationFilter
     events?: EventListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-    statuses?: ProjectStatusLinkListRelationFilter
+    statuses?: ProjectStatusListRelationFilter
     tasks?: TaskListRelationFilter
     teamMembers?: TeamMemberListRelationFilter
   }
@@ -23367,9 +23639,11 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
-    statusId?: SortOrder
     startDate?: SortOrderInput | SortOrder
     endDate?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    totalTimeSpent?: SortOrderInput | SortOrder
+    estimatedTime?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdById?: SortOrder
@@ -23377,8 +23651,7 @@ export namespace Prisma {
     attendances?: AttendanceOrderByRelationAggregateInput
     events?: EventOrderByRelationAggregateInput
     createdBy?: UserOrderByWithRelationInput
-    status?: ProjectStatusOrderByWithRelationInput
-    statuses?: ProjectStatusLinkOrderByRelationAggregateInput
+    statuses?: ProjectStatusOrderByRelationAggregateInput
     tasks?: TaskOrderByRelationAggregateInput
     teamMembers?: TeamMemberOrderByRelationAggregateInput
     _relevance?: ProjectOrderByRelevanceInput
@@ -23391,9 +23664,11 @@ export namespace Prisma {
     NOT?: ProjectWhereInput | ProjectWhereInput[]
     title?: StringFilter<"Project"> | string
     description?: StringNullableFilter<"Project"> | string | null
-    statusId?: StringFilter<"Project"> | string
     startDate?: DateTimeNullableFilter<"Project"> | Date | string | null
     endDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    dueDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    totalTimeSpent?: FloatNullableFilter<"Project"> | number | null
+    estimatedTime?: FloatNullableFilter<"Project"> | number | null
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdById?: StringFilter<"Project"> | string
@@ -23401,8 +23676,7 @@ export namespace Prisma {
     attendances?: AttendanceListRelationFilter
     events?: EventListRelationFilter
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-    statuses?: ProjectStatusLinkListRelationFilter
+    statuses?: ProjectStatusListRelationFilter
     tasks?: TaskListRelationFilter
     teamMembers?: TeamMemberListRelationFilter
   }, "id">
@@ -23411,15 +23685,19 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
-    statusId?: SortOrder
     startDate?: SortOrderInput | SortOrder
     endDate?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    totalTimeSpent?: SortOrderInput | SortOrder
+    estimatedTime?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdById?: SortOrder
     _count?: ProjectCountOrderByAggregateInput
+    _avg?: ProjectAvgOrderByAggregateInput
     _max?: ProjectMaxOrderByAggregateInput
     _min?: ProjectMinOrderByAggregateInput
+    _sum?: ProjectSumOrderByAggregateInput
   }
 
   export type ProjectScalarWhereWithAggregatesInput = {
@@ -23429,9 +23707,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Project"> | string
     title?: StringWithAggregatesFilter<"Project"> | string
     description?: StringNullableWithAggregatesFilter<"Project"> | string | null
-    statusId?: StringWithAggregatesFilter<"Project"> | string
     startDate?: DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
     endDate?: DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+    dueDate?: DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+    totalTimeSpent?: FloatNullableWithAggregatesFilter<"Project"> | number | null
+    estimatedTime?: FloatNullableWithAggregatesFilter<"Project"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
     createdById?: StringWithAggregatesFilter<"Project"> | string
@@ -23445,11 +23725,13 @@ export namespace Prisma {
     name?: StringFilter<"ProjectStatus"> | string
     color?: StringNullableFilter<"ProjectStatus"> | string | null
     description?: StringNullableFilter<"ProjectStatus"> | string | null
+    order?: IntFilter<"ProjectStatus"> | number
     isDefault?: BoolFilter<"ProjectStatus"> | boolean
+    projectId?: StringFilter<"ProjectStatus"> | string
     createdAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeFilter<"ProjectStatus"> | Date | string
-    projects?: ProjectListRelationFilter
-    projectLinks?: ProjectStatusLinkListRelationFilter
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    tasks?: TaskListRelationFilter
   }
 
   export type ProjectStatusOrderByWithRelationInput = {
@@ -23457,40 +23739,49 @@ export namespace Prisma {
     name?: SortOrder
     color?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    order?: SortOrder
     isDefault?: SortOrder
+    projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    projects?: ProjectOrderByRelationAggregateInput
-    projectLinks?: ProjectStatusLinkOrderByRelationAggregateInput
+    project?: ProjectOrderByWithRelationInput
+    tasks?: TaskOrderByRelationAggregateInput
     _relevance?: ProjectStatusOrderByRelevanceInput
   }
 
   export type ProjectStatusWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    projectId_name?: ProjectStatusProjectIdNameCompoundUniqueInput
     AND?: ProjectStatusWhereInput | ProjectStatusWhereInput[]
     OR?: ProjectStatusWhereInput[]
     NOT?: ProjectStatusWhereInput | ProjectStatusWhereInput[]
     name?: StringFilter<"ProjectStatus"> | string
     color?: StringNullableFilter<"ProjectStatus"> | string | null
     description?: StringNullableFilter<"ProjectStatus"> | string | null
+    order?: IntFilter<"ProjectStatus"> | number
     isDefault?: BoolFilter<"ProjectStatus"> | boolean
+    projectId?: StringFilter<"ProjectStatus"> | string
     createdAt?: DateTimeFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeFilter<"ProjectStatus"> | Date | string
-    projects?: ProjectListRelationFilter
-    projectLinks?: ProjectStatusLinkListRelationFilter
-  }, "id">
+    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    tasks?: TaskListRelationFilter
+  }, "id" | "projectId_name">
 
   export type ProjectStatusOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     color?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    order?: SortOrder
     isDefault?: SortOrder
+    projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ProjectStatusCountOrderByAggregateInput
+    _avg?: ProjectStatusAvgOrderByAggregateInput
     _max?: ProjectStatusMaxOrderByAggregateInput
     _min?: ProjectStatusMinOrderByAggregateInput
+    _sum?: ProjectStatusSumOrderByAggregateInput
   }
 
   export type ProjectStatusScalarWhereWithAggregatesInput = {
@@ -23501,74 +23792,11 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"ProjectStatus"> | string
     color?: StringNullableWithAggregatesFilter<"ProjectStatus"> | string | null
     description?: StringNullableWithAggregatesFilter<"ProjectStatus"> | string | null
+    order?: IntWithAggregatesFilter<"ProjectStatus"> | number
     isDefault?: BoolWithAggregatesFilter<"ProjectStatus"> | boolean
+    projectId?: StringWithAggregatesFilter<"ProjectStatus"> | string
     createdAt?: DateTimeWithAggregatesFilter<"ProjectStatus"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ProjectStatus"> | Date | string
-  }
-
-  export type ProjectStatusLinkWhereInput = {
-    AND?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
-    OR?: ProjectStatusLinkWhereInput[]
-    NOT?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
-    id?: StringFilter<"ProjectStatusLink"> | string
-    projectId?: StringFilter<"ProjectStatusLink"> | string
-    statusId?: StringFilter<"ProjectStatusLink"> | string
-    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
-    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
-    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
-    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
-    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-  }
-
-  export type ProjectStatusLinkOrderByWithRelationInput = {
-    id?: SortOrder
-    projectId?: SortOrder
-    statusId?: SortOrder
-    isPrimary?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    project?: ProjectOrderByWithRelationInput
-    status?: ProjectStatusOrderByWithRelationInput
-    _relevance?: ProjectStatusLinkOrderByRelevanceInput
-  }
-
-  export type ProjectStatusLinkWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    projectId_statusId?: ProjectStatusLinkProjectIdStatusIdCompoundUniqueInput
-    AND?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
-    OR?: ProjectStatusLinkWhereInput[]
-    NOT?: ProjectStatusLinkWhereInput | ProjectStatusLinkWhereInput[]
-    projectId?: StringFilter<"ProjectStatusLink"> | string
-    statusId?: StringFilter<"ProjectStatusLink"> | string
-    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
-    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
-    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
-    project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
-    status?: XOR<ProjectStatusScalarRelationFilter, ProjectStatusWhereInput>
-  }, "id" | "projectId_statusId">
-
-  export type ProjectStatusLinkOrderByWithAggregationInput = {
-    id?: SortOrder
-    projectId?: SortOrder
-    statusId?: SortOrder
-    isPrimary?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: ProjectStatusLinkCountOrderByAggregateInput
-    _max?: ProjectStatusLinkMaxOrderByAggregateInput
-    _min?: ProjectStatusLinkMinOrderByAggregateInput
-  }
-
-  export type ProjectStatusLinkScalarWhereWithAggregatesInput = {
-    AND?: ProjectStatusLinkScalarWhereWithAggregatesInput | ProjectStatusLinkScalarWhereWithAggregatesInput[]
-    OR?: ProjectStatusLinkScalarWhereWithAggregatesInput[]
-    NOT?: ProjectStatusLinkScalarWhereWithAggregatesInput | ProjectStatusLinkScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
-    projectId?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
-    statusId?: StringWithAggregatesFilter<"ProjectStatusLink"> | string
-    isPrimary?: BoolWithAggregatesFilter<"ProjectStatusLink"> | boolean
-    createdAt?: DateTimeWithAggregatesFilter<"ProjectStatusLink"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"ProjectStatusLink"> | Date | string
   }
 
   export type TaskWhereInput = {
@@ -23579,20 +23807,26 @@ export namespace Prisma {
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
     priority?: StringFilter<"Task"> | string
+    startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: FloatNullableFilter<"Task"> | number | null
+    estimatedTime?: FloatNullableFilter<"Task"> | number | null
     projectId?: StringFilter<"Task"> | string
-    assignedToId?: StringNullableFilter<"Task"> | string | null
+    statusId?: StringNullableFilter<"Task"> | string | null
     parentId?: StringNullableFilter<"Task"> | string | null
     order?: IntFilter<"Task"> | number
     createdAt?: DateTimeFilter<"Task"> | Date | string
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     completed?: BoolFilter<"Task"> | boolean
+    assignedToId?: StringNullableFilter<"Task"> | string | null
     activities?: ActivityListRelationFilter
     attendances?: AttendanceListRelationFilter
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     parent?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     subtasks?: TaskListRelationFilter
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    status?: XOR<ProjectStatusNullableScalarRelationFilter, ProjectStatusWhereInput> | null
     assignees?: TaskAssigneeListRelationFilter
   }
 
@@ -23601,20 +23835,26 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     priority?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
+    timeSpent?: SortOrderInput | SortOrder
+    estimatedTime?: SortOrderInput | SortOrder
     projectId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
+    statusId?: SortOrderInput | SortOrder
     parentId?: SortOrderInput | SortOrder
     order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     completed?: SortOrder
+    assignedToId?: SortOrderInput | SortOrder
     activities?: ActivityOrderByRelationAggregateInput
     attendances?: AttendanceOrderByRelationAggregateInput
     assignedTo?: UserOrderByWithRelationInput
     parent?: TaskOrderByWithRelationInput
     subtasks?: TaskOrderByRelationAggregateInput
     project?: ProjectOrderByWithRelationInput
+    status?: ProjectStatusOrderByWithRelationInput
     assignees?: TaskAssigneeOrderByRelationAggregateInput
     _relevance?: TaskOrderByRelevanceInput
   }
@@ -23627,20 +23867,26 @@ export namespace Prisma {
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
     priority?: StringFilter<"Task"> | string
+    startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: FloatNullableFilter<"Task"> | number | null
+    estimatedTime?: FloatNullableFilter<"Task"> | number | null
     projectId?: StringFilter<"Task"> | string
-    assignedToId?: StringNullableFilter<"Task"> | string | null
+    statusId?: StringNullableFilter<"Task"> | string | null
     parentId?: StringNullableFilter<"Task"> | string | null
     order?: IntFilter<"Task"> | number
     createdAt?: DateTimeFilter<"Task"> | Date | string
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     completed?: BoolFilter<"Task"> | boolean
+    assignedToId?: StringNullableFilter<"Task"> | string | null
     activities?: ActivityListRelationFilter
     attendances?: AttendanceListRelationFilter
     assignedTo?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     parent?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     subtasks?: TaskListRelationFilter
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
+    status?: XOR<ProjectStatusNullableScalarRelationFilter, ProjectStatusWhereInput> | null
     assignees?: TaskAssigneeListRelationFilter
   }, "id">
 
@@ -23649,14 +23895,19 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     priority?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
+    timeSpent?: SortOrderInput | SortOrder
+    estimatedTime?: SortOrderInput | SortOrder
     projectId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
+    statusId?: SortOrderInput | SortOrder
     parentId?: SortOrderInput | SortOrder
     order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     completed?: SortOrder
+    assignedToId?: SortOrderInput | SortOrder
     _count?: TaskCountOrderByAggregateInput
     _avg?: TaskAvgOrderByAggregateInput
     _max?: TaskMaxOrderByAggregateInput
@@ -23672,14 +23923,19 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"Task"> | string
     description?: StringNullableWithAggregatesFilter<"Task"> | string | null
     priority?: StringWithAggregatesFilter<"Task"> | string
+    startDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+    endDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+    timeSpent?: FloatNullableWithAggregatesFilter<"Task"> | number | null
+    estimatedTime?: FloatNullableWithAggregatesFilter<"Task"> | number | null
     projectId?: StringWithAggregatesFilter<"Task"> | string
-    assignedToId?: StringNullableWithAggregatesFilter<"Task"> | string | null
+    statusId?: StringNullableWithAggregatesFilter<"Task"> | string | null
     parentId?: StringNullableWithAggregatesFilter<"Task"> | string | null
     order?: IntWithAggregatesFilter<"Task"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Task"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Task"> | Date | string
     completed?: BoolWithAggregatesFilter<"Task"> | boolean
+    assignedToId?: StringNullableWithAggregatesFilter<"Task"> | string | null
   }
 
   export type TaskAssigneeWhereInput = {
@@ -23749,7 +24005,6 @@ export namespace Prisma {
     id?: StringFilter<"TeamMember"> | string
     projectId?: StringFilter<"TeamMember"> | string
     userId?: StringFilter<"TeamMember"> | string
-    role?: StringFilter<"TeamMember"> | string
     createdAt?: DateTimeFilter<"TeamMember"> | Date | string
     updatedAt?: DateTimeFilter<"TeamMember"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
@@ -23760,7 +24015,6 @@ export namespace Prisma {
     id?: SortOrder
     projectId?: SortOrder
     userId?: SortOrder
-    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     project?: ProjectOrderByWithRelationInput
@@ -23776,7 +24030,6 @@ export namespace Prisma {
     NOT?: TeamMemberWhereInput | TeamMemberWhereInput[]
     projectId?: StringFilter<"TeamMember"> | string
     userId?: StringFilter<"TeamMember"> | string
-    role?: StringFilter<"TeamMember"> | string
     createdAt?: DateTimeFilter<"TeamMember"> | Date | string
     updatedAt?: DateTimeFilter<"TeamMember"> | Date | string
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
@@ -23787,7 +24040,6 @@ export namespace Prisma {
     id?: SortOrder
     projectId?: SortOrder
     userId?: SortOrder
-    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TeamMemberCountOrderByAggregateInput
@@ -23802,7 +24054,6 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"TeamMember"> | string
     projectId?: StringWithAggregatesFilter<"TeamMember"> | string
     userId?: StringWithAggregatesFilter<"TeamMember"> | string
-    role?: StringWithAggregatesFilter<"TeamMember"> | string
     createdAt?: DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
   }
@@ -24190,6 +24441,84 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Activity"> | Date | string
   }
 
+  export type DocumentWhereInput = {
+    AND?: DocumentWhereInput | DocumentWhereInput[]
+    OR?: DocumentWhereInput[]
+    NOT?: DocumentWhereInput | DocumentWhereInput[]
+    id?: StringFilter<"Document"> | string
+    name?: StringFilter<"Document"> | string
+    description?: StringNullableFilter<"Document"> | string | null
+    fileType?: StringFilter<"Document"> | string
+    fileSize?: IntFilter<"Document"> | number
+    filePath?: StringFilter<"Document"> | string
+    userId?: StringFilter<"Document"> | string
+    createdAt?: DateTimeFilter<"Document"> | Date | string
+    updatedAt?: DateTimeFilter<"Document"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type DocumentOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    fileType?: SortOrder
+    fileSize?: SortOrder
+    filePath?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    _relevance?: DocumentOrderByRelevanceInput
+  }
+
+  export type DocumentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DocumentWhereInput | DocumentWhereInput[]
+    OR?: DocumentWhereInput[]
+    NOT?: DocumentWhereInput | DocumentWhereInput[]
+    name?: StringFilter<"Document"> | string
+    description?: StringNullableFilter<"Document"> | string | null
+    fileType?: StringFilter<"Document"> | string
+    fileSize?: IntFilter<"Document"> | number
+    filePath?: StringFilter<"Document"> | string
+    userId?: StringFilter<"Document"> | string
+    createdAt?: DateTimeFilter<"Document"> | Date | string
+    updatedAt?: DateTimeFilter<"Document"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type DocumentOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    fileType?: SortOrder
+    fileSize?: SortOrder
+    filePath?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DocumentCountOrderByAggregateInput
+    _avg?: DocumentAvgOrderByAggregateInput
+    _max?: DocumentMaxOrderByAggregateInput
+    _min?: DocumentMinOrderByAggregateInput
+    _sum?: DocumentSumOrderByAggregateInput
+  }
+
+  export type DocumentScalarWhereWithAggregatesInput = {
+    AND?: DocumentScalarWhereWithAggregatesInput | DocumentScalarWhereWithAggregatesInput[]
+    OR?: DocumentScalarWhereWithAggregatesInput[]
+    NOT?: DocumentScalarWhereWithAggregatesInput | DocumentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Document"> | string
+    name?: StringWithAggregatesFilter<"Document"> | string
+    description?: StringNullableWithAggregatesFilter<"Document"> | string | null
+    fileType?: StringWithAggregatesFilter<"Document"> | string
+    fileSize?: IntWithAggregatesFilter<"Document"> | number
+    filePath?: StringWithAggregatesFilter<"Document"> | string
+    userId?: StringWithAggregatesFilter<"Document"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Document"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Document"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name?: string | null
@@ -24198,20 +24527,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -24229,20 +24559,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -24260,20 +24591,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -24291,20 +24623,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -24322,15 +24655,15 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -24341,15 +24674,15 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -24360,15 +24693,15 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountCreateInput = {
@@ -24889,14 +25222,16 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -24905,16 +25240,18 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -24925,14 +25262,16 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -24941,16 +25280,18 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -24959,9 +25300,11 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
@@ -24973,6 +25316,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24981,9 +25327,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
@@ -24994,11 +25342,12 @@ export namespace Prisma {
     name: string
     color?: string | null
     description?: string | null
+    order?: number
     isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    projects?: ProjectCreateNestedManyWithoutStatusInput
-    projectLinks?: ProjectStatusLinkCreateNestedManyWithoutStatusInput
+    project: ProjectCreateNestedOneWithoutStatusesInput
+    tasks?: TaskCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusUncheckedCreateInput = {
@@ -25006,11 +25355,12 @@ export namespace Prisma {
     name: string
     color?: string | null
     description?: string | null
+    order?: number
     isDefault?: boolean
+    projectId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    projects?: ProjectUncheckedCreateNestedManyWithoutStatusInput
-    projectLinks?: ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutStatusInput
   }
 
   export type ProjectStatusUpdateInput = {
@@ -25018,11 +25368,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projects?: ProjectUpdateManyWithoutStatusNestedInput
-    projectLinks?: ProjectStatusLinkUpdateManyWithoutStatusNestedInput
+    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
+    tasks?: TaskUpdateManyWithoutStatusNestedInput
   }
 
   export type ProjectStatusUncheckedUpdateInput = {
@@ -25030,11 +25381,12 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     isDefault?: BoolFieldUpdateOperationsInput | boolean
+    projectId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projects?: ProjectUncheckedUpdateManyWithoutStatusNestedInput
-    projectLinks?: ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutStatusNestedInput
   }
 
   export type ProjectStatusCreateManyInput = {
@@ -25042,7 +25394,9 @@ export namespace Prisma {
     name: string
     color?: string | null
     description?: string | null
+    order?: number
     isDefault?: boolean
+    projectId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -25052,6 +25406,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25062,68 +25417,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     isDefault?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ProjectStatusLinkCreateInput = {
-    id?: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    project: ProjectCreateNestedOneWithoutStatusesInput
-    status: ProjectStatusCreateNestedOneWithoutProjectLinksInput
-  }
-
-  export type ProjectStatusLinkUncheckedCreateInput = {
-    id?: string
-    projectId: string
-    statusId: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ProjectStatusLinkUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput
-  }
-
-  export type ProjectStatusLinkUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
-    statusId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ProjectStatusLinkCreateManyInput = {
-    id?: string
-    projectId: string
-    statusId: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ProjectStatusLinkUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ProjectStatusLinkUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    projectId?: StringFieldUpdateOperationsInput | string
-    statusId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25133,7 +25429,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25144,6 +25444,7 @@ export namespace Prisma {
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -25152,14 +25453,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
@@ -25171,7 +25477,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25182,6 +25492,7 @@ export namespace Prisma {
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -25190,14 +25501,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
@@ -25209,14 +25525,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
   }
 
   export type TaskUpdateManyMutationInput = {
@@ -25224,7 +25545,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25236,14 +25561,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskAssigneeCreateInput = {
@@ -25302,7 +25632,6 @@ export namespace Prisma {
 
   export type TeamMemberCreateInput = {
     id?: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     project: ProjectCreateNestedOneWithoutTeamMembersInput
@@ -25313,14 +25642,12 @@ export namespace Prisma {
     id?: string
     projectId: string
     userId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type TeamMemberUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     project?: ProjectUpdateOneRequiredWithoutTeamMembersNestedInput
@@ -25331,7 +25658,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25340,14 +25666,12 @@ export namespace Prisma {
     id?: string
     projectId: string
     userId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type TeamMemberUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25356,7 +25680,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25772,6 +26095,89 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DocumentCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDocumentsInput
+  }
+
+  export type DocumentUncheckedCreateInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDocumentsNestedInput
+  }
+
+  export type DocumentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentCreateManyInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    userId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[]
@@ -25847,6 +26253,12 @@ export namespace Prisma {
     isNot?: AttendanceSettingsWhereInput | null
   }
 
+  export type DocumentListRelationFilter = {
+    every?: DocumentWhereInput
+    some?: DocumentWhereInput
+    none?: DocumentWhereInput
+  }
+
   export type ProjectListRelationFilter = {
     every?: ProjectWhereInput
     some?: ProjectWhereInput
@@ -25906,6 +26318,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type DocumentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ProjectOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -25948,15 +26364,15 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    bio?: SortOrder
-    jobTitle?: SortOrder
-    department?: SortOrder
-    location?: SortOrder
-    phone?: SortOrder
-    skills?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
+    bio?: SortOrder
+    department?: SortOrder
+    jobTitle?: SortOrder
+    location?: SortOrder
+    phone?: SortOrder
+    skills?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -25967,15 +26383,15 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    bio?: SortOrder
-    jobTitle?: SortOrder
-    department?: SortOrder
-    location?: SortOrder
-    phone?: SortOrder
-    skills?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
+    bio?: SortOrder
+    department?: SortOrder
+    jobTitle?: SortOrder
+    location?: SortOrder
+    phone?: SortOrder
+    skills?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -25986,15 +26402,15 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    bio?: SortOrder
-    jobTitle?: SortOrder
-    department?: SortOrder
-    location?: SortOrder
-    phone?: SortOrder
-    skills?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
+    bio?: SortOrder
+    department?: SortOrder
+    jobTitle?: SortOrder
+    location?: SortOrder
+    phone?: SortOrder
+    skills?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -26423,28 +26839,34 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type EventListRelationFilter = {
     every?: EventWhereInput
     some?: EventWhereInput
     none?: EventWhereInput
   }
 
-  export type ProjectStatusScalarRelationFilter = {
-    is?: ProjectStatusWhereInput
-    isNot?: ProjectStatusWhereInput
-  }
-
-  export type ProjectStatusLinkListRelationFilter = {
-    every?: ProjectStatusLinkWhereInput
-    some?: ProjectStatusLinkWhereInput
-    none?: ProjectStatusLinkWhereInput
+  export type ProjectStatusListRelationFilter = {
+    every?: ProjectStatusWhereInput
+    some?: ProjectStatusWhereInput
+    none?: ProjectStatusWhereInput
   }
 
   export type EventOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type ProjectStatusLinkOrderByRelationAggregateInput = {
+  export type ProjectStatusOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -26458,21 +26880,30 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    statusId?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    dueDate?: SortOrder
+    totalTimeSpent?: SortOrder
+    estimatedTime?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdById?: SortOrder
+  }
+
+  export type ProjectAvgOrderByAggregateInput = {
+    totalTimeSpent?: SortOrder
+    estimatedTime?: SortOrder
   }
 
   export type ProjectMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    statusId?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    dueDate?: SortOrder
+    totalTimeSpent?: SortOrder
+    estimatedTime?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdById?: SortOrder
@@ -26482,91 +26913,35 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     description?: SortOrder
-    statusId?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    dueDate?: SortOrder
+    totalTimeSpent?: SortOrder
+    estimatedTime?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdById?: SortOrder
   }
 
-  export type ProjectStatusOrderByRelevanceInput = {
-    fields: ProjectStatusOrderByRelevanceFieldEnum | ProjectStatusOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
+  export type ProjectSumOrderByAggregateInput = {
+    totalTimeSpent?: SortOrder
+    estimatedTime?: SortOrder
   }
 
-  export type ProjectStatusCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    color?: SortOrder
-    description?: SortOrder
-    isDefault?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ProjectStatusMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    color?: SortOrder
-    description?: SortOrder
-    isDefault?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ProjectStatusMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    color?: SortOrder
-    description?: SortOrder
-    isDefault?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ProjectScalarRelationFilter = {
-    is?: ProjectWhereInput
-    isNot?: ProjectWhereInput
-  }
-
-  export type ProjectStatusLinkOrderByRelevanceInput = {
-    fields: ProjectStatusLinkOrderByRelevanceFieldEnum | ProjectStatusLinkOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type ProjectStatusLinkProjectIdStatusIdCompoundUniqueInput = {
-    projectId: string
-    statusId: string
-  }
-
-  export type ProjectStatusLinkCountOrderByAggregateInput = {
-    id?: SortOrder
-    projectId?: SortOrder
-    statusId?: SortOrder
-    isPrimary?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ProjectStatusLinkMaxOrderByAggregateInput = {
-    id?: SortOrder
-    projectId?: SortOrder
-    statusId?: SortOrder
-    isPrimary?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type ProjectStatusLinkMinOrderByAggregateInput = {
-    id?: SortOrder
-    projectId?: SortOrder
-    statusId?: SortOrder
-    isPrimary?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -26580,72 +26955,63 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type UserNullableScalarRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
+  export type ProjectScalarRelationFilter = {
+    is?: ProjectWhereInput
+    isNot?: ProjectWhereInput
   }
 
-  export type TaskNullableScalarRelationFilter = {
-    is?: TaskWhereInput | null
-    isNot?: TaskWhereInput | null
-  }
-
-  export type TaskOrderByRelevanceInput = {
-    fields: TaskOrderByRelevanceFieldEnum | TaskOrderByRelevanceFieldEnum[]
+  export type ProjectStatusOrderByRelevanceInput = {
+    fields: ProjectStatusOrderByRelevanceFieldEnum | ProjectStatusOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
   }
 
-  export type TaskCountOrderByAggregateInput = {
+  export type ProjectStatusProjectIdNameCompoundUniqueInput = {
+    projectId: string
+    name: string
+  }
+
+  export type ProjectStatusCountOrderByAggregateInput = {
     id?: SortOrder
-    title?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
     description?: SortOrder
-    priority?: SortOrder
-    dueDate?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    parentId?: SortOrder
     order?: SortOrder
+    isDefault?: SortOrder
+    projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    completed?: SortOrder
   }
 
-  export type TaskAvgOrderByAggregateInput = {
+  export type ProjectStatusAvgOrderByAggregateInput = {
     order?: SortOrder
   }
 
-  export type TaskMaxOrderByAggregateInput = {
+  export type ProjectStatusMaxOrderByAggregateInput = {
     id?: SortOrder
-    title?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
     description?: SortOrder
-    priority?: SortOrder
-    dueDate?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    parentId?: SortOrder
     order?: SortOrder
+    isDefault?: SortOrder
+    projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    completed?: SortOrder
   }
 
-  export type TaskMinOrderByAggregateInput = {
+  export type ProjectStatusMinOrderByAggregateInput = {
     id?: SortOrder
-    title?: SortOrder
+    name?: SortOrder
+    color?: SortOrder
     description?: SortOrder
-    priority?: SortOrder
-    dueDate?: SortOrder
-    projectId?: SortOrder
-    assignedToId?: SortOrder
-    parentId?: SortOrder
     order?: SortOrder
+    isDefault?: SortOrder
+    projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    completed?: SortOrder
   }
 
-  export type TaskSumOrderByAggregateInput = {
+  export type ProjectStatusSumOrderByAggregateInput = {
     order?: SortOrder
   }
 
@@ -26663,6 +27029,99 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type TaskNullableScalarRelationFilter = {
+    is?: TaskWhereInput | null
+    isNot?: TaskWhereInput | null
+  }
+
+  export type ProjectStatusNullableScalarRelationFilter = {
+    is?: ProjectStatusWhereInput | null
+    isNot?: ProjectStatusWhereInput | null
+  }
+
+  export type TaskOrderByRelevanceInput = {
+    fields: TaskOrderByRelevanceFieldEnum | TaskOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type TaskCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    priority?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    dueDate?: SortOrder
+    timeSpent?: SortOrder
+    estimatedTime?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    parentId?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    completed?: SortOrder
+    assignedToId?: SortOrder
+  }
+
+  export type TaskAvgOrderByAggregateInput = {
+    timeSpent?: SortOrder
+    estimatedTime?: SortOrder
+    order?: SortOrder
+  }
+
+  export type TaskMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    priority?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    dueDate?: SortOrder
+    timeSpent?: SortOrder
+    estimatedTime?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    parentId?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    completed?: SortOrder
+    assignedToId?: SortOrder
+  }
+
+  export type TaskMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    priority?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    dueDate?: SortOrder
+    timeSpent?: SortOrder
+    estimatedTime?: SortOrder
+    projectId?: SortOrder
+    statusId?: SortOrder
+    parentId?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    completed?: SortOrder
+    assignedToId?: SortOrder
+  }
+
+  export type TaskSumOrderByAggregateInput = {
+    timeSpent?: SortOrder
+    estimatedTime?: SortOrder
+    order?: SortOrder
   }
 
   export type TaskScalarRelationFilter = {
@@ -26720,7 +27179,6 @@ export namespace Prisma {
     id?: SortOrder
     projectId?: SortOrder
     userId?: SortOrder
-    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26729,7 +27187,6 @@ export namespace Prisma {
     id?: SortOrder
     projectId?: SortOrder
     userId?: SortOrder
-    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26738,7 +27195,6 @@ export namespace Prisma {
     id?: SortOrder
     projectId?: SortOrder
     userId?: SortOrder
-    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26777,17 +27233,6 @@ export namespace Prisma {
     projectId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type ProjectNullableScalarRelationFilter = {
@@ -26890,22 +27335,6 @@ export namespace Prisma {
     checkOutLatitude?: SortOrder
     checkOutLongitude?: SortOrder
     totalHours?: SortOrder
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -27030,6 +27459,56 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type DocumentOrderByRelevanceInput = {
+    fields: DocumentOrderByRelevanceFieldEnum | DocumentOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type DocumentCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    fileType?: SortOrder
+    fileSize?: SortOrder
+    filePath?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DocumentAvgOrderByAggregateInput = {
+    fileSize?: SortOrder
+  }
+
+  export type DocumentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    fileType?: SortOrder
+    fileSize?: SortOrder
+    filePath?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DocumentMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    fileType?: SortOrder
+    fileSize?: SortOrder
+    filePath?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DocumentSumOrderByAggregateInput = {
+    fileSize?: SortOrder
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -27062,6 +27541,13 @@ export namespace Prisma {
     create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
     connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
     connect?: AttendanceSettingsWhereUniqueInput
+  }
+
+  export type DocumentCreateNestedManyWithoutUserInput = {
+    create?: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput> | DocumentCreateWithoutUserInput[] | DocumentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentCreateOrConnectWithoutUserInput | DocumentCreateOrConnectWithoutUserInput[]
+    createMany?: DocumentCreateManyUserInputEnvelope
+    connect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
   }
 
   export type ProjectCreateNestedManyWithoutCreatedByInput = {
@@ -27145,6 +27631,13 @@ export namespace Prisma {
     create?: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
     connectOrCreate?: AttendanceSettingsCreateOrConnectWithoutUserInput
     connect?: AttendanceSettingsWhereUniqueInput
+  }
+
+  export type DocumentUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput> | DocumentCreateWithoutUserInput[] | DocumentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentCreateOrConnectWithoutUserInput | DocumentCreateOrConnectWithoutUserInput[]
+    createMany?: DocumentCreateManyUserInputEnvelope
+    connect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
   }
 
   export type ProjectUncheckedCreateNestedManyWithoutCreatedByInput = {
@@ -27276,6 +27769,20 @@ export namespace Prisma {
     delete?: AttendanceSettingsWhereInput | boolean
     connect?: AttendanceSettingsWhereUniqueInput
     update?: XOR<XOR<AttendanceSettingsUpdateToOneWithWhereWithoutUserInput, AttendanceSettingsUpdateWithoutUserInput>, AttendanceSettingsUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DocumentUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput> | DocumentCreateWithoutUserInput[] | DocumentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentCreateOrConnectWithoutUserInput | DocumentCreateOrConnectWithoutUserInput[]
+    upsert?: DocumentUpsertWithWhereUniqueWithoutUserInput | DocumentUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DocumentCreateManyUserInputEnvelope
+    set?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    disconnect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    delete?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    connect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    update?: DocumentUpdateWithWhereUniqueWithoutUserInput | DocumentUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DocumentUpdateManyWithWhereWithoutUserInput | DocumentUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DocumentScalarWhereInput | DocumentScalarWhereInput[]
   }
 
   export type ProjectUpdateManyWithoutCreatedByNestedInput = {
@@ -27440,6 +27947,20 @@ export namespace Prisma {
     delete?: AttendanceSettingsWhereInput | boolean
     connect?: AttendanceSettingsWhereUniqueInput
     update?: XOR<XOR<AttendanceSettingsUpdateToOneWithWhereWithoutUserInput, AttendanceSettingsUpdateWithoutUserInput>, AttendanceSettingsUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DocumentUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput> | DocumentCreateWithoutUserInput[] | DocumentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DocumentCreateOrConnectWithoutUserInput | DocumentCreateOrConnectWithoutUserInput[]
+    upsert?: DocumentUpsertWithWhereUniqueWithoutUserInput | DocumentUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DocumentCreateManyUserInputEnvelope
+    set?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    disconnect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    delete?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    connect?: DocumentWhereUniqueInput | DocumentWhereUniqueInput[]
+    update?: DocumentUpdateWithWhereUniqueWithoutUserInput | DocumentUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DocumentUpdateManyWithWhereWithoutUserInput | DocumentUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DocumentScalarWhereInput | DocumentScalarWhereInput[]
   }
 
   export type ProjectUncheckedUpdateManyWithoutCreatedByNestedInput = {
@@ -27859,17 +28380,11 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type ProjectStatusCreateNestedOneWithoutProjectsInput = {
-    create?: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
-    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectsInput
-    connect?: ProjectStatusWhereUniqueInput
-  }
-
-  export type ProjectStatusLinkCreateNestedManyWithoutProjectInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
-    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+  export type ProjectStatusCreateNestedManyWithoutProjectInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput> | ProjectStatusCreateWithoutProjectInput[] | ProjectStatusUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectInput | ProjectStatusCreateOrConnectWithoutProjectInput[]
+    createMany?: ProjectStatusCreateManyProjectInputEnvelope
+    connect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
   }
 
   export type TaskCreateNestedManyWithoutProjectInput = {
@@ -27907,11 +28422,11 @@ export namespace Prisma {
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
   }
 
-  export type ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
-    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
+  export type ProjectStatusUncheckedCreateNestedManyWithoutProjectInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput> | ProjectStatusCreateWithoutProjectInput[] | ProjectStatusUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectInput | ProjectStatusCreateOrConnectWithoutProjectInput[]
+    createMany?: ProjectStatusCreateManyProjectInputEnvelope
+    connect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
   }
 
   export type TaskUncheckedCreateNestedManyWithoutProjectInput = {
@@ -27926,6 +28441,14 @@ export namespace Prisma {
     connectOrCreate?: TeamMemberCreateOrConnectWithoutProjectInput | TeamMemberCreateOrConnectWithoutProjectInput[]
     createMany?: TeamMemberCreateManyProjectInputEnvelope
     connect?: TeamMemberWhereUniqueInput | TeamMemberWhereUniqueInput[]
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type ActivityUpdateManyWithoutProjectNestedInput = {
@@ -27978,26 +28501,18 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProjectsInput, UserUpdateWithoutProjectsInput>, UserUncheckedUpdateWithoutProjectsInput>
   }
 
-  export type ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput = {
-    create?: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
-    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectsInput
-    upsert?: ProjectStatusUpsertWithoutProjectsInput
-    connect?: ProjectStatusWhereUniqueInput
-    update?: XOR<XOR<ProjectStatusUpdateToOneWithWhereWithoutProjectsInput, ProjectStatusUpdateWithoutProjectsInput>, ProjectStatusUncheckedUpdateWithoutProjectsInput>
-  }
-
-  export type ProjectStatusLinkUpdateManyWithoutProjectNestedInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
-    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput[]
-    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
-    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput[]
-    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput | ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput[]
-    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+  export type ProjectStatusUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput> | ProjectStatusCreateWithoutProjectInput[] | ProjectStatusUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectInput | ProjectStatusCreateOrConnectWithoutProjectInput[]
+    upsert?: ProjectStatusUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: ProjectStatusCreateManyProjectInputEnvelope
+    set?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    disconnect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    delete?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    connect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    update?: ProjectStatusUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: ProjectStatusUpdateManyWithWhereWithoutProjectInput | ProjectStatusUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: ProjectStatusScalarWhereInput | ProjectStatusScalarWhereInput[]
   }
 
   export type TaskUpdateManyWithoutProjectNestedInput = {
@@ -28070,18 +28585,18 @@ export namespace Prisma {
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
   }
 
-  export type ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput> | ProjectStatusLinkCreateWithoutProjectInput[] | ProjectStatusLinkUncheckedCreateWithoutProjectInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutProjectInput | ProjectStatusLinkCreateOrConnectWithoutProjectInput[]
-    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput[]
-    createMany?: ProjectStatusLinkCreateManyProjectInputEnvelope
-    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput[]
-    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput | ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput[]
-    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
+  export type ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput = {
+    create?: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput> | ProjectStatusCreateWithoutProjectInput[] | ProjectStatusUncheckedCreateWithoutProjectInput[]
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectInput | ProjectStatusCreateOrConnectWithoutProjectInput[]
+    upsert?: ProjectStatusUpsertWithWhereUniqueWithoutProjectInput | ProjectStatusUpsertWithWhereUniqueWithoutProjectInput[]
+    createMany?: ProjectStatusCreateManyProjectInputEnvelope
+    set?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    disconnect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    delete?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    connect?: ProjectStatusWhereUniqueInput | ProjectStatusWhereUniqueInput[]
+    update?: ProjectStatusUpdateWithWhereUniqueWithoutProjectInput | ProjectStatusUpdateWithWhereUniqueWithoutProjectInput[]
+    updateMany?: ProjectStatusUpdateManyWithWhereWithoutProjectInput | ProjectStatusUpdateManyWithWhereWithoutProjectInput[]
+    deleteMany?: ProjectStatusScalarWhereInput | ProjectStatusScalarWhereInput[]
   }
 
   export type TaskUncheckedUpdateManyWithoutProjectNestedInput = {
@@ -28112,100 +28627,32 @@ export namespace Prisma {
     deleteMany?: TeamMemberScalarWhereInput | TeamMemberScalarWhereInput[]
   }
 
-  export type ProjectCreateNestedManyWithoutStatusInput = {
-    create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
-    createMany?: ProjectCreateManyStatusInputEnvelope
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-  }
-
-  export type ProjectStatusLinkCreateNestedManyWithoutStatusInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
-    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-  }
-
-  export type ProjectUncheckedCreateNestedManyWithoutStatusInput = {
-    create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
-    createMany?: ProjectCreateManyStatusInputEnvelope
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-  }
-
-  export type ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
-    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-  }
-
-  export type ProjectUpdateManyWithoutStatusNestedInput = {
-    create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
-    upsert?: ProjectUpsertWithWhereUniqueWithoutStatusInput | ProjectUpsertWithWhereUniqueWithoutStatusInput[]
-    createMany?: ProjectCreateManyStatusInputEnvelope
-    set?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    disconnect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    delete?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    update?: ProjectUpdateWithWhereUniqueWithoutStatusInput | ProjectUpdateWithWhereUniqueWithoutStatusInput[]
-    updateMany?: ProjectUpdateManyWithWhereWithoutStatusInput | ProjectUpdateManyWithWhereWithoutStatusInput[]
-    deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
-  }
-
-  export type ProjectStatusLinkUpdateManyWithoutStatusNestedInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
-    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput[]
-    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
-    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput[]
-    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput | ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput[]
-    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
-  }
-
-  export type ProjectUncheckedUpdateManyWithoutStatusNestedInput = {
-    create?: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput> | ProjectCreateWithoutStatusInput[] | ProjectUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectCreateOrConnectWithoutStatusInput | ProjectCreateOrConnectWithoutStatusInput[]
-    upsert?: ProjectUpsertWithWhereUniqueWithoutStatusInput | ProjectUpsertWithWhereUniqueWithoutStatusInput[]
-    createMany?: ProjectCreateManyStatusInputEnvelope
-    set?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    disconnect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    delete?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
-    update?: ProjectUpdateWithWhereUniqueWithoutStatusInput | ProjectUpdateWithWhereUniqueWithoutStatusInput[]
-    updateMany?: ProjectUpdateManyWithWhereWithoutStatusInput | ProjectUpdateManyWithWhereWithoutStatusInput[]
-    deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
-  }
-
-  export type ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput = {
-    create?: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput> | ProjectStatusLinkCreateWithoutStatusInput[] | ProjectStatusLinkUncheckedCreateWithoutStatusInput[]
-    connectOrCreate?: ProjectStatusLinkCreateOrConnectWithoutStatusInput | ProjectStatusLinkCreateOrConnectWithoutStatusInput[]
-    upsert?: ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput[]
-    createMany?: ProjectStatusLinkCreateManyStatusInputEnvelope
-    set?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    disconnect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    delete?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    connect?: ProjectStatusLinkWhereUniqueInput | ProjectStatusLinkWhereUniqueInput[]
-    update?: ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput | ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput[]
-    updateMany?: ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput | ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput[]
-    deleteMany?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
-  }
-
   export type ProjectCreateNestedOneWithoutStatusesInput = {
     create?: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
     connectOrCreate?: ProjectCreateOrConnectWithoutStatusesInput
     connect?: ProjectWhereUniqueInput
   }
 
-  export type ProjectStatusCreateNestedOneWithoutProjectLinksInput = {
-    create?: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
-    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectLinksInput
-    connect?: ProjectStatusWhereUniqueInput
+  export type TaskCreateNestedManyWithoutStatusInput = {
+    create?: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput> | TaskCreateWithoutStatusInput[] | TaskUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: TaskCreateOrConnectWithoutStatusInput | TaskCreateOrConnectWithoutStatusInput[]
+    createMany?: TaskCreateManyStatusInputEnvelope
+    connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+  }
+
+  export type TaskUncheckedCreateNestedManyWithoutStatusInput = {
+    create?: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput> | TaskCreateWithoutStatusInput[] | TaskUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: TaskCreateOrConnectWithoutStatusInput | TaskCreateOrConnectWithoutStatusInput[]
+    createMany?: TaskCreateManyStatusInputEnvelope
+    connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type ProjectUpdateOneRequiredWithoutStatusesNestedInput = {
@@ -28216,12 +28663,32 @@ export namespace Prisma {
     update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutStatusesInput, ProjectUpdateWithoutStatusesInput>, ProjectUncheckedUpdateWithoutStatusesInput>
   }
 
-  export type ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput = {
-    create?: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
-    connectOrCreate?: ProjectStatusCreateOrConnectWithoutProjectLinksInput
-    upsert?: ProjectStatusUpsertWithoutProjectLinksInput
-    connect?: ProjectStatusWhereUniqueInput
-    update?: XOR<XOR<ProjectStatusUpdateToOneWithWhereWithoutProjectLinksInput, ProjectStatusUpdateWithoutProjectLinksInput>, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
+  export type TaskUpdateManyWithoutStatusNestedInput = {
+    create?: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput> | TaskCreateWithoutStatusInput[] | TaskUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: TaskCreateOrConnectWithoutStatusInput | TaskCreateOrConnectWithoutStatusInput[]
+    upsert?: TaskUpsertWithWhereUniqueWithoutStatusInput | TaskUpsertWithWhereUniqueWithoutStatusInput[]
+    createMany?: TaskCreateManyStatusInputEnvelope
+    set?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    disconnect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    delete?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    update?: TaskUpdateWithWhereUniqueWithoutStatusInput | TaskUpdateWithWhereUniqueWithoutStatusInput[]
+    updateMany?: TaskUpdateManyWithWhereWithoutStatusInput | TaskUpdateManyWithWhereWithoutStatusInput[]
+    deleteMany?: TaskScalarWhereInput | TaskScalarWhereInput[]
+  }
+
+  export type TaskUncheckedUpdateManyWithoutStatusNestedInput = {
+    create?: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput> | TaskCreateWithoutStatusInput[] | TaskUncheckedCreateWithoutStatusInput[]
+    connectOrCreate?: TaskCreateOrConnectWithoutStatusInput | TaskCreateOrConnectWithoutStatusInput[]
+    upsert?: TaskUpsertWithWhereUniqueWithoutStatusInput | TaskUpsertWithWhereUniqueWithoutStatusInput[]
+    createMany?: TaskCreateManyStatusInputEnvelope
+    set?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    disconnect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    delete?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
+    update?: TaskUpdateWithWhereUniqueWithoutStatusInput | TaskUpdateWithWhereUniqueWithoutStatusInput[]
+    updateMany?: TaskUpdateManyWithWhereWithoutStatusInput | TaskUpdateManyWithWhereWithoutStatusInput[]
+    deleteMany?: TaskScalarWhereInput | TaskScalarWhereInput[]
   }
 
   export type ActivityCreateNestedManyWithoutTaskInput = {
@@ -28263,6 +28730,12 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput
   }
 
+  export type ProjectStatusCreateNestedOneWithoutTasksInput = {
+    create?: XOR<ProjectStatusCreateWithoutTasksInput, ProjectStatusUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutTasksInput
+    connect?: ProjectStatusWhereUniqueInput
+  }
+
   export type TaskAssigneeCreateNestedManyWithoutTaskInput = {
     create?: XOR<TaskAssigneeCreateWithoutTaskInput, TaskAssigneeUncheckedCreateWithoutTaskInput> | TaskAssigneeCreateWithoutTaskInput[] | TaskAssigneeUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: TaskAssigneeCreateOrConnectWithoutTaskInput | TaskAssigneeCreateOrConnectWithoutTaskInput[]
@@ -28296,14 +28769,6 @@ export namespace Prisma {
     connectOrCreate?: TaskAssigneeCreateOrConnectWithoutTaskInput | TaskAssigneeCreateOrConnectWithoutTaskInput[]
     createMany?: TaskAssigneeCreateManyTaskInputEnvelope
     connect?: TaskAssigneeWhereUniqueInput | TaskAssigneeWhereUniqueInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type ActivityUpdateManyWithoutTaskNestedInput = {
@@ -28374,6 +28839,16 @@ export namespace Prisma {
     upsert?: ProjectUpsertWithoutTasksInput
     connect?: ProjectWhereUniqueInput
     update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutTasksInput, ProjectUpdateWithoutTasksInput>, ProjectUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type ProjectStatusUpdateOneWithoutTasksNestedInput = {
+    create?: XOR<ProjectStatusCreateWithoutTasksInput, ProjectStatusUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: ProjectStatusCreateOrConnectWithoutTasksInput
+    upsert?: ProjectStatusUpsertWithoutTasksInput
+    disconnect?: ProjectStatusWhereInput | boolean
+    delete?: ProjectStatusWhereInput | boolean
+    connect?: ProjectStatusWhereUniqueInput
+    update?: XOR<XOR<ProjectStatusUpdateToOneWithWhereWithoutTasksInput, ProjectStatusUpdateWithoutTasksInput>, ProjectStatusUncheckedUpdateWithoutTasksInput>
   }
 
   export type TaskAssigneeUpdateManyWithoutTaskNestedInput = {
@@ -28540,14 +29015,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type UserUpdateOneWithoutAttendanceAdjustmentsNestedInput = {
     create?: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAttendanceAdjustmentsInput
@@ -28652,6 +29119,20 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutActivitiesInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutActivitiesInput, UserUpdateWithoutActivitiesInput>, UserUncheckedUpdateWithoutActivitiesInput>
+  }
+
+  export type UserCreateNestedOneWithoutDocumentsInput = {
+    create?: XOR<UserCreateWithoutDocumentsInput, UserUncheckedCreateWithoutDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutDocumentsNestedInput = {
+    create?: XOR<UserCreateWithoutDocumentsInput, UserUncheckedCreateWithoutDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentsInput
+    upsert?: UserUpsertWithoutDocumentsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDocumentsInput, UserUpdateWithoutDocumentsInput>, UserUncheckedUpdateWithoutDocumentsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -28832,6 +29313,22 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -28857,22 +29354,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -29106,19 +29587,53 @@ export namespace Prisma {
     create: XOR<AttendanceSettingsCreateWithoutUserInput, AttendanceSettingsUncheckedCreateWithoutUserInput>
   }
 
+  export type DocumentCreateWithoutUserInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DocumentCreateOrConnectWithoutUserInput = {
+    where: DocumentWhereUniqueInput
+    create: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput>
+  }
+
+  export type DocumentCreateManyUserInputEnvelope = {
+    data: DocumentCreateManyUserInput | DocumentCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProjectCreateWithoutCreatedByInput = {
     id?: string
     title: string
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -29127,15 +29642,17 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -29177,7 +29694,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29187,6 +29708,7 @@ export namespace Prisma {
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -29195,8 +29717,13 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
@@ -29244,7 +29771,6 @@ export namespace Prisma {
 
   export type TeamMemberCreateWithoutUserInput = {
     id?: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     project: ProjectCreateNestedOneWithoutTeamMembersInput
@@ -29253,7 +29779,6 @@ export namespace Prisma {
   export type TeamMemberUncheckedCreateWithoutUserInput = {
     id?: string
     projectId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -29478,6 +30003,37 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DocumentUpsertWithWhereUniqueWithoutUserInput = {
+    where: DocumentWhereUniqueInput
+    update: XOR<DocumentUpdateWithoutUserInput, DocumentUncheckedUpdateWithoutUserInput>
+    create: XOR<DocumentCreateWithoutUserInput, DocumentUncheckedCreateWithoutUserInput>
+  }
+
+  export type DocumentUpdateWithWhereUniqueWithoutUserInput = {
+    where: DocumentWhereUniqueInput
+    data: XOR<DocumentUpdateWithoutUserInput, DocumentUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DocumentUpdateManyWithWhereWithoutUserInput = {
+    where: DocumentScalarWhereInput
+    data: XOR<DocumentUpdateManyMutationInput, DocumentUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type DocumentScalarWhereInput = {
+    AND?: DocumentScalarWhereInput | DocumentScalarWhereInput[]
+    OR?: DocumentScalarWhereInput[]
+    NOT?: DocumentScalarWhereInput | DocumentScalarWhereInput[]
+    id?: StringFilter<"Document"> | string
+    name?: StringFilter<"Document"> | string
+    description?: StringNullableFilter<"Document"> | string | null
+    fileType?: StringFilter<"Document"> | string
+    fileSize?: IntFilter<"Document"> | number
+    filePath?: StringFilter<"Document"> | string
+    userId?: StringFilter<"Document"> | string
+    createdAt?: DateTimeFilter<"Document"> | Date | string
+    updatedAt?: DateTimeFilter<"Document"> | Date | string
+  }
+
   export type ProjectUpsertWithWhereUniqueWithoutCreatedByInput = {
     where: ProjectWhereUniqueInput
     update: XOR<ProjectUpdateWithoutCreatedByInput, ProjectUncheckedUpdateWithoutCreatedByInput>
@@ -29501,9 +30057,11 @@ export namespace Prisma {
     id?: StringFilter<"Project"> | string
     title?: StringFilter<"Project"> | string
     description?: StringNullableFilter<"Project"> | string | null
-    statusId?: StringFilter<"Project"> | string
     startDate?: DateTimeNullableFilter<"Project"> | Date | string | null
     endDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    dueDate?: DateTimeNullableFilter<"Project"> | Date | string | null
+    totalTimeSpent?: FloatNullableFilter<"Project"> | number | null
+    estimatedTime?: FloatNullableFilter<"Project"> | number | null
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdById?: StringFilter<"Project"> | string
@@ -29559,14 +30117,19 @@ export namespace Prisma {
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
     priority?: StringFilter<"Task"> | string
+    startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: FloatNullableFilter<"Task"> | number | null
+    estimatedTime?: FloatNullableFilter<"Task"> | number | null
     projectId?: StringFilter<"Task"> | string
-    assignedToId?: StringNullableFilter<"Task"> | string | null
+    statusId?: StringNullableFilter<"Task"> | string | null
     parentId?: StringNullableFilter<"Task"> | string | null
     order?: IntFilter<"Task"> | number
     createdAt?: DateTimeFilter<"Task"> | Date | string
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     completed?: BoolFilter<"Task"> | boolean
+    assignedToId?: StringNullableFilter<"Task"> | string | null
   }
 
   export type TaskAssigneeUpsertWithWhereUniqueWithoutUserInput = {
@@ -29619,7 +30182,6 @@ export namespace Prisma {
     id?: StringFilter<"TeamMember"> | string
     projectId?: StringFilter<"TeamMember"> | string
     userId?: StringFilter<"TeamMember"> | string
-    role?: StringFilter<"TeamMember"> | string
     createdAt?: DateTimeFilter<"TeamMember"> | Date | string
     updatedAt?: DateTimeFilter<"TeamMember"> | Date | string
   }
@@ -29687,19 +30249,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -29717,19 +30280,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -29763,19 +30327,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -29793,19 +30358,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -29823,20 +30389,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -29853,20 +30420,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -29899,20 +30467,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -29929,20 +30498,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -30157,20 +30727,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -30187,20 +30758,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -30264,20 +30836,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -30294,20 +30867,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -30467,20 +31041,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -30497,20 +31072,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -30576,20 +31152,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -30606,20 +31183,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -30754,20 +31332,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -30784,20 +31363,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -30811,56 +31391,37 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutProjectsInput, UserUncheckedCreateWithoutProjectsInput>
   }
 
-  export type ProjectStatusCreateWithoutProjectsInput = {
+  export type ProjectStatusCreateWithoutProjectInput = {
     id?: string
     name: string
     color?: string | null
     description?: string | null
+    order?: number
     isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    projectLinks?: ProjectStatusLinkCreateNestedManyWithoutStatusInput
+    tasks?: TaskCreateNestedManyWithoutStatusInput
   }
 
-  export type ProjectStatusUncheckedCreateWithoutProjectsInput = {
+  export type ProjectStatusUncheckedCreateWithoutProjectInput = {
     id?: string
     name: string
     color?: string | null
     description?: string | null
+    order?: number
     isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    projectLinks?: ProjectStatusLinkUncheckedCreateNestedManyWithoutStatusInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutStatusInput
   }
 
-  export type ProjectStatusCreateOrConnectWithoutProjectsInput = {
+  export type ProjectStatusCreateOrConnectWithoutProjectInput = {
     where: ProjectStatusWhereUniqueInput
-    create: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
+    create: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput>
   }
 
-  export type ProjectStatusLinkCreateWithoutProjectInput = {
-    id?: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    status: ProjectStatusCreateNestedOneWithoutProjectLinksInput
-  }
-
-  export type ProjectStatusLinkUncheckedCreateWithoutProjectInput = {
-    id?: string
-    statusId: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ProjectStatusLinkCreateOrConnectWithoutProjectInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    create: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput>
-  }
-
-  export type ProjectStatusLinkCreateManyProjectInputEnvelope = {
-    data: ProjectStatusLinkCreateManyProjectInput | ProjectStatusLinkCreateManyProjectInput[]
+  export type ProjectStatusCreateManyProjectInputEnvelope = {
+    data: ProjectStatusCreateManyProjectInput | ProjectStatusCreateManyProjectInput[]
     skipDuplicates?: boolean
   }
 
@@ -30869,7 +31430,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30879,6 +31444,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -30887,13 +31453,18 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
-    assignedToId?: string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
@@ -30912,7 +31483,6 @@ export namespace Prisma {
 
   export type TeamMemberCreateWithoutProjectInput = {
     id?: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutTeamsInput
@@ -30921,7 +31491,6 @@ export namespace Prisma {
   export type TeamMemberUncheckedCreateWithoutProjectInput = {
     id?: string
     userId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31016,20 +31585,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -31046,20 +31616,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -31068,65 +31639,35 @@ export namespace Prisma {
     userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type ProjectStatusUpsertWithoutProjectsInput = {
-    update: XOR<ProjectStatusUpdateWithoutProjectsInput, ProjectStatusUncheckedUpdateWithoutProjectsInput>
-    create: XOR<ProjectStatusCreateWithoutProjectsInput, ProjectStatusUncheckedCreateWithoutProjectsInput>
-    where?: ProjectStatusWhereInput
+  export type ProjectStatusUpsertWithWhereUniqueWithoutProjectInput = {
+    where: ProjectStatusWhereUniqueInput
+    update: XOR<ProjectStatusUpdateWithoutProjectInput, ProjectStatusUncheckedUpdateWithoutProjectInput>
+    create: XOR<ProjectStatusCreateWithoutProjectInput, ProjectStatusUncheckedCreateWithoutProjectInput>
   }
 
-  export type ProjectStatusUpdateToOneWithWhereWithoutProjectsInput = {
-    where?: ProjectStatusWhereInput
-    data: XOR<ProjectStatusUpdateWithoutProjectsInput, ProjectStatusUncheckedUpdateWithoutProjectsInput>
+  export type ProjectStatusUpdateWithWhereUniqueWithoutProjectInput = {
+    where: ProjectStatusWhereUniqueInput
+    data: XOR<ProjectStatusUpdateWithoutProjectInput, ProjectStatusUncheckedUpdateWithoutProjectInput>
   }
 
-  export type ProjectStatusUpdateWithoutProjectsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isDefault?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projectLinks?: ProjectStatusLinkUpdateManyWithoutStatusNestedInput
+  export type ProjectStatusUpdateManyWithWhereWithoutProjectInput = {
+    where: ProjectStatusScalarWhereInput
+    data: XOR<ProjectStatusUpdateManyMutationInput, ProjectStatusUncheckedUpdateManyWithoutProjectInput>
   }
 
-  export type ProjectStatusUncheckedUpdateWithoutProjectsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isDefault?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projectLinks?: ProjectStatusLinkUncheckedUpdateManyWithoutStatusNestedInput
-  }
-
-  export type ProjectStatusLinkUpsertWithWhereUniqueWithoutProjectInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    update: XOR<ProjectStatusLinkUpdateWithoutProjectInput, ProjectStatusLinkUncheckedUpdateWithoutProjectInput>
-    create: XOR<ProjectStatusLinkCreateWithoutProjectInput, ProjectStatusLinkUncheckedCreateWithoutProjectInput>
-  }
-
-  export type ProjectStatusLinkUpdateWithWhereUniqueWithoutProjectInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    data: XOR<ProjectStatusLinkUpdateWithoutProjectInput, ProjectStatusLinkUncheckedUpdateWithoutProjectInput>
-  }
-
-  export type ProjectStatusLinkUpdateManyWithWhereWithoutProjectInput = {
-    where: ProjectStatusLinkScalarWhereInput
-    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyWithoutProjectInput>
-  }
-
-  export type ProjectStatusLinkScalarWhereInput = {
-    AND?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
-    OR?: ProjectStatusLinkScalarWhereInput[]
-    NOT?: ProjectStatusLinkScalarWhereInput | ProjectStatusLinkScalarWhereInput[]
-    id?: StringFilter<"ProjectStatusLink"> | string
-    projectId?: StringFilter<"ProjectStatusLink"> | string
-    statusId?: StringFilter<"ProjectStatusLink"> | string
-    isPrimary?: BoolFilter<"ProjectStatusLink"> | boolean
-    createdAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
-    updatedAt?: DateTimeFilter<"ProjectStatusLink"> | Date | string
+  export type ProjectStatusScalarWhereInput = {
+    AND?: ProjectStatusScalarWhereInput | ProjectStatusScalarWhereInput[]
+    OR?: ProjectStatusScalarWhereInput[]
+    NOT?: ProjectStatusScalarWhereInput | ProjectStatusScalarWhereInput[]
+    id?: StringFilter<"ProjectStatus"> | string
+    name?: StringFilter<"ProjectStatus"> | string
+    color?: StringNullableFilter<"ProjectStatus"> | string | null
+    description?: StringNullableFilter<"ProjectStatus"> | string | null
+    order?: IntFilter<"ProjectStatus"> | number
+    isDefault?: BoolFilter<"ProjectStatus"> | boolean
+    projectId?: StringFilter<"ProjectStatus"> | string
+    createdAt?: DateTimeFilter<"ProjectStatus"> | Date | string
+    updatedAt?: DateTimeFilter<"ProjectStatus"> | Date | string
   }
 
   export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
@@ -31161,121 +31702,21 @@ export namespace Prisma {
     data: XOR<TeamMemberUpdateManyMutationInput, TeamMemberUncheckedUpdateManyWithoutProjectInput>
   }
 
-  export type ProjectCreateWithoutStatusInput = {
-    id?: string
-    title: string
-    description?: string | null
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    activities?: ActivityCreateNestedManyWithoutProjectInput
-    attendances?: AttendanceCreateNestedManyWithoutProjectInput
-    events?: EventCreateNestedManyWithoutProjectInput
-    createdBy: UserCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
-    tasks?: TaskCreateNestedManyWithoutProjectInput
-    teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
-  }
-
-  export type ProjectUncheckedCreateWithoutStatusInput = {
-    id?: string
-    title: string
-    description?: string | null
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    createdById: string
-    activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
-    attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
-    events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
-    tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
-    teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
-  }
-
-  export type ProjectCreateOrConnectWithoutStatusInput = {
-    where: ProjectWhereUniqueInput
-    create: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput>
-  }
-
-  export type ProjectCreateManyStatusInputEnvelope = {
-    data: ProjectCreateManyStatusInput | ProjectCreateManyStatusInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ProjectStatusLinkCreateWithoutStatusInput = {
-    id?: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    project: ProjectCreateNestedOneWithoutStatusesInput
-  }
-
-  export type ProjectStatusLinkUncheckedCreateWithoutStatusInput = {
-    id?: string
-    projectId: string
-    isPrimary?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ProjectStatusLinkCreateOrConnectWithoutStatusInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    create: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput>
-  }
-
-  export type ProjectStatusLinkCreateManyStatusInputEnvelope = {
-    data: ProjectStatusLinkCreateManyStatusInput | ProjectStatusLinkCreateManyStatusInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ProjectUpsertWithWhereUniqueWithoutStatusInput = {
-    where: ProjectWhereUniqueInput
-    update: XOR<ProjectUpdateWithoutStatusInput, ProjectUncheckedUpdateWithoutStatusInput>
-    create: XOR<ProjectCreateWithoutStatusInput, ProjectUncheckedCreateWithoutStatusInput>
-  }
-
-  export type ProjectUpdateWithWhereUniqueWithoutStatusInput = {
-    where: ProjectWhereUniqueInput
-    data: XOR<ProjectUpdateWithoutStatusInput, ProjectUncheckedUpdateWithoutStatusInput>
-  }
-
-  export type ProjectUpdateManyWithWhereWithoutStatusInput = {
-    where: ProjectScalarWhereInput
-    data: XOR<ProjectUpdateManyMutationInput, ProjectUncheckedUpdateManyWithoutStatusInput>
-  }
-
-  export type ProjectStatusLinkUpsertWithWhereUniqueWithoutStatusInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    update: XOR<ProjectStatusLinkUpdateWithoutStatusInput, ProjectStatusLinkUncheckedUpdateWithoutStatusInput>
-    create: XOR<ProjectStatusLinkCreateWithoutStatusInput, ProjectStatusLinkUncheckedCreateWithoutStatusInput>
-  }
-
-  export type ProjectStatusLinkUpdateWithWhereUniqueWithoutStatusInput = {
-    where: ProjectStatusLinkWhereUniqueInput
-    data: XOR<ProjectStatusLinkUpdateWithoutStatusInput, ProjectStatusLinkUncheckedUpdateWithoutStatusInput>
-  }
-
-  export type ProjectStatusLinkUpdateManyWithWhereWithoutStatusInput = {
-    where: ProjectStatusLinkScalarWhereInput
-    data: XOR<ProjectStatusLinkUpdateManyMutationInput, ProjectStatusLinkUncheckedUpdateManyWithoutStatusInput>
-  }
-
   export type ProjectCreateWithoutStatusesInput = {
     id?: string
     title: string
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -31284,9 +31725,11 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
@@ -31302,31 +31745,60 @@ export namespace Prisma {
     create: XOR<ProjectCreateWithoutStatusesInput, ProjectUncheckedCreateWithoutStatusesInput>
   }
 
-  export type ProjectStatusCreateWithoutProjectLinksInput = {
+  export type TaskCreateWithoutStatusInput = {
     id?: string
-    name: string
-    color?: string | null
+    title: string
     description?: string | null
-    isDefault?: boolean
+    priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    projects?: ProjectCreateNestedManyWithoutStatusInput
+    completed?: boolean
+    activities?: ActivityCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceCreateNestedManyWithoutTaskInput
+    assignedTo?: UserCreateNestedOneWithoutTasksInput
+    parent?: TaskCreateNestedOneWithoutSubtasksInput
+    subtasks?: TaskCreateNestedManyWithoutParentInput
+    project: ProjectCreateNestedOneWithoutTasksInput
+    assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
-  export type ProjectStatusUncheckedCreateWithoutProjectLinksInput = {
+  export type TaskUncheckedCreateWithoutStatusInput = {
     id?: string
-    name: string
-    color?: string | null
+    title: string
     description?: string | null
-    isDefault?: boolean
+    priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
+    projectId: string
+    parentId?: string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    projects?: ProjectUncheckedCreateNestedManyWithoutStatusInput
+    completed?: boolean
+    assignedToId?: string | null
+    activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
+    subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
+    assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
   }
 
-  export type ProjectStatusCreateOrConnectWithoutProjectLinksInput = {
-    where: ProjectStatusWhereUniqueInput
-    create: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
+  export type TaskCreateOrConnectWithoutStatusInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput>
+  }
+
+  export type TaskCreateManyStatusInputEnvelope = {
+    data: TaskCreateManyStatusInput | TaskCreateManyStatusInput[]
+    skipDuplicates?: boolean
   }
 
   export type ProjectUpsertWithoutStatusesInput = {
@@ -31346,13 +31818,15 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -31361,9 +31835,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
@@ -31374,37 +31850,20 @@ export namespace Prisma {
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
 
-  export type ProjectStatusUpsertWithoutProjectLinksInput = {
-    update: XOR<ProjectStatusUpdateWithoutProjectLinksInput, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
-    create: XOR<ProjectStatusCreateWithoutProjectLinksInput, ProjectStatusUncheckedCreateWithoutProjectLinksInput>
-    where?: ProjectStatusWhereInput
+  export type TaskUpsertWithWhereUniqueWithoutStatusInput = {
+    where: TaskWhereUniqueInput
+    update: XOR<TaskUpdateWithoutStatusInput, TaskUncheckedUpdateWithoutStatusInput>
+    create: XOR<TaskCreateWithoutStatusInput, TaskUncheckedCreateWithoutStatusInput>
   }
 
-  export type ProjectStatusUpdateToOneWithWhereWithoutProjectLinksInput = {
-    where?: ProjectStatusWhereInput
-    data: XOR<ProjectStatusUpdateWithoutProjectLinksInput, ProjectStatusUncheckedUpdateWithoutProjectLinksInput>
+  export type TaskUpdateWithWhereUniqueWithoutStatusInput = {
+    where: TaskWhereUniqueInput
+    data: XOR<TaskUpdateWithoutStatusInput, TaskUncheckedUpdateWithoutStatusInput>
   }
 
-  export type ProjectStatusUpdateWithoutProjectLinksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isDefault?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projects?: ProjectUpdateManyWithoutStatusNestedInput
-  }
-
-  export type ProjectStatusUncheckedUpdateWithoutProjectLinksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    isDefault?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    projects?: ProjectUncheckedUpdateManyWithoutStatusNestedInput
+  export type TaskUpdateManyWithWhereWithoutStatusInput = {
+    where: TaskScalarWhereInput
+    data: XOR<TaskUpdateManyMutationInput, TaskUncheckedUpdateManyWithoutStatusInput>
   }
 
   export type ActivityCreateWithoutTaskInput = {
@@ -31505,20 +31964,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
@@ -31535,20 +31995,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
@@ -31567,7 +32028,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -31577,6 +32042,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -31585,14 +32051,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
@@ -31608,7 +32079,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -31618,6 +32093,7 @@ export namespace Prisma {
     assignedTo?: UserCreateNestedOneWithoutTasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -31626,13 +32102,18 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
@@ -31655,14 +32136,16 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
 
@@ -31670,22 +32153,53 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
 
   export type ProjectCreateOrConnectWithoutTasksInput = {
     where: ProjectWhereUniqueInput
     create: XOR<ProjectCreateWithoutTasksInput, ProjectUncheckedCreateWithoutTasksInput>
+  }
+
+  export type ProjectStatusCreateWithoutTasksInput = {
+    id?: string
+    name: string
+    color?: string | null
+    description?: string | null
+    order?: number
+    isDefault?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    project: ProjectCreateNestedOneWithoutStatusesInput
+  }
+
+  export type ProjectStatusUncheckedCreateWithoutTasksInput = {
+    id?: string
+    name: string
+    color?: string | null
+    description?: string | null
+    order?: number
+    isDefault?: boolean
+    projectId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProjectStatusCreateOrConnectWithoutTasksInput = {
+    where: ProjectStatusWhereUniqueInput
+    create: XOR<ProjectStatusCreateWithoutTasksInput, ProjectStatusUncheckedCreateWithoutTasksInput>
   }
 
   export type TaskAssigneeCreateWithoutTaskInput = {
@@ -31763,20 +32277,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
@@ -31793,20 +32308,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
@@ -31831,7 +32347,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31841,6 +32361,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -31849,14 +32370,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
@@ -31895,14 +32421,16 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
 
@@ -31910,17 +32438,54 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
+  }
+
+  export type ProjectStatusUpsertWithoutTasksInput = {
+    update: XOR<ProjectStatusUpdateWithoutTasksInput, ProjectStatusUncheckedUpdateWithoutTasksInput>
+    create: XOR<ProjectStatusCreateWithoutTasksInput, ProjectStatusUncheckedCreateWithoutTasksInput>
+    where?: ProjectStatusWhereInput
+  }
+
+  export type ProjectStatusUpdateToOneWithWhereWithoutTasksInput = {
+    where?: ProjectStatusWhereInput
+    data: XOR<ProjectStatusUpdateWithoutTasksInput, ProjectStatusUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type ProjectStatusUpdateWithoutTasksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
+  }
+
+  export type ProjectStatusUncheckedUpdateWithoutTasksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    projectId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TaskAssigneeUpsertWithWhereUniqueWithoutTaskInput = {
@@ -31944,7 +32509,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -31955,6 +32524,7 @@ export namespace Prisma {
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
   }
 
   export type TaskUncheckedCreateWithoutAssigneesInput = {
@@ -31962,14 +32532,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
@@ -31988,20 +32563,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -32018,20 +32594,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -32061,7 +32638,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -32072,6 +32653,7 @@ export namespace Prisma {
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAssigneesInput = {
@@ -32079,14 +32661,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
@@ -32111,20 +32698,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -32141,20 +32729,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -32169,14 +32758,16 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
   }
 
@@ -32184,16 +32775,18 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
   }
 
@@ -32210,20 +32803,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -32240,20 +32834,21 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -32284,14 +32879,16 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
   }
 
@@ -32299,16 +32896,18 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
   }
 
@@ -32331,20 +32930,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -32361,20 +32961,21 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -32389,13 +32990,15 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -32404,15 +33007,17 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -32439,13 +33044,15 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -32454,15 +33061,17 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -32475,19 +33084,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -32505,19 +33115,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -32538,13 +33149,15 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     activities?: ActivityCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -32553,15 +33166,17 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     activities?: ActivityUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -32576,7 +33191,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -32586,6 +33205,7 @@ export namespace Prisma {
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -32594,14 +33214,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
@@ -32620,19 +33245,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -32650,19 +33276,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -32696,19 +33323,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -32726,19 +33354,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -32765,13 +33394,15 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -32780,15 +33411,17 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -32809,7 +33442,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -32819,6 +33456,7 @@ export namespace Prisma {
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -32827,14 +33465,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
@@ -32859,19 +33502,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -32889,19 +33533,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -32919,19 +33564,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -32949,19 +33595,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -32995,19 +33642,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -33025,19 +33673,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -33053,13 +33702,15 @@ export namespace Prisma {
     description?: string | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     attendances?: AttendanceCreateNestedManyWithoutProjectInput
     events?: EventCreateNestedManyWithoutProjectInput
     createdBy: UserCreateNestedOneWithoutProjectsInput
-    status: ProjectStatusCreateNestedOneWithoutProjectsInput
-    statuses?: ProjectStatusLinkCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusCreateNestedManyWithoutProjectInput
     tasks?: TaskCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberCreateNestedManyWithoutProjectInput
   }
@@ -33068,15 +33719,17 @@ export namespace Prisma {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdById: string
     attendances?: AttendanceUncheckedCreateNestedManyWithoutProjectInput
     events?: EventUncheckedCreateNestedManyWithoutProjectInput
-    statuses?: ProjectStatusLinkUncheckedCreateNestedManyWithoutProjectInput
+    statuses?: ProjectStatusUncheckedCreateNestedManyWithoutProjectInput
     tasks?: TaskUncheckedCreateNestedManyWithoutProjectInput
     teamMembers?: TeamMemberUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -33091,7 +33744,11 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -33101,6 +33758,7 @@ export namespace Prisma {
     parent?: TaskCreateNestedOneWithoutSubtasksInput
     subtasks?: TaskCreateNestedManyWithoutParentInput
     project: ProjectCreateNestedOneWithoutTasksInput
+    status?: ProjectStatusCreateNestedOneWithoutTasksInput
     assignees?: TaskAssigneeCreateNestedManyWithoutTaskInput
   }
 
@@ -33109,14 +33767,19 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutTaskInput
     subtasks?: TaskUncheckedCreateNestedManyWithoutParentInput
     assignees?: TaskAssigneeUncheckedCreateNestedManyWithoutTaskInput
@@ -33135,19 +33798,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
     projects?: ProjectCreateNestedManyWithoutCreatedByInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tasks?: TaskCreateNestedManyWithoutAssignedToInput
@@ -33165,19 +33829,20 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
-    bio?: string | null
-    jobTitle?: string | null
-    department?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
@@ -33209,13 +33874,15 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
     createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -33224,15 +33891,17 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdById?: StringFieldUpdateOperationsInput | string
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -33253,7 +33922,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33263,6 +33936,7 @@ export namespace Prisma {
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -33271,14 +33945,19 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
     assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
@@ -33303,19 +33982,20 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
     projects?: ProjectUpdateManyWithoutCreatedByNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tasks?: TaskUpdateManyWithoutAssignedToNestedInput
@@ -33333,16 +34013,157 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
+    attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    tasks?: TaskUncheckedUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+    userPermissions?: UserPermissionUncheckedUpdateManyWithoutUserNestedInput
+    userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutDocumentsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    activities?: ActivityCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
+    attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
+    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
+    projects?: ProjectCreateNestedManyWithoutCreatedByInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    tasks?: TaskCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
+    teams?: TeamMemberCreateNestedManyWithoutUserInput
+    userPermissions?: UserPermissionCreateNestedManyWithoutUserInput
+    userRoles?: UserRoleCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDocumentsInput = {
+    id?: string
+    name?: string | null
+    email: string
+    emailVerified?: Date | string | null
+    image?: string | null
+    password?: string | null
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lastLogin?: Date | string | null
+    bio?: string | null
+    department?: string | null
+    jobTitle?: string | null
+    location?: string | null
+    phone?: string | null
+    skills?: string | null
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
+    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
+    attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    tasks?: TaskUncheckedCreateNestedManyWithoutAssignedToInput
+    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
+    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
+    userPermissions?: UserPermissionUncheckedCreateNestedManyWithoutUserInput
+    userRoles?: UserRoleUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDocumentsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDocumentsInput, UserUncheckedCreateWithoutDocumentsInput>
+  }
+
+  export type UserUpsertWithoutDocumentsInput = {
+    update: XOR<UserUpdateWithoutDocumentsInput, UserUncheckedUpdateWithoutDocumentsInput>
+    create: XOR<UserCreateWithoutDocumentsInput, UserUncheckedCreateWithoutDocumentsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDocumentsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDocumentsInput, UserUncheckedUpdateWithoutDocumentsInput>
+  }
+
+  export type UserUpdateWithoutDocumentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    activities?: ActivityUpdateManyWithoutUserNestedInput
+    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
+    attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
+    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
+    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    tasks?: TaskUpdateManyWithoutAssignedToNestedInput
+    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
+    teams?: TeamMemberUpdateManyWithoutUserNestedInput
+    userPermissions?: UserPermissionUpdateManyWithoutUserNestedInput
+    userRoles?: UserRoleUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDocumentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: NullableStringFieldUpdateOperationsInput | string | null
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
     attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
@@ -33428,13 +34249,26 @@ export namespace Prisma {
     taskId?: string | null
   }
 
+  export type DocumentCreateManyUserInput = {
+    id?: string
+    name: string
+    description?: string | null
+    fileType: string
+    fileSize: number
+    filePath: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ProjectCreateManyCreatedByInput = {
     id?: string
     title: string
     description?: string | null
-    statusId: string
     startDate?: Date | string | null
     endDate?: Date | string | null
+    dueDate?: Date | string | null
+    totalTimeSpent?: number | null
+    estimatedTime?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -33450,8 +34284,13 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
@@ -33469,7 +34308,6 @@ export namespace Prisma {
   export type TeamMemberCreateManyUserInput = {
     id?: string
     projectId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -33708,19 +34546,54 @@ export namespace Prisma {
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type DocumentUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    fileType?: StringFieldUpdateOperationsInput | string
+    fileSize?: IntFieldUpdateOperationsInput | number
+    filePath?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ProjectUpdateWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUpdateManyWithoutProjectNestedInput
     events?: EventUpdateManyWithoutProjectNestedInput
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUpdateManyWithoutProjectNestedInput
     tasks?: TaskUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
   }
@@ -33729,15 +34602,17 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
     events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
+    statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -33746,9 +34621,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    statusId?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalTimeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33776,7 +34653,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33786,6 +34667,7 @@ export namespace Prisma {
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -33794,8 +34676,13 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33812,8 +34699,13 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33844,7 +34736,6 @@ export namespace Prisma {
 
   export type TeamMemberUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     project?: ProjectUpdateOneRequiredWithoutTeamMembersNestedInput
@@ -33853,7 +34744,6 @@ export namespace Prisma {
   export type TeamMemberUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33861,7 +34751,6 @@ export namespace Prisma {
   export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34071,10 +34960,13 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type ProjectStatusLinkCreateManyProjectInput = {
+  export type ProjectStatusCreateManyProjectInput = {
     id?: string
-    statusId: string
-    isPrimary?: boolean
+    name: string
+    color?: string | null
+    description?: string | null
+    order?: number
+    isDefault?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -34084,19 +34976,23 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
-    assignedToId?: string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
+    statusId?: string | null
     parentId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
   }
 
   export type TeamMemberCreateManyProjectInput = {
     id?: string
     userId: string
-    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -34233,26 +35129,37 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ProjectStatusLinkUpdateWithoutProjectInput = {
+  export type ProjectStatusUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: ProjectStatusUpdateOneRequiredWithoutProjectLinksNestedInput
+    tasks?: TaskUpdateManyWithoutStatusNestedInput
   }
 
-  export type ProjectStatusLinkUncheckedUpdateWithoutProjectInput = {
+  export type ProjectStatusUncheckedUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    statusId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tasks?: TaskUncheckedUpdateManyWithoutStatusNestedInput
   }
 
-  export type ProjectStatusLinkUncheckedUpdateManyWithoutProjectInput = {
+  export type ProjectStatusUncheckedUpdateManyWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    statusId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    name?: StringFieldUpdateOperationsInput | string
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34262,7 +35169,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -34272,6 +35183,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     parent?: TaskUpdateOneWithoutSubtasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -34280,13 +35192,18 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
@@ -34298,18 +35215,22 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     parentId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TeamMemberUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutTeamsNestedInput
@@ -34318,7 +35239,6 @@ export namespace Prisma {
   export type TeamMemberUncheckedUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -34326,97 +35246,92 @@ export namespace Prisma {
   export type TeamMemberUncheckedUpdateManyWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ProjectCreateManyStatusInput = {
+  export type TaskCreateManyStatusInput = {
     id?: string
     title: string
     description?: string | null
+    priority?: string
     startDate?: Date | string | null
     endDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    createdById: string
-  }
-
-  export type ProjectStatusLinkCreateManyStatusInput = {
-    id?: string
+    dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    isPrimary?: boolean
+    parentId?: string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    completed?: boolean
+    assignedToId?: string | null
   }
 
-  export type ProjectUpdateWithoutStatusInput = {
+  export type TaskUpdateWithoutStatusInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    activities?: ActivityUpdateManyWithoutProjectNestedInput
-    attendances?: AttendanceUpdateManyWithoutProjectNestedInput
-    events?: EventUpdateManyWithoutProjectNestedInput
-    createdBy?: UserUpdateOneRequiredWithoutProjectsNestedInput
-    statuses?: ProjectStatusLinkUpdateManyWithoutProjectNestedInput
-    tasks?: TaskUpdateManyWithoutProjectNestedInput
-    teamMembers?: TeamMemberUpdateManyWithoutProjectNestedInput
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    activities?: ActivityUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUpdateManyWithoutTaskNestedInput
+    assignedTo?: UserUpdateOneWithoutTasksNestedInput
+    parent?: TaskUpdateOneWithoutSubtasksNestedInput
+    subtasks?: TaskUpdateManyWithoutParentNestedInput
+    project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
-  export type ProjectUncheckedUpdateWithoutStatusInput = {
+  export type TaskUncheckedUpdateWithoutStatusInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdById?: StringFieldUpdateOperationsInput | string
-    activities?: ActivityUncheckedUpdateManyWithoutProjectNestedInput
-    attendances?: AttendanceUncheckedUpdateManyWithoutProjectNestedInput
-    events?: EventUncheckedUpdateManyWithoutProjectNestedInput
-    statuses?: ProjectStatusLinkUncheckedUpdateManyWithoutProjectNestedInput
-    tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
-    teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
-  }
-
-  export type ProjectUncheckedUpdateManyWithoutStatusInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdById?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type ProjectStatusLinkUpdateWithoutStatusInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    project?: ProjectUpdateOneRequiredWithoutStatusesNestedInput
-  }
-
-  export type ProjectStatusLinkUncheckedUpdateWithoutStatusInput = {
-    id?: StringFieldUpdateOperationsInput | string
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
+    attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
+    subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
+    assignees?: TaskAssigneeUncheckedUpdateManyWithoutTaskNestedInput
   }
 
-  export type ProjectStatusLinkUncheckedUpdateManyWithoutStatusInput = {
+  export type TaskUncheckedUpdateManyWithoutStatusInput = {
     id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    parentId?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ActivityCreateManyTaskInput = {
@@ -34459,13 +35374,18 @@ export namespace Prisma {
     title: string
     description?: string | null
     priority?: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
     dueDate?: Date | string | null
+    timeSpent?: number | null
+    estimatedTime?: number | null
     projectId: string
-    assignedToId?: string | null
+    statusId?: string | null
     order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     completed?: boolean
+    assignedToId?: string | null
   }
 
   export type TaskAssigneeCreateManyTaskInput = {
@@ -34585,7 +35505,11 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -34595,6 +35519,7 @@ export namespace Prisma {
     assignedTo?: UserUpdateOneWithoutTasksNestedInput
     subtasks?: TaskUpdateManyWithoutParentNestedInput
     project?: ProjectUpdateOneRequiredWithoutTasksNestedInput
+    status?: ProjectStatusUpdateOneWithoutTasksNestedInput
     assignees?: TaskAssigneeUpdateManyWithoutTaskNestedInput
   }
 
@@ -34603,13 +35528,18 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutTaskNestedInput
     attendances?: AttendanceUncheckedUpdateManyWithoutTaskNestedInput
     subtasks?: TaskUncheckedUpdateManyWithoutParentNestedInput
@@ -34621,13 +35551,18 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     priority?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: NullableFloatFieldUpdateOperationsInput | number | null
+    estimatedTime?: NullableFloatFieldUpdateOperationsInput | number | null
     projectId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    statusId?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completed?: BoolFieldUpdateOperationsInput | boolean
+    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskAssigneeUpdateWithoutTaskInput = {

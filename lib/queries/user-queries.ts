@@ -95,7 +95,6 @@ export async function getUsers(args: {
     select.teams = {
       select: {
         id: true,
-        role: true,
         project: {
           select: {
             id: true,
@@ -133,6 +132,7 @@ export async function getUserById(id: string, includeRelations: boolean = false)
     createdAt: true,
     updatedAt: true,
     emailVerified: true,
+    lastLogin: true, // Include lastLogin field
     // Never return the password
     password: false,
   };
@@ -235,12 +235,22 @@ export async function getUserProfile(id: string) {
     skills: user.skills || null,
   };
 
-  // Get last login from attendance records
-  const lastAttendance = await prisma.attendance.findFirst({
-    where: { userId: id },
-    orderBy: { checkInTime: 'desc' },
-    select: { checkInTime: true }
-  });
+  // Get last login directly from user model
+  // We'll keep this as a fallback in case the user model doesn't have lastLogin
+  let lastLogin = user.lastLogin;
+
+  if (!lastLogin) {
+    // Fallback to attendance records if user lastLogin is not set
+    const lastAttendance = await prisma.attendance.findFirst({
+      where: { userId: id },
+      orderBy: { checkInTime: 'desc' },
+      select: { checkInTime: true }
+    });
+
+    if (lastAttendance) {
+      lastLogin = lastAttendance.checkInTime;
+    }
+  }
 
   // Calculate user stats
   const stats = await getUserStats(id);
@@ -295,7 +305,7 @@ export async function getUserProfile(id: string) {
     tasks: allTasks,
     projects: uniqueProjects,
     stats,
-    lastLogin: lastAttendance?.checkInTime || null
+    lastLogin: lastLogin || null
   };
 }
 

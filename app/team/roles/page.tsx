@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { SYSTEM_ROLES } from "@/lib/roles"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,11 +35,26 @@ import {
 import { Search, Plus, MoreHorizontal, ShieldCheck, ShieldAlert, Shield, UserCog, HelpCircle } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
-// Define role types
+// Use centralized role definitions
 const ROLES = [
-  { id: "user", name: "User", description: "Regular user with basic access", color: "bg-blue-500" },
-  { id: "manager", name: "Manager", description: "Team manager with extended access", color: "bg-green-500" },
-  { id: "admin", name: "Admin", description: "Administrator with full access", color: "bg-purple-500" }
+  {
+    id: "user",
+    name: SYSTEM_ROLES.user.name,
+    description: SYSTEM_ROLES.user.description,
+    color: SYSTEM_ROLES.user.color
+  },
+  {
+    id: "manager",
+    name: SYSTEM_ROLES.manager.name,
+    description: SYSTEM_ROLES.manager.description,
+    color: SYSTEM_ROLES.manager.color
+  },
+  {
+    id: "admin",
+    name: SYSTEM_ROLES.admin.name,
+    description: SYSTEM_ROLES.admin.description,
+    color: SYSTEM_ROLES.admin.color
+  }
 ]
 
 export default function RoleManagementPage() {

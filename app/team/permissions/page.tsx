@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { SYSTEM_ROLES } from "@/lib/roles"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -30,34 +31,34 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Define role types and permissions
+// Define role types and permissions using centralized definitions
 const ROLES = [
   {
     id: "admin",
-    name: "Admin",
-    description: "Full access to all resources and settings",
-    color: "bg-purple-500",
+    name: SYSTEM_ROLES.admin.name,
+    description: SYSTEM_ROLES.admin.description,
+    color: SYSTEM_ROLES.admin.color,
     count: 1
   },
   {
     id: "manager",
-    name: "Manager",
-    description: "Can manage users and content but not system settings",
-    color: "bg-green-500",
+    name: SYSTEM_ROLES.manager.name,
+    description: SYSTEM_ROLES.manager.description,
+    color: SYSTEM_ROLES.manager.color,
     count: 1
   },
   {
     id: "user",
-    name: "User",
-    description: "Regular user with limited access",
-    color: "bg-blue-500",
+    name: SYSTEM_ROLES.user.name,
+    description: SYSTEM_ROLES.user.description,
+    color: SYSTEM_ROLES.user.color,
     count: 2
   },
   {
     id: "guest",
-    name: "Guest",
-    description: "Minimal access for temporary users",
-    color: "bg-gray-500",
+    name: SYSTEM_ROLES.guest.name,
+    description: SYSTEM_ROLES.guest.description,
+    color: SYSTEM_ROLES.guest.color,
     count: 1
   }
 ]
@@ -415,9 +416,9 @@ export default function RolePermissionsPage() {
       </div>
 
       <Tabs defaultValue="roles" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full md:w-auto grid-cols-2">
-          <TabsTrigger value="roles">Available Roles</TabsTrigger>
-          <TabsTrigger value="permissions">Permissions Matrix</TabsTrigger>
+        <TabsList className="flex w-full">
+          <TabsTrigger value="roles" className="flex-1">Available Roles</TabsTrigger>
+          <TabsTrigger value="permissions" className="flex-1">Permissions Matrix</TabsTrigger>
         </TabsList>
 
         <TabsContent value="roles" className="mt-6">
@@ -486,13 +487,13 @@ export default function RolePermissionsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border overflow-x-auto">
+              <div className="rounded-md border overflow-x-auto max-w-[calc(100vw-2rem)] sm:max-w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Permission</TableHead>
+                      <TableHead className="min-w-[150px]">Permission</TableHead>
                       {allRoles.map((role) => (
-                        <TableHead key={role.id} className="text-center">
+                        <TableHead key={role.id} className="text-center min-w-[100px]">
                           {getRoleBadge(role.id)}
                         </TableHead>
                       ))}
@@ -503,11 +504,11 @@ export default function RolePermissionsPage() {
                       <TableRow key={permission.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            {permission.name}
+                            <span className="truncate max-w-[120px] sm:max-w-none">{permission.name}</span>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                  <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{permission.description}</p>
@@ -531,16 +532,27 @@ export default function RolePermissionsPage() {
                 </Table>
               </div>
 
-                      <div className="mt-6 flex flex-wrap gap-2">
-                <Button onClick={() => setEditDialogOpen(true)}>
+              <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-2">
+                <Button
+                  onClick={() => setEditDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                >
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Permissions
                 </Button>
-                <Button variant="outline" onClick={() => setNewPermissionDialogOpen(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setNewPermissionDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Permission
                 </Button>
-                <Button variant="outline" onClick={() => setNewRoleDialogOpen(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setNewRoleDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                >
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add Role
                 </Button>
@@ -552,7 +564,7 @@ export default function RolePermissionsPage() {
 
       {/* Edit Permissions Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="w-[95vw] max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Role Permissions</DialogTitle>
             <DialogDescription>
@@ -566,13 +578,13 @@ export default function RolePermissionsPage() {
                 <span className="ml-2">Loading permissions...</span>
               </div>
             ) : (
-              <div className="rounded-md border overflow-x-auto">
+              <div className="rounded-md border overflow-x-auto max-w-[calc(100vw-4rem)] sm:max-w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Permission</TableHead>
+                      <TableHead className="min-w-[150px]">Permission</TableHead>
                       {allRoles.map((role) => (
-                        <TableHead key={role.id} className="text-center">
+                        <TableHead key={role.id} className="text-center min-w-[100px]">
                           {getRoleBadge(role.name)}
                         </TableHead>
                       ))}
@@ -583,11 +595,11 @@ export default function RolePermissionsPage() {
                       <TableRow key={permission.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            {permission.name}
+                            <span className="truncate max-w-[120px] sm:max-w-none">{permission.name}</span>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                  <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{permission.description}</p>
@@ -620,11 +632,19 @@ export default function RolePermissionsPage() {
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button onClick={saveRolePermissions} disabled={loading}>
+            <Button
+              onClick={saveRolePermissions}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -640,7 +660,7 @@ export default function RolePermissionsPage() {
 
       {/* Add Permission Dialog */}
       <Dialog open={newPermissionDialogOpen} onOpenChange={setNewPermissionDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Permission</DialogTitle>
             <DialogDescription>
@@ -689,11 +709,19 @@ export default function RolePermissionsPage() {
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewPermissionDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setNewPermissionDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button onClick={createPermission} disabled={loading || !newPermissionData.name}>
+            <Button
+              onClick={createPermission}
+              disabled={loading || !newPermissionData.name}
+              className="w-full sm:w-auto"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -709,7 +737,7 @@ export default function RolePermissionsPage() {
 
       {/* Add Role Dialog */}
       <Dialog open={newRoleDialogOpen} onOpenChange={setNewRoleDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Role</DialogTitle>
             <DialogDescription>
@@ -739,11 +767,19 @@ export default function RolePermissionsPage() {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewRoleDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setNewRoleDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button onClick={createRole} disabled={loading || !newRoleData.name}>
+            <Button
+              onClick={createRole}
+              disabled={loading || !newRoleData.name}
+              className="w-full sm:w-auto"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

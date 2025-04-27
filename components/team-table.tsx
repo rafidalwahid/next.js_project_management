@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { RoleBadge } from "@/components/ui/role-badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,21 +60,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
     console.log("Searching for:", searchQuery)
   }
 
-  // Get role badge style based on role
-  const getRoleBadge = (role: string) => {
-    switch (role?.toLowerCase()) {
-      case "owner":
-        return "bg-purple-50 text-purple-700 border-purple-200"
-      case "admin":
-        return "bg-blue-50 text-blue-700 border-blue-200"
-      case "manager":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200"
-      case "member":
-        return "bg-green-50 text-green-700 border-green-200"
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200"
-    }
-  }
+  // Role badge styling is now handled by the RoleBadge component
 
   if (isError) {
     return <div className="p-8 text-center text-red-500">Error loading team members. Please try again later.</div>
@@ -98,9 +85,11 @@ export function TeamTable({ projectId }: TeamTableProps) {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        <Button className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Add Member
+        <Button className="gap-2" asChild>
+          <a href="/team/new">
+            <UserPlus className="h-4 w-4" />
+            Add Member
+          </a>
         </Button>
       </div>
 
@@ -146,9 +135,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
                 </TableCell>
                 <TableCell>{member.user?.email || "No email"}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={getRoleBadge(member.role)}>
-                    {member.role?.charAt(0).toUpperCase() + member.role?.slice(1).toLowerCase() || "Member"}
-                  </Badge>
+                  <RoleBadge role={member.user?.role || "user"} />
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
@@ -177,7 +164,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
                           setRoleDialogOpen(true)
                         }}
                       >
-                        Change Role
+                        View Role
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         Assign Tasks
@@ -227,7 +214,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
         open={roleDialogOpen}
         onOpenChange={setRoleDialogOpen}
         teamMember={selectedTeamMember}
-        onRoleUpdated={mutate}
+        onSuccess={mutate}
       />
     </div>
   )

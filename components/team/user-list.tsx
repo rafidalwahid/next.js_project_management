@@ -119,7 +119,7 @@ export function UserList({ users, onDelete }: UserListProps) {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
-                <RoleBadge role={user.role} type="system" />
+                <RoleBadge role={user.role} />
               </TableCell>
               <TableCell>
                 <DropdownMenu>

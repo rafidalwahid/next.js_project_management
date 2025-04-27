@@ -2,13 +2,12 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
-import { googleProvider, facebookProvider, twitterProvider } from "@/providers";
+import { googleProvider, facebookProvider } from "@/providers";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     googleProvider,
     facebookProvider,
-    twitterProvider,
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -34,17 +33,17 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        // Temporarily comment out lastLogin update
-        // try {
-        //   // Update the lastLogin timestamp
-        //   await prisma.user.update({
-        //     where: { id: user.id },
-        //     data: { lastLogin: new Date() }
-        //   });
-        // } catch (error) {
-        //   console.error("Error updating lastLogin:", error);
-        //   // Continue with authentication even if lastLogin update fails
-        // }
+        // Update lastLogin timestamp
+        try {
+          // Update the lastLogin timestamp
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() }
+          });
+        } catch (error) {
+          console.error("Error updating lastLogin:", error);
+          // Continue with authentication even if lastLogin update fails
+        }
 
         return {
           id: user.id,
@@ -58,7 +57,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google" || account?.provider === "facebook" || account?.provider === "twitter") {
+      if (account?.provider === "google" || account?.provider === "facebook") {
         try {
           // Check if user exists
           const existingUser = await prisma.user.findUnique({

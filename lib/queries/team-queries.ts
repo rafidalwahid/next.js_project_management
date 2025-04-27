@@ -8,23 +8,20 @@ export const getTeamMembers = cache(async (
   projectId?: string,
   page = 1,
   limit = 10,
-  search?: string,
-  role?: string
+  search?: string
 ) => {
   try {
     const skip = (page - 1) * limit;
-    
+
     // Build where clause
     const where: any = {};
-    
+
     if (projectId) {
       where.projectId = projectId;
     }
-    
-    if (role) {
-      where.role = role;
-    }
-    
+
+    // Role filtering removed
+
     if (search) {
       where.user = {
         OR: [
@@ -33,10 +30,10 @@ export const getTeamMembers = cache(async (
         ],
       };
     }
-    
+
     // Get total count for pagination
     const totalCount = await prisma.teamMember.count({ where });
-    
+
     // Get team members with user details
     const teamMembers = await prisma.teamMember.findMany({
       where,
@@ -63,7 +60,7 @@ export const getTeamMembers = cache(async (
         createdAt: 'desc',
       },
     });
-    
+
     // Add task count for each team member
     const teamMembersWithTaskCount = await Promise.all(
       teamMembers.map(async (member) => {
@@ -75,14 +72,14 @@ export const getTeamMembers = cache(async (
             },
           },
         });
-        
+
         return {
           ...member,
           taskCount,
         };
       })
     );
-    
+
     return {
       teamMembers: teamMembersWithTaskCount,
       pagination: {
@@ -131,11 +128,11 @@ export const getTeamMember = cache(async (id: string) => {
         },
       },
     });
-    
+
     if (!teamMember) {
       return null;
     }
-    
+
     // Get task count
     const taskCount = await prisma.taskAssignee.count({
       where: {
@@ -145,7 +142,7 @@ export const getTeamMember = cache(async (id: string) => {
         },
       },
     });
-    
+
     return {
       ...teamMember,
       taskCount,
@@ -166,12 +163,12 @@ export const getUserTeamMemberships = cache(async (
 ) => {
   try {
     const skip = (page - 1) * limit;
-    
+
     // Get total count for pagination
     const totalCount = await prisma.teamMember.count({
       where: { userId },
     });
-    
+
     // Get team memberships with project details
     const teamMemberships = await prisma.teamMember.findMany({
       where: { userId },
@@ -200,7 +197,7 @@ export const getUserTeamMemberships = cache(async (
         createdAt: 'desc',
       },
     });
-    
+
     // Add task count for each project
     const membershipsWithTaskCount = await Promise.all(
       teamMemberships.map(async (membership) => {
@@ -212,14 +209,14 @@ export const getUserTeamMemberships = cache(async (
             },
           },
         });
-        
+
         return {
           ...membership,
           taskCount,
         };
       })
     );
-    
+
     return {
       teamMemberships: membershipsWithTaskCount,
       pagination: {
@@ -259,7 +256,7 @@ export const isUserProjectMember = cache(async (
         },
       },
     });
-    
+
     return !!teamMember;
   } catch (error) {
     console.error("Error checking if user is project member:", error);
@@ -267,26 +264,4 @@ export const isUserProjectMember = cache(async (
   }
 });
 
-/**
- * Get a user's role in a project
- */
-export const getUserProjectRole = cache(async (
-  userId: string,
-  projectId: string
-) => {
-  try {
-    const teamMember = await prisma.teamMember.findUnique({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId,
-        },
-      },
-    });
-    
-    return teamMember?.role || null;
-  } catch (error) {
-    console.error("Error getting user project role:", error);
-    return null;
-  }
-});
+// getUserProjectRole function removed as we no longer have project roles

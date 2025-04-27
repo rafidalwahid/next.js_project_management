@@ -125,8 +125,7 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Relations**: Many-to-one with Project and User (assignedTo), One-to-many with Activities
 
 #### TeamMember
-- **Fields**: id (cuid), role (String), userId (String), projectId (String), joinedAt (DateTime)
-- **Role Values**: "owner", "admin", "member"
+- **Fields**: id (cuid), userId (String), projectId (String), createdAt (DateTime), updatedAt (DateTime)
 - **Relations**: Many-to-one with User and Project
 - **Constraints**: Unique [userId, projectId] combination
 

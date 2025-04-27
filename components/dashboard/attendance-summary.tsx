@@ -9,6 +9,7 @@ interface AttendanceSummaryProps {
   period: "today" | "week" | "month"
   title: string
   subtitle?: string
+  className?: string
 }
 
 interface AttendanceData {
@@ -20,7 +21,7 @@ interface AttendanceData {
   currentSessionStart?: string
 }
 
-export function AttendanceSummary({ period, title, subtitle }: AttendanceSummaryProps) {
+export function AttendanceSummary({ period, title, subtitle, className }: AttendanceSummaryProps) {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<AttendanceData | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -137,7 +138,7 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
   }
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <CardDescription className="text-xs">
@@ -156,7 +157,7 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
         ) : (
           <div className="space-y-2">
             {period === "today" && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Status:</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
                   data?.currentStatus === "checked-in"
@@ -173,7 +174,7 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
             )}
 
             {period === "today" && data?.currentStatus === "checked-in" && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Current Session:</span>
                 <span className="text-xs">
                   {data?.currentSessionStart
@@ -183,7 +184,7 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
               </div>
             )}
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-1">
               <span className="text-xs font-medium">
                 {period === "today" ? "Hours Today:" : "Total Hours:"}
               </span>
@@ -191,7 +192,7 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
             </div>
 
             {period !== "today" && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Days Present:</span>
                 <span className="text-xs">
                   {data?.daysWorked} {period === "week" ? "/ 5" : ""} days
@@ -200,14 +201,14 @@ export function AttendanceSummary({ period, title, subtitle }: AttendanceSummary
             )}
 
             {period !== "today" && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Daily Average:</span>
                 <span className="text-xs">{data?.avgHoursPerDay} hrs/day</span>
               </div>
             )}
 
             {period === "month" && data?.attendanceRate !== undefined && (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Attendance Rate:</span>
                 <span className="text-xs">{data.attendanceRate}%</span>
               </div>

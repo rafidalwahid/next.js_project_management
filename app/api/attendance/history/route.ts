@@ -159,7 +159,16 @@ export async function GET(req: NextRequest) {
 
           const group = groupMap.get(groupKey);
           group.records.push(record);
-          group.totalHours += record.totalHours || 0;
+
+          // Add hours, but ensure we don't exceed 24 hours per day
+          // If this is a day grouping, limit total hours to 24
+          if (groupBy === 'day') {
+            group.totalHours = Math.min(group.totalHours + (record.totalHours || 0), 24);
+          } else {
+            // For week/month, we'll still add the hours but ensure each record doesn't exceed 24h
+            group.totalHours += Math.min(record.totalHours || 0, 24);
+          }
+
           group.checkInCount += 1;
         } catch (error) {
           console.error('Error processing record for grouping:', error, record);
@@ -171,11 +180,33 @@ export async function GET(req: NextRequest) {
       groupedRecords = Array.from(groupMap.values());
 
       // Calculate additional stats for each group
-      groupedRecords = groupedRecords.map(group => ({
-        ...group,
-        totalHours: parseFloat(group.totalHours.toFixed(2)),
-        averageHoursPerDay: parseFloat((group.totalHours / (group.records.length || 1)).toFixed(2))
-      }));
+      groupedRecords = groupedRecords.map(group => {
+        // For day grouping, average is just the total (since it's one day)
+        // For week/month, calculate based on unique days with records
+        let averageHoursPerDay;
+
+        if (groupBy === 'day') {
+          averageHoursPerDay = group.totalHours;
+        } else {
+          // Count unique days in this group
+          const uniqueDays = new Set(
+            group.records.map(record =>
+              new Date(record.checkInTime).toISOString().split('T')[0]
+            )
+          ).size;
+
+          // Calculate average hours per day based on unique days
+          averageHoursPerDay = uniqueDays > 0
+            ? group.totalHours / uniqueDays
+            : group.totalHours;
+        }
+
+        return {
+          ...group,
+          totalHours: parseFloat(group.totalHours.toFixed(2)),
+          averageHoursPerDay: parseFloat(averageHoursPerDay.toFixed(2))
+        };
+      });
 
       // Sort by date (newest first)
       try {

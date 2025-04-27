@@ -9,7 +9,6 @@ import {
   Briefcase,
   CheckSquare,
   Users,
-  Settings,
   UserCircle,
   Clock
 }
@@ -45,11 +44,6 @@ function getNavItems(userId?: string) {
       href: "/attendance",
       icon: Clock,
       isExpandable: true,
-    },
-    {
-      title: "Settings",
-      href: "/settings",
-      icon: Settings,
     },
   ];
 }

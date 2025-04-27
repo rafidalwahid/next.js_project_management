@@ -61,11 +61,8 @@ export async function checkTeamMemberPermission(
   // Check if user is the project creator
   const isProjectCreator = teamMember.project.createdById === session.user.id;
 
-  // Check if user is a team member with admin/owner role
-  const isProjectAdmin = userTeamMember?.role === 'owner' || userTeamMember?.role === 'admin';
-
-  // Check if user is a team member with manager role
-  const isProjectManager = userTeamMember?.role === 'manager';
+  // Check if user is manager
+  const isManager = session.user.role === 'manager';
 
   // Check if user is the team member themselves
   const isSelf = teamMember.userId === session.user.id;
@@ -86,42 +83,33 @@ export async function checkTeamMemberPermission(
       break;
   }
 
-  // First check role-based permissions
-  if (isAdmin) {
-    // Admins have all permissions
-    hasPermission = true;
-  } else if (isProjectCreator) {
-    // Project creators have all permissions for their projects
-    hasPermission = true;
-  } else {
-    // Check permission based on role
-    if (action === 'view') {
-      // Any team member can view other team members
-      hasPermission = !!userTeamMember || isSelf;
-    } else if (action === 'update') {
-      // Only admins and managers can update team members
-      hasPermission = isProjectAdmin || (isProjectManager && permissionName === 'team_edit');
+  // Determine permission based on action and user role
+  if (action === 'view') {
+    // Admins, managers, project creators, and team members can view
+    hasPermission = isAdmin || isManager || isProjectCreator || !!userTeamMember || isSelf;
+  } else if (action === 'update') {
+    // Only admins, managers, and project creators can update team members
+    hasPermission = isAdmin || isManager || isProjectCreator;
 
-      // Special case: can't update project creator's role
-      if (teamMember.project.createdById === teamMember.userId) {
-        return {
-          hasPermission: false,
-          teamMember,
-          error: "Cannot update the project creator's role"
-        };
-      }
-    } else if (action === 'delete') {
-      // Admins and project admins can remove team members, users can remove themselves
-      hasPermission = isProjectAdmin || isSelf;
+    // Special case: can't update project creator's membership
+    if (teamMember.project.createdById === teamMember.userId) {
+      return {
+        hasPermission: false,
+        teamMember,
+        error: "Cannot update the project creator's membership"
+      };
+    }
+  } else if (action === 'delete') {
+    // Admins, managers, and project creators can remove team members, users can remove themselves
+    hasPermission = isAdmin || isManager || isProjectCreator || isSelf;
 
-      // Special case: can't remove project creator
-      if (teamMember.project.createdById === teamMember.userId) {
-        return {
-          hasPermission: false,
-          teamMember,
-          error: "Cannot remove the project creator from the team"
-        };
-      }
+    // Special case: can't remove project creator
+    if (teamMember.project.createdById === teamMember.userId) {
+      return {
+        hasPermission: false,
+        teamMember,
+        error: "Cannot remove the project creator from the team"
+      };
     }
   }
 
@@ -195,10 +183,8 @@ export async function checkProjectTeamPermission(
   // Check if user is the project creator
   const isProjectCreator = project.createdById === session.user.id;
 
-  // Check if user is a team member with admin/owner role
-  const isProjectAdmin = project.teamMembers.some(tm =>
-    tm.role === 'owner' || tm.role === 'admin'
-  );
+  // Check if user is manager
+  const isManager = session.user.role === 'manager';
 
   // Check if user is any team member
   const isTeamMember = project.teamMembers.length > 0;
@@ -207,11 +193,11 @@ export async function checkProjectTeamPermission(
 
   // For view actions, any team member can view the team
   if (action === 'view') {
-    hasPermission = isAdmin || isProjectCreator || isTeamMember;
+    hasPermission = isAdmin || isManager || isProjectCreator || isTeamMember;
   }
-  // For add/manage actions, need admin permissions
+  // For add/manage actions, need admin or manager permissions
   else if (action === 'add' || action === 'manage') {
-    hasPermission = isAdmin || isProjectCreator || isProjectAdmin;
+    hasPermission = isAdmin || isManager || isProjectCreator;
   }
 
   return {

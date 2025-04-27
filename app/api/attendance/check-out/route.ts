@@ -59,7 +59,10 @@ export async function POST(req: NextRequest) {
     const checkInTime = new Date(attendance.checkInTime);
     const checkOutTime = new Date();
     const totalHoursDecimal = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
-    const totalHours = parseFloat(totalHoursDecimal.toFixed(2));
+
+    // Limit to 24 hours per day to prevent unrealistic values
+    const limitedHours = Math.min(totalHoursDecimal, 24);
+    const totalHours = parseFloat(limitedHours.toFixed(2));
 
     // Get location name if coordinates are provided
     let locationName = null;

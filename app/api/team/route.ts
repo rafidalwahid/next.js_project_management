@@ -6,11 +6,10 @@ import { authOptions } from "@/lib/auth-options";
 import { checkProjectTeamPermission } from "@/lib/permissions/team-permissions";
 import { logActivity } from "@/lib/activity-logger";
 
-// Validation schema for creating/updating team members
+// Validation schema for creating team members (no role field)
 const teamMemberSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
   projectId: z.string().min(1, "Project ID is required"),
-  role: z.enum(["owner", "admin", "manager", "member"]).default("member"),
 });
 
 // GET /api/team - Get team members with pagination and filtering
@@ -161,7 +160,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { userId, projectId, role } = validationResult.data;
+    const { userId, projectId } = validationResult.data;
 
     // Check if the project exists
     const project = await prisma.project.findUnique({
@@ -226,7 +225,6 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         projectId,
-        role,
       },
       include: {
         user: {
@@ -235,6 +233,7 @@ export async function POST(req: NextRequest) {
             name: true,
             email: true,
             image: true,
+            role: true, // Include system role
           },
         },
         project: {

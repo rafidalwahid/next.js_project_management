@@ -42,15 +42,15 @@ export default function InviteMemberPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">System Role</Label>
                 <Select>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="user">Regular User</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="admin">Administrator</SelectItem>
-                    <SelectItem value="viewer">Viewer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

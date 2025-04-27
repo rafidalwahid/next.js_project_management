@@ -133,7 +133,7 @@ export default function NewTaskPage() {
         router.push(`/tasks/${parentId}`)
       } else if (projectId) {
         // If task was created from a project page, redirect back to that project
-        router.push(`/projects/edit/${projectId}`)
+        router.push(`/projects/${projectId}`)
       } else {
         // Otherwise go to the task list
         router.push("/tasks")

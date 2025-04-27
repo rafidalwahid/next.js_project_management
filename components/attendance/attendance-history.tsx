@@ -155,7 +155,7 @@ export function AttendanceHistory() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -172,10 +172,10 @@ export function AttendanceHistory() {
           </Button>
         </form>
 
-        <div className="flex items-center gap-2 self-end md:self-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <span className="text-sm whitespace-nowrap">Group by:</span>
           <select
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-1 sm:flex-none"
             value={groupBy || ''}
             onChange={(e) => setGroupBy(e.target.value || null)}
           >
@@ -255,7 +255,7 @@ export function AttendanceHistory() {
                               <Info className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
+                          <DialogContent className="w-[95vw] max-w-3xl">
                             <DialogHeader>
                               <DialogTitle>
                                 {groupBy === 'day' ? (
@@ -273,47 +273,49 @@ export function AttendanceHistory() {
                               </DialogDescription>
                             </DialogHeader>
                             <div className="max-h-[60vh] overflow-auto">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Check In</TableHead>
-                                    <TableHead>Check Out</TableHead>
-                                    <TableHead>Duration</TableHead>
-                                    <TableHead>Location</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {group.records.map((record: any) => (
-                                    <TableRow key={record.id}>
-                                      <TableCell>
-                                        {safeFormat(record.checkInTime, "MMM d, yyyy")}
-                                      </TableCell>
-                                      <TableCell>
-                                        {safeFormat(record.checkInTime, "h:mm a")}
-                                      </TableCell>
-                                      <TableCell>
-                                        {record.checkOutTime
-                                          ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
-                                          : "In progress"}
-                                      </TableCell>
-                                      <TableCell>
-                                        {calculateDuration(record.checkInTime, record.checkOutTime)}
-                                      </TableCell>
-                                      <TableCell>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0"
-                                          onClick={() => viewLocationDetails(record)}
-                                        >
-                                          <MapPin className="h-4 w-4" />
-                                        </Button>
-                                      </TableCell>
+                              <div className="overflow-x-auto">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="whitespace-nowrap">Date</TableHead>
+                                      <TableHead className="whitespace-nowrap">Check In</TableHead>
+                                      <TableHead className="whitespace-nowrap">Check Out</TableHead>
+                                      <TableHead className="whitespace-nowrap">Duration</TableHead>
+                                      <TableHead className="whitespace-nowrap">Location</TableHead>
                                     </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {group.records.map((record: any) => (
+                                      <TableRow key={record.id}>
+                                        <TableCell className="whitespace-nowrap">
+                                          {safeFormat(record.checkInTime, "MMM d, yyyy")}
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                          {safeFormat(record.checkInTime, "h:mm a")}
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                          {record.checkOutTime
+                                            ? safeFormat(record.checkOutTime, "h:mm a", "Invalid time")
+                                            : "In progress"}
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                          {calculateDuration(record.checkInTime, record.checkOutTime)}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => viewLocationDetails(record)}
+                                          >
+                                            <MapPin className="h-4 w-4" />
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -371,26 +373,27 @@ export function AttendanceHistory() {
                               <MapPin className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="w-[95vw] max-w-3xl">
                             <DialogHeader>
                               <DialogTitle>Location Details</DialogTitle>
                               <DialogDescription>
                                 Attendance record for {safeFormat(record.checkInTime, "MMMM d, yyyy")}
                               </DialogDescription>
                             </DialogHeader>
-                            <div className="space-y-6 py-4">
+                            <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
                               <div className="space-y-4">
                                 <h4 className="font-medium flex items-center gap-2">
-                                  <MapPin className="h-4 w-4" />
+                                  <MapPin className="h-4 w-4 flex-shrink-0" />
                                   Check-in Location
                                 </h4>
                                 {record.checkInLatitude && record.checkInLongitude ? (
                                   <div className="text-sm space-y-2">
                                     <div className="space-y-2">
                                       <div className="bg-muted/50 p-3 rounded-md">
-                                        <p className="font-medium">{record.checkInLocationName || 'Location name not available'}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          Coordinates: {record.checkInLatitude.toFixed(6)}, {record.checkInLongitude.toFixed(6)}
+                                        <p className="font-medium break-words">{record.checkInLocationName || 'Location name not available'}</p>
+                                        <p className="text-xs text-muted-foreground mt-1 break-all">
+                                          <span className="inline-block">Coordinates: </span>
+                                          <span className="inline-block">{record.checkInLatitude.toFixed(6)}, {record.checkInLongitude.toFixed(6)}</span>
                                         </p>
                                       </div>
 
@@ -408,15 +411,15 @@ export function AttendanceHistory() {
                                         View larger map <ExternalLink className="h-3 w-3" />
                                       </a>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                                       <p className="text-xs text-muted-foreground">
                                         {safeFormat(record.checkInTime, "MMM d, yyyy 'at' h:mm:ss a")}
                                       </p>
                                     </div>
                                     <div className="flex items-start gap-2">
-                                      <Laptop className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
-                                      <p className="text-xs text-muted-foreground">
+                                      <Laptop className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                      <p className="text-xs text-muted-foreground break-words">
                                         {record.checkInDeviceInfo ? getDeviceInfo(record.checkInDeviceInfo) : 'Device information not available'}
                                       </p>
                                     </div>
@@ -429,16 +432,17 @@ export function AttendanceHistory() {
                               {record.checkOutTime && (
                                 <div className="space-y-4 border-t pt-4">
                                   <h4 className="font-medium flex items-center gap-2">
-                                    <MapPin className="h-4 w-4" />
+                                    <MapPin className="h-4 w-4 flex-shrink-0" />
                                     Check-out Location
                                   </h4>
                                   {record.checkOutLatitude && record.checkOutLongitude ? (
                                     <div className="text-sm space-y-2">
                                       <div className="space-y-2">
                                         <div className="bg-muted/50 p-3 rounded-md">
-                                          <p className="font-medium">{record.checkOutLocationName || 'Location name not available'}</p>
-                                          <p className="text-xs text-muted-foreground mt-1">
-                                            Coordinates: {record.checkOutLatitude.toFixed(6)}, {record.checkOutLongitude.toFixed(6)}
+                                          <p className="font-medium break-words">{record.checkOutLocationName || 'Location name not available'}</p>
+                                          <p className="text-xs text-muted-foreground mt-1 break-all">
+                                            <span className="inline-block">Coordinates: </span>
+                                            <span className="inline-block">{record.checkOutLatitude.toFixed(6)}, {record.checkOutLongitude.toFixed(6)}</span>
                                           </p>
                                         </div>
 
@@ -456,15 +460,15 @@ export function AttendanceHistory() {
                                           View larger map <ExternalLink className="h-3 w-3" />
                                         </a>
                                       </div>
-                                      <div className="flex items-center gap-2">
-                                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                                         <p className="text-xs text-muted-foreground">
                                           {safeFormat(record.checkOutTime, "MMM d, yyyy 'at' h:mm:ss a")}
                                         </p>
                                       </div>
                                       <div className="flex items-start gap-2">
-                                        <Laptop className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
-                                        <p className="text-xs text-muted-foreground">
+                                        <Laptop className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                        <p className="text-xs text-muted-foreground break-words">
                                           {record.checkOutDeviceInfo ? getDeviceInfo(record.checkOutDeviceInfo) : 'Device information not available'}
                                         </p>
                                       </div>
@@ -477,7 +481,7 @@ export function AttendanceHistory() {
 
                               <div className="bg-primary/5 p-4 rounded-md text-sm border">
                                 <p className="font-medium flex items-center gap-2">
-                                  <Info className="h-4 w-4" />
+                                  <Info className="h-4 w-4 flex-shrink-0" />
                                   Session Summary
                                 </p>
                                 <div className="mt-2 space-y-1">
@@ -522,12 +526,13 @@ export function AttendanceHistory() {
                 <div className="text-sm text-muted-foreground">
                   Page {page} of {totalPages}
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handlePreviousPage}
                     disabled={page <= 1}
+                    className="flex-1 sm:flex-initial"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     {!isMobile && "Previous"}
@@ -537,6 +542,7 @@ export function AttendanceHistory() {
                     size="sm"
                     onClick={handleNextPage}
                     disabled={page >= totalPages}
+                    className="flex-1 sm:flex-initial"
                   >
                     {!isMobile && "Next"}
                     <ChevronRight className="h-4 w-4 ml-1" />

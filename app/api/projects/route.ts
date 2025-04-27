@@ -76,12 +76,7 @@ export async function GET(req: NextRequest) {
               email: true,
             }
           },
-          status: true, // Primary status
-          statuses: { // All statuses
-            include: {
-              status: true
-            }
-          },
+          statuses: true, // Project-specific statuses
           _count: {
             select: {
               tasks: true,
@@ -132,11 +127,26 @@ const createProjectSchema = z.object({
   title: z.string()
     .min(3, "Project title must be at least 3 characters long")
     .max(100, "Project title cannot exceed 100 characters"),
-  description: z.string().optional(),
-  statusId: z.string().optional(),
-  statusIds: z.array(z.string()).optional(), // Multiple status IDs
+  description: z.string().optional().nullable(),
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
+  // Handle estimatedTime as string or number
+  estimatedTime: z.union([
+    z.string().optional().nullable().transform(val => {
+      if (!val) return null;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    }),
+    z.number().optional().nullable()
+  ]),
+  initialStatuses: z.array(
+    z.object({
+      name: z.string().min(1).max(50),
+      color: z.string().optional(),
+      description: z.string().optional().nullable(),
+      isDefault: z.boolean().optional(),
+    })
+  ).optional(),
 });
 
 // POST handler to create a project
@@ -175,66 +185,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get default status or use provided statusId
-    let statusId = validationResult.data.statusId;
-
-    if (!statusId) {
-      // Find the default status
-      const defaultStatus = await prisma.projectStatus.findFirst({
-        where: { isDefault: true }
-      });
-
-      if (!defaultStatus) {
-        // If no default status exists, get any status
-        const anyStatus = await prisma.projectStatus.findFirst();
-
-        if (!anyStatus) {
-          return NextResponse.json(
-            { error: "No project statuses found in the system" },
-            { status: 500 }
-          );
-        }
-
-        statusId = anyStatus.id;
-      } else {
-        statusId = defaultStatus.id;
-      }
-    }
+    // Log the validated data for debugging
+    console.log("Validated project data:", JSON.stringify(validationResult.data, null, 2));
 
     // Create project with user association
     const project = await prisma.project.create({
       data: {
         title: validationResult.data.title,
         description: validationResult.data.description,
-        startDate: validationResult.data.startDate && validationResult.data.startDate.trim() !== ""
+        startDate: validationResult.data.startDate && typeof validationResult.data.startDate === 'string' && validationResult.data.startDate.trim() !== ""
           ? new Date(validationResult.data.startDate)
           : null,
-        endDate: validationResult.data.endDate && validationResult.data.endDate.trim() !== ""
+        endDate: validationResult.data.endDate && typeof validationResult.data.endDate === 'string' && validationResult.data.endDate.trim() !== ""
           ? new Date(validationResult.data.endDate)
           : null,
-        statusId: statusId, // Primary status (for backward compatibility)
+        estimatedTime: validationResult.data.estimatedTime !== undefined
+          ? validationResult.data.estimatedTime
+          : null,
         createdById: user.id,
         teamMembers: {
           create: {
             userId: user.id,
-            role: 'OWNER'
           }
         },
-        // Create status links for multiple statuses
-        statuses: {
-          create: [
-            // Primary status link
-            {
-              statusId: statusId,
-              isPrimary: true
-            },
-            // Additional statuses if provided
-            ...(validationResult.data.statusIds?.filter(id => id !== statusId).map(id => ({
-              statusId: id,
-              isPrimary: false
-            })) || [])
-          ]
-        }
       },
       include: {
         createdBy: {
@@ -255,20 +228,135 @@ export async function POST(req: NextRequest) {
             }
           }
         },
-        status: true, // Include primary status
-        statuses: { // Include all statuses
-          include: {
-            status: true
-          }
-        }
+        statuses: true
       }
     });
 
-    return NextResponse.json({ project });
+    // Create initial statuses if provided
+    if (validationResult.data.initialStatuses && validationResult.data.initialStatuses.length > 0) {
+      const statuses = [];
+
+      // Find if there's a default status in the initial statuses
+      const hasDefaultStatus = validationResult.data.initialStatuses.some(status => status.isDefault);
+
+      // Create each status
+      for (let i = 0; i < validationResult.data.initialStatuses.length; i++) {
+        const statusData = validationResult.data.initialStatuses[i];
+
+        // If no default status is specified, make the first one default
+        const isDefault = statusData.isDefault || (!hasDefaultStatus && i === 0);
+
+        const status = await prisma.projectStatus.create({
+          data: {
+            name: statusData.name,
+            color: statusData.color || "#6E56CF", // Default color if not provided
+            description: statusData.description,
+            order: i,
+            isDefault,
+            projectId: project.id,
+          }
+        });
+
+        statuses.push(status);
+      }
+
+      // Update the project with the created statuses
+      const updatedProject = await prisma.project.findUnique({
+        where: { id: project.id },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            }
+          },
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                }
+              }
+            }
+          },
+          statuses: true
+        }
+      });
+
+      return NextResponse.json({ project: updatedProject });
+    } else {
+      // Create default statuses if none provided
+      const defaultStatuses = [
+        { name: "To Do", color: "#3498db", isDefault: true, order: 0 },
+        { name: "In Progress", color: "#f39c12", isDefault: false, order: 1 },
+        { name: "Done", color: "#2ecc71", isDefault: false, order: 2 }
+      ];
+
+      for (const statusData of defaultStatuses) {
+        await prisma.projectStatus.create({
+          data: {
+            ...statusData,
+            projectId: project.id,
+          }
+        });
+      }
+
+      // Update the project with the created statuses
+      const updatedProject = await prisma.project.findUnique({
+        where: { id: project.id },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            }
+          },
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                }
+              }
+            }
+          },
+          statuses: true
+        }
+      });
+
+      return NextResponse.json({ project: updatedProject });
+    }
   } catch (error) {
     console.error("Error creating project:", error);
+
+    // Check if it's a Prisma error
+    if (error.name === 'PrismaClientKnownRequestError' || error.name === 'PrismaClientValidationError') {
+      return NextResponse.json(
+        {
+          error: "Database validation error",
+          details: {
+            message: error.message,
+            code: error.code,
+          }
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "An error occurred while creating the project", details: { error: String(error) } },
+      {
+        error: "An error occurred while creating the project",
+        details: {
+          message: error instanceof Error ? error.message : String(error),
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }
+      },
       { status: 500 }
     );
   }

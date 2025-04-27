@@ -177,15 +177,15 @@ export function AttendanceWidget() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-5">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div>
               <div className="flex items-center mb-4">
                 <div className="h-2 w-2 rounded-full bg-primary/70 mr-2"></div>
                 <Skeleton className="h-3 w-16" />
               </div>
-              <div className="space-y-5">
+              <div className="space-y-4 md:space-y-5">
                 <div className="flex items-start gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
                   <div className="space-y-1 flex-1">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-32" />
@@ -193,13 +193,13 @@ export function AttendanceWidget() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full" />
+                    <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
                     <Skeleton className="h-4 w-16" />
                   </div>
                   <div className="ml-6 space-y-1">
                     <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-40" />
-                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-3 w-[90%]" />
+                    <Skeleton className="h-3 w-[80%]" />
                   </div>
                 </div>
                 <Skeleton className="h-[180px] w-full rounded-lg" />
@@ -211,7 +211,7 @@ export function AttendanceWidget() {
                 <Skeleton className="h-3 w-16" />
               </div>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                   <Skeleton className="h-3 w-20" />
                   <Skeleton className="h-3 w-full" />
                   <Skeleton className="h-3 w-20" />
@@ -222,10 +222,10 @@ export function AttendanceWidget() {
                   <Skeleton className="h-3 w-full" />
                 </div>
                 <div className="pt-3 mt-2 border-t flex justify-center">
-                  <Skeleton className="h-3 w-48" />
+                  <Skeleton className="h-3 w-[80%] sm:w-48" />
                 </div>
-                <div className="flex justify-end mt-2">
-                  <Skeleton className="h-9 w-24 rounded-md" />
+                <div className="flex justify-center sm:justify-end mt-2">
+                  <Skeleton className="h-9 w-full sm:w-24 rounded-md" />
                 </div>
               </div>
             </div>
@@ -254,7 +254,7 @@ export function AttendanceWidget() {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Left column */}
           <div>
             <div className="flex items-center mb-4">
@@ -263,17 +263,17 @@ export function AttendanceWidget() {
             </div>
 
             {currentAttendance && !currentAttendance.checkOutTime ? (
-              <div className="space-y-5">
+              <div className="space-y-4 md:space-y-5">
                 <div className="flex items-center bg-primary/5 p-3 rounded-lg border border-primary/20">
-                  <div className="bg-primary/10 p-2 rounded-full mr-3">
+                  <div className="bg-primary/10 p-2 rounded-full mr-3 flex-shrink-0">
                     <Clock className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <div className="text-sm font-medium flex items-center gap-2">
-                      Currently Checked In
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] h-5">Active</Badge>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                      <span className="truncate">Currently Checked In</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] h-5 flex-shrink-0">Active</Badge>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
+                    <div className="text-xs text-muted-foreground mt-0.5 truncate">
                       {formatDistanceToNow(new Date(currentAttendance.checkInTime), { addSuffix: true })}
                     </div>
                   </div>
@@ -281,19 +281,20 @@ export function AttendanceWidget() {
 
                 <div className="space-y-3 bg-muted/30 p-3 rounded-lg border">
                   <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-primary" />
+                    <MapPin className="h-4 w-4 mr-2 text-primary flex-shrink-0" />
                     <div className="text-sm font-medium">Location</div>
                   </div>
                   <div className="ml-6 space-y-1">
-                    <div className="text-xs font-medium">
+                    <div className="text-xs font-medium break-words">
                       {currentAttendance.checkInLocationName || 'Location name not available'}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Coordinates: {currentAttendance.checkInLatitude?.toFixed(6)}, {currentAttendance.checkInLongitude?.toFixed(6)}
+                    <div className="text-xs text-muted-foreground break-all">
+                      <span className="inline-block">Coordinates: </span>
+                      <span className="inline-block">{currentAttendance.checkInLatitude?.toFixed(6)}, {currentAttendance.checkInLongitude?.toFixed(6)}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(currentAttendance.checkInTime), "MMM d, yyyy 'at' h:mm a")}
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
+                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{format(new Date(currentAttendance.checkInTime), "MMM d, yyyy 'at' h:mm a")}</span>
                     </div>
                   </div>
                 </div>
@@ -323,15 +324,15 @@ export function AttendanceWidget() {
                 {currentAttendance ? (
                   <div className="space-y-3">
                     <div className="flex items-center">
-                      <div className="bg-muted/50 p-2 rounded-full mr-3">
+                      <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
                         <CheckCircle className="h-4 w-4 text-green-600" />
                       </div>
-                      <div>
-                        <div className="text-sm font-medium flex items-center gap-2">
-                          Checked Out
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] h-5">Complete</Badge>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                          <span className="truncate">Checked Out</span>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] h-5 flex-shrink-0">Complete</Badge>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
+                        <div className="text-xs text-muted-foreground mt-0.5 truncate">
                           Last session: {formatDistanceToNow(new Date(currentAttendance.checkOutTime || currentAttendance.checkInTime), { addSuffix: true })}
                         </div>
                       </div>
@@ -339,7 +340,7 @@ export function AttendanceWidget() {
                   </div>
                 ) : (
                   <div className="flex items-center">
-                    <div className="bg-muted/50 p-2 rounded-full mr-3">
+                    <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
                       <Info className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-sm">You haven't checked in today</span>
@@ -358,37 +359,37 @@ export function AttendanceWidget() {
 
             {currentAttendance && currentAttendance.checkInDeviceInfo ? (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-y-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-xs">
                   <div className="font-medium">Device Name:</div>
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground break-words">
                     {currentAttendance.checkInDeviceInfo ?
                       getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[0] :
                       'Unknown'}
                   </div>
 
                   <div className="font-medium">Device Type:</div>
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground break-words">
                     {currentAttendance.checkInDeviceInfo ?
                       getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[1] :
                       'Unknown'}
                   </div>
 
                   <div className="font-medium">Operating System:</div>
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground break-words">
                     {currentAttendance.checkInDeviceInfo ?
                       getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[2] :
                       'Unknown'}
                   </div>
 
                   <div className="font-medium">Browser:</div>
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground break-words">
                     {currentAttendance.checkInDeviceInfo ?
                       getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[3] :
                       'Unknown'}
                   </div>
 
                   <div className="font-medium">IP Address:</div>
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground break-words">
                     {currentAttendance.checkInIpAddress || 'Unknown'}
                   </div>
                 </div>
@@ -398,14 +399,14 @@ export function AttendanceWidget() {
                   Location is only recorded during check-in/out
                 </div>
 
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-center sm:justify-end mt-4">
                   {currentAttendance && !currentAttendance.checkOutTime ? (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleCheckOut}
                       disabled={checkingOut}
-                      className="text-xs"
+                      className="text-xs w-full sm:w-auto"
                     >
                       {checkingOut ? (
                         <>
@@ -427,7 +428,7 @@ export function AttendanceWidget() {
                       size="sm"
                       onClick={handleCheckIn}
                       disabled={checkingIn}
-                      className="text-xs"
+                      className="text-xs w-full sm:w-auto"
                     >
                       {checkingIn ? (
                         <>

@@ -16,28 +16,28 @@ model User {
   image                 String?
   password              String?
   role                  String              @default("user")
-  bio                   String?             @db.Text
-  jobTitle              String?
-  department            String?
-  location              String?
-  phone                 String?
-  skills                String?             @db.Text
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   lastLogin             DateTime?
+  bio                   String?             @db.Text
+  department            String?
+  jobTitle              String?
+  location              String?
+  phone                 String?
+  skills                String?             @db.Text
   accounts              Account[]
   activities            Activity[]
   attendanceAdjustments Attendance[]        @relation("AttendanceAdjustments")
   attendanceRecords     Attendance[]
   attendanceSettings    AttendanceSettings?
+  documents             Document[]
   projects              Project[]
-
-  sessions        Session[]
-  tasks           Task[]           @relation("TaskAssignedTo")
-  taskAssignments TaskAssignee[]
-  teams           TeamMember[]
-  userPermissions UserPermission[]
-  userRoles       UserRole[]
+  sessions              Session[]
+  tasks                 Task[]              @relation("TaskAssignedTo")
+  taskAssignments       TaskAssignee[]
+  teams                 TeamMember[]
+  userPermissions       UserPermission[]
+  userRoles             UserRole[]
 
   @@map("user")
 }
@@ -156,82 +156,76 @@ model UserPermission {
 }
 
 model Project {
-  id          String              @id @default(cuid())
-  title       String
-  description String?
-  statusId    String // Primary status (for backward compatibility)
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  createdById String
-  activities  Activity[]
-  attendances Attendance[]
-  events      Event[]
-  createdBy   User                @relation(fields: [createdById], references: [id])
-  status      ProjectStatus       @relation(fields: [statusId], references: [id])
-  statuses    ProjectStatusLink[] // Multiple statuses
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  dueDate        DateTime? // Derived field
+  totalTimeSpent Float? // In hours
+  estimatedTime  Float? // In hours
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdById    String
+  activities     Activity[]
+  attendances    Attendance[]
+  events         Event[]
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  statuses       ProjectStatus[] // Project-specific statuses
+  tasks          Task[]
+  teamMembers    TeamMember[]
 
-  tasks       Task[]
-  teamMembers TeamMember[]
-
-  @@index([statusId])
   @@index([createdById])
   @@map("project")
 }
 
 model ProjectStatus {
-  id           String              @id @default(cuid())
-  name         String
-  color        String?
-  description  String?
-  isDefault    Boolean             @default(false)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  projects     Project[] // For backward compatibility
-  projectLinks ProjectStatusLink[] // Multiple projects
+  id          String   @id @default(cuid())
+  name        String
+  color       String?
+  description String?
+  order       Int      @default(0)
+  isDefault   Boolean  @default(false)
+  projectId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks       Task[] // Tasks in this status
 
+  @@unique([projectId, name])
+  @@index([projectId])
   @@map("project_status")
 }
 
-model ProjectStatusLink {
-  id        String        @id @default(cuid())
-  projectId String
-  statusId  String
-  isPrimary Boolean       @default(false)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  status    ProjectStatus @relation(fields: [statusId], references: [id], onDelete: Cascade)
+model Task {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?        @db.Text
+  priority      String         @default("medium")
+  startDate     DateTime?
+  endDate       DateTime?
+  dueDate       DateTime?
+  timeSpent     Float? // In hours
+  estimatedTime Float? // In hours
+  projectId     String
+  statusId      String? // Current status ID
+  parentId      String?
+  order         Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  completed     Boolean        @default(false)
+  activities    Activity[]
+  attendances   Attendance[]
+  assignedTo    User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
+  assignedToId  String?
+  parent        Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks      Task[]         @relation("SubTasks")
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status        ProjectStatus? @relation(fields: [statusId], references: [id])
+  assignees     TaskAssignee[]
 
-  @@unique([projectId, statusId])
   @@index([projectId])
   @@index([statusId])
-  @@map("project_status_link")
-}
-
-model Task {
-  id           String         @id @default(cuid())
-  title        String
-  description  String?        @db.Text
-  priority     String         @default("medium")
-  dueDate      DateTime?
-  projectId    String
-  assignedToId String?
-  parentId     String?
-  order        Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  completed    Boolean        @default(false)
-  activities   Activity[]
-  attendances  Attendance[]
-  assignedTo   User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  parent       Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks     Task[]         @relation("SubTasks")
-  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  assignees    TaskAssignee[]
-
-  @@index([projectId])
   @@index([assignedToId])
   @@index([parentId])
   @@map("task")
@@ -256,7 +250,6 @@ model TeamMember {
   id        String   @id @default(cuid())
   projectId String
   userId    String
-  role      String   @default("member")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -265,9 +258,6 @@ model TeamMember {
   @@unique([projectId, userId])
   @@index([projectId])
   @@index([userId])
-  @@index([role])
-  @@index([projectId, role])
-  @@index([userId, role])
   @@map("team_member")
 }
 
@@ -358,4 +348,20 @@ model Activity {
   @@index([createdAt])
   @@index([entityType, entityId])
   @@map("activity")
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  fileType    String
+  fileSize    Int
+  filePath    String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("document")
 }

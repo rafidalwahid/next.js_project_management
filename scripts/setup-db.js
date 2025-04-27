@@ -1,40 +1,67 @@
+// scripts/setup-db.js
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+const dotenv = require('dotenv');
 
-async function setupDatabase() {
-  // Extract database name from the DATABASE_URL
-  const dbUrlRegex = /mysql:\/\/.*?@.*?:(.*?)\/(.*?)(\?|$)/;
-  const match = process.env.DATABASE_URL.match(dbUrlRegex);
+// Load environment variables
+dotenv.config();
+
+async function main() {
+  console.log('Setting up database...');
+  
+  // Parse the DATABASE_URL to get the database name
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) {
+    console.error('DATABASE_URL environment variable is not set');
+    process.exit(1);
+  }
+  
+  // Extract database connection details from the URL
+  // Format: mysql://username:password@host:port/database
+  const dbUrlRegex = /mysql:\/\/([^:]+):([^@]*)@([^:]+):(\d+)\/([^?]+)/;
+  const match = dbUrl.match(dbUrlRegex);
   
   if (!match) {
     console.error('Invalid DATABASE_URL format');
     process.exit(1);
   }
   
-  const [, port, dbName] = match;
+  const [, username, password, host, port, dbName] = match;
   
   try {
-    // Connect to MySQL server without specifying a database
+    // Create connection without database name
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      port: port || 3306,
-      user: 'root',
-      password: ''
+      host,
+      port: parseInt(port, 10),
+      user: username,
+      password: password || undefined, // Handle empty password
     });
     
-    console.log('Connected to MySQL server');
+    console.log(`Checking if database '${dbName}' exists...`);
     
-    // Create the database if it doesn't exist
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-    console.log(`Database "${dbName}" created or already exists`);
+    // Check if database exists
+    const [rows] = await connection.execute(
+      `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?`,
+      [dbName]
+    );
     
-    // Close the connection
+    if (rows.length === 0) {
+      console.log(`Database '${dbName}' does not exist. Creating...`);
+      await connection.execute(`CREATE DATABASE \`${dbName}\``);
+      console.log(`Database '${dbName}' created successfully!`);
+    } else {
+      console.log(`Database '${dbName}' already exists.`);
+    }
+    
     await connection.end();
-    console.log('Database setup completed');
+    console.log('Database setup completed successfully!');
   } catch (error) {
     console.error('Error setting up database:', error);
     process.exit(1);
   }
 }
 
-setupDatabase(); 
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

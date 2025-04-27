@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Users, ChevronDown, ChevronRight, UserCircle, UserPlus, UsersRound, ShieldCheck } from "lucide-react"
+import { Users, ChevronDown, ChevronRight, UserCircle, UserPlus, UsersRound, ShieldCheck, ClipboardCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Collapsible,
@@ -34,6 +34,12 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       href: userId ? `/profile/${userId}` : "/profile",
       icon: UserCircle,
       roles: ["user", "manager", "admin"], // All users can see their profile
+    },
+    {
+      title: "Team Attendance",
+      href: "/team/attendance",
+      icon: ClipboardCheck,
+      roles: ["manager", "admin"], // Only managers and admins can view team attendance
     },
     {
       title: "Add Member",

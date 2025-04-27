@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RoleBadge } from "@/components/ui/role-badge"
 import { UserProjectRoles } from "@/components/profile/user-project-roles"
+import { UserAttendanceSummary } from "@/components/profile/user-attendance-summary"
+import { UserDocumentList } from "@/components/profile/user-document-list"
 
 interface UserProfileViewProps {
   profile: UserProfile
@@ -69,38 +71,57 @@ export function UserProfileView({
   }
 
   // Format dates in a more readable way
-  const formattedCreatedDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric'
-  });
+  const formattedCreatedDate = formatDate(profile.createdAt, "MMM d, yyyy");
 
   // Format last login date if available
-  const lastLoginDate = profile.lastLogin
-    ? new Date(profile.lastLogin).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    : 'Not available';
+  const lastLoginDate = formatDate(profile.lastLogin);
 
   // Handle document upload button click
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection for documents
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // In a real app, you would upload the file to your server here
-      console.log("File selected:", files[0].name);
+      try {
+        const file = files[0];
+        console.log("File selected:", file.name);
 
-      // Reset the input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        // Create form data
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Upload the file
+        const response = await fetch(`/api/users/${profile.id}/documents`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to upload document");
+        }
+
+        // Refresh the documents list
+        setActiveTab("documents");
+
+        // Show success message
+        alert("Document uploaded successfully!");
+
+        // Reset the input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (error) {
+        console.error("Error uploading document:", error);
+        alert("Failed to upload document. Please try again.");
+
+        // Reset the input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     }
   };
@@ -219,9 +240,9 @@ export function UserProfileView({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             {isOwnProfile ? 'My Profile' : `${profile.name || 'User'}'s Profile`}
           </h1>
           <p className="text-muted-foreground">
@@ -230,25 +251,32 @@ export function UserProfileView({
         </div>
 
         {canEdit && (
-          <Button variant="default" onClick={handleEditProfileClick}>
+          <Button variant="default" onClick={handleEditProfileClick} className="w-full sm:w-auto">
             <Pencil className="mr-2 h-4 w-4" /> Edit Profile
           </Button>
         )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full max-w-md">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
+        <TabsList className="w-full flex flex-wrap">
+          <TabsTrigger value="overview" className="flex-1 min-w-[100px]">Overview</TabsTrigger>
+          <TabsTrigger value="attendance" className="flex-1 min-w-[100px]">Attendance</TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 min-w-[100px]">Documents</TabsTrigger>
+          <TabsTrigger value="projects" className="flex-1 min-w-[100px]">Projects</TabsTrigger>
+          <TabsTrigger value="tasks" className="flex-1 min-w-[100px]">Tasks</TabsTrigger>
+          <TabsTrigger value="activity" className="flex-1 min-w-[100px]">Activity</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="attendance" className="mt-6">
+          <div className="grid gap-6 md:grid-cols-1">
+            <UserAttendanceSummary userId={profile.id} />
+          </div>
+        </TabsContent>
+
         <TabsContent value="overview" className="mt-6">
-          <div className="grid gap-6 md:grid-cols-7">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-7">
             {/* Profile card */}
-            <Card className="md:col-span-2">
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Profile</CardTitle>
               </CardHeader>
@@ -329,48 +357,51 @@ export function UserProfileView({
               </CardContent>
             </Card>
 
-            {/* Status cards */}
-            <div className="md:col-span-5 grid gap-6 md:grid-cols-3">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm text-muted-foreground">System Role</p>
-                    <div className="flex items-center gap-2">
-                      <RoleBadge role={profile.role} type="system" showTooltip={true} />
+            {/* Right column */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* Status cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-sm text-muted-foreground">System Role</p>
+                      <div className="flex items-center gap-2">
+                        <RoleBadge role={profile.role} type="system" showTooltip={true} />
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8">
-                        Active
-                      </Badge>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-sm text-muted-foreground">Status</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8">
+                          Active
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm text-muted-foreground">Last Login</p>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-xl font-bold">
-                        {lastLoginDate === 'Not available'
-                          ? <span className="text-sm font-normal text-muted-foreground">Not tracked</span>
-                          : lastLoginDate}
-                      </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-sm text-muted-foreground">Last Login</p>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-xl font-bold">
+                          {profile.lastLogin
+                            ? formatDate(profile.lastLogin)
+                            : <span className="text-sm font-normal text-muted-foreground">Not tracked</span>}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* User information */}
-              <Card className="md:col-span-3">
+              <Card>
                 <CardHeader>
                   <CardTitle>User Information</CardTitle>
                   <p className="text-sm text-muted-foreground">
@@ -378,14 +409,14 @@ export function UserProfileView({
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2">
+                  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Full Name</h3>
                       <p>{profile.name || "Admin User"}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Email Address</h3>
-                      <p>{profile.email}</p>
+                      <p className="break-words">{profile.email}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">System Role</h3>
@@ -404,9 +435,9 @@ export function UserProfileView({
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Login</h3>
                       <p>
-                        {lastLoginDate === 'Not available'
-                          ? <span className="text-sm text-muted-foreground">Not tracked in this application</span>
-                          : lastLoginDate}
+                        {profile.lastLogin
+                          ? formatDate(profile.lastLogin)
+                          : <span className="text-sm text-muted-foreground">Not tracked</span>}
                       </p>
                     </div>
                   </div>
@@ -438,28 +469,26 @@ export function UserProfileView({
 
         <TabsContent value="documents" className="mt-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <CardTitle>Documents</CardTitle>
-              <Button onClick={handleUploadClick} size="sm" className="ml-auto">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload
-              </Button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
+              {canEdit && (
+                <>
+                  <Button onClick={handleUploadClick} size="sm" className="w-full sm:w-auto">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif"
+                  />
+                </>
+              )}
             </CardHeader>
             <CardContent>
-              {/* Check if real documents exist - no documents property yet, so show empty state */}
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <FileText className="h-10 w-10 text-muted-foreground/60 mb-4" />
-                <h3 className="text-lg font-medium">No Documents</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You haven't uploaded any documents yet.
-                </p>
-              </div>
+              <UserDocumentList userId={profile.id} canEdit={canEdit} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -480,11 +509,11 @@ export function UserProfileView({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {projects.map(project => (
-                    <div key={project.id} className="rounded-lg border p-4">
-                      <h3 className="text-lg font-semibold">{project.title}</h3>
-                      <p className="text-sm text-muted-foreground">Project ID: {project.id}</p>
+                    <div key={project.id} className="rounded-lg border p-4 h-full flex flex-col">
+                      <h3 className="text-lg font-semibold truncate">{project.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 break-all">Project ID: {project.id}</p>
                     </div>
                   ))}
                 </div>
@@ -509,11 +538,18 @@ export function UserProfileView({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {tasks.map(task => (
-                    <div key={task.id} className="rounded-lg border p-4">
-                      <h3 className="text-lg font-semibold">{task.title}</h3>
-                      <p className="text-sm text-muted-foreground">Priority: {task.priority}</p>
+                    <div key={task.id} className="rounded-lg border p-4 h-full flex flex-col">
+                      <h3 className="text-lg font-semibold truncate">{task.title}</h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <Badge variant="outline" className="capitalize">{task.priority}</Badge>
+                        {task.project && (
+                          <Badge variant="secondary" className="truncate max-w-full">
+                            {task.project.title}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -537,19 +573,24 @@ export function UserProfileView({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {activities.map(activity => (
-                    <div key={activity.id} className="flex items-start gap-3 mb-6">
-                      <div className="rounded-full bg-slate-100 p-2 mt-0.5">
+                    <div key={activity.id} className="flex items-start gap-3 border-b pb-4 last:border-0 last:pb-0">
+                      <div className="rounded-full bg-slate-100 p-2 mt-0.5 flex-shrink-0">
                         <CalendarClock className="h-4 w-4 text-slate-600" />
                       </div>
-                      <div>
-                        <p className="font-medium">{activity.action}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium break-words">{activity.action}</p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(activity.createdAt).toLocaleString()}
                         </p>
                         {activity.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{activity.description}</p>
+                        )}
+                        {activity.project && (
+                          <Badge variant="outline" className="mt-2">
+                            {activity.project.title}
+                          </Badge>
                         )}
                       </div>
                     </div>

@@ -28,6 +28,25 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       if (!textResponse || textResponse.trim() === '') {
         console.warn('Empty response received from API');
         data = {};
+      } else if (textResponse.trim().startsWith('<!DOCTYPE') || textResponse.trim().startsWith('<html')) {
+        // Handle HTML responses (likely an error page)
+        console.error('Received HTML response instead of JSON:', textResponse.substring(0, 200));
+
+        // For profile endpoints, return a default empty structure
+        if (url.includes('/api/users/') && url.includes('profile=true')) {
+          return {
+            user: { id: 'unknown', name: 'Unknown User', email: 'unknown@example.com' },
+            projects: [],
+            tasks: [],
+            activities: [],
+            stats: { projectCount: 0, taskCount: 0, teamCount: 0, completionRate: '0%' }
+          };
+        } else if (url.includes('/api/team/user/')) {
+          // For team memberships, return an empty array
+          return [];
+        }
+
+        throw new Error(`Received HTML response instead of JSON. The API endpoint may not exist or returned an error page.`);
       } else {
         data = JSON.parse(textResponse);
       }
@@ -38,6 +57,13 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       }
     } catch (error) {
       console.error('API Error (parse failure):', error);
+
+      // For specific endpoints, return default values instead of throwing
+      if (url.includes('/api/team/user/')) {
+        console.warn('Returning empty array for team memberships due to parse error');
+        return [];
+      }
+
       throw new Error(`Failed to parse API response: ${error instanceof Error ? error.message : String(error)}`);
     }
 
@@ -51,6 +77,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       };
 
       console.error('API Error:', error);
+
       // Include more context in the error
       const enhancedError = {
         ...error,
@@ -58,32 +85,45 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
         requestMethod: options.method || 'GET',
         timestamp: new Date().toISOString()
       };
-      throw new Error(JSON.stringify(enhancedError));
+
+      // Use a more descriptive error message that includes the status code
+      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${error.message}`);
     }
 
     return data;
   } catch (error) {
+    // Create a more descriptive error message
+    let errorMessage = 'API request failed';
+
     if (error instanceof Error) {
-      // Check if this is already our formatted error
-      try {
-        JSON.parse(error.message);
-        // If we can parse it, it's already formatted, so just rethrow
-      } catch {
-        // Otherwise, it's an unexpected error, so log it
-        console.error('API request failed:', {
-          url,
-          message: error.message,
-          stack: error.stack
-        });
-      }
+      console.error('API request failed:', {
+        url,
+        message: error.message,
+        stack: error.stack
+      });
+
+      // Use the original error message
+      errorMessage = `${errorMessage}: ${error.message}`;
     } else {
       // Handle non-Error objects
       console.error('API request failed with non-Error:', {
         url,
         error: String(error)
       });
+
+      errorMessage = `${errorMessage}: ${String(error)}`;
     }
-    throw error;
+
+    // Create a new error with a more descriptive message
+    const apiError = new Error(errorMessage);
+
+    // Add the original error as a cause if supported
+    if (error instanceof Error) {
+      // @ts-ignore - cause property might not be recognized by TypeScript
+      apiError.cause = error;
+    }
+
+    throw apiError;
   }
 }
 
@@ -193,7 +233,15 @@ export const projectApi = {
       });
     }
 
-    return fetchAPI(`/api/projects?${params.toString()}`);
+    console.log("Fetching projects with URL:", `/api/projects?${params.toString()}`);
+    try {
+      const result = await fetchAPI(`/api/projects?${params.toString()}`);
+      console.log("Projects API response:", result);
+      return result;
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      throw error;
+    }
   },
 
   getProject: async (id: string) => {
@@ -341,13 +389,12 @@ export const teamApi = {
     return fetchAPI(url);
   },
 
-  getTeamMembers: async (projectId?: string, page = 1, limit = 10, search?: string, role?: string) => {
+  getTeamMembers: async (projectId?: string, page = 1, limit = 10, search?: string) => {
     const params = new URLSearchParams();
     if (projectId) params.append('projectId', projectId);
     params.append('page', page.toString());
     params.append('limit', limit.toString());
     if (search) params.append('search', search);
-    if (role) params.append('role', role);
 
     return fetchAPI(`/api/team?${params.toString()}`);
   },
@@ -357,7 +404,29 @@ export const teamApi = {
   },
 
   getUserTeamMemberships: async (userId: string) => {
-    return fetchAPI(`/api/team/user/${userId}`);
+    try {
+      console.log(`Fetching team memberships for user: ${userId}`);
+      const response = await fetchAPI(`/api/team/user/${userId}`);
+      console.log(`Team memberships response:`, response);
+
+      // Handle different response formats
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && typeof response === 'object') {
+        // Try to extract array data if it exists
+        const possibleArrays = Object.values(response).filter(val => Array.isArray(val));
+        if (possibleArrays.length > 0) {
+          return possibleArrays[0];
+        }
+      }
+
+      // If we can't determine the format, return the response as is
+      return response || [];
+    } catch (error) {
+      console.error(`Error fetching team memberships for user ${userId}:`, error);
+      // Return empty array on error to prevent UI crashes
+      return [];
+    }
   },
 
   addTeamMember: async (teamMember: any) => {
@@ -367,20 +436,7 @@ export const teamApi = {
     });
   },
 
-  updateTeamMember: async (id: string, teamMember: any) => {
-    console.log(`Updating team member ${id} with data:`, teamMember);
-    try {
-      const result = await fetchAPI(`/api/team/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(teamMember),
-      });
-      console.log('Team member update result:', result);
-      return result;
-    } catch (error) {
-      console.error('Error updating team member:', error);
-      throw error;
-    }
-  },
+  // updateTeamMember function removed as we no longer need to update team member roles
 
   removeTeamMember: async (id: string) => {
     return fetchAPI(`/api/team/${id}`, {

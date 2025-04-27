@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Filter, Plus, Search, Edit, Trash } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +33,18 @@ export default function ProjectsPage() {
   const [filters, setFilters] = useState<Record<string, string>>({})
   const { projects, isLoading, isError, mutate } = useProjects(page, 20, {})
   const { toast } = useToast()
+
+  // Show error toast when there's an API error
+  useEffect(() => {
+    if (isError) {
+      console.error('Projects page error:', isError);
+      toast({
+        title: "Error loading projects",
+        description: isError instanceof Error ? isError.message : "Failed to load projects",
+        variant: "destructive",
+      });
+    }
+  }, [isError, toast]);
 
   const deleteProject = async (id: string) => {
     try {
@@ -97,7 +109,18 @@ export default function ProjectsPage() {
       {isLoading ? (
         <div className="text-center p-4">Loading projects...</div>
       ) : isError ? (
-        <div className="text-center p-4 text-red-500">Error loading projects</div>
+        <div className="text-center p-4 text-red-500">
+          <p className="font-semibold">Error loading projects</p>
+          <p className="text-sm mt-2">{isError instanceof Error ? isError.message : "An unexpected error occurred"}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => mutate()}
+          >
+            Try Again
+          </Button>
+        </div>
       ) : projects && projects.length > 0 ? (
         <Table>
           <TableHeader>
@@ -125,7 +148,7 @@ export default function ProjectsPage() {
                 <TableCell>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Link href={`/projects/edit/${project.id}`}>
+                    <Link href={`/projects/${project.id}`}>
                       <Button variant="outline" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>

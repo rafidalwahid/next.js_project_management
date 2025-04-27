@@ -28,227 +28,128 @@ export default function RolesHelpPage() {
         <CardHeader>
           <CardTitle>Role System Overview</CardTitle>
           <CardDescription>
-            Our application uses two types of roles to manage permissions
+            Our application uses a unified role system to manage permissions
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="system" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="system">System Roles</TabsTrigger>
-              <TabsTrigger value="project">Project Roles</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="system" className="space-y-4 pt-4">
-              <div className="space-y-4">
-                <div className="prose max-w-none">
-                  <h3>System Roles</h3>
-                  <p>
-                    System roles apply across the entire application and determine what features a user can access.
-                    These roles are assigned at the user level and affect all interactions with the system.
-                  </p>
-                </div>
-                
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Permissions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="admin" type="system" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        System administrators with full access to all features and settings
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Manage all users and their roles</li>
-                          <li>Access all projects and settings</li>
-                          <li>Configure system-wide settings</li>
-                          <li>Manage permissions and roles</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="manager" type="system" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        System managers with elevated access to manage users and projects
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Create and manage projects</li>
-                          <li>Manage users (except admins)</li>
-                          <li>View system reports</li>
-                          <li>Limited system configuration</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="user" type="system" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        Regular users with standard access to projects they're assigned to
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Access assigned projects</li>
-                          <li>Manage own profile</li>
-                          <li>Create and manage tasks (based on project role)</li>
-                          <li>View team members</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="project" className="space-y-4 pt-4">
-              <div className="space-y-4">
-                <div className="prose max-w-none">
-                  <h3>Project Roles</h3>
-                  <p>
-                    Project roles apply only to specific projects and determine what actions a user can perform within that project.
-                    A user can have different roles in different projects.
-                  </p>
-                </div>
-                
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Permissions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="owner" type="project" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        Project creator with full control over the project
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Full control over project settings</li>
-                          <li>Add/remove team members</li>
-                          <li>Assign project roles</li>
-                          <li>Delete the project</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="admin" type="project" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        Project administrator with management permissions
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Manage project settings</li>
-                          <li>Add/remove team members</li>
-                          <li>Assign project roles (except owner)</li>
-                          <li>Manage all tasks</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="manager" type="project" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        Project manager with team management permissions
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Manage tasks and assignments</li>
-                          <li>Add team members</li>
-                          <li>Update project details</li>
-                          <li>View project reports</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>
-                        <RoleBadge role="member" type="project" showTooltip={false} />
-                      </TableCell>
-                      <TableCell>
-                        Regular project team member
-                      </TableCell>
-                      <TableCell>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>View project details</li>
-                          <li>Work on assigned tasks</li>
-                          <li>Create and update own tasks</li>
-                          <li>View team members</li>
-                        </ul>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="space-y-4">
+            <div className="prose max-w-none">
+              <h3>User Roles</h3>
+              <p>
+                User roles apply across the entire application and determine what features a user can access.
+                These roles are assigned at the user level and affect all interactions with the system.
+              </p>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Permissions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <RoleBadge role="admin" showTooltip={false} />
+                  </TableCell>
+                  <TableCell>
+                    System administrators with full access to all features and settings
+                  </TableCell>
+                  <TableCell>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Manage all users and their roles</li>
+                      <li>Access all projects and settings</li>
+                      <li>Configure system-wide settings</li>
+                      <li>Manage permissions and roles</li>
+                    </ul>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <RoleBadge role="manager" showTooltip={false} />
+                  </TableCell>
+                  <TableCell>
+                    System managers with elevated access to manage users and projects
+                  </TableCell>
+                  <TableCell>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Create and manage projects</li>
+                      <li>Manage users (except admins)</li>
+                      <li>View system reports</li>
+                      <li>Limited system configuration</li>
+                    </ul>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <RoleBadge role="user" showTooltip={false} />
+                  </TableCell>
+                  <TableCell>
+                    Regular users with standard access to projects they're assigned to
+                  </TableCell>
+                  <TableCell>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Access assigned projects</li>
+                      <li>Manage own profile</li>
+                      <li>Create and manage tasks</li>
+                      <li>View team members</li>
+                    </ul>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
-          <CardTitle>How Roles Work Together</CardTitle>
+          <CardTitle>Role-Based Access Control</CardTitle>
           <CardDescription>
-            Understanding the interaction between system and project roles
+            Understanding how roles determine permissions in the system
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="prose max-w-none">
-            <h3>Role Hierarchy</h3>
+            <h3>Permission System</h3>
             <p>
-              System roles and project roles work together to determine a user's permissions:
+              User roles determine what features and actions a user can access:
             </p>
-            
+
             <ul>
               <li>
-                <strong>System roles</strong> determine what features a user can access across the entire application.
+                <strong>User roles</strong> determine what features a user can access across the entire application.
               </li>
               <li>
-                <strong>Project roles</strong> determine what actions a user can perform within a specific project.
+                <strong>Team membership</strong> determines which projects a user can access.
               </li>
             </ul>
-            
+
             <h3>Examples</h3>
-            
+
             <div className="bg-muted p-4 rounded-md my-4">
-              <h4 className="text-lg font-medium mb-2">Example 1: System Admin</h4>
+              <h4 className="text-lg font-medium mb-2">Example 1: Admin User</h4>
               <p>
-                A user with the <RoleBadge role="admin" type="system" showTooltip={false} /> system role has access to all features
-                and can manage all projects, even if they don't have a specific project role assigned.
+                A user with the <RoleBadge role="admin" showTooltip={false} /> role has access to all features
+                and can manage all projects, even if they aren't explicitly added as a team member.
               </p>
             </div>
-            
+
             <div className="bg-muted p-4 rounded-md my-4">
-              <h4 className="text-lg font-medium mb-2">Example 2: Project Owner</h4>
+              <h4 className="text-lg font-medium mb-2">Example 2: Manager User</h4>
               <p>
-                A user with the <RoleBadge role="user" type="system" showTooltip={false} /> system role and 
-                <RoleBadge role="owner" type="project" showTooltip={false} className="ml-2" /> project role
-                has full control over their project, but can't access system-wide settings or other projects.
+                A user with the <RoleBadge role="manager" showTooltip={false} /> role can create projects and manage users,
+                but they can only access projects where they are added as a team member.
               </p>
             </div>
-            
+
             <div className="bg-muted p-4 rounded-md my-4">
-              <h4 className="text-lg font-medium mb-2">Example 3: Multiple Project Roles</h4>
+              <h4 className="text-lg font-medium mb-2">Example 3: Regular User</h4>
               <p>
-                A user can have different roles in different projects. For example, they might be an
-                <RoleBadge role="admin" type="project" showTooltip={false} className="mx-2" /> in one project
-                but just a <RoleBadge role="member" type="project" showTooltip={false} /> in another.
+                A user with the <RoleBadge role="user" showTooltip={false} /> role can only access projects
+                where they have been added as a team member, and they have limited permissions within those projects.
               </p>
             </div>
           </div>

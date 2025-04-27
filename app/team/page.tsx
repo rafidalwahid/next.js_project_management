@@ -140,11 +140,11 @@ export default function TeamPage() {
 
         <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription>Contributors</CardDescription>
-            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'contributor').length}</CardTitle>
+            <CardDescription>Regular Users</CardDescription>
+            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'user').length}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Team members contributing to projects</p>
+            <p className="text-xs text-muted-foreground">Regular team members with standard access</p>
           </CardContent>
         </Card>
       </div>
@@ -186,7 +186,6 @@ export default function TeamPage() {
                   <option value="all">All Roles</option>
                   <option value="admin">Admin</option>
                   <option value="manager">Manager</option>
-                  <option value="contributor">Contributor</option>
                   <option value="user">User</option>
                 </select>
               </div>

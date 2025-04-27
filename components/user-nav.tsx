@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CreditCard, LogOut, Settings, User } from "lucide-react"
+import { LogOut, User } from "lucide-react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 
@@ -82,14 +82,6 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
