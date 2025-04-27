@@ -8,11 +8,55 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KanbanBoard } from "@/components/project/kanban-board"
+import { StatusListView } from "@/components/project/status-list-view"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { TaskForm } from "@/components/project/task-form"
 import { format } from "date-fns"
+
+interface Task {
+  id: string
+  title: string
+  description?: string | null
+  priority: string
+  startDate?: string | null
+  endDate?: string | null
+  dueDate?: string | null
+  timeSpent?: number | null
+  estimatedTime?: number | null
+  projectId: string
+  statusId?: string | null
+  parentId?: string | null
+  order: number
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+  assignees?: {
+    id: string
+    user: {
+      id: string
+      name: string | null
+      email: string
+      image: string | null
+    }
+  }[]
+  status?: {
+    id: string
+    name: string
+    color: string
+  } | null
+}
+
+interface ProjectStatus {
+  id: string
+  name: string
+  color: string
+  description?: string | null
+  order: number
+  isDefault: boolean
+  projectId: string
+}
 
 interface Project {
   id: string
@@ -25,11 +69,7 @@ interface Project {
   estimatedTime: number | null
   createdAt: string
   updatedAt: string
-  statuses: {
-    id: string
-    name: string
-    color: string
-  }[]
+  statuses: ProjectStatus[]
   _count?: {
     tasks: number
     teamMembers: number
@@ -41,7 +81,10 @@ export default function ProjectPage() {
   const router = useRouter()
   const projectId = params.projectId as string
   const [project, setProject] = useState<Project | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [statuses, setStatuses] = useState<ProjectStatus[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isTasksLoading, setIsTasksLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("board")
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
@@ -60,6 +103,7 @@ export default function ProjectPage() {
 
         const data = await response.json()
         setProject(data.project)
+        setStatuses(data.project.statuses || [])
       } catch (error) {
         toast({
           title: "Error",
@@ -76,6 +120,36 @@ export default function ProjectPage() {
     }
   }, [projectId])
 
+  // Fetch tasks data
+  const fetchTasks = async () => {
+    try {
+      setIsTasksLoading(true)
+      const response = await fetch(`/api/tasks?projectId=${projectId}&limit=100`)
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks")
+      }
+
+      const data = await response.json()
+      setTasks(data.tasks || [])
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch tasks",
+        variant: "destructive",
+      })
+    } finally {
+      setIsTasksLoading(false)
+    }
+  }
+
+  // Load tasks on component mount and when project changes
+  useEffect(() => {
+    if (projectId) {
+      fetchTasks()
+    }
+  }, [projectId])
+
   const handleCreateTask = () => {
     setEditingTaskId(null)
     setIsTaskDialogOpen(true)
@@ -86,9 +160,11 @@ export default function ProjectPage() {
     setIsTaskDialogOpen(true)
   }
 
-  const handleTaskDialogClose = () => {
+  const handleTaskDialogClose = async () => {
     setIsTaskDialogOpen(false)
     setEditingTaskId(null)
+    // Refresh tasks after creating or editing
+    await fetchTasks()
   }
 
   const formatDate = (dateString: string | null) => {
@@ -203,23 +279,36 @@ export default function ProjectPage() {
             projectId={projectId}
             onCreateTask={handleCreateTask}
             onEditTask={handleEditTask}
+            initialTasks={tasks}
+            initialStatuses={statuses}
+            onTasksChange={setTasks}
+            onStatusesChange={setStatuses}
+            onRefresh={fetchTasks}
           />
         </TabsContent>
 
         <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle>Task List</CardTitle>
-              <CardDescription>
-                View all tasks in a list format
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Task list view will be implemented in a future update.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold">Tasks by Status</h2>
+                <p className="text-sm text-muted-foreground">
+                  View and manage tasks grouped by status
+                </p>
+              </div>
+              <Button onClick={handleCreateTask}>
+                Create Task
+              </Button>
+            </div>
+            <StatusListView
+              projectId={projectId}
+              statuses={statuses}
+              tasks={tasks}
+              isLoading={isTasksLoading}
+              onEditTask={handleEditTask}
+              onRefresh={fetchTasks}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="team">

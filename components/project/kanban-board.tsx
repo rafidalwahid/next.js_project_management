@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { CreateStatusDialog } from "@/components/project/create-status-dialog"
 import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
+import { taskApi } from "@/lib/api"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,17 +65,51 @@ interface KanbanBoardProps {
   projectId: string
   onCreateTask?: () => void
   onEditTask?: (taskId: string) => void
+  initialTasks?: Task[]
+  initialStatuses?: ProjectStatus[]
+  onTasksChange?: (tasks: Task[]) => void
+  onStatusesChange?: (statuses: ProjectStatus[]) => void
+  onRefresh?: () => Promise<void>
 }
 
-export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoardProps) {
-  const [statuses, setStatuses] = useState<ProjectStatus[]>([])
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+export function KanbanBoard({
+  projectId,
+  onCreateTask,
+  onEditTask,
+  initialTasks,
+  initialStatuses,
+  onTasksChange,
+  onStatusesChange,
+  onRefresh
+}: KanbanBoardProps) {
+  const [statuses, setStatuses] = useState<ProjectStatus[]>(initialStatuses || [])
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || [])
+  const [isLoading, setIsLoading] = useState(!initialTasks || !initialStatuses)
   const { toast } = useToast()
+
+  // Update local state when props change
+  useEffect(() => {
+    if (initialTasks) {
+      setTasks(initialTasks)
+    }
+  }, [initialTasks])
+
+  useEffect(() => {
+    if (initialStatuses) {
+      setStatuses(initialStatuses)
+    }
+  }, [initialStatuses])
 
   // Fetch statuses and tasks
   const fetchData = async () => {
     try {
+      // If onRefresh is provided, use it
+      if (onRefresh) {
+        await onRefresh()
+        setIsLoading(false)
+        return
+      }
+
       setIsLoading(true)
 
       // Fetch statuses
@@ -91,8 +126,20 @@ export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoard
       }
       const tasksData = await tasksResponse.json()
 
-      setStatuses(statusesData.statuses || [])
-      setTasks(tasksData.tasks || [])
+      const newStatuses = statusesData.statuses || []
+      const newTasks = tasksData.tasks || []
+
+      setStatuses(newStatuses)
+      setTasks(newTasks)
+
+      // Notify parent components of changes
+      if (onTasksChange) {
+        onTasksChange(newTasks)
+      }
+
+      if (onStatusesChange) {
+        onStatusesChange(newStatuses)
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -104,12 +151,12 @@ export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoard
     }
   }
 
-  // Load data on component mount
+  // Load data on component mount if initialTasks and initialStatuses are not provided
   useEffect(() => {
-    if (projectId) {
+    if (projectId && (!initialTasks || !initialStatuses)) {
       fetchData()
     }
-  }, [projectId])
+  }, [projectId, initialTasks, initialStatuses])
 
   // Group tasks by status
   const getTasksByStatus = (statusId: string) => {
@@ -146,6 +193,11 @@ export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoard
             statusId: destination.droppableId
           }
           setTasks(updatedTasks)
+
+          // Notify parent component of changes
+          if (onTasksChange) {
+            onTasksChange(updatedTasks)
+          }
         }
 
         // Update the task status on the server
@@ -171,8 +223,59 @@ export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoard
         await fetchData()
       }
     }
+    // Handle reordering within the same column
+    else if (source.droppableId === destination.droppableId) {
+      try {
+        // Get all tasks in the current status
+        const tasksInStatus = getTasksByStatus(source.droppableId)
 
-    // TODO: Handle reordering within the same column
+        // Optimistically update the UI
+        const updatedTasks = [...tasks]
+
+        // Find the task being moved
+        const movedTask = tasksInStatus[source.index]
+
+        // Find the target task (if any)
+        const targetTask = destination.index < tasksInStatus.length
+          ? tasksInStatus[destination.index]
+          : null
+
+        // Update the tasks array with the new order
+        const newTasksInStatus = Array.from(tasksInStatus)
+        newTasksInStatus.splice(source.index, 1)
+        newTasksInStatus.splice(destination.index, 0, movedTask)
+
+        // Update the tasks array
+        const newTasks = tasks.filter(t => t.statusId !== source.droppableId)
+        newTasks.push(...newTasksInStatus)
+        setTasks(newTasks)
+
+        // Notify parent component of changes
+        if (onTasksChange) {
+          onTasksChange(newTasks)
+        }
+
+        // Call the reorder API using taskApi
+        await taskApi.reorderTask(
+          taskId,
+          null, // newParentId
+          null, // oldParentId
+          targetTask?.id || null, // targetTaskId
+          true // isSameParentReorder
+        )
+
+        // Refresh data to ensure we have the latest state
+        await fetchData()
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to reorder task",
+          variant: "destructive"
+        })
+        // Refresh data to ensure we have the correct state
+        await fetchData()
+      }
+    }
   }
 
   // Format date for display
@@ -203,6 +306,11 @@ export function KanbanBoard({ projectId, onCreateTask, onEditTask }: KanbanBoard
         task.id === taskId ? { ...task, completed: !completed } : task
       )
       setTasks(updatedTasks)
+
+      // Notify parent component of changes
+      if (onTasksChange) {
+        onTasksChange(updatedTasks)
+      }
 
       // Update on the server
       const response = await fetch(`/api/tasks/${taskId}`, {
