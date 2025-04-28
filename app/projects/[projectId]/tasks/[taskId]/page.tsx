@@ -26,6 +26,7 @@ import { TaskForm } from "@/components/project/task-form-fixed"
 import { TimeTracker } from "@/components/project/time-tracker"
 import { format } from "date-fns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 
 interface TaskAssignee {
   id: string
@@ -259,6 +260,8 @@ export default function TaskDetailPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Breadcrumbs />
+
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/projects/${projectId}`}>

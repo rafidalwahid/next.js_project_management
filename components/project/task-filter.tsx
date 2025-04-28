@@ -59,19 +59,19 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
     priority: null,
     completed: null,
   })
-  
+
   const [statusOpen, setStatusOpen] = useState(false)
   const [assigneeOpen, setAssigneeOpen] = useState(false)
-  
+
   // Update parent component when filters change
   useEffect(() => {
     onFilterChange(filters)
   }, [filters, onFilterChange])
-  
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, search: e.target.value }))
   }
-  
+
   const toggleStatus = (statusId: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -80,7 +80,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
         : [...prev.statusIds, statusId],
     }))
   }
-  
+
   const toggleAssignee = (userId: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -89,11 +89,11 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
         : [...prev.assigneeIds, userId],
     }))
   }
-  
+
   const handlePriorityChange = (value: string) => {
     setFilters((prev) => ({ ...prev, priority: value === "all" ? null : value }))
   }
-  
+
   const handleCompletedChange = (value: string) => {
     if (value === "all") {
       setFilters((prev) => ({ ...prev, completed: null }))
@@ -103,7 +103,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
       setFilters((prev) => ({ ...prev, completed: false }))
     }
   }
-  
+
   const clearFilters = () => {
     setFilters({
       search: "",
@@ -113,14 +113,14 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
       completed: null,
     })
   }
-  
-  const hasActiveFilters = 
-    filters.search !== "" || 
-    filters.statusIds.length > 0 || 
-    filters.assigneeIds.length > 0 || 
-    filters.priority !== null || 
+
+  const hasActiveFilters =
+    filters.search !== "" ||
+    filters.statusIds.length > 0 ||
+    filters.assigneeIds.length > 0 ||
+    filters.priority !== null ||
     filters.completed !== null
-  
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-2">
@@ -143,13 +143,13 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
             </Button>
           )}
         </div>
-        
-        <div className="flex gap-2">
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Popover open={statusOpen} onOpenChange={setStatusOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start w-full">
                 <Filter className="mr-2 h-4 w-4" />
-                Status
+                <span className="truncate">Status</span>
                 {filters.statusIds.length > 0 && (
                   <Badge variant="secondary" className="ml-2 rounded-sm px-1">
                     {filters.statusIds.length}
@@ -190,12 +190,12 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               </Command>
             </PopoverContent>
           </Popover>
-          
+
           <Popover open={assigneeOpen} onOpenChange={setAssigneeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start">
+              <Button variant="outline" className="justify-start w-full">
                 <Filter className="mr-2 h-4 w-4" />
-                Assignee
+                <span className="truncate">Assignee</span>
                 {filters.assigneeIds.length > 0 && (
                   <Badge variant="secondary" className="ml-2 rounded-sm px-1">
                     {filters.assigneeIds.length}
@@ -232,12 +232,12 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               </Command>
             </PopoverContent>
           </Popover>
-          
+
           <Select
             value={filters.priority || "all"}
             onValueChange={handlePriorityChange}
           >
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -247,12 +247,12 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               <SelectItem value="low">Low</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select
             value={filters.completed === null ? "all" : filters.completed ? "completed" : "active"}
             onValueChange={handleCompletedChange}
           >
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -263,9 +263,9 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
           </Select>
         </div>
       </div>
-      
+
       {hasActiveFilters && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex flex-wrap gap-2">
             {filters.statusIds.length > 0 && (
               <Badge variant="secondary" className="flex items-center gap-1">
@@ -280,7 +280,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                 </Button>
               </Badge>
             )}
-            
+
             {filters.assigneeIds.length > 0 && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Assignees: {filters.assigneeIds.length}
@@ -294,7 +294,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                 </Button>
               </Badge>
             )}
-            
+
             {filters.priority && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 Priority: {filters.priority}
@@ -308,7 +308,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                 </Button>
               </Badge>
             )}
-            
+
             {filters.completed !== null && (
               <Badge variant="secondary" className="flex items-center gap-1">
                 {filters.completed ? "Completed" : "Active"}
@@ -323,8 +323,8 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               </Badge>
             )}
           </div>
-          
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="self-start sm:self-auto">
             Clear all
           </Button>
         </div>

@@ -15,6 +15,7 @@ import {
   rectIntersection,
   DragOverEvent,
 } from "@dnd-kit/core"
+import { AssignMembersPopup } from "@/components/project/assign-members-popup"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
@@ -127,11 +128,13 @@ function DraggableTaskItem({
   onToggleComplete,
   onEdit,
   onDelete,
+  onUpdateAssignees,
 }: {
   task: Task
   onToggleComplete: (taskId: string, completed: boolean) => void
   onEdit?: (taskId: string) => void
   onDelete?: (taskId: string) => void
+  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -170,7 +173,7 @@ function DraggableTaskItem({
         transition,
         opacity: isDragging ? 0.5 : 1,
       }}
-      className={`mb-2 rounded-md border bg-background p-3 shadow-sm ${
+      className={`mb-2 rounded-md border bg-background p-3 shadow-sm flex flex-col min-h-[120px] ${
         task.completed ? "opacity-60" : ""
       }`}
     >
@@ -194,7 +197,7 @@ function DraggableTaskItem({
                 {task.description}
               </p>
             )}
-            <div className="flex flex-wrap gap-2 mt-1">
+            <div className="flex flex-wrap gap-2 mt-1 flex-grow">
               <Badge variant="outline" className={getPriorityColor(task.priority)}>
                 {task.priority}
               </Badge>
@@ -242,23 +245,33 @@ function DraggableTaskItem({
         </DropdownMenu>
       </div>
 
-      {task.assignees && task.assignees.length > 0 && (
-        <div className="flex -space-x-2 mt-3 ml-7">
-          {task.assignees.slice(0, 3).map((assignee) => (
-            <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
-              <AvatarImage src={assignee.user.image || undefined} />
-              <AvatarFallback className="text-xs">
-                {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-          {task.assignees.length > 3 && (
-            <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs">
-              +{task.assignees.length - 3}
-            </div>
-          )}
+      <div className="flex justify-end mt-3">
+        <div className="flex -space-x-2">
+          {task.assignees && task.assignees.length > 0 ? (
+            <>
+              {task.assignees.slice(0, 3).map((assignee) => (
+                <Avatar key={assignee.id} className="h-7 w-7 border border-black">
+                  <AvatarImage src={assignee.user.image || undefined} />
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                    {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {task.assignees.length > 3 && (
+                <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs border border-black">
+                  +{task.assignees.length - 3}
+                </div>
+              )}
+            </>
+          ) : null}
+          <AssignMembersPopup
+            projectId={task.projectId}
+            taskId={task.id}
+            currentAssignees={task.assignees?.map(a => a.user.id) || []}
+            onAssigneesChange={(assigneeIds) => onUpdateAssignees(task.id, assigneeIds)}
+          />
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -280,6 +293,7 @@ function StatusSection({
   onEditingNameChange,
   onSaveEdit,
   onCancelEdit,
+  onUpdateAssignees,
 }: {
   status: ProjectStatus
   tasks: Task[]
@@ -296,6 +310,7 @@ function StatusSection({
   onEditingNameChange: (value: string) => void
   onSaveEdit: () => void
   onCancelEdit: () => void
+  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void
 }) {
   // Reference for the status input field
   const statusInputRef = useRef<HTMLInputElement>(null);
@@ -437,6 +452,7 @@ function StatusSection({
                   onToggleComplete={onToggleComplete}
                   onEdit={onEdit}
                   onDelete={onDeleteTask}
+                  onUpdateAssignees={onUpdateAssignees}
                 />
               ))}
             </SortableContext>
@@ -539,6 +555,37 @@ export function StatusListView({
         description: error instanceof Error ? error.message : "Failed to update task",
         variant: "destructive"
       })
+    }
+  }
+
+  // Update task assignees
+  const updateTaskAssignees = async (taskId: string, assigneeIds: string[]) => {
+    try {
+      // Update on the server
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assigneeIds })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update task assignees");
+      }
+
+      // Refresh data
+      await onRefresh();
+
+      toast({
+        title: "Task updated",
+        description: "Task assignees updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating task assignees:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update task assignees",
+        variant: "destructive"
+      });
     }
   }
 
@@ -897,6 +944,7 @@ export function StatusListView({
             onEditingNameChange={setEditingStatusName}
             onSaveEdit={handleSaveStatusName}
             onCancelEdit={handleCancelEdit}
+            onUpdateAssignees={updateTaskAssignees}
           />
         ))}
 

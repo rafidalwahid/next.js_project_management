@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TaskForm } from "@/components/project/task-form-fixed"
 import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
 import { format } from "date-fns"
+import { CreateStatusDialog } from "@/components/project/create-status-dialog"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -334,23 +336,25 @@ export default function ProjectPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Breadcrumbs />
+
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">{project.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">{project.title.split('hgh')[0]}</h1>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 title="Edit Project"
                 onClick={() => setIsSettingsDialogOpen(true)}
               >
                 <Settings className="h-4 w-4" />
               </Button>
             </div>
-            {project.description && (
-              <p className="text-muted-foreground mt-1">{project.description}</p>
+            {project.description && !project.description.includes('hgh') && (
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">{project.description}</p>
             )}
           </div>
         </div>
@@ -367,12 +371,22 @@ export default function ProjectPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="board">Board</TabsTrigger>
-          <TabsTrigger value="list">List</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="board" className="flex-1 sm:flex-initial">Board</TabsTrigger>
+            <TabsTrigger value="list" className="flex-1 sm:flex-initial">List</TabsTrigger>
+            <TabsTrigger value="team" className="flex-1 sm:flex-initial">Team</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1 sm:flex-initial">Analytics</TabsTrigger>
+          </TabsList>
+          {activeTab === "board" && (
+            <CreateStatusDialog
+              projectId={projectId}
+              onStatusCreated={async () => {
+                await fetchTasks();
+              }}
+            />
+          )}
+        </div>
 
         <TabsContent value="board">
           <div className="space-y-4">
@@ -407,7 +421,7 @@ export default function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="team">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Project Creator Card */}
             <Card>
               <CardHeader>
@@ -523,7 +537,7 @@ export default function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Progress Card */}
             <Card>
               <CardHeader>

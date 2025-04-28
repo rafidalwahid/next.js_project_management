@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { CreateStatusDialog } from "@/components/project/create-status-dialog"
 import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
+import { AssignMembersPopup } from "@/components/project/assign-members-popup"
 import { taskApi } from "@/lib/api"
 import { Input } from "@/components/ui/input"
 import {
@@ -357,6 +358,74 @@ export function KanbanBoard({
     }
   }
 
+  // Update task assignees
+  const updateTaskAssignees = async (taskId: string, assigneeIds: string[]) => {
+    try {
+      // Optimistically update the UI
+      const updatedTasks = tasks.map(task => {
+        if (task.id === taskId) {
+          // Create new assignees array with the updated user IDs
+          const updatedAssignees = assigneeIds.map(userId => {
+            // Try to find existing assignee to preserve data
+            const existingAssignee = task.assignees?.find(a => a.user.id === userId);
+            if (existingAssignee) return existingAssignee;
+
+            // Find user data from another task's assignees if available
+            const userFromOtherTask = tasks.flatMap(t => t.assignees || [])
+              .find(a => a.user.id === userId);
+
+            if (userFromOtherTask) return userFromOtherTask;
+
+            // Create minimal assignee object if user not found
+            return {
+              id: `temp-${userId}`,
+              user: {
+                id: userId,
+                name: null,
+                email: "",
+                image: null
+              }
+            };
+          });
+
+          return { ...task, assignees: updatedAssignees };
+        }
+        return task;
+      });
+
+      setTasks(updatedTasks);
+
+      // Notify parent component of changes
+      if (onTasksChange) {
+        onTasksChange(updatedTasks);
+      }
+
+      // Update on the server
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assigneeIds })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update task assignees");
+      }
+
+      toast({
+        title: "Task updated",
+        description: "Task assignees updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update task assignees",
+        variant: "destructive"
+      });
+      // Refresh data to ensure we have the correct state
+      await fetchData();
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -534,20 +603,12 @@ export function KanbanBoard({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end items-center">
-        <div className="flex items-center gap-2">
-          <CreateStatusDialog
-            projectId={projectId}
-            onStatusCreated={handleStatusCreated}
-          />
-        </div>
-      </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="h-[600px] max-h-[calc(100vh-240px)] overflow-hidden">
-          <div className="flex overflow-x-auto pb-4 gap-6 snap-x scrollbar scrollbar-thumb-gray-300 scrollbar-track-transparent h-full pr-4 pl-1 -ml-1">
+        <div className="h-[500px] sm:h-[600px] max-h-[calc(100vh-240px)] overflow-hidden">
+          <div className="flex overflow-x-auto pb-4 gap-4 sm:gap-6 snap-x scrollbar scrollbar-thumb-gray-300 scrollbar-track-transparent h-full pr-2 sm:pr-4 pl-1 -ml-1">
           {statuses.sort((a, b) => a.order - b.order).map((status) => (
-            <div key={status.id} className="flex flex-col h-full min-w-[300px] snap-start shadow-md rounded-md">
+            <div key={status.id} className="flex flex-col h-full min-w-[260px] sm:min-w-[300px] snap-start shadow-md rounded-md">
               <div
                 className="flex items-center justify-between p-3 rounded-t-md"
                 style={{ backgroundColor: status.color + "20" }}
@@ -652,7 +713,7 @@ export function KanbanBoard({
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`bg-background p-3 rounded-md shadow-sm mb-2 border-l-4 ${
+                              className={`bg-background p-2 sm:p-3 rounded-md shadow-sm mb-2 border-l-4 flex flex-col min-h-[120px] ${
                                 task.completed ? "opacity-60" : ""
                               }`}
                               style={{
@@ -705,7 +766,7 @@ export function KanbanBoard({
                                 </p>
                               )}
 
-                              <div className="flex flex-wrap gap-2 mt-2">
+                              <div className="flex flex-wrap gap-2 mt-2 flex-grow">
                                 <Badge variant="outline" className={getPriorityColor(task.priority)}>
                                   {task.priority}
                                 </Badge>
@@ -725,23 +786,33 @@ export function KanbanBoard({
                                 )}
                               </div>
 
-                              {task.assignees && task.assignees.length > 0 && (
-                                <div className="flex -space-x-2 mt-3">
-                                  {task.assignees.slice(0, 3).map((assignee) => (
-                                    <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
-                                      <AvatarImage src={assignee.user.image || undefined} />
-                                      <AvatarFallback className="text-xs">
-                                        {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ))}
-                                  {task.assignees.length > 3 && (
-                                    <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs">
-                                      +{task.assignees.length - 3}
-                                    </div>
-                                  )}
+                              <div className="flex justify-end mt-3">
+                                <div className="flex -space-x-2">
+                                  {task.assignees && task.assignees.length > 0 ? (
+                                    <>
+                                      {task.assignees.slice(0, 3).map((assignee) => (
+                                        <Avatar key={assignee.id} className="h-7 w-7 border border-black">
+                                          <AvatarImage src={assignee.user.image || undefined} />
+                                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                                            {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      ))}
+                                      {task.assignees.length > 3 && (
+                                        <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs border border-black">
+                                          +{task.assignees.length - 3}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : null}
+                                  <AssignMembersPopup
+                                    projectId={projectId}
+                                    taskId={task.id}
+                                    currentAssignees={task.assignees?.map(a => a.user.id) || []}
+                                    onAssigneesChange={(assigneeIds) => updateTaskAssignees(task.id, assigneeIds)}
+                                  />
                                 </div>
-                              )}
+                              </div>
                             </div>
                           )}
                         </Draggable>

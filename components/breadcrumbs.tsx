@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Home } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useProject } from "@/hooks/use-data"
+import { useProject, useTask } from "@/hooks/use-data"
 import { useUserProfile } from "@/hooks/use-user-profile"
 
 // Define route mappings for breadcrumb labels
@@ -53,8 +53,22 @@ export function Breadcrumbs() {
   // Check if we're on a user profile page
   const isUserProfilePage = userIdMatch && (userIdMatch[1] === 'profile' || userIdMatch[1] === 'users')
 
+  // Extract project ID from project path if present
+  const projectIdMatch = pathname.match(/\/projects\/([a-zA-Z0-9_-]+)/)
+  const projectId = projectIdMatch ? projectIdMatch[1] : null
+
+  // Extract task ID from task path if present
+  const taskIdMatch = pathname.match(/\/tasks\/([a-zA-Z0-9_-]+)/)
+  const taskId = taskIdMatch ? taskIdMatch[1] : null
+
   // Fetch user profile if we're on a profile page
-  const { profile, isLoading } = useUserProfile(isUserProfilePage ? userId || '' : '')
+  const { profile, isLoading: isProfileLoading } = useUserProfile(isUserProfilePage ? userId || '' : '')
+
+  // Fetch project if we're on a project page
+  const { project, isLoading: isProjectLoading } = useProject(projectId)
+
+  // Fetch task if we're on a task page
+  const { task, isLoading: isTaskLoading } = useTask(taskId)
 
   // Memoize breadcrumb generation to avoid unnecessary re-renders
   useEffect(() => {
@@ -90,16 +104,29 @@ export function Breadcrumbs() {
         if (isDynamic) {
           // If it's a project ID, we could fetch the project title
           if (segments.includes('projects') && segments.indexOf('projects') < index) {
-            label = 'Project Details'
+            if (isProjectLoading) {
+              label = 'Loading...'
+            } else if (project && project.title) {
+              // Clean up any gibberish in the project title
+              label = project.title.split('hgh')[0]
+            } else {
+              label = 'Project Details'
+            }
           }
           // If it's a task ID
           else if (segments.includes('tasks') && segments.indexOf('tasks') < index) {
-            label = 'Task Details'
+            if (isTaskLoading) {
+              label = 'Loading...'
+            } else if (task && task.title) {
+              label = task.title
+            } else {
+              label = 'Task Details'
+            }
           }
           // If it's a user profile and we have the profile data
           else if ((segments.includes('profile') && segments.indexOf('profile') < index) ||
                   (segments.includes('users') && segments.indexOf('users') < index)) {
-            if (isLoading) {
+            if (isProfileLoading) {
               label = 'Loading...'
             } else if (profile && profile.name) {
               label = profile.name
@@ -124,7 +151,7 @@ export function Breadcrumbs() {
     }
 
     generateBreadcrumbs()
-  }, [pathname, profile, isLoading])
+  }, [pathname, profile, isProfileLoading, project, isProjectLoading, task, isTaskLoading])
 
   // Don't render anything if we're on the dashboard or have no breadcrumbs
   if (pathname === '/dashboard' || breadcrumbs.length === 0) {
