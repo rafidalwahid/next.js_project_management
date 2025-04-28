@@ -338,15 +338,15 @@ export default function ProjectPage() {
     <div className="container mx-auto py-6 space-y-6">
       <Breadcrumbs />
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b">
           <div className="flex-1">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">{project.title.split('hgh')[0]}</h1>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="h-8 w-8 flex-shrink-0"
+                className="h-8 w-8 flex-shrink-0 rounded-full"
                 title="Edit Project"
                 onClick={() => setIsSettingsDialogOpen(true)}
               >
@@ -354,29 +354,26 @@ export default function ProjectPage() {
               </Button>
             </div>
             {project.description && !project.description.includes('hgh') && (
-              <p className="text-muted-foreground mt-1 text-sm sm:text-base">{project.description}</p>
+              <p className="text-muted-foreground text-sm sm:text-base">{project.description}</p>
             )}
           </div>
         </div>
-
         {/* Removed the card with project details to make the view cleaner */}
       </div>
-
-      <div className="mb-4">
+      <div className="bg-muted/10 p-4 rounded-lg border mb-6">
         <TaskFilter
           statuses={statuses}
           users={users}
           onFilterChange={setTaskFilters}
         />
       </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="board" className="flex-1 sm:flex-initial">Board</TabsTrigger>
-            <TabsTrigger value="list" className="flex-1 sm:flex-initial">List</TabsTrigger>
-            <TabsTrigger value="team" className="flex-1 sm:flex-initial">Team</TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1 sm:flex-initial">Analytics</TabsTrigger>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-2 border-b">
+          <TabsList className="w-full sm:w-auto bg-background border">
+            <TabsTrigger value="board" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Board</TabsTrigger>
+            <TabsTrigger value="list" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">List</TabsTrigger>
+            <TabsTrigger value="team" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Team</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analytics</TabsTrigger>
           </TabsList>
           {activeTab === "board" && (
             <CreateStatusDialog
@@ -387,7 +384,6 @@ export default function ProjectPage() {
             />
           )}
         </div>
-
         <TabsContent value="board">
           <div className="space-y-4">
             <KanbanBoard
@@ -404,7 +400,6 @@ export default function ProjectPage() {
             />
           </div>
         </TabsContent>
-
         <TabsContent value="list">
           <div className="space-y-4">
             <StatusListView
@@ -419,7 +414,6 @@ export default function ProjectPage() {
             />
           </div>
         </TabsContent>
-
         <TabsContent value="team">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Project Creator Card */}
@@ -535,7 +529,6 @@ export default function ProjectPage() {
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="analytics">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Progress Card */}
@@ -776,7 +769,6 @@ export default function ProjectPage() {
           </div>
         </TabsContent>
       </Tabs>
-
       {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
         <DialogContent className="max-w-3xl" style={{ zIndex: 100 }}>

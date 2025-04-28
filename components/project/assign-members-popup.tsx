@@ -48,19 +48,19 @@ export function AssignMembersPopup({
     try {
       setIsLoading(true)
       const response = await fetch(`/api/projects/${projectId}/team`)
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch team members")
       }
-      
+
       const data = await response.json()
-      
+
       if (data.teamMembers && Array.isArray(data.teamMembers)) {
         // Extract user data from team members
         const teamUsers = data.teamMembers
           .map((tm: any) => tm.user)
           .filter((user: any) => user && user.id)
-        
+
         setUsers(teamUsers)
       }
     } catch (error) {
@@ -76,7 +76,7 @@ export function AssignMembersPopup({
 
   // Toggle user selection
   const toggleUser = (userId: string) => {
-    setSelectedUsers(prev => 
+    setSelectedUsers(prev =>
       prev.includes(userId)
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
@@ -95,9 +95,9 @@ export function AssignMembersPopup({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Avatar className="h-7 w-7 border border-black bg-background cursor-pointer hover:bg-muted transition-colors">
-          <Plus className="h-4 w-4" />
-        </Avatar>
+        <div className="h-7 w-7 rounded-full border-2 border-dashed border-black bg-background cursor-pointer hover:bg-muted transition-colors hover:border-primary flex items-center justify-center">
+          <Plus className="h-4 w-4 text-black" />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-[250px] p-0" align="end" side="top" style={{ zIndex: 100 }}>
         <div className="p-2 border-b">

@@ -123,12 +123,12 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search tasks..."
-            className="pl-8"
+            className="pl-9 h-10 bg-background"
             value={filters.search}
             onChange={handleSearchChange}
           />
@@ -136,22 +136,21 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-0 top-0 h-full px-3"
+              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-primary"
               onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Popover open={statusOpen} onOpenChange={setStatusOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start w-full">
-                <Filter className="mr-2 h-4 w-4" />
+              <Button variant="outline" className="justify-start w-full h-10 bg-background hover:bg-muted/50">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="truncate">Status</span>
                 {filters.statusIds.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-sm px-1">
+                  <Badge variant="secondary" className="ml-2 rounded-full px-2 bg-primary/10 text-primary">
                     {filters.statusIds.length}
                   </Badge>
                 )}
@@ -193,11 +192,11 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
 
           <Popover open={assigneeOpen} onOpenChange={setAssigneeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start w-full">
-                <Filter className="mr-2 h-4 w-4" />
+              <Button variant="outline" className="justify-start w-full h-10 bg-background hover:bg-muted/50">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="truncate">Assignee</span>
                 {filters.assigneeIds.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-sm px-1">
+                  <Badge variant="secondary" className="ml-2 rounded-full px-2 bg-primary/10 text-primary">
                     {filters.assigneeIds.length}
                   </Badge>
                 )}
@@ -237,7 +236,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
             value={filters.priority || "all"}
             onValueChange={handlePriorityChange}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-10 bg-background hover:bg-muted/50">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -252,7 +251,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
             value={filters.completed === null ? "all" : filters.completed ? "completed" : "active"}
             onValueChange={handleCompletedChange}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-10 bg-background hover:bg-muted/50">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -265,57 +264,54 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
       </div>
 
       {hasActiveFilters && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t">
           <div className="flex flex-wrap gap-2">
             {filters.statusIds.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
                 Statuses: {filters.statusIds.length}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 ml-1 p-0"
+                  className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
                   onClick={() => setFilters((prev) => ({ ...prev, statusIds: [] }))}
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
             )}
-
             {filters.assigneeIds.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
                 Assignees: {filters.assigneeIds.length}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 ml-1 p-0"
+                  className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
                   onClick={() => setFilters((prev) => ({ ...prev, assigneeIds: [] }))}
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
             )}
-
             {filters.priority && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
                 Priority: {filters.priority}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 ml-1 p-0"
+                  className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
                   onClick={() => setFilters((prev) => ({ ...prev, priority: null }))}
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
             )}
-
             {filters.completed !== null && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
                 {filters.completed ? "Completed" : "Active"}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 ml-1 p-0"
+                  className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
                   onClick={() => setFilters((prev) => ({ ...prev, completed: null }))}
                 >
                   <X className="h-3 w-3" />
@@ -323,9 +319,13 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               </Badge>
             )}
           </div>
-
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="self-start sm:self-auto">
-            Clear all
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearFilters}
+            className="self-start sm:self-auto hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+          >
+            Clear all filters
           </Button>
         </div>
       )}
