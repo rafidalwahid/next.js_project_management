@@ -14,6 +14,7 @@ import { CalendarIcon, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "@/components/ui/spinner"
+import { MultiSelect } from "@/components/ui/multi-select"
 import {
   Form,
   FormControl,
@@ -145,8 +146,21 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         if (!response.ok) throw new Error("Failed to fetch team members")
 
         const data = await response.json()
-        setTeamMembers(data.teamMembers?.map((tm: any) => tm.user) || [])
+
+        if (data.teamMembers && Array.isArray(data.teamMembers)) {
+          // Extract user data from team members and filter out any null values
+          const users = data.teamMembers
+            .map((tm: any) => tm.user)
+            .filter((user: any) => user && user.id);
+
+          console.log(`Fetched ${users.length} team members for task assignment`);
+          setTeamMembers(users);
+        } else {
+          console.error("No team members data found:", data);
+          setTeamMembers([]);
+        }
       } catch (error) {
+        console.error("Error fetching team members:", error);
         toast({
           title: "Error",
           description: "Failed to fetch team members",
@@ -201,6 +215,12 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         const data = await response.json()
         const task = data.task
 
+        console.log("Fetched task data:", task);
+
+        // Extract assignee IDs from the task
+        const assigneeIds = task.assignees?.map((a: any) => a.userId) || [];
+        console.log("Extracted assignee IDs:", assigneeIds);
+
         if (task) {
           form.reset({
             title: task.title,
@@ -212,11 +232,12 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
             estimatedTime: task.estimatedTime,
             timeSpent: task.timeSpent,
             statusId: task.statusId,
-            assigneeIds: task.assignees?.map((a: any) => a.userId) || [],
+            assigneeIds: assigneeIds,
             parentId: task.parentId,
           })
         }
       } catch (error) {
+        console.error("Error fetching task:", error);
         toast({
           title: "Error",
           description: "Failed to fetch task details",
@@ -255,6 +276,9 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         dueDate: values.dueDate ? values.dueDate.toISOString() : null,
       }
 
+      // Log assignee information
+      console.log("Assignee IDs being submitted:", values.assigneeIds);
+      console.log("Team members available:", teamMembers.map(m => ({ id: m.id, name: m.name || m.email })));
       console.log("Submitting task data:", payload)
 
       const response = await fetch(endpoint, {
@@ -587,60 +611,17 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
             <FormItem>
               <FormLabel>Assignees</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
-                    const currentValues = new Set(field.value || [])
-                    if (currentValues.has(value)) {
-                      currentValues.delete(value)
-                    } else {
-                      currentValues.add(value)
-                    }
-                    field.onChange(Array.from(currentValues))
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      field.value && field.value.length > 0
-                        ? `${field.value.length} assignee(s) selected`
-                        : "Select assignees"
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teamMembers.map((member) => (
-                      <SelectItem
-                        key={member.id}
-                        value={member.id}
-                        className={cn(
-                          "flex items-center gap-2",
-                          field.value?.includes(member.id) && "bg-primary/10"
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          {field.value?.includes(member.id) && (
-                            <span>✓</span>
-                          )}
-                          {member.name || member.email}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  options={teamMembers.map((member) => ({
+                    label: member.name || member.email,
+                    value: member.id,
+                  }))}
+                  selected={field.value || []}
+                  onChange={field.onChange}
+                  placeholder="Select assignees"
+                  className="w-full"
+                />
               </FormControl>
-              <FormDescription>
-                {field.value && field.value.length > 0 ? (
-                  <>
-                    <span className="text-sm font-medium">Selected: </span>
-                    {field.value.map((id) => {
-                      const member = teamMembers.find(m => m.id === id)
-                      return member ? (
-                        <span key={id} className="inline-block bg-muted px-2 py-1 rounded text-xs mr-1 mb-1">
-                          {member.name || member.email}
-                        </span>
-                      ) : null
-                    })}
-                  </>
-                ) : null}
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

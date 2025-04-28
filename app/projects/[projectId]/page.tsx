@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KanbanBoard } from "@/components/project/kanban-board"
 import { StatusListView } from "@/components/project/status-list-view"
+import { TaskFilter, TaskFilters } from "@/components/project/task-filter"
+import { ProjectSettingsDialog } from "@/components/project/project-settings-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -87,7 +89,17 @@ export default function ProjectPage() {
   const [isTasksLoading, setIsTasksLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("board")
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
+  const [taskFilters, setTaskFilters] = useState<TaskFilters>({
+    search: "",
+    statusIds: [],
+    assigneeIds: [],
+    priority: null,
+    completed: null,
+  })
+  const [users, setUsers] = useState<any[]>([])
   const { toast } = useToast()
 
   // Fetch project data
@@ -147,8 +159,84 @@ export default function ProjectPage() {
   useEffect(() => {
     if (projectId) {
       fetchTasks()
+      fetchUsers()
     }
   }, [projectId])
+
+  // Fetch users for the project
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}/team`)
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch project members")
+      }
+
+      const data = await response.json()
+
+      // Check if we have team members data
+      if (data.teamMembers && Array.isArray(data.teamMembers)) {
+        // Extract user data from team members
+        const usersList = data.teamMembers.map(member => member.user).filter(Boolean)
+        console.log("Fetched users:", usersList.length)
+        setUsers(usersList)
+      } else {
+        console.error("No team members data found:", data)
+        setUsers([])
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error)
+    }
+  }
+
+  // Filter tasks based on current filters
+  useEffect(() => {
+    if (tasks.length === 0) {
+      setFilteredTasks([])
+      return
+    }
+
+    let filtered = [...tasks]
+
+    // Filter by search term
+    if (taskFilters.search) {
+      const searchTerm = taskFilters.search.toLowerCase()
+      filtered = filtered.filter(task =>
+        task.title.toLowerCase().includes(searchTerm) ||
+        (task.description && task.description.toLowerCase().includes(searchTerm))
+      )
+    }
+
+    // Filter by status
+    if (taskFilters.statusIds.length > 0) {
+      filtered = filtered.filter(task =>
+        task.statusId && taskFilters.statusIds.includes(task.statusId)
+      )
+    }
+
+    // Filter by assignee
+    if (taskFilters.assigneeIds.length > 0) {
+      filtered = filtered.filter(task =>
+        task.assignees && task.assignees.some(assignee =>
+          taskFilters.assigneeIds.includes(assignee.user.id)
+        )
+      )
+    }
+
+    // Filter by priority
+    if (taskFilters.priority) {
+      filtered = filtered.filter(task =>
+        task.priority.toLowerCase() === taskFilters.priority?.toLowerCase()
+      )
+    }
+
+    // Filter by completion status
+    if (taskFilters.completed !== null) {
+      filtered = filtered.filter(task => task.completed === taskFilters.completed)
+    }
+
+    setFilteredTasks(filtered)
+  }, [tasks, taskFilters])
 
   const handleCreateTask = () => {
     setEditingTaskId(null)
@@ -191,79 +279,105 @@ export default function ProjectPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{project.title}</h1>
-          {project.description && (
-            <p className="text-muted-foreground mt-1">{project.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href={`/projects/${projectId}/settings`}>
-            <Button variant="outline" size="sm">
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight">{project.title}</h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                title="Edit Project"
+                onClick={() => setIsSettingsDialogOpen(true)}
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+            {project.description && (
+              <p className="text-muted-foreground mt-1">{project.description}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleCreateTask}>
+              <span className="mr-2">+</span> New Task
             </Button>
-          </Link>
+          </div>
         </div>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Progress</span>
+                  <span className="text-sm text-muted-foreground">
+                    {project._count?.tasks ?
+                      Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden mt-2">
+                  <div
+                    className="h-full bg-primary"
+                    style={{
+                      width: project._count?.tasks ?
+                        `${Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100)}%` : "0%"
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-muted-foreground">
+                    {tasks.filter(t => t.completed).length} / {project._count?.tasks || 0} tasks
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Timeline</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDate(project.startDate)} - {formatDate(project.endDate)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Time Tracking</p>
+                  <p className="text-xs text-muted-foreground">
+                    {project.totalTimeSpent || 0} / {project.estimatedTime || 0} hours
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Team</p>
+                  <p className="text-xs text-muted-foreground">
+                    {project._count?.teamMembers || 0} members
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tasks</CardDescription>
-            <CardTitle className="text-2xl">{project._count?.tasks || 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Total tasks in this project</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Team Members</CardDescription>
-            <CardTitle className="text-2xl">{project._count?.teamMembers || 0}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">People working on this project</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Timeline</CardDescription>
-            <CardTitle className="text-sm flex items-center">
-              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-              {formatDate(project.startDate)} - {formatDate(project.endDate)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Project duration</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Time Tracking</CardDescription>
-            <CardTitle className="text-sm flex items-center">
-              <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-              {project.totalTimeSpent || 0} / {project.estimatedTime || 0} hours
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary"
-                style={{
-                  width: project.estimatedTime
-                    ? `${Math.min(100, (project.totalTimeSpent || 0) / project.estimatedTime * 100)}%`
-                    : "0%"
-                }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Time spent vs. estimated</p>
-          </CardContent>
-        </Card>
+      <div className="mb-6">
+        <TaskFilter
+          statuses={statuses}
+          users={users}
+          onFilterChange={setTaskFilters}
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -279,7 +393,9 @@ export default function ProjectPage() {
             projectId={projectId}
             onCreateTask={handleCreateTask}
             onEditTask={handleEditTask}
-            initialTasks={tasks}
+            initialTasks={filteredTasks.length > 0 || Object.values(taskFilters).some(v =>
+              Array.isArray(v) ? v.length > 0 : v !== null && v !== ""
+            ) ? filteredTasks : tasks}
             initialStatuses={statuses}
             onTasksChange={setTasks}
             onStatusesChange={setStatuses}
@@ -303,7 +419,9 @@ export default function ProjectPage() {
             <StatusListView
               projectId={projectId}
               statuses={statuses}
-              tasks={tasks}
+              tasks={filteredTasks.length > 0 || Object.values(taskFilters).some(v =>
+                Array.isArray(v) ? v.length > 0 : v !== null && v !== ""
+              ) ? filteredTasks : tasks}
               isLoading={isTasksLoading}
               onEditTask={handleEditTask}
               onRefresh={fetchTasks}
@@ -358,6 +476,21 @@ export default function ProjectPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Project Settings Dialog */}
+      {project && (
+        <ProjectSettingsDialog
+          projectId={projectId}
+          open={isSettingsDialogOpen}
+          onOpenChange={setIsSettingsDialogOpen}
+          project={project}
+          statuses={statuses}
+          onSuccess={async () => {
+            await fetchProject();
+            await fetchTasks();
+          }}
+        />
+      )}
     </div>
   )
 }

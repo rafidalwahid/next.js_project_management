@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
-import { Plus, MoreHorizontal, Clock, Calendar, User } from "lucide-react"
+import { Plus, MoreHorizontal, Clock, Calendar, User, Pencil, Trash, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,13 +12,25 @@ import { useToast } from "@/hooks/use-toast"
 import { CreateStatusDialog } from "@/components/project/create-status-dialog"
 import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
 import { taskApi } from "@/lib/api"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { format } from "date-fns"
 
 interface ProjectStatus {
@@ -85,6 +97,11 @@ export function KanbanBoard({
   const [statuses, setStatuses] = useState<ProjectStatus[]>(initialStatuses || [])
   const [tasks, setTasks] = useState<Task[]>(initialTasks || [])
   const [isLoading, setIsLoading] = useState(!initialTasks || !initialStatuses)
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
+  const [editingStatusName, setEditingStatusName] = useState<string>("")
+  const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null)
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null)
+  const statusInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
   // Update local state when props change
@@ -99,6 +116,13 @@ export function KanbanBoard({
       setStatuses(initialStatuses)
     }
   }, [initialStatuses])
+
+  // Focus input when editing status
+  useEffect(() => {
+    if (editingStatusId && statusInputRef.current) {
+      statusInputRef.current.focus()
+    }
+  }, [editingStatusId])
 
   // Fetch statuses and tasks
   const fetchData = async () => {
@@ -356,10 +380,156 @@ export function KanbanBoard({
     )
   }
 
-  // Import the CreateStatusDialog component
+  // Handle status creation
   const handleStatusCreated = () => {
     // Refresh data when a new status is created
     fetchData();
+  };
+
+  // Start editing a status
+  const handleEditStatus = (status: ProjectStatus) => {
+    setEditingStatusId(status.id);
+    setEditingStatusName(status.name);
+  };
+
+  // Save edited status
+  const handleSaveStatusName = async () => {
+    if (!editingStatusId) return;
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/statuses/${editingStatusId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editingStatusName }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      // Update local state
+      setStatuses(prev =>
+        prev.map(status =>
+          status.id === editingStatusId
+            ? { ...status, name: editingStatusName }
+            : status
+        )
+      );
+
+      // Notify parent component
+      if (onStatusesChange) {
+        onStatusesChange(statuses.map(status =>
+          status.id === editingStatusId
+            ? { ...status, name: editingStatusName }
+            : status
+        ));
+      }
+
+      toast({
+        title: "Status updated",
+        description: "Status name has been updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update status",
+        variant: "destructive",
+      });
+    } finally {
+      setEditingStatusId(null);
+    }
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingStatusId(null);
+  };
+
+  // Delete status
+  const handleDeleteStatus = async () => {
+    if (!deleteStatusId) return;
+
+    try {
+      // Check if status has tasks
+      const tasksInStatus = tasks.filter(task => task.statusId === deleteStatusId);
+
+      if (tasksInStatus.length > 0) {
+        toast({
+          title: "Cannot delete status",
+          description: "This status contains tasks. Move or delete them first.",
+          variant: "destructive",
+        });
+        setDeleteStatusId(null);
+        return;
+      }
+
+      const response = await fetch(`/api/projects/${projectId}/statuses/${deleteStatusId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete status");
+      }
+
+      // Update local state
+      const updatedStatuses = statuses.filter(status => status.id !== deleteStatusId);
+      setStatuses(updatedStatuses);
+
+      // Notify parent component
+      if (onStatusesChange) {
+        onStatusesChange(updatedStatuses);
+      }
+
+      toast({
+        title: "Status deleted",
+        description: "Status has been deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete status",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteStatusId(null);
+    }
+  };
+
+  // Delete task
+  const handleDeleteTask = async () => {
+    if (!deleteTaskId) return;
+
+    try {
+      const response = await fetch(`/api/tasks/${deleteTaskId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+
+      // Update local state
+      const updatedTasks = tasks.filter(task => task.id !== deleteTaskId);
+      setTasks(updatedTasks);
+
+      // Notify parent component
+      if (onTasksChange) {
+        onTasksChange(updatedTasks);
+      }
+
+      toast({
+        title: "Task deleted",
+        description: "Task has been deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete task",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTaskId(null);
+    }
   };
 
   return (
@@ -393,17 +563,80 @@ export function KanbanBoard({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: status.color }}
                   />
-                  <h3 className="font-medium">{status.name}</h3>
+
+                  {editingStatusId === status.id ? (
+                    <div className="flex items-center gap-1">
+                      <Input
+                        ref={statusInputRef}
+                        value={editingStatusName}
+                        onChange={(e) => setEditingStatusName(e.target.value)}
+                        className="h-7 w-[120px] py-1 px-2 text-sm"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveStatusName();
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit();
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={handleSaveStatusName}
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={handleCancelEdit}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <h3 className="font-medium">{status.name}</h3>
+                  )}
+
                   <span className="text-xs text-muted-foreground">
                     {getTasksByStatus(status.id).length}
                   </span>
                 </div>
-                <QuickTaskDialog
-                  projectId={projectId}
-                  statusId={status.id}
-                  statusName={status.name}
-                  onTaskCreated={fetchData}
-                />
+
+                <div className="flex items-center gap-1">
+                  {!editingStatusId && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditStatus(status)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit Status
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setDeleteStatusId(status.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Delete Status
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+
+                  <QuickTaskDialog
+                    projectId={projectId}
+                    statusId={status.id}
+                    statusName={status.name}
+                    onTaskCreated={fetchData}
+                  />
+                </div>
               </div>
 
               <Droppable droppableId={status.id}>
@@ -453,10 +686,20 @@ export function KanbanBoard({
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => onEditTask && onEditTask(task.id)}>
+                                      <Pencil className="mr-2 h-4 w-4" />
                                       Edit
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => toggleTaskCompletion(task.id, task.completed)}>
+                                      <Check className="mr-2 h-4 w-4" />
                                       Mark as {task.completed ? "Incomplete" : "Complete"}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => setDeleteTaskId(task.id)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      Delete
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -519,6 +762,42 @@ export function KanbanBoard({
           </div>
         </div>
       </DragDropContext>
+
+      {/* Delete Status Confirmation Dialog */}
+      <AlertDialog open={!!deleteStatusId} onOpenChange={(open) => !open && setDeleteStatusId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Status</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this status? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteStatus} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Task Confirmation Dialog */}
+      <AlertDialog open={!!deleteTaskId} onOpenChange={(open) => !open && setDeleteTaskId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTask} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
