@@ -52,9 +52,9 @@ export async function DELETE(
     // Check if user is a team member
     const teamMember = await prisma.teamMember.findUnique({
       where: {
-        userId_projectId: {
-          userId,
+        projectId_userId: {
           projectId,
+          userId,
         },
       },
       include: {
@@ -85,9 +85,9 @@ export async function DELETE(
     // Remove user from the team
     await prisma.teamMember.delete({
       where: {
-        userId_projectId: {
-          userId,
+        projectId_userId: {
           projectId,
+          userId,
         },
       },
     });

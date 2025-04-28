@@ -79,33 +79,46 @@ export function useRole(role: string) {
 export function useUserPermissions() {
   const { data: session } = useSession()
   const [permissions, setPermissions] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // If no session, user has no permissions
     if (!session?.user?.id) {
       setPermissions([])
+      setIsLoading(false)
       return
     }
 
-    // Use the client-side method if we're still loading or for SSR
-    const userRole = session.user.role || "guest"
-    const clientPermissions = ClientPermissions.getPermissionsForRole(userRole)
-    setPermissions(clientPermissions)
+    setIsLoading(true)
 
-    // Then get the actual permissions from the database
+    // Get the actual permissions from the database
     const getPermissions = async () => {
       try {
         const userPermissions = await ClientPermissions.getUserPermissions(session.user.id)
-        setPermissions(userPermissions)
+
+        // If no permissions returned from API, fallback to role-based permissions
+        if (!userPermissions || userPermissions.length === 0) {
+          const userRole = session.user.role || "guest"
+          const clientPermissions = ClientPermissions.getPermissionsForRole(userRole)
+          setPermissions(clientPermissions)
+        } else {
+          setPermissions(userPermissions)
+        }
       } catch (error) {
         console.error("Error getting user permissions:", error)
+        // Fallback to role-based permissions on error
+        const userRole = session.user.role || "guest"
+        const clientPermissions = ClientPermissions.getPermissionsForRole(userRole)
+        setPermissions(clientPermissions)
+      } finally {
+        setIsLoading(false)
       }
     }
 
     getPermissions()
   }, [session])
 
-  return permissions
+  return { permissions, isLoading }
 }
 
 /**
@@ -114,30 +127,42 @@ export function useUserPermissions() {
 export function useUserRoles() {
   const { data: session } = useSession()
   const [roles, setRoles] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // If no session, user has no roles
     if (!session?.user?.id) {
       setRoles([])
+      setIsLoading(false)
       return
     }
 
-    // Use the fallback method if we're still loading or for SSR
-    const userRole = session.user.role || "guest"
-    setRoles([userRole])
+    setIsLoading(true)
 
     // Then get the actual roles from the database
     const getRoles = async () => {
       try {
         const userRoles = await ClientPermissions.getUserRoles(session.user.id)
-        setRoles(userRoles)
+
+        // If no roles returned from API, fallback to session role
+        if (!userRoles || userRoles.length === 0) {
+          const userRole = session.user.role || "guest"
+          setRoles([userRole])
+        } else {
+          setRoles(userRoles)
+        }
       } catch (error) {
         console.error("Error getting user roles:", error)
+        // Fallback to session role on error
+        const userRole = session.user.role || "guest"
+        setRoles([userRole])
+      } finally {
+        setIsLoading(false)
       }
     }
 
     getRoles()
   }, [session])
 
-  return roles
+  return { roles, isLoading }
 }

@@ -74,9 +74,11 @@ export function getTaskIncludeObject(
     project: {
       select: projectSelectFields
     },
+    // Keep assignedTo for backward compatibility, but it's deprecated
     assignedTo: {
       select: userSelectFields
     },
+    // Use assignees as the primary way to get task assignees
     assignees: {
       include: {
         user: {
@@ -167,9 +169,11 @@ export function getTaskListIncludeObject(): Prisma.TaskInclude {
     project: {
       select: projectMinimalSelectFields
     },
+    // Keep assignedTo for backward compatibility, but it's deprecated
     assignedTo: {
       select: userMinimalSelectFields
     },
+    // Use assignees as the primary way to get task assignees
     assignees: {
       include: {
         user: {

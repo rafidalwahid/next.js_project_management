@@ -216,8 +216,10 @@ model Task {
   completed     Boolean        @default(false)
   activities    Activity[]
   attendances   Attendance[]
+  // DEPRECATED: Use assignees relation instead
+  // This field is kept for backward compatibility but should not be used
   assignedTo    User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  assignedToId  String?
+  assignedToId  String? // DEPRECATED: Use TaskAssignee model instead
   parent        Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
   subtasks      Task[]         @relation("SubTasks")
   project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)

@@ -9,8 +9,8 @@ export async function middleware(request: NextRequest) {
 
   // Skip authentication check for these paths
   if (
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
+    pathname.includes('/login') ||
+    pathname.includes('/register') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/register') ||
     pathname.startsWith('/_next') ||
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
 
   // If not authenticated and not on an auth page, redirect to login
-  if (!token && pathname !== '/login') {
+  if (!token && !pathname.includes('/login')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

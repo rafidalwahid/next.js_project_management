@@ -204,12 +204,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Note: assignedToId is deprecated in favor of the TaskAssignee model
-    // We'll set it to null to encourage using the TaskAssignee model instead
+    // assignedToId is completely deprecated - always set to null
+    // If assignedToId is provided, convert it to assigneeIds for backward compatibility
     if (assignedToId !== undefined) {
       // For backward compatibility, if assignedToId is provided, we'll add this user
       // to the task assignees list instead of using the direct field
       if (assignedToId !== null && assignedToId !== "") {
+        console.log(`Converting deprecated assignedToId ${assignedToId} to assigneeIds`);
+
         // Verify the user exists
         const userExists = await prisma.user.findUnique({
           where: { id: assignedToId },
@@ -223,7 +225,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           );
         }
 
-        // Instead of setting assignedToId, we'll ensure this user is in the assignees list
+        // If assigneeIds wasn't provided, create it from the assignedToId
         if (assigneeIds === undefined) {
           // Get current assignees
           const currentAssignees = await prisma.taskAssignee.findMany({
@@ -233,38 +235,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
           const currentUserIds = currentAssignees.map(a => a.userId);
 
-          // Only add if not already an assignee
-          if (!currentUserIds.includes(assignedToId)) {
-            await prisma.taskAssignee.create({
-              data: {
-                taskId,
-                userId: assignedToId
-              }
-            });
-
-            // Also add as team member if needed
-            const isTeamMember = await prisma.teamMember.findUnique({
-              where: {
-                projectId_userId: {
-                  projectId: task.projectId,
-                  userId: assignedToId
-                }
-              }
-            });
-
-            if (!isTeamMember) {
-              await prisma.teamMember.create({
-                data: {
-                  projectId: task.projectId,
-                  userId: assignedToId
-                }
-              });
-            }
+          // Create a new assigneeIds array with the current assignees plus the assignedToId
+          const newAssigneeIds = [...currentUserIds];
+          if (!newAssigneeIds.includes(assignedToId)) {
+            newAssigneeIds.push(assignedToId);
           }
+
+          // Set the assigneeIds variable so it will be processed by the assigneeIds handler below
+          validationResult.data.assigneeIds = newAssigneeIds;
         }
       }
 
-      // Always set the direct assignedToId to null to encourage using TaskAssignee
+      // Always set the direct assignedToId to null
       updateData.assignedToId = null;
     }
 
@@ -525,7 +507,21 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           }
         }
       },
-      include: getTaskIncludeObject(3) // 3 levels deep, no activities
+      include: {
+        ...getTaskIncludeObject(3), // 3 levels deep, no activities
+        assignees: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              }
+            }
+          }
+        }
+      }
     });
 
     console.log('Updated task:', JSON.stringify({

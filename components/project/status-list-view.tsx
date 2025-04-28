@@ -7,26 +7,19 @@ import {
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  UniqueIdentifier,
-  pointerWithin,
   rectIntersection,
-  getFirstCollision,
-  DroppableContainer,
   DragOverEvent,
 } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
-  arrayMove,
   useSortable,
   verticalListSortingStrategy,
-  rectSortingStrategy,
 } from "@dnd-kit/sortable"
 import { useDroppable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
@@ -63,7 +56,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -282,6 +274,7 @@ function StatusSection({
   onToggle,
   onEditStatus,
   onDeleteStatus,
+  onDeleteTask,
   isEditing,
   editingName,
   onEditingNameChange,
@@ -297,14 +290,18 @@ function StatusSection({
   onToggle: () => void
   onEditStatus: (status: ProjectStatus) => void
   onDeleteStatus: (statusId: string) => void
+  onDeleteTask: (taskId: string) => void
   isEditing: boolean
   editingName: string
   onEditingNameChange: (value: string) => void
   onSaveEdit: () => void
   onCancelEdit: () => void
 }) {
+  // Reference for the status input field
+  const statusInputRef = useRef<HTMLInputElement>(null);
+
   // Make the status section a droppable area
-  const { setNodeRef, isOver, active } = useDroppable({
+  const { setNodeRef, isOver } = useDroppable({
     id: `status-${status.id}`,
     data: {
       type: 'status',
@@ -439,7 +436,7 @@ function StatusSection({
                   task={task}
                   onToggleComplete={onToggleComplete}
                   onEdit={onEdit}
-                  onDelete={(taskId) => setDeleteTaskId(taskId)}
+                  onDelete={onDeleteTask}
                 />
               ))}
             </SortableContext>
@@ -513,6 +510,8 @@ export function StatusListView({
   // Handle task completion toggle
   const toggleTaskCompletion = async (taskId: string, completed: boolean) => {
     try {
+      console.log(`Toggling task completion: ${taskId}, current state: ${completed}`);
+
       // Update on the server
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -521,17 +520,20 @@ export function StatusListView({
       })
 
       if (!response.ok) {
-        throw new Error("Failed to update task")
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to update task completion:", errorData);
+        throw new Error(errorData.error || "Failed to update task");
       }
 
       // Refresh data
-      await onRefresh()
+      await onRefresh();
 
       toast({
         title: `Task marked as ${!completed ? "completed" : "incomplete"}`,
         description: "Task status updated successfully",
       })
     } catch (error) {
+      console.error("Error toggling task completion:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update task",
@@ -648,8 +650,11 @@ export function StatusListView({
     if (!deleteStatusId) return;
 
     try {
+      console.log(`Attempting to delete status: ${deleteStatusId}`);
+
       // Check if status has tasks
       const tasksInStatus = tasks.filter(task => task.statusId === deleteStatusId);
+      console.log(`Status has ${tasksInStatus.length} tasks`);
 
       if (tasksInStatus.length > 0) {
         toast({
@@ -666,7 +671,9 @@ export function StatusListView({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete status");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to delete status:", errorData);
+        throw new Error(errorData.error || "Failed to delete status");
       }
 
       // Refresh data
@@ -677,6 +684,7 @@ export function StatusListView({
         description: "Status has been deleted successfully",
       });
     } catch (error) {
+      console.error("Error deleting status:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete status",
@@ -692,12 +700,16 @@ export function StatusListView({
     if (!deleteTaskId) return;
 
     try {
+      console.log(`Deleting task: ${deleteTaskId}`);
+
       const response = await fetch(`/api/tasks/${deleteTaskId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete task");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to delete task:", errorData);
+        throw new Error(errorData.error || "Failed to delete task");
       }
 
       // Refresh data
@@ -708,6 +720,7 @@ export function StatusListView({
         description: "Task has been deleted successfully",
       });
     } catch (error) {
+      console.error("Error deleting task:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete task",
@@ -878,6 +891,7 @@ export function StatusListView({
             onToggle={() => toggleStatus(status.id)}
             onEditStatus={handleEditStatus}
             onDeleteStatus={(statusId) => setDeleteStatusId(statusId)}
+            onDeleteTask={(taskId) => setDeleteTaskId(taskId)}
             isEditing={editingStatusId === status.id}
             editingName={editingStatusName}
             onEditingNameChange={setEditingStatusName}

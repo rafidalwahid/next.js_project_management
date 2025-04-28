@@ -151,9 +151,9 @@ export async function POST(
     // Check if user is already a team member
     const existingTeamMember = await prisma.teamMember.findUnique({
       where: {
-        userId_projectId: {
-          userId,
+        projectId_userId: {
           projectId,
+          userId,
         },
       },
     });

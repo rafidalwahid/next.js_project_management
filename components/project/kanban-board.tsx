@@ -534,14 +534,8 @@ export function KanbanBoard({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Tasks</h2>
+      <div className="flex justify-end items-center">
         <div className="flex items-center gap-2">
-          {statuses.length > 3 && (
-            <span className="text-sm text-muted-foreground hidden md:inline-block">
-              Scroll horizontally to see all {statuses.length} columns
-            </span>
-          )}
           <CreateStatusDialog
             projectId={projectId}
             onStatusCreated={handleStatusCreated}
@@ -551,7 +545,7 @@ export function KanbanBoard({
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="h-[600px] max-h-[calc(100vh-240px)] overflow-hidden">
-          <div className="flex overflow-x-auto pb-4 gap-6 snap-x scrollbar scrollbar-thumb-gray-300 scrollbar-track-transparent h-full pr-4 pl-1 -ml-1" title="Scroll horizontally to see more columns">
+          <div className="flex overflow-x-auto pb-4 gap-6 snap-x scrollbar scrollbar-thumb-gray-300 scrollbar-track-transparent h-full pr-4 pl-1 -ml-1">
           {statuses.sort((a, b) => a.order - b.order).map((status) => (
             <div key={status.id} className="flex flex-col h-full min-w-[300px] snap-start shadow-md rounded-md">
               <div

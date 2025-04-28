@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const projectId = searchParams.get("projectId");
     const assignedToId = searchParams.get("assignedToId");
+    const assigneeId = searchParams.get("assigneeId");
     const priority = searchParams.get("priority");
     const limit = parseInt(searchParams.get("limit") || "20");
     const page = parseInt(searchParams.get("page") || "1");
@@ -33,8 +34,21 @@ export async function GET(req: NextRequest) {
       where.projectId = projectId;
     }
 
+    // Support both old assignedToId and new assigneeId parameters
     if (assignedToId) {
-      where.assignedToId = assignedToId;
+      // For backward compatibility, use assignedToId directly
+      // But also check TaskAssignee table
+      where.OR = [
+        { assignedToId: assignedToId },
+        { assignees: { some: { userId: assignedToId } } }
+      ];
+    } else if (assigneeId) {
+      // Use the TaskAssignee relation for filtering
+      where.assignees = {
+        some: {
+          userId: assigneeId
+        }
+      };
     }
 
     if (priority) {
@@ -269,8 +283,7 @@ export async function POST(req: NextRequest) {
         timeSpent,
         projectId,
         statusId: finalStatusId,
-        // Note: assignedToId is deprecated in favor of the TaskAssignee model
-        // We'll keep it for backward compatibility but it's not the primary assignment method
+        // assignedToId is completely deprecated - always set to null
         assignedToId: null,
         parentId,
         order: initialOrder,
@@ -287,6 +300,18 @@ export async function POST(req: NextRequest) {
             createdAt: true,
             updatedAt: true,
           },
+        },
+        assignees: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              }
+            }
+          }
         },
       },
     });

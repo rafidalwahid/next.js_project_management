@@ -7,22 +7,22 @@ import { useUserRoles, useUserPermissions } from "@/hooks/use-permission"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  BarChart3, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  Layers, 
-  ShieldAlert, 
-  ShieldCheck, 
-  Users 
+import {
+  BarChart3,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Layers,
+  ShieldAlert,
+  ShieldCheck,
+  Users
 } from "lucide-react"
 
 export function RoleDashboard() {
   const { data: session } = useSession()
-  const userRoles = useUserRoles()
-  const userPermissions = useUserPermissions()
+  const { roles: userRoles, isLoading: rolesLoading } = useUserRoles()
+  const { permissions: userPermissions, isLoading: permissionsLoading } = useUserPermissions()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     projects: 0,
@@ -37,7 +37,7 @@ export function RoleDashboard() {
     // Simulate loading stats
     const loadStats = async () => {
       setLoading(true)
-      
+
       // In a real app, you would fetch this data from your API
       // For now, we'll just use dummy data
       setTimeout(() => {
@@ -52,12 +52,32 @@ export function RoleDashboard() {
         setLoading(false)
       }, 1000)
     }
-    
+
     loadStats()
   }, [])
 
   // Determine which dashboard view to show based on user roles
   const getDashboardView = () => {
+    // Show loading skeleton while roles are being fetched
+    if (rolesLoading) {
+      return (
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
+      )
+    }
+
+    // Once roles are loaded, show the appropriate dashboard
     if (userRoles.includes("admin")) {
       return <AdminDashboard stats={stats} loading={loading} />
     } else if (userRoles.includes("manager")) {
@@ -72,21 +92,28 @@ export function RoleDashboard() {
       <div className="flex flex-col space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Welcome back, {session?.user?.name}</h2>
         <div className="flex flex-wrap gap-2">
-          {userRoles.map(role => (
-            <Badge key={role} variant="outline" className="capitalize">
-              {role === "admin" ? (
-                <ShieldAlert className="mr-1 h-3 w-3" />
-              ) : role === "manager" ? (
-                <ShieldCheck className="mr-1 h-3 w-3" />
-              ) : null}
-              {role}
-            </Badge>
-          ))}
+          {rolesLoading ? (
+            <>
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-24" />
+            </>
+          ) : (
+            userRoles.map(role => (
+              <Badge key={role} variant="outline" className="capitalize">
+                {role === "admin" ? (
+                  <ShieldAlert className="mr-1 h-3 w-3" />
+                ) : role === "manager" ? (
+                  <ShieldCheck className="mr-1 h-3 w-3" />
+                ) : null}
+                {role}
+              </Badge>
+            ))
+          )}
         </div>
       </div>
-      
+
       {getDashboardView()}
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Your Permissions</CardTitle>
@@ -95,14 +122,22 @@ export function RoleDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {userPermissions.map(permission => (
-              <Badge key={permission} variant="secondary" className="capitalize">
-                <CheckCircle2 className="mr-1 h-3 w-3" />
-                {permission.replace(/_/g, ' ')}
-              </Badge>
-            ))}
-          </div>
+          {permissionsLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {userPermissions.map(permission => (
+                <Badge key={permission} variant="secondary" className="capitalize">
+                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                  {permission.replace(/_/g, ' ')}
+                </Badge>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -150,7 +185,7 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
               loading={loading}
             />
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -188,7 +223,7 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
@@ -224,7 +259,7 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="analytics">
           <Card>
             <CardHeader>
@@ -244,7 +279,7 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="reports">
           <Card>
             <CardHeader>
@@ -264,7 +299,7 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="system">
           <Card>
             <CardHeader>
@@ -329,7 +364,7 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
               loading={loading}
             />
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -367,7 +402,7 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Recent Updates</CardTitle>
@@ -403,7 +438,7 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="team">
           <Card>
             <CardHeader>
@@ -423,7 +458,7 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="projects">
           <Card>
             <CardHeader>
@@ -481,7 +516,7 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
               loading={loading}
             />
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -519,7 +554,7 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
@@ -555,7 +590,7 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="tasks">
           <Card>
             <CardHeader>
@@ -575,7 +610,7 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="attendance">
           <Card>
             <CardHeader>
@@ -600,13 +635,13 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
   )
 }
 
-function StatsCard({ 
-  title, 
-  value, 
-  description, 
+function StatsCard({
+  title,
+  value,
+  description,
   icon,
   loading
-}: { 
+}: {
   title: string
   value: number | string
   description: string

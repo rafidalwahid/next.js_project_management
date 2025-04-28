@@ -20,7 +20,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     if (status === "loading") return
 
     // Redirect if user is not logged in
-    if (status === "unauthenticated" && pathname !== "/login" && pathname !== "/register") {
+    if (status === "unauthenticated" && !pathname.includes("/login") && !pathname.includes("/register")) {
       router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
       return
     }
@@ -58,7 +58,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   }
 
   // Allow access to login and register pages when unauthenticated
-  if (status === "unauthenticated" && (pathname === "/login" || pathname === "/register")) {
+  if (status === "unauthenticated" && (pathname.includes("/login") || pathname.includes("/register"))) {
     return <>{children}</>
   }
 
