@@ -272,6 +272,8 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         // Ensure these are properly formatted for the API
         estimatedTime: values.estimatedTime === "" ? null : values.estimatedTime,
         timeSpent: values.timeSpent === "" ? null : values.timeSpent,
+        // Make sure assigneeIds is an array
+        assigneeIds: Array.isArray(values.assigneeIds) ? values.assigneeIds : [],
         // Format dates
         startDate: values.startDate ? values.startDate.toISOString() : null,
         endDate: values.endDate ? values.endDate.toISOString() : null,
@@ -292,9 +294,12 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || "Failed to save task")
       }
+
+      const result = await response.json()
+      console.log("Task form submission result:", result)
 
       toast({
         title: taskId ? "Task updated" : "Task created",
@@ -307,6 +312,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         onSuccess()
       }
     } catch (error) {
+      console.error("Form submission error:", error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to save task",

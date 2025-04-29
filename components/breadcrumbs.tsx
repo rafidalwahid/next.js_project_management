@@ -61,14 +61,18 @@ export function Breadcrumbs() {
   const taskIdMatch = pathname.match(/\/tasks\/([a-zA-Z0-9_-]+)/)
   const taskId = taskIdMatch ? taskIdMatch[1] : null
 
+  // Don't try to fetch if it's a "new" route
+  const isNewTaskRoute = taskId === "new"
+  const isNewProjectRoute = projectId === "new"
+
   // Fetch user profile if we're on a profile page
   const { profile, isLoading: isProfileLoading } = useUserProfile(isUserProfilePage ? userId || '' : '')
 
-  // Fetch project if we're on a project page
-  const { project, isLoading: isProjectLoading } = useProject(projectId)
+  // Fetch project if we're on a project page (but not for "new" project)
+  const { project, isLoading: isProjectLoading } = useProject(isNewProjectRoute ? null : projectId)
 
-  // Fetch task if we're on a task page
-  const { task, isLoading: isTaskLoading } = useTask(taskId)
+  // Fetch task if we're on a task page (but not for "new" task)
+  const { task, isLoading: isTaskLoading } = useTask(isNewTaskRoute ? null : taskId)
 
   // Memoize breadcrumb generation to avoid unnecessary re-renders
   useEffect(() => {
@@ -94,33 +98,37 @@ export function Breadcrumbs() {
         currentPath += `/${segment}`
         const isLastSegment = index === segments.length - 1
 
-        // Check if segment is a UUID or ID (likely a dynamic route)
-        const isDynamic = /^[a-f0-9]{8,}$/i.test(segment) || segment === '[id]'
+        // Check if segment is a UUID, ID, or special value like 'new'
+        const isDynamic = /^[a-f0-9]{8,}$/i.test(segment) || segment === '[id]' || segment === 'new'
 
         // Get a more readable label
         let label = routeMappings[segment] || segment
 
         // For dynamic segments, try to get a better label
         if (isDynamic) {
-          // If it's a project ID, we could fetch the project title
+          // If it's a project ID or 'new' in the projects route
           if (segments.includes('projects') && segments.indexOf('projects') < index) {
-            if (isProjectLoading) {
-              label = 'Loading...'
+            if (segment === 'new') {
+              label = 'New Project';
+            } else if (isProjectLoading) {
+              label = 'Loading...';
             } else if (project && project.title) {
               // Clean up any gibberish in the project title
-              label = project.title.split('hgh')[0]
+              label = project.title.split('hgh')[0];
             } else {
-              label = 'Project Details'
+              label = 'Project Details';
             }
           }
-          // If it's a task ID
+          // If it's a task ID or 'new' in the tasks route
           else if (segments.includes('tasks') && segments.indexOf('tasks') < index) {
-            if (isTaskLoading) {
-              label = 'Loading...'
+            if (segment === 'new') {
+              label = 'New Task';
+            } else if (isTaskLoading) {
+              label = 'Loading...';
             } else if (task && task.title) {
-              label = task.title
+              label = task.title;
             } else {
-              label = 'Task Details'
+              label = 'Task Details';
             }
           }
           // If it's a user profile and we have the profile data

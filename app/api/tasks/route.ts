@@ -7,6 +7,7 @@ import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
 import { getNextOrderValue } from "@/lib/ordering/task-ordering";
+import { createTaskSchema, CreateTaskValues } from "@/lib/validations/task";
 
 // GET handler to list tasks
 export async function GET(req: NextRequest) {
@@ -20,7 +21,6 @@ export async function GET(req: NextRequest) {
     // Get search params
     const searchParams = req.nextUrl.searchParams;
     const projectId = searchParams.get("projectId");
-    const assignedToId = searchParams.get("assignedToId");
     const assigneeId = searchParams.get("assigneeId");
     const priority = searchParams.get("priority");
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -34,15 +34,7 @@ export async function GET(req: NextRequest) {
       where.projectId = projectId;
     }
 
-    // Support both old assignedToId and new assigneeId parameters
-    if (assignedToId) {
-      // For backward compatibility, use assignedToId directly
-      // But also check TaskAssignee table
-      where.OR = [
-        { assignedToId: assignedToId },
-        { assignees: { some: { userId: assignedToId } } }
-      ];
-    } else if (assigneeId) {
+    if (assigneeId) {
       // Use the TaskAssignee relation for filtering
       where.assignees = {
         some: {
@@ -99,35 +91,8 @@ export async function GET(req: NextRequest) {
 }
 
 // Validation schema for creating a task
-const createTaskSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional().nullable(),
-  priority: z.enum(["low", "medium", "high"]).default("medium"),
-  startDate: z.string().optional().nullable(),
-  endDate: z.string().optional().nullable(),
-  dueDate: z.string().optional().nullable(),
-  estimatedTime: z.union([
-    z.number().optional().nullable(),
-    z.string().optional().nullable().transform(val => {
-      if (!val) return null;
-      const parsed = parseFloat(val);
-      return isNaN(parsed) ? null : parsed;
-    })
-  ]),
-  timeSpent: z.union([
-    z.number().optional().nullable(),
-    z.string().optional().nullable().transform(val => {
-      if (!val) return null;
-      const parsed = parseFloat(val);
-      return isNaN(parsed) ? null : parsed;
-    })
-  ]),
-  projectId: z.string(),
-  statusId: z.string().optional().nullable(),
-  assignedToId: z.string().optional().nullable(), // Kept for backward compatibility
-  assigneeIds: z.array(z.string()).optional(), // New field for multiple assignees
-  parentId: z.string().optional().nullable(), // New field for parent task reference
-});
+// export const createTaskSchema = z.object({ ... }); // Remove schema definition
+// export type CreateTaskValues = z.infer<typeof createTaskSchema>; // Remove type definition
 
 // POST handler to create a task
 export async function POST(req: NextRequest) {
@@ -165,32 +130,16 @@ export async function POST(req: NextRequest) {
       timeSpent,
       projectId,
       statusId,
-      assignedToId,
       assigneeIds,
       parentId
     } = validationResult.data;
-    console.log('POST /api/tasks: Parsed data:', { title, projectId, assignedToId, assigneeIds });
+    console.log('POST /api/tasks: Parsed data:', { title, projectId, assigneeIds });
 
     // Check project permission
     const { hasPermission, error } = await checkProjectPermission(projectId, session, 'update');
 
     if (!hasPermission) {
       return NextResponse.json({ error }, { status: error === "Project not found" ? 404 : 403 });
-    }
-
-    // Validate assignedToId if provided
-    if (assignedToId) {
-      const userExists = await prisma.user.findUnique({
-        where: { id: assignedToId },
-        select: { id: true }
-      });
-
-      if (!userExists) {
-        return NextResponse.json(
-          { error: "Invalid assignedToId: User not found" },
-          { status: 400 }
-        );
-      }
     }
 
     // Validate assigneeIds if provided
@@ -283,8 +232,6 @@ export async function POST(req: NextRequest) {
         timeSpent,
         projectId,
         statusId: finalStatusId,
-        // assignedToId is completely deprecated - always set to null
-        assignedToId: null,
         parentId,
         order: initialOrder,
       },

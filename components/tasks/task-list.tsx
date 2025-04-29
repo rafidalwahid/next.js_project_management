@@ -1,7 +1,17 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
-import { Edit, Trash, MoreHorizontal, CheckCircle2 } from "lucide-react"
+import { Edit, Trash, MoreHorizontal, CheckCircle2, ArrowUpDown, Circle, CircleDotDashed, CircleCheck } from "lucide-react"
+import {
+  ColumnDef,
+  SortingState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,23 +24,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
-interface Task {
+// Export the Task interface
+export interface Task {
   id: string
   title: string
   description: string | null
   priority: string
+  status: { // Added nested status object based on schema
+    name: string
+    color: string | null
+  } | null
   dueDate: string | null
   project?: {
     id: string
     title: string
   } | null
-  assignedTo?: {
-    id: string
-    name: string | null
-    image: string | null
-  } | null
-  assignees?: {
+  assignees?: { // Keeping assignees for multiple assignees display
     id: string
     user: {
       id: string
@@ -45,182 +57,358 @@ interface TaskListProps {
   onDelete: (taskId: string) => void
 }
 
+// --- Helper Functions ---
+
+const getUserInitials = (name: string | null) => {
+  if (!name) return "U"
+  const nameParts = name.split(" ")
+  if (nameParts.length >= 2) {
+    return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+  }
+  return name.substring(0, 2).toUpperCase()
+}
+
+const getPriorityBadgeVariant = (priority: string): "destructive" | "warning" | "outline" | "secondary" => {
+  switch (priority?.toLowerCase()) {
+    case "high": return "destructive"
+    case "medium": return "warning" // Using warning color for medium
+    case "low": return "secondary"  // Using secondary for low
+    default: return "outline"
+  }
+}
+
+const getStatusBadgeVariant = (statusName: string | undefined | null): "outline" | "secondary" | "success" => {
+  switch (statusName?.toLowerCase()) {
+    case "completed": return "success"
+    case "in-progress": return "secondary"
+    case "pending": return "outline"
+    // Add other fallback variants if needed
+    default: return "outline"
+  }
+}
+
+const getStatusIcon = (statusName: string | undefined | null) => {
+  switch (statusName?.toLowerCase()) {
+    case "pending": return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />
+    case "in-progress": return <CircleDotDashed className="mr-1.5 h-3 w-3 text-yellow-600" />
+    case "completed": return <CircleCheck className="mr-1.5 h-3 w-3 text-green-600" />
+    // Add more cases based on actual status names if needed
+    default: return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />
+  }
+}
+
+
+// --- Column Definitions for React Table ---
+
+const columns = (onDelete: (taskId: string) => void): ColumnDef<Task>[] => [
+  {
+    accessorKey: "title",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-4"
+      >
+        Title
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="flex flex-col">
+         <Link
+           href={`/tasks/${row.original.id}`}
+           className="font-medium hover:text-primary hover:underline max-w-[200px] md:max-w-[300px] truncate"
+           title={row.original.title}
+         >
+           {row.original.title}
+         </Link>
+         {row.original.description && (
+           <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[200px] md:max-w-[300px]">
+             {row.original.description}
+           </p>
+         )}
+       </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-4"
+      >
+        Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const status = row.original.status
+      const statusName = status?.name
+      const statusColor = status?.color
+
+      const baseBadgeClasses = "capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border"
+
+      const dynamicStyle: React.CSSProperties = statusColor
+        ? {
+            backgroundColor: `${statusColor}1A`,
+            borderColor: `${statusColor}4D`,
+            color: statusColor,
+          }
+        : {};
+
+      return (
+        <Badge
+          style={statusColor ? dynamicStyle : {}}
+          variant={!statusColor ? getStatusBadgeVariant(statusName) : null}
+          className={cn(
+             baseBadgeClasses,
+             !statusColor && "px-2 py-0.5",
+             statusColor && "px-2 py-0.5"
+          )}
+        >
+          {getStatusIcon(statusName)}
+          {statusName || "No Status"}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "project.title",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-4 hidden lg:inline-flex"
+      >
+        Project
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const project = row.original.project
+      return project ? (
+        <Link
+          href={`/projects/${project.id}`}
+          className="text-sm hover:underline whitespace-nowrap max-w-[150px] truncate"
+          title={project.title}
+        >
+          {project.title}
+        </Link>
+      ) : (
+        <span className="text-sm text-muted-foreground">—</span>
+      )
+    },
+    sortingFn: 'alphanumeric',
+  },
+  {
+    accessorKey: "priority",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-4"
+      >
+        Priority
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <Badge variant={getPriorityBadgeVariant(row.original.priority)} className="capitalize whitespace-nowrap text-xs font-medium">
+        {row.original.priority}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "dueDate",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="-ml-4 hidden md:inline-flex"
+      >
+        Due Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const dueDate = row.original.dueDate
+      return dueDate ? (
+        <span className="text-sm whitespace-nowrap">
+          {new Date(dueDate).toLocaleDateString()}
+        </span>
+      ) : (
+        <span className="text-sm text-muted-foreground">—</span>
+      )
+    },
+  },
+  {
+    id: "assignees",
+    header: "Assigned To",
+    cell: ({ row }) => {
+      const assignees = row.original.assignees
+
+      if (assignees && assignees.length > 0) {
+        const displayCount = 3; // Show first 3 avatars overlapping
+        const visibleAssignees = assignees.slice(0, displayCount);
+        const hiddenAssignees = assignees.slice(displayCount);
+        const remainingCount = hiddenAssignees.length;
+
+        return (
+          <TooltipProvider delayDuration={100}> {/* Wrap in provider */}
+            <div className="flex items-center -space-x-2"> {/* Revert to negative space */}
+              {visibleAssignees.map((assignee) => (
+                <Tooltip key={assignee.id}>
+                  <TooltipTrigger asChild>
+                    {/* Remove the inner div and name span */}
+                    <Avatar className="h-7 w-7 border-2 border-background cursor-pointer"> {/* Added cursor */}
+                      {assignee.user.image ? (
+                        <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                      ) : null}
+                      <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
+                        {getUserInitials(assignee.user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{assignee.user.name || "Unnamed User"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+              {remainingCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                     {/* Tooltip for the count indicator */}
+                     <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium text-muted-foreground z-10 cursor-default">
+                       +{remainingCount}
+                     </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {/* List remaining names */}
+                    {hiddenAssignees.map(a => a.user.name || "Unnamed").join(", ")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </TooltipProvider>
+        )
+       } else {
+        return <span className="text-sm text-muted-foreground">Unassigned</span>
+       }
+    },
+    enableSorting: false,
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const task = row.original
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+               <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                 <CheckCircle2 className="mr-2 h-4 w-4" /> View
+               </Link>
+             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+               <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                 <Edit className="mr-2 h-4 w-4" /> Edit
+               </Link>
+             </DropdownMenuItem>
+            <DropdownMenuItem
+               className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
+               onClick={() => onDelete(task.id)}
+             >
+               <Trash className="mr-2 h-4 w-4" /> Delete
+             </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
+    enableSorting: false,
+  },
+]
+
+// --- Main Component ---
+
 export function TaskList({ tasks, onDelete }: TaskListProps) {
-  // Get user initials for avatar fallback
-  const getUserInitials = (name: string | null) => {
-    if (!name) return "U"
+  const [sorting, setSorting] = React.useState<SortingState>([])
 
-    const nameParts = name.split(" ")
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
-    }
+  const table = useReactTable({
+    data: tasks,
+    columns: React.useMemo(() => columns(onDelete), [onDelete]),
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  })
 
-    return name.substring(0, 2).toUpperCase()
-  }
+  const columnCount = React.useMemo(() => columns(onDelete).length, [onDelete])
 
-  // Get priority badge variant
-  const getPriorityBadgeVariant = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "destructive"
-      case "medium":
-        return "warning"
-      case "low":
-        return "outline"
-      default:
-        return "outline"
-    }
-  }
-
-  if (tasks.length === 0) {
-    return (
-      <div className="rounded-md border-0 shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Assigned To</TableHead>
-              <TableHead className="w-[70px]">Actions</TableHead>
+  return (
+    <div className="rounded-md border shadow-sm overflow-x-auto">
+      <Table className="min-w-full">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead
+                   key={header.id}
+                   className={cn(
+                     "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
+                     header.id === 'project.title' && "hidden lg:table-cell",
+                     header.id === 'dueDate' && "hidden md:table-cell"
+                   )}
+                 >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
-          </TableHeader>
-          <TableBody>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                     key={cell.id}
+                     className={cn(
+                       "px-3 py-2.5 text-sm",
+                       cell.column.id === 'project.title' && "hidden lg:table-cell",
+                       cell.column.id === 'dueDate' && "hidden md:table-cell"
+                     )}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={columnCount} className="h-24 text-center">
                 No tasks found.
               </TableCell>
             </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    )
-  }
-
-  return (
-    <div className="rounded-md border-0 shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Project</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Due Date</TableHead>
-            <TableHead>Assigned To</TableHead>
-            <TableHead className="w-[70px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tasks.map((task) => (
-            <TableRow key={task.id}>
-              <TableCell>
-                <Link
-                  href={`/tasks/${task.id}`}
-                  className="font-medium hover:text-primary hover:underline"
-                >
-                  {task.title}
-                </Link>
-                {task.description && (
-                  <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
-                    {task.description}
-                  </p>
-                )}
-              </TableCell>
-              <TableCell>
-                {task.project ? (
-                  <Link
-                    href={`/projects/${task.project.id}`}
-                    className="text-sm hover:underline"
-                  >
-                    {task.project.title}
-                  </Link>
-                ) : (
-                  <span className="text-sm text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize">
-                  {task.priority}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {task.dueDate ? (
-                  <span className="text-sm">
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {task.assignees && task.assignees.length > 0 ? (
-                  <div className="flex items-center gap-1">
-                    {task.assignees.slice(0, 3).map((assignee) => (
-                      <Avatar key={assignee.id} className="h-6 w-6 border border-black/10">
-                        {assignee.user.image ? (
-                          <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
-                        ) : null}
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {getUserInitials(assignee.user.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                    {task.assignees.length > 3 && (
-                      <span className="text-xs text-muted-foreground ml-1">+{task.assignees.length - 3}</span>
-                    )}
-                  </div>
-                ) : task.assignedTo ? (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6 border border-black/10">
-                      {task.assignedTo.image ? (
-                        <AvatarImage src={task.assignedTo.image} alt={task.assignedTo.name || "User"} />
-                      ) : null}
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {getUserInitials(task.assignedTo.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{task.assignedTo.name || "Unnamed User"}</span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Unassigned</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={`/tasks/${task.id}`} className="cursor-pointer">
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        View Task
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/tasks/${task.id}`} className="cursor-pointer">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Task
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={() => onDelete(task.id)}
-                    >
-                      <Trash className="mr-2 h-4 w-4" />
-                      Delete Task
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

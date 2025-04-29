@@ -18,76 +18,81 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     const response = await fetch(url, options);
     console.log(`API Response status: ${response.status} ${response.statusText}`);
 
-    // Try to parse JSON response
+    // Read the response text only once and store it
+    const textResponse = await response.text();
+    console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
+    
+    // Parse the data only if the response is successful
     let data;
-    try {
-      const textResponse = await response.text();
-      console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
+    
+    // Handle empty responses
+    if (!textResponse || textResponse.trim() === '') {
+      console.warn('Empty response received from API');
+      data = {};
+    } else if (textResponse.trim().startsWith('<!DOCTYPE') || textResponse.trim().startsWith('<html')) {
+      // Handle HTML responses (likely an error page)
+      console.error('Received HTML response instead of JSON:', textResponse.substring(0, 200));
 
-      // Handle empty responses
-      if (!textResponse || textResponse.trim() === '') {
-        console.warn('Empty response received from API');
-        data = {};
-      } else if (textResponse.trim().startsWith('<!DOCTYPE') || textResponse.trim().startsWith('<html')) {
-        // Handle HTML responses (likely an error page)
-        console.error('Received HTML response instead of JSON:', textResponse.substring(0, 200));
-
-        // For profile endpoints, return a default empty structure
-        if (url.includes('/api/users/') && url.includes('profile=true')) {
-          return {
-            user: { id: 'unknown', name: 'Unknown User', email: 'unknown@example.com' },
-            projects: [],
-            tasks: [],
-            activities: [],
-            stats: { projectCount: 0, taskCount: 0, teamCount: 0, completionRate: '0%' }
-          };
-        } else if (url.includes('/api/team/user/')) {
-          // For team memberships, return an empty array
-          return [];
-        }
-
-        throw new Error(`Received HTML response instead of JSON. The API endpoint may not exist or returned an error page.`);
-      } else {
-        data = JSON.parse(textResponse);
-      }
-
-      // Check if data is empty or null
-      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-        console.warn('API Warning: Empty response data');
-      }
-    } catch (error) {
-      console.error('API Error (parse failure):', error);
-
-      // For specific endpoints, return default values instead of throwing
-      if (url.includes('/api/team/user/')) {
-        console.warn('Returning empty array for team memberships due to parse error');
+      // For profile endpoints, return a default empty structure
+      if (url.includes('/api/users/') && url.includes('profile=true')) {
+        return {
+          user: { id: 'unknown', name: 'Unknown User', email: 'unknown@example.com' },
+          projects: [],
+          tasks: [],
+          activities: [],
+          stats: { projectCount: 0, taskCount: 0, teamCount: 0, completionRate: '0%' }
+        };
+      } else if (url.includes('/api/team/user/')) {
+        // For team memberships, return an empty array
         return [];
       }
 
-      throw new Error(`Failed to parse API response: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Received HTML response instead of JSON. The API endpoint may not exist or returned an error page.`);
+    } else {
+      try {
+        // Try to parse as JSON
+        data = JSON.parse(textResponse);
+      } catch (parseError) {
+        console.error('API Error (parse failure):', parseError);
+
+        // For specific endpoints, return default values instead of throwing
+        if (url.includes('/api/team/user/')) {
+          console.warn('Returning empty array for team memberships due to parse error');
+          return [];
+        }
+
+        throw new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+      }
+    }
+
+    // Check if data is empty or null
+    if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+      console.warn('API Warning: Empty response data');
     }
 
     if (!response.ok) {
-      // Enhanced error handling
-      const error = {
+      // We already have the response text, no need to read it again
+      // Use the data we already parsed if available
+      const errorDetails = {
         status: response.status,
         statusText: response.statusText,
         message: data?.error || `Request failed with status ${response.status}`,
-        details: data?.details || {}
+        details: data?.details || {},
+        rawBody: textResponse.substring(0, 500) // Include start of raw body for context
       };
 
-      console.error('API Error:', error);
+      console.error('API Error:', errorDetails);
 
       // Include more context in the error
       const enhancedError = {
-        ...error,
+        ...errorDetails,
         url,
         requestMethod: options.method || 'GET',
         timestamp: new Date().toISOString()
       };
 
-      // Use a more descriptive error message that includes the status code
-      throw new Error(`API request failed: ${response.status} ${response.statusText} - ${error.message}`);
+      // Use a more descriptive error message that includes the status code and message
+      throw new Error(`API request failed: ${errorDetails.status} ${errorDetails.statusText} - ${errorDetails.message}`);
     }
 
     return data;
@@ -309,28 +314,57 @@ export const taskApi = {
   },
 
   getTask: async (id: string) => {
+    // Skip API call for "new" route
+    if (!id || id === "new") {
+      console.warn('API client: getTask called with invalid ID:', id);
+      return { task: null };
+    }
+    
     console.log('API client: Getting task with ID:', id);
     try {
       const result = await fetchAPI(`/api/tasks/${id}`);
-      console.log('API client: Get task response:', JSON.stringify({
-        id: result.task.id,
-        title: result.task.title,
-        dueDate: result.task.dueDate
-      }, null, 2));
+      if (!result || !result.task) {
+        console.warn('API client: Task not found or empty response for ID:', id);
+        return { task: null };
+      }
+      
+      console.log('API client: Get task success for ID:', id);
       return result;
     } catch (error) {
       console.error('API client: Error getting task:', error);
-      throw error;
+      // Instead of rethrowing, return a structured error response
+      return { 
+        task: null, 
+        error: error instanceof Error ? error.message : 'Unknown error fetching task'
+      };
     }
   },
 
   createTask: async (task: any) => {
-    // Remove status if present
-    const { status, ...taskWithoutStatus } = task;
-    return fetchAPI('/api/tasks', {
-      method: 'POST',
-      body: JSON.stringify(taskWithoutStatus),
-    });
+    console.log('API client: Creating task, data:', JSON.stringify(task));
+    try {
+      // Ensure we have required fields
+      if (!task.title) {
+        throw new Error("Task title is required");
+      }
+      if (!task.projectId) {
+        throw new Error("Project ID is required");
+      }
+      
+      // Remove status if present (it should be statusId instead)
+      const { status, ...taskWithoutStatus } = task;
+      
+      const result = await fetchAPI('/api/tasks', {
+        method: 'POST',
+        body: JSON.stringify(taskWithoutStatus),
+      });
+      
+      console.log('API client: Create task response:', result);
+      return result;
+    } catch (error) {
+      console.error('API client: Error creating task:', error);
+      throw error;
+    }
   },
 
   updateTask: async (id: string, task: any) => {

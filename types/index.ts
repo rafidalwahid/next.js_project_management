@@ -3,7 +3,6 @@ export interface Task {
   title: string
   description: string
   projectId: string
-  assignedTo: string
   dueDate: string
   priority?: "low" | "medium" | "high"
 }

@@ -53,15 +53,11 @@ export async function checkTaskPermission(
   // Check if user is a team member of the project
   const isTeamMember = task.project.teamMembers.length > 0;
 
-  // Check if user is assigned to the task (legacy - deprecated)
-  // This is kept for backward compatibility but will be phased out
-  const isAssignedToTask = task.assignedToId === session.user.id;
-
   // Check if user is assigned to the task (via TaskAssignee model)
   const isTaskAssignee = task.assignees && task.assignees.length > 0;
 
   // For view actions, any of these conditions is sufficient
-  let hasPermission = isAdmin || isProjectCreator || isTeamMember || isAssignedToTask || isTaskAssignee;
+  let hasPermission = isAdmin || isProjectCreator || isTeamMember || isTaskAssignee;
 
   // For delete actions, we might want stricter permissions
   if (action === 'delete' && !hasPermission) {

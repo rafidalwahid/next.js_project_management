@@ -1,6 +1,7 @@
 import prisma from '../prisma';
 import { Prisma, User } from '../prisma-client';
 import { hash } from 'bcrypt';
+import { getTaskListIncludeObject } from "./task-queries"; // Assuming this is correctly imported
 
 // User types for API operations
 export type UserCreateInput = {
@@ -473,4 +474,61 @@ export async function logUserActivity(
       taskId,
     }
   });
+}
+
+export async function getUserProfileData(userId: string) {
+  // ... (existing code to fetch user)
+
+  // Fetch projects the user is a member of or created
+  const projects = await prisma.project.findMany({
+    where: {
+      OR: [
+        { createdById: userId },
+        { teamMembers: { some: { userId: userId } } }
+      ]
+    },
+    select: {
+      id: true,
+      title: true,
+      // status: true, // Assuming project status needs separate handling if needed
+      startDate: true,
+      endDate: true,
+      teamMembers: {
+        where: { userId: userId },
+        select: {
+          // Need to select fields that indicate the role, e.g., if TeamMember has a 'role' field
+          createdAt: true // Placeholder, adjust based on actual TeamMember fields
+        }
+      }
+    }
+  });
+
+  // Map projects to include user's role (example assumes TeamMember has role)
+  const mappedProjects = projects.map(p => ({
+    id: p.id,
+    title: p.title,
+    // status: p.status, // Adjust as needed
+    startDate: p.startDate?.toISOString() ?? null,
+    endDate: p.endDate?.toISOString() ?? null,
+    role: p.teamMembers[0] ? 'Member' : 'Creator', // Example role logic
+    joinedAt: p.teamMembers[0]?.createdAt.toISOString() ?? new Date().toISOString() // Example join date
+  }));
+
+  // Fetch tasks assigned to the user via TaskAssignee
+  const tasks = await prisma.task.findMany({
+    where: {
+      assignees: { // Filter using the assignees relation
+        some: {
+          userId: userId
+        }
+      }
+      // Remove old filter:
+      // assignedToId: userId
+    },
+    include: getTaskListIncludeObject(), // Use the standard include for lists
+    orderBy: { createdAt: 'desc' },
+    take: 100 // Example limit
+  });
+
+  // ... (rest of the function, including stats calculation)
 }

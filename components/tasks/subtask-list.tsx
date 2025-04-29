@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { CheckCircle2, Circle, Plus, Trash2 } from "lucide-react"
+import { useState, useCallback } from "react"
+import { CheckCircle2, Circle, Plus, Trash2, ChevronRight, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -9,33 +9,36 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { taskApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-
-interface Subtask {
-  id: string
-  title: string
-  priority: string
-  assignedToId?: string | null
-  assignedTo?: {
-    id: string
-    name: string | null
-    image: string | null
-  } | null
-  subtasks?: Subtask[] // Add support for nested subtasks
-}
+import { Spinner } from "@/components/ui/spinner"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Subtask } from "@/types/task"
 
 interface SubtaskListProps {
   parentTaskId: string
   projectId: string
   subtasks: Subtask[]
   onSubtaskChange: () => void
+  depth?: number
+  maxInitialDepth?: number
 }
 
-export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange }: SubtaskListProps) {
+export function SubtaskList({
+  parentTaskId,
+  projectId,
+  subtasks,
+  onSubtaskChange,
+  depth = 0,
+  maxInitialDepth = 2
+}: SubtaskListProps) {
   const { toast } = useToast()
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("")
   const [isAddingSubtask, setIsAddingSubtask] = useState(false)
   const [addingNestedToId, setAddingNestedToId] = useState<string | null>(null)
   const [nestedSubtaskTitle, setNestedSubtaskTitle] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({})
+  const [loadingSubtasks, setLoadingSubtasks] = useState<Record<string, boolean>>({})
 
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
@@ -49,19 +52,72 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
     return nameParts[0].substring(0, 2).toUpperCase()
   }
 
-  const handleAddSubtask = async () => {
-    if (!newSubtaskTitle.trim()) return
+  // Function to load subtasks on demand
+  const loadSubtasks = useCallback(async (subtaskId: string) => {
+    // Skip if already loading or expanded
+    if (loadingSubtasks[subtaskId] || expandedSubtasks[subtaskId]) {
+      return
+    }
 
     try {
-      console.log("Creating subtask with:", {
-        title: newSubtaskTitle,
-        projectId,
-        parentId: parentTaskId,
-        priority: "medium",
-      })
+      setLoadingSubtasks(prev => ({ ...prev, [subtaskId]: true }))
 
+      // Fetch subtasks from the API
+      const response = await fetch(`/api/tasks/${subtaskId}?includeSubtasks=true`)
+
+      if (!response.ok) {
+        throw new Error("Failed to load subtasks")
+      }
+
+      // Update the subtasks in the parent component
+      onSubtaskChange()
+
+      // Mark as expanded
+      setExpandedSubtasks(prev => ({ ...prev, [subtaskId]: true }))
+    } catch (error) {
+      console.error("Error loading subtasks:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load subtasks. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingSubtasks(prev => ({ ...prev, [subtaskId]: false }))
+    }
+  }, [loadingSubtasks, expandedSubtasks, onSubtaskChange, toast])
+
+  // Function to toggle expansion of a subtask
+  const toggleSubtaskExpansion = useCallback((subtaskId: string) => {
+    // If not expanded yet, load the subtasks
+    if (!expandedSubtasks[subtaskId]) {
+      loadSubtasks(subtaskId)
+    } else {
+      // Toggle expansion state
+      setExpandedSubtasks(prev => ({
+        ...prev,
+        [subtaskId]: !prev[subtaskId]
+      }))
+    }
+  }, [expandedSubtasks, loadSubtasks])
+
+  const handleAddSubtask = async () => {
+    const trimmedTitle = newSubtaskTitle.trim()
+    if (!trimmedTitle) return
+
+    // Validate title length
+    if (trimmedTitle.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Subtask title must be at least 3 characters long",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsLoading(true)
       await taskApi.createTask({
-        title: newSubtaskTitle,
+        title: trimmedTitle,
         projectId,
         parentId: parentTaskId,
         priority: "medium",
@@ -79,25 +135,32 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
       console.error("Error adding subtask:", error)
       toast({
         title: "Error",
-        description: "Failed to add subtask. There may be an issue with the database schema. Please check the console for details.",
+        description: "Failed to add subtask. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleAddNestedSubtask = async (parentSubtaskId: string) => {
-    if (!nestedSubtaskTitle.trim()) return
+    const trimmedTitle = nestedSubtaskTitle.trim()
+    if (!trimmedTitle) return
+
+    // Validate title length
+    if (trimmedTitle.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Nested subtask title must be at least 3 characters long",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
-      console.log("Creating nested subtask with:", {
-        title: nestedSubtaskTitle,
-        projectId,
-        parentId: parentSubtaskId,
-        priority: "medium",
-      })
-
+      setIsLoading(true)
       await taskApi.createTask({
-        title: nestedSubtaskTitle,
+        title: trimmedTitle,
         projectId,
         parentId: parentSubtaskId,
         priority: "medium",
@@ -115,54 +178,85 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
       console.error("Error adding nested subtask:", error)
       toast({
         title: "Error",
-        description: "Failed to add nested subtask. Please check the console for details.",
+        description: "Failed to add nested subtask. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleToggleStatus = async (subtaskId: string, isCompleted: boolean) => {
-    // Since we no longer have a status field, we would need to implement a different way
-    // to track completion status. For now, we'll just show a toast and refresh the data.
+  const handleToggleStatus = async (taskId: string, isCompleted: boolean) => {
     try {
-      // We would update a different field here
-      // await taskApi.updateTask(subtaskId, { isCompleted: !isCompleted })
-      onSubtaskChange()
+      setIsLoading(true)
+      
+      // Call the API to update the task's completed status
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ completed: !isCompleted }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update task status");
+      }
+
       toast({
         title: "Subtask updated",
         description: `Subtask marked as ${!isCompleted ? "completed" : "pending"}`
       })
+
+      // Refresh the task list
+      onSubtaskChange()
     } catch (error) {
+      console.error("Error toggling subtask status:", error);
       toast({
         title: "Error",
-        description: "Failed to update subtask completion status",
+        description: error instanceof Error ? error.message : "Failed to update subtask status",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleDeleteSubtask = async (subtaskId: string) => {
+    if (!confirm("Are you sure you want to delete this subtask? This will also delete all nested subtasks.")) {
+      return
+    }
+
     try {
+      setIsLoading(true)
       await taskApi.deleteTask(subtaskId)
-      onSubtaskChange()
 
       toast({
         title: "Subtask deleted",
         description: "Subtask has been deleted successfully",
       })
+
+      // Refresh the task list
+      onSubtaskChange()
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete subtask",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <div className="space-y-3">
+      {/* Header with add button */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">Subtasks ({subtasks.length})</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Subtasks ({subtasks.length})
+        </h3>
         {!isAddingSubtask && (
           <Button
             variant="ghost"
@@ -176,6 +270,7 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         )}
       </div>
 
+      {/* Add subtask form */}
       {isAddingSubtask && (
         <div className="flex items-center gap-2">
           <Input
@@ -194,7 +289,7 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
           />
           <Button
             size="sm"
-            className="h-8 px-2"
+            className="h-8"
             onClick={handleAddSubtask}
           >
             Add
@@ -213,29 +308,44 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
         </div>
       )}
 
+      {/* Subtask list */}
       <ul className="space-y-2 mt-2">
         {subtasks.map((subtask) => (
           <li key={subtask.id} className="space-y-2">
-            <div
-              className={cn(
-                "flex items-center justify-between p-2 rounded-md border",
-                "bg-card border-border"
-              )}
-            >
+            <div className="flex items-center justify-between p-2 rounded-md border bg-card border-border">
               <div className="flex items-center gap-2 flex-1 min-w-0">
+                {/* Expand/collapse button for subtasks with children */}
+                {subtask.subtasks && subtask.subtasks.length > 0 ? (
+                  <button
+                    onClick={() => toggleSubtaskExpansion(subtask.id)}
+                    className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
+                  >
+                    {expandedSubtasks[subtask.id] ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </button>
+                ) : (
+                  <div className="w-4" /> // Spacer for alignment
+                )}
+
                 <button
-                  onClick={() => handleToggleStatus(subtask.id, false)}
+                  onClick={() => handleToggleStatus(subtask.id, subtask.completed || false)}
                   className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
                 >
-                  <Circle className="h-5 w-5" />
+                  {subtask.completed ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <Circle className="h-5 w-5" />
+                  )}
                 </button>
 
-                <span
-                  className={cn(
-                    "text-sm truncate",
-                    "text-foreground"
-                  )}
-                >
+                <span className={cn(
+                  "text-sm truncate",
+                  subtask.completed ? "text-muted-foreground line-through" : "text-foreground"
+                )}>
                   {subtask.title}
                 </span>
 
@@ -253,10 +363,46 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
                     {subtask.priority}
                   </Badge>
                 )}
+
+                {subtask.dueDate && (
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(subtask.dueDate).toLocaleDateString()}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
-                {subtask.assignedTo && (
+                {/* Assignees */}
+                {subtask.assignees && subtask.assignees.length > 0 ? (
+                  <div className="flex -space-x-2">
+                    {subtask.assignees.slice(0, 2).map((assignee) => (
+                      <TooltipProvider key={assignee.id}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Avatar className="h-6 w-6 border border-background">
+                              {assignee.user.image ? (
+                                <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                              ) : null}
+                              <AvatarFallback className="text-xs">
+                                {getUserInitials(assignee.user.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {assignee.user.name || assignee.user.email}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                    {subtask.assignees.length > 2 && (
+                      <Avatar className="h-6 w-6 border border-background">
+                        <AvatarFallback className="text-xs bg-muted">
+                          +{subtask.assignees.length - 2}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                ) : subtask.assignedTo ? (
                   <Avatar className="h-6 w-6">
                     {subtask.assignedTo.image ? (
                       <AvatarImage src={subtask.assignedTo.image} alt={subtask.assignedTo.name || "User"} />
@@ -265,7 +411,7 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
                       {getUserInitials(subtask.assignedTo.name)}
                     </AvatarFallback>
                   </Avatar>
-                )}
+                ) : null}
 
                 <Button
                   variant="ghost"
@@ -330,14 +476,30 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
               </div>
             )}
 
-            {/* Render nested subtasks if they exist */}
-            {subtask.subtasks && subtask.subtasks.length > 0 && (
+            {/* Loading state for nested subtasks */}
+            {loadingSubtasks[subtask.id] && (
+              <div className="pl-6 border-l-2 border-muted ml-3 py-2">
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex items-center gap-2 animate-pulse">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-40" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Render nested subtasks if they exist and are expanded */}
+            {subtask.subtasks && subtask.subtasks.length > 0 && expandedSubtasks[subtask.id] && (
               <div className="pl-6 border-l-2 border-muted ml-3">
                 <SubtaskList
                   parentTaskId={subtask.id}
                   projectId={projectId}
                   subtasks={subtask.subtasks}
                   onSubtaskChange={onSubtaskChange}
+                  depth={depth + 1}
+                  maxInitialDepth={maxInitialDepth}
                 />
               </div>
             )}
@@ -350,6 +512,14 @@ export function SubtaskList({ parentTaskId, projectId, subtasks, onSubtaskChange
           </li>
         )}
       </ul>
+
+      {/* Loading indicator for the entire list */}
+      {isLoading && (
+        <div className="fixed bottom-4 right-4 bg-background border rounded-md shadow-md p-2 z-50 flex items-center gap-2">
+          <Spinner className="h-4 w-4" />
+          <span className="text-xs">Updating subtasks...</span>
+        </div>
+      )}
     </div>
   )
 }

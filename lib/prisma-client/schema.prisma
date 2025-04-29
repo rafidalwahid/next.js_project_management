@@ -30,11 +30,12 @@ model User {
   attendanceAdjustments Attendance[]        @relation("AttendanceAdjustments")
   attendanceRecords     Attendance[]
   attendanceSettings    AttendanceSettings?
+  comments              Comment[]
   documents             Document[]
   projects              Project[]
   sessions              Session[]
-  tasks                 Task[]              @relation("TaskAssignedTo")
   taskAssignments       TaskAssignee[]
+  taskAttachments       TaskAttachment[]
   teams                 TeamMember[]
   userPermissions       UserPermission[]
   userRoles             UserRole[]
@@ -161,17 +162,17 @@ model Project {
   description    String?
   startDate      DateTime?
   endDate        DateTime?
-  dueDate        DateTime? // Derived field
-  totalTimeSpent Float? // In hours
-  estimatedTime  Float? // In hours
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   createdById    String
+  dueDate        DateTime?
+  estimatedTime  Float?
+  totalTimeSpent Float?
   activities     Activity[]
   attendances    Attendance[]
   events         Event[]
   createdBy      User            @relation(fields: [createdById], references: [id])
-  statuses       ProjectStatus[] // Project-specific statuses
+  statuses       ProjectStatus[]
   tasks          Task[]
   teamMembers    TeamMember[]
 
@@ -184,13 +185,13 @@ model ProjectStatus {
   name        String
   color       String?
   description String?
-  order       Int      @default(0)
   isDefault   Boolean  @default(false)
-  projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  order       Int      @default(0)
+  projectId   String
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tasks       Task[] // Tasks in this status
+  tasks       Task[]
 
   @@unique([projectId, name])
   @@index([projectId])
@@ -198,37 +199,34 @@ model ProjectStatus {
 }
 
 model Task {
-  id            String         @id @default(cuid())
+  id            String           @id @default(cuid())
   title         String
-  description   String?        @db.Text
-  priority      String         @default("medium")
-  startDate     DateTime?
-  endDate       DateTime?
+  description   String?          @db.Text
+  priority      String           @default("medium")
   dueDate       DateTime?
-  timeSpent     Float? // In hours
-  estimatedTime Float? // In hours
   projectId     String
-  statusId      String? // Current status ID
   parentId      String?
-  order         Int            @default(0)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  completed     Boolean        @default(false)
+  order         Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  completed     Boolean          @default(false)
+  endDate       DateTime?
+  estimatedTime Float?
+  startDate     DateTime?
+  statusId      String?
+  timeSpent     Float?
   activities    Activity[]
   attendances   Attendance[]
-  // DEPRECATED: Use assignees relation instead
-  // This field is kept for backward compatibility but should not be used
-  assignedTo    User?          @relation("TaskAssignedTo", fields: [assignedToId], references: [id])
-  assignedToId  String? // DEPRECATED: Use TaskAssignee model instead
-  parent        Task?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
-  subtasks      Task[]         @relation("SubTasks")
-  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  status        ProjectStatus? @relation(fields: [statusId], references: [id])
+  comments      Comment[]
+  parent        Task?            @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks      Task[]           @relation("SubTasks")
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status        ProjectStatus?   @relation(fields: [statusId], references: [id])
   assignees     TaskAssignee[]
+  attachments   TaskAttachment[]
 
   @@index([projectId])
   @@index([statusId])
-  @@index([assignedToId])
   @@index([parentId])
   @@map("task")
 }
@@ -366,4 +364,37 @@ model Document {
 
   @@index([userId])
   @@map("document")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("comment")
+}
+
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  filename  String
+  fileUrl   String
+  fileSize  Int
+  fileType  String
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_attachment")
 }

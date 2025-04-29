@@ -140,18 +140,32 @@ export function useTasks(page = 1, limit = 10, filters = {}) {
  */
 export function useTask(id: string | null) {
   const { data, error, isLoading, mutate } = useSWR(
-    id ? `/api/tasks/${id}` : null,
+    // Skip fetching if id is null or "new"
+    id && id !== "new" ? `/api/tasks/${id}` : null,
     async () => {
-      if (!id) return null;
-      const response = await taskApi.getTask(id);
-      return response;
+      if (!id || id === "new") return null;
+      try {
+        console.log('Fetching task with ID:', id);
+        const response = await taskApi.getTask(id);
+        console.log('Task fetch success for ID:', id);
+        return response;
+      } catch (err) {
+        console.error('Error in useTask hook:', err);
+        // Don't throw here - let SWR handle the error
+        return null;
+      }
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      dedupingInterval: 5000 // Cache results for 5 seconds
     }
   );
 
   return {
-    task: data?.task,
-    isLoading,
-    isError: error,
+    task: data?.task || null,
+    isLoading: isLoading && id !== "new", // Don't show loading state for "new"
+    isError: error && id !== "new",       // Don't show error state for "new"
     mutate,
   };
 }

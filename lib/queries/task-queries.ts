@@ -74,10 +74,6 @@ export function getTaskIncludeObject(
     project: {
       select: projectSelectFields
     },
-    // Keep assignedTo for backward compatibility, but it's deprecated
-    assignedTo: {
-      select: userSelectFields
-    },
     // Use assignees as the primary way to get task assignees
     assignees: {
       include: {
@@ -90,6 +86,27 @@ export function getTaskIncludeObject(
       select: {
         id: true,
         title: true,
+      }
+    },
+    // Include comments and attachments
+    comments: {
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        user: {
+          select: userSelectFields
+        }
+      }
+    },
+    attachments: {
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        user: {
+          select: userSelectFields
+        }
       }
     }
   };
@@ -120,37 +137,52 @@ export function getTaskIncludeObject(
         { createdAt: 'asc' }
       ],
       include: {
-        assignedTo: {
-          select: userMinimalSelectFields
-        }
+        assignees: {
+          include: {
+            user: {
+              select: userMinimalSelectFields
+            }
+          }
+        },
+        status: { select: { name: true, color: true }}
       }
     };
 
     // Add second level of subtasks
-    if (depth >= 2 && includeObj.subtasks) {
+    if (depth >= 2 && includeObj.subtasks?.include) {
       includeObj.subtasks.include.subtasks = {
         orderBy: [
           { order: 'asc' },
           { createdAt: 'asc' }
         ],
         include: {
-          assignedTo: {
-            select: userMinimalSelectFields
-          }
+          assignees: {
+            include: {
+              user: {
+                select: userMinimalSelectFields
+              }
+            }
+          },
+          status: { select: { name: true, color: true }}
         }
       };
 
       // Add third level of subtasks
-      if (depth >= 3 && includeObj.subtasks.include.subtasks) {
+      if (depth >= 3 && includeObj.subtasks.include.subtasks?.include) {
         includeObj.subtasks.include.subtasks.include.subtasks = {
           orderBy: [
             { order: 'asc' },
             { createdAt: 'asc' }
           ],
           include: {
-            assignedTo: {
-              select: userMinimalSelectFields
-            }
+            assignees: {
+              include: {
+                user: {
+                  select: userMinimalSelectFields
+                }
+              }
+            },
+            status: { select: { name: true, color: true }}
           }
         };
       }
@@ -166,12 +198,14 @@ export function getTaskIncludeObject(
  */
 export function getTaskListIncludeObject(): Prisma.TaskInclude {
   return {
+    status: {
+      select: {
+        name: true,
+        color: true
+      }
+    },
     project: {
       select: projectMinimalSelectFields
-    },
-    // Keep assignedTo for backward compatibility, but it's deprecated
-    assignedTo: {
-      select: userMinimalSelectFields
     },
     // Use assignees as the primary way to get task assignees
     assignees: {
