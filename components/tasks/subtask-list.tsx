@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { CheckCircle2, Circle, Plus, Trash2, ChevronRight, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,7 @@ interface SubtaskListProps {
   onSubtaskChange: () => void
   depth?: number
   maxInitialDepth?: number
+  showHeader?: boolean
 }
 
 export function SubtaskList({
@@ -29,7 +30,8 @@ export function SubtaskList({
   subtasks,
   onSubtaskChange,
   depth = 0,
-  maxInitialDepth = 2
+  maxInitialDepth = 2,
+  showHeader = true
 }: SubtaskListProps) {
   const { toast } = useToast()
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("")
@@ -39,6 +41,25 @@ export function SubtaskList({
   const [isLoading, setIsLoading] = useState(false)
   const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({})
   const [loadingSubtasks, setLoadingSubtasks] = useState<Record<string, boolean>>({})
+
+  // Initialize expanded subtasks on mount - expand subtasks with children up to maxInitialDepth
+  useEffect(() => {
+    if (depth < maxInitialDepth) {
+      const initialExpanded: Record<string, boolean> = {};
+      
+      // Find subtasks with children and mark them as expanded
+      subtasks.forEach(subtask => {
+        if (subtask.subtasks && subtask.subtasks.length > 0) {
+          initialExpanded[subtask.id] = true;
+        }
+      });
+      
+      // Update expanded state if we found any subtasks to expand
+      if (Object.keys(initialExpanded).length > 0) {
+        setExpandedSubtasks(prev => ({ ...prev, ...initialExpanded }));
+      }
+    }
+  }, [subtasks, depth, maxInitialDepth]);
 
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
@@ -68,7 +89,10 @@ export function SubtaskList({
       if (!response.ok) {
         throw new Error("Failed to load subtasks")
       }
-
+      
+      // Parse the response
+      const data = await response.json()
+      
       // Update the subtasks in the parent component
       onSubtaskChange()
 
@@ -252,23 +276,25 @@ export function SubtaskList({
 
   return (
     <div className="space-y-3">
-      {/* Header with add button */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          Subtasks ({subtasks.length})
-        </h3>
-        {!isAddingSubtask && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() => setIsAddingSubtask(true)}
-          >
-            <Plus className="mr-1 h-3 w-3" />
-            Add Subtask
-          </Button>
-        )}
-      </div>
+      {/* Header with add button - only show if showHeader is true */}
+      {showHeader && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Subtasks ({subtasks.length})
+          </h3>
+          {!isAddingSubtask && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => setIsAddingSubtask(true)}
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              Add Subtask
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Add subtask form */}
       {isAddingSubtask && (
@@ -317,9 +343,13 @@ export function SubtaskList({
                 {/* Expand/collapse button for subtasks with children */}
                 {subtask.subtasks && subtask.subtasks.length > 0 ? (
                   <button
-                    onClick={() => toggleSubtaskExpansion(subtask.id)}
-                    className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => {
+                      console.log(`Toggling expand for subtask: ${subtask.id}`);
+                      toggleSubtaskExpansion(subtask.id);
+                    }}
+                    className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
+                    type="button"
                   >
                     {expandedSubtasks[subtask.id] ? (
                       <ChevronDown className="h-4 w-4" />
@@ -491,17 +521,23 @@ export function SubtaskList({
             )}
 
             {/* Render nested subtasks if they exist and are expanded */}
-            {subtask.subtasks && subtask.subtasks.length > 0 && expandedSubtasks[subtask.id] && (
-              <div className="pl-6 border-l-2 border-muted ml-3">
-                <SubtaskList
-                  parentTaskId={subtask.id}
-                  projectId={projectId}
-                  subtasks={subtask.subtasks}
-                  onSubtaskChange={onSubtaskChange}
-                  depth={depth + 1}
-                  maxInitialDepth={maxInitialDepth}
-                />
-              </div>
+            {subtask.subtasks && subtask.subtasks.length > 0 && (
+              <>
+                {console.log(`Subtask ${subtask.id} expanded: ${expandedSubtasks[subtask.id]}`)}
+                {expandedSubtasks[subtask.id] && (
+                  <div className="pl-6 border-l-2 border-muted ml-3">
+                    <SubtaskList
+                      parentTaskId={subtask.id}
+                      projectId={projectId}
+                      subtasks={subtask.subtasks}
+                      onSubtaskChange={onSubtaskChange}
+                      depth={depth + 1}
+                      maxInitialDepth={maxInitialDepth}
+                      showHeader={false}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </li>
         ))}

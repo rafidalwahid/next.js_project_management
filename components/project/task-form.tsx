@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -138,7 +139,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
     if (projectId) {
       fetchStatuses()
     }
-  }, [projectId, taskId])
+  }, [projectId, taskId, form, toast])
 
   // Fetch team members
   useEffect(() => {
@@ -174,7 +175,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
     if (projectId) {
       fetchTeamMembers()
     }
-  }, [projectId])
+  }, [projectId, toast])
 
   // Fetch parent tasks (top-level tasks for this project)
   useEffect(() => {
@@ -202,7 +203,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
     if (projectId) {
       fetchParentTasks()
     }
-  }, [projectId, taskId])
+  }, [projectId, taskId, toast])
 
   // Fetch task data if editing
   useEffect(() => {
@@ -253,11 +254,12 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
     if (taskId) {
       fetchTask()
     }
-  }, [taskId])
+  }, [taskId, form, toast])
 
   const onSubmit = async (values: TaskFormValues) => {
     try {
       setIsLoading(true)
+      console.log("Form submission started with values:", values);
 
       const endpoint = taskId
         ? `/api/tasks/${taskId}`
@@ -272,6 +274,8 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         // Ensure these are properly formatted for the API
         estimatedTime: values.estimatedTime === "" ? null : values.estimatedTime,
         timeSpent: values.timeSpent === "" ? null : values.timeSpent,
+        // Make sure assigneeIds is an array
+        assigneeIds: Array.isArray(values.assigneeIds) ? values.assigneeIds : [],
         // Format dates
         startDate: values.startDate ? values.startDate.toISOString() : null,
         endDate: values.endDate ? values.endDate.toISOString() : null,
@@ -281,7 +285,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
       // Log assignee information
       console.log("Assignee IDs being submitted:", values.assigneeIds);
       console.log("Team members available:", teamMembers.map(m => ({ id: m.id, name: m.name || m.email })));
-      console.log("Submitting task data:", payload)
+      console.log("Submitting task data:", payload);
 
       const response = await fetch(endpoint, {
         method,
@@ -289,12 +293,18 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      })
+      });
 
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to save task")
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error response:", errorData);
+        throw new Error(errorData.error || "Failed to save task");
       }
+
+      const result = await response.json();
+      console.log("Task form submission result:", result);
 
       toast({
         title: taskId ? "Task updated" : "Task created",
@@ -304,9 +314,10 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
       })
 
       if (onSuccess) {
-        onSuccess()
+        onSuccess();
       }
     } catch (error) {
+      console.error("Error during form submission:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to save task",
@@ -452,7 +463,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value || undefined}
@@ -495,7 +506,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value || undefined}
@@ -538,7 +549,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value || undefined}

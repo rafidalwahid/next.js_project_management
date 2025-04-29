@@ -15,7 +15,7 @@ import { ProjectSettingsDialog } from "@/components/project/project-settings-dia
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TaskForm } from "@/components/project/task-form-fixed"
+import { TaskForm } from "@/components/project/task-form"
 import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
 import { format } from "date-fns"
 import { CreateStatusDialog } from "@/components/project/create-status-dialog"

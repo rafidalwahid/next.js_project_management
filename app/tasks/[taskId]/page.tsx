@@ -35,7 +35,7 @@ import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TaskForm } from "@/components/project/task-form-fixed"
+import { TaskForm } from "@/components/project/task-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SubtaskList } from "@/components/tasks/subtask-list"
 import { Textarea } from "@/components/ui/textarea"
@@ -904,21 +904,21 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      {isEditDialogOpen && (
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Task</DialogTitle>
-            </DialogHeader>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+          {task && isEditDialogOpen && (
             <TaskForm
               projectId={task.projectId}
               taskId={task.id}
               onSuccess={handleEditDialogClose}
               onCancel={() => setIsEditDialogOpen(false)}
             />
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
