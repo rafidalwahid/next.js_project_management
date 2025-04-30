@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import { PermissionSystem, PERMISSIONS, ROLES } from '@/lib/permissions/permission-system';
+import { UnifiedPermissionSystem, PERMISSIONS, ROLES } from '@/lib/permissions/unified-permission-system';
 
 /**
  * Service for handling permissions in the application
@@ -21,8 +21,8 @@ export class PermissionService {
         return false;
       }
 
-      // Use the permission system to check if the role has the permission
-      return PermissionSystem.hasPermission(user.role, permission);
+      // Use the unified permission system to check if the role has the permission
+      return UnifiedPermissionSystem.hasPermission(user.role, permission);
     } catch (error) {
       console.error(`Error checking permission ${permission} for user ${userId}:`, error);
       return false;
@@ -44,8 +44,8 @@ export class PermissionService {
         return [];
       }
 
-      // Use the permission system to get permissions for the role
-      return PermissionSystem.getPermissionsForRole(user.role);
+      // Use the unified permission system to get permissions for the role
+      return UnifiedPermissionSystem.getPermissionsForRole(user.role);
     } catch (error) {
       console.error(`Error getting permissions for user ${userId}:`, error);
       return [];
@@ -55,22 +55,22 @@ export class PermissionService {
   /**
    * Get all available permissions
    */
-  static async getAllPermissions(): Promise<{ id: string; name: string; description: string }[]> {
-    return PermissionSystem.getAllPermissions();
+  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+    return UnifiedPermissionSystem.getAllPermissions();
   }
 
   /**
    * Get all available roles
    */
   static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
-    return PermissionSystem.getAllRoles();
+    return UnifiedPermissionSystem.getAllRoles();
   }
 
   /**
    * Get the permission matrix
    */
   static async getPermissionMatrix(): Promise<Record<string, string[]>> {
-    return PermissionSystem.getPermissionMatrix();
+    return PERMISSION_MATRIX;
   }
 
   /**

@@ -11,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { PERMISSIONS, UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
 
 interface TeamNavItemProps {
   collapsed?: boolean
@@ -21,50 +22,59 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
   const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(pathname.startsWith("/team") || pathname.startsWith("/profile"))
   const userId = session?.user?.id
+  const userRole = session?.user?.role || "user"
 
+  // Define menu items with their required permissions
   const subItems = [
     {
       title: "Team Members",
       href: "/team",
       icon: UsersRound,
-      roles: ["user", "manager", "admin"], // All users can see team members
+      permission: PERMISSIONS.TEAM_VIEW,
+      // This is a core functionality that all users should have access to
+      alwaysShow: true
     },
     {
       title: "My Profile",
       href: userId ? `/profile/${userId}` : "/profile",
       icon: UserCircle,
-      roles: ["user", "manager", "admin"], // All users can see their profile
+      permission: PERMISSIONS.EDIT_PROFILE,
+      // This is a core functionality that all users should have access to
+      alwaysShow: true
     },
     {
       title: "Team Attendance",
       href: "/team/attendance",
       icon: ClipboardCheck,
-      roles: ["manager", "admin"], // Only managers and admins can view team attendance
+      permission: PERMISSIONS.VIEW_TEAM_ATTENDANCE,
+      alwaysShow: false
     },
     {
       title: "Add Member",
       href: "/team/new",
       icon: UserPlus,
-      roles: ["manager", "admin"], // Only managers and admins can add members
+      permission: PERMISSIONS.TEAM_ADD,
+      alwaysShow: false
     },
     {
       title: "Role Management",
       href: "/team/roles",
       icon: ShieldCheck,
-      roles: ["admin"], // Only admins can manage roles
+      permission: PERMISSIONS.MANAGE_ROLES,
+      alwaysShow: false
     },
     {
       title: "Permissions",
       href: "/team/permissions",
       icon: ShieldCheck,
-      roles: ["admin"], // Only admins can manage permissions
+      permission: PERMISSIONS.MANAGE_PERMISSIONS,
+      alwaysShow: false
     },
   ]
 
-  // Filter items based on user role
-  const userRole = session?.user?.role || "user"
+  // Filter items based on user permissions
   const filteredSubItems = subItems.filter(item =>
-    item.roles.includes(userRole)
+    item.alwaysShow || UnifiedPermissionSystem.hasPermission(userRole, item.permission)
   )
 
   const isActive = pathname.startsWith("/team") || pathname.startsWith("/profile")

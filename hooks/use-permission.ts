@@ -2,10 +2,11 @@
 
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
-import { PermissionSystem } from "@/lib/permissions/permission-system"
+import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
 
 /**
  * Hook to check if the current user has a specific permission
+ * Uses the unified permission system for consistent permission checking
  */
 export function usePermission(permission: string) {
   const { data: session } = useSession()
@@ -18,9 +19,9 @@ export function usePermission(permission: string) {
       return
     }
 
-    // Use the permission system to check permission
+    // Use the unified permission system to check permission
     const userRole = session.user.role || "guest"
-    const result = PermissionSystem.hasPermission(userRole, permission)
+    const result = UnifiedPermissionSystem.hasPermission(userRole, permission)
     setHasPermission(result)
   }, [session, permission])
 
@@ -51,6 +52,7 @@ export function useRole(role: string) {
 
 /**
  * Hook to get all permissions for the current user
+ * Uses the unified permission system for consistent permission retrieval
  */
 export function useUserPermissions() {
   const { data: session } = useSession()
@@ -65,9 +67,9 @@ export function useUserPermissions() {
       return
     }
 
-    // Get permissions based on user role
+    // Get permissions based on user role using the unified permission system
     const userRole = session.user.role || "guest"
-    const rolePermissions = PermissionSystem.getPermissionsForRole(userRole)
+    const rolePermissions = UnifiedPermissionSystem.getPermissionsForRole(userRole)
     setPermissions(rolePermissions)
     setIsLoading(false)
   }, [session])
@@ -77,6 +79,7 @@ export function useUserPermissions() {
 
 /**
  * Hook to get the user's role
+ * Provides the current user's role with loading state
  */
 export function useUserRole() {
   const { data: session } = useSession()

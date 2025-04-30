@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { ReactNode } from "react"
-import { PermissionSystem } from "@/lib/permissions/permission-system"
+import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
 
 interface PermissionGuardProps {
   permission: string
@@ -12,12 +12,13 @@ interface PermissionGuardProps {
 
 /**
  * Component that only renders its children if the user has the specified permission
+ * Uses the unified permission system for consistent permission checking
  */
 export function PermissionGuard({ permission, children, fallback = null }: PermissionGuardProps) {
   const { data: session } = useSession()
   const userRole = session?.user?.role || "guest"
 
-  if (!PermissionSystem.hasPermission(userRole, permission)) {
+  if (!UnifiedPermissionSystem.hasPermission(userRole, permission)) {
     return <>{fallback}</>
   }
 

@@ -1,6 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 /**
  * Check if a user has permission to access a project
@@ -51,22 +51,22 @@ export async function checkProjectPermission(
   // Check permissions based on action
   if (action === 'view') {
     // For view actions, check VIEW_PROJECTS permission or direct involvement
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS) ||
                     isProjectCreator || isTeamMember;
   }
   else if (action === 'update') {
     // For update actions, check PROJECT_MANAGEMENT permission or project creator status
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_MANAGEMENT) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_MANAGEMENT) ||
                     isProjectCreator;
   }
   else if (action === 'delete') {
     // For delete actions, check PROJECT_DELETION permission or project creator status
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_DELETION) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_DELETION) ||
                     isProjectCreator;
   }
   else if (action === 'create') {
     // For create actions, check PROJECT_CREATION permission
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
   }
 
   return {

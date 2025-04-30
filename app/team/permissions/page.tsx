@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { SYSTEM_ROLES } from "@/lib/roles"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle2, XCircle, Edit, Info, ShieldAlert, ShieldCheck, Shield, Plus, UserPlus, Loader2 } from "lucide-react"
+import { CheckCircle2, XCircle, Edit, Info, ShieldAlert, ShieldCheck, Shield, Plus, UserPlus, Loader2, Save } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Dialog,
@@ -30,69 +29,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  PERMISSIONS,
+  ROLES,
+  SYSTEM_ROLES,
+  PERMISSION_MATRIX,
+  UnifiedPermissionSystem
+} from "@/lib/permissions/unified-permission-system"
 
-// Define role types and permissions using centralized definitions
-const ROLES = [
-  {
-    id: "admin",
-    name: SYSTEM_ROLES.admin.name,
-    description: SYSTEM_ROLES.admin.description,
-    color: SYSTEM_ROLES.admin.color,
-    count: 1
-  },
-  {
-    id: "manager",
-    name: SYSTEM_ROLES.manager.name,
-    description: SYSTEM_ROLES.manager.description,
-    color: SYSTEM_ROLES.manager.color,
-    count: 1
-  },
-  {
-    id: "user",
-    name: SYSTEM_ROLES.user.name,
-    description: SYSTEM_ROLES.user.description,
-    color: SYSTEM_ROLES.user.color,
-    count: 2
-  },
-  {
-    id: "guest",
-    name: SYSTEM_ROLES.guest.name,
-    description: SYSTEM_ROLES.guest.description,
-    color: SYSTEM_ROLES.guest.color,
-    count: 1
-  }
-]
+// Get roles with metadata from the unified permission system
+const ROLE_DATA = UnifiedPermissionSystem.getAllRoles().map(role => ({
+  ...role,
+  count: role.id === "user" ? 2 : 1 // Default counts for display
+}));
 
-const PERMISSIONS = [
-  { id: "user_management", name: "User Management", description: "Manage users, roles and permissions" },
-  { id: "project_creation", name: "Project Creation", description: "Create new projects" },
-  { id: "task_assignment", name: "Task Assignment", description: "Assign tasks to users" },
-  { id: "task_management", name: "Task Management", description: "Create and manage tasks" },
-  { id: "view_projects", name: "View Projects", description: "View project details" },
-  { id: "edit_profile", name: "Edit Profile", description: "Edit own profile information" },
-  { id: "system_settings", name: "System Settings", description: "Configure system settings" },
-  { id: "project_management", name: "Project Management", description: "Manage existing projects" },
-]
+// Get permissions with metadata from the unified permission system
+const PERMISSION_DATA = UnifiedPermissionSystem.getAllPermissions();
 
-// Permission matrix - which roles have which permissions
-const PERMISSION_MATRIX = {
-  admin: [
-    "user_management", "project_creation", "task_assignment", "task_management",
-    "view_projects", "edit_profile", "system_settings", "project_management"
-  ],
-  manager: [
-    "user_management", "project_creation", "task_assignment", "task_management",
-    "view_projects", "edit_profile", "project_management"
-  ],
-  user: [
-    "task_management", "view_projects", "edit_profile"
-  ],
-  guest: [
-    "view_projects"
-  ]
-}
-
-// Permission badges for the roles table
+// Permission badges for the roles table - key highlights for each role
 const PERMISSION_BADGES = {
   admin: [
     { id: "full_access", name: "Full Access", color: "bg-purple-500" },
@@ -123,6 +78,8 @@ export default function RolePermissionsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
   const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>(PERMISSION_MATRIX)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Check if user is admin
   useEffect(() => {
@@ -156,10 +113,15 @@ export default function RolePermissionsPage() {
 
       return newPermissions
     })
+
+    // Mark that we have unsaved changes
+    setHasUnsavedChanges(true)
+    // Reset save success message when changes are made
+    setSaveSuccess(false)
   }
 
-  const [allPermissions, setAllPermissions] = useState<any[]>(PERMISSIONS)
-  const [allRoles, setAllRoles] = useState<any[]>(ROLES)
+  const [allPermissions, setAllPermissions] = useState<any[]>(PERMISSION_DATA)
+  const [allRoles, setAllRoles] = useState<any[]>(ROLE_DATA)
   const [loading, setLoading] = useState(true)
   const [newPermissionDialogOpen, setNewPermissionDialogOpen] = useState(false)
   const [newPermissionData, setNewPermissionData] = useState({
@@ -184,14 +146,14 @@ export default function RolePermissionsPage() {
           const allRolesResponse = await fetch("/api/roles")
           if (allRolesResponse.ok) {
             const allRolesData = await allRolesResponse.json()
-            setAllRoles(allRolesData.length > 0 ? allRolesData : ROLES)
+            setAllRoles(allRolesData.length > 0 ? allRolesData : ROLE_DATA)
           } else {
             console.warn("Using default roles due to API error")
-            setAllRoles(ROLES)
+            setAllRoles(ROLE_DATA)
           }
         } catch (error) {
           console.warn("Using default roles due to API error:", error)
-          setAllRoles(ROLES)
+          setAllRoles(ROLE_DATA)
         }
 
         // Fetch all permissions
@@ -199,14 +161,14 @@ export default function RolePermissionsPage() {
           const allPermissionsResponse = await fetch("/api/permissions")
           if (allPermissionsResponse.ok) {
             const allPermissionsData = await allPermissionsResponse.json()
-            setAllPermissions(allPermissionsData.length > 0 ? allPermissionsData : PERMISSIONS)
+            setAllPermissions(allPermissionsData.length > 0 ? allPermissionsData : PERMISSION_DATA)
           } else {
             console.warn("Using default permissions due to API error")
-            setAllPermissions(PERMISSIONS)
+            setAllPermissions(PERMISSION_DATA)
           }
         } catch (error) {
           console.warn("Using default permissions due to API error:", error)
-          setAllPermissions(PERMISSIONS)
+          setAllPermissions(PERMISSION_DATA)
         }
 
         // Fetch permissions matrix
@@ -231,8 +193,8 @@ export default function RolePermissionsPage() {
           variant: "destructive"
         })
         // Set default values if API calls fail
-        setAllRoles(ROLES)
-        setAllPermissions(PERMISSIONS)
+        setAllRoles(ROLE_DATA)
+        setAllPermissions(PERMISSION_DATA)
         setRolePermissions(PERMISSION_MATRIX)
       } finally {
         setLoading(false)
@@ -264,7 +226,15 @@ export default function RolePermissionsPage() {
         title: "Permissions Updated",
         description: "Role permissions have been updated successfully",
       })
-      setEditDialogOpen(false)
+
+      // Mark that changes are saved
+      setHasUnsavedChanges(false)
+      setSaveSuccess(true)
+
+      // Close dialog if open
+      if (editDialogOpen) {
+        setEditDialogOpen(false)
+      }
     } catch (error) {
       console.error("Error updating permissions:", error)
       toast({
@@ -532,6 +502,30 @@ export default function RolePermissionsPage() {
                 </Table>
               </div>
 
+              {hasUnsavedChanges && (
+                <Alert className="mb-4 border-yellow-500 bg-yellow-50">
+                  <AlertTitle className="flex items-center text-yellow-800">
+                    <Info className="h-4 w-4 mr-2" />
+                    Unsaved Changes
+                  </AlertTitle>
+                  <AlertDescription className="text-yellow-800">
+                    You have made changes to the permission matrix. Click "Save Changes" to apply them.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {saveSuccess && (
+                <Alert className="mb-4 border-green-500 bg-green-50">
+                  <AlertTitle className="flex items-center text-green-800">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Changes Saved
+                  </AlertTitle>
+                  <AlertDescription className="text-green-800">
+                    Your changes to the permission matrix have been saved successfully.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-2">
                 <Button
                   onClick={() => setEditDialogOpen(true)}
@@ -540,6 +534,25 @@ export default function RolePermissionsPage() {
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Permissions
                 </Button>
+                {hasUnsavedChanges && (
+                  <Button
+                    onClick={saveRolePermissions}
+                    disabled={loading}
+                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => setNewPermissionDialogOpen(true)}

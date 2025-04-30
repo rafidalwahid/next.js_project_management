@@ -1,4 +1,8 @@
-// lib/permissions/permission-system.ts
+// lib/permissions/unified-permission-system.ts
+// This is a consolidated permission system that works in all environments:
+// - Server-side with Prisma
+// - Edge Runtime (middleware)
+// - Client-side in the browser
 
 // Define all available permissions
 export const PERMISSIONS = {
@@ -48,22 +52,22 @@ export const SYSTEM_ROLES = {
   admin: {
     name: "Administrator",
     description: "Full access to all system features",
-    color: "#8B5CF6" // Purple
+    color: "bg-purple-500" // Purple
   },
   manager: {
     name: "Manager",
     description: "Can manage projects, tasks, and team members",
-    color: "#3B82F6" // Blue
+    color: "bg-blue-500" // Blue
   },
   user: {
     name: "User",
     description: "Regular user with limited permissions",
-    color: "#10B981" // Green
+    color: "bg-green-500" // Green
   },
   guest: {
     name: "Guest",
     description: "View-only access to projects",
-    color: "#6B7280" // Gray
+    color: "bg-gray-500" // Gray
   }
 };
 
@@ -121,7 +125,7 @@ export const PERMISSION_MATRIX = {
 };
 
 // Permission checking functions
-export class PermissionSystem {
+export class UnifiedPermissionSystem {
   /**
    * Check if a role has a specific permission
    */
@@ -157,18 +161,43 @@ export class PermissionSystem {
   }
 
   /**
-   * Get all available permissions
+   * Get all available permissions with metadata
    */
-  static getAllPermissions(): { id: string; name: string; description: string }[] {
-    return Object.entries(PERMISSIONS).map(([key, value]) => ({
-      id: value,
-      name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      description: `Permission to ${value.replace(/_/g, ' ')}`
-    }));
+  static getAllPermissions(): { id: string; name: string; description: string; category?: string }[] {
+    return Object.entries(PERMISSIONS).map(([key, value]) => {
+      // Convert permission key to a more readable format
+      const name = key
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      
+      // Determine category based on the permission key
+      let category = 'General';
+      if (key.includes('USER') || key.includes('ROLE')) {
+        category = 'User Management';
+      } else if (key.includes('PROJECT')) {
+        category = 'Project Management';
+      } else if (key.includes('TASK')) {
+        category = 'Task Management';
+      } else if (key.includes('TEAM')) {
+        category = 'Team Management';
+      } else if (key.includes('ATTENDANCE')) {
+        category = 'Attendance';
+      } else if (key.includes('SYSTEM')) {
+        category = 'System';
+      }
+      
+      return {
+        id: value,
+        name,
+        description: `Permission to ${value.replace(/_/g, ' ')}`,
+        category
+      };
+    });
   }
 
   /**
-   * Get all available roles
+   * Get all available roles with metadata
    */
   static getAllRoles(): { id: string; name: string; description: string; color: string }[] {
     return Object.entries(SYSTEM_ROLES).map(([id, role]) => ({
@@ -177,12 +206,5 @@ export class PermissionSystem {
       description: role.description,
       color: role.color
     }));
-  }
-
-  /**
-   * Get the permission matrix
-   */
-  static getPermissionMatrix(): typeof PERMISSION_MATRIX {
-    return PERMISSION_MATRIX;
   }
 }

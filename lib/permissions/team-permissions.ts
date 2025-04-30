@@ -1,6 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 import { logActivity } from "@/lib/activity-logger";
 
 /**
@@ -69,12 +69,12 @@ export async function checkTeamMemberPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check TEAM_VIEW permission or direct involvement
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
                     isProjectCreator || !!userTeamMember || isSelf;
   }
   else if (action === 'update') {
     // For update actions, check TEAM_MANAGEMENT permission or project creator status
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
                     isProjectCreator;
 
     // Special case: can't update project creator's membership
@@ -88,7 +88,7 @@ export async function checkTeamMemberPermission(
   }
   else if (action === 'delete') {
     // For delete actions, check TEAM_REMOVE permission or project creator status or self
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_REMOVE) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_REMOVE) ||
                     isProjectCreator || isSelf;
 
     // Special case: can't remove project creator
@@ -179,17 +179,17 @@ export async function checkProjectTeamPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check TEAM_VIEW permission or direct involvement
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
                     isProjectCreator || isTeamMember;
   }
   else if (action === 'add') {
     // For add actions, check TEAM_ADD permission or project creator status
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_ADD) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_ADD) ||
                     isProjectCreator;
   }
   else if (action === 'manage') {
     // For manage actions, check TEAM_MANAGEMENT permission or project creator status
-    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
+    hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
                     isProjectCreator;
   }
 

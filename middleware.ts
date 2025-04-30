@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { PermissionSystem, PERMISSIONS } from '@/lib/permissions/permission-system'
+import { UnifiedPermissionSystem, PERMISSIONS } from '@/lib/permissions/unified-permission-system'
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -34,21 +34,21 @@ export async function middleware(request: NextRequest) {
 
     // Admin-only routes
     if (pathname.startsWith('/team/permissions') || pathname.startsWith('/team/roles')) {
-      if (!PermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
+      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     }
 
     // Manager and admin routes
     if (pathname.startsWith('/team/new')) {
-      if (!PermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
+      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     }
 
     // Check permissions for specific API routes
     if (pathname.startsWith('/api/roles') || pathname.startsWith('/api/permissions')) {
-      if (!PermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
+      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
         return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
       }
     }
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next()
       }
 
-      if (!PermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
+      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
         return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
       }
     }
