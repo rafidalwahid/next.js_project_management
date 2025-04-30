@@ -128,7 +128,7 @@ export default function RoleManagementPage() {
 
     try {
       const response = await fetch(`/api/users/${selectedUser.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json"
         },

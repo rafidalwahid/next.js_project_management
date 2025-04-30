@@ -113,7 +113,7 @@ export function UserCard({ user, onDelete }: UserCardProps) {
               {currentUserRole === "admin" && (
                 <>
                   <DropdownMenuItem asChild>
-                    <Link href="/team/roles" className="cursor-pointer">
+                    <Link href={`/team/roles?userId=${user.id}`} className="cursor-pointer">
                       <ShieldCheck className="mr-2 h-4 w-4" />
                       Manage Role
                     </Link>

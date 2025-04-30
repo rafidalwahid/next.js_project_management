@@ -16,31 +16,44 @@ import { UserGrid } from "@/components/team/user-grid"
 import { UserList } from "@/components/team/user-list"
 import { Pagination } from "@/components/team/pagination"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog"
 
 export default function TeamPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<string | null>(null)
   const itemsPerPage = 12
-  const { users: allUsers, isLoading, isError, mutate } = useUsers(searchQuery, 100) // Increased limit
 
-  // Filter users by role
-  const filteredUsers = allUsers.filter(user => {
-    if (roleFilter === "all") return true
-    return user.role.toLowerCase() === roleFilter.toLowerCase()
+  // Use the enhanced useUsers hook with server-side pagination and filtering
+  const { 
+    users, 
+    pagination, 
+    isLoading, 
+    isError, 
+    mutate 
+  } = useUsers({
+    search: searchQuery,
+    role: roleFilter,
+    page: currentPage,
+    limit: itemsPerPage
   })
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const users = filteredUsers.slice(startIndex, startIndex + itemsPerPage)
 
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  
   const { toast } = useToast()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -53,18 +66,54 @@ export default function TeamPage() {
     }
   }, [status, router])
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, roleFilter])
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
   }
 
-  // This would be implemented with the API in a real app
-  const handleDelete = async (userId: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+  const confirmDelete = (userId: string) => {
+    setUserToDelete(userId)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDelete = async () => {
+    if (!userToDelete) return
+
+    try {
+      const response = await fetch(`/api/users/${userToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete user');
+      }
+
       toast({
-        title: "Not implemented",
-        description: "User deletion is not implemented in this demo.",
+        title: "User deleted",
+        description: "The user has been successfully deleted.",
+      });
+
+      // Close dialog and reset state
+      setShowDeleteDialog(false)
+      setUserToDelete(null)
+
+      // Refresh the users list
+      mutate();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user",
         variant: "destructive",
-      })
+      });
     }
   }
 
@@ -91,6 +140,14 @@ export default function TeamPage() {
     )
   }
 
+  // Get user counts by role (using the available users data)
+  const userCounts = {
+    total: users.length,
+    admin: users.filter(u => u.role.toLowerCase() === 'admin').length,
+    manager: users.filter(u => u.role.toLowerCase() === 'manager').length,
+    user: users.filter(u => u.role.toLowerCase() === 'user').length
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
@@ -111,7 +168,7 @@ export default function TeamPage() {
         <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Total Members</CardDescription>
-            <CardTitle className="text-3xl">{allUsers.length}</CardTitle>
+            <CardTitle className="text-3xl">{userCounts.total}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Active team members in your organization</p>
@@ -121,7 +178,7 @@ export default function TeamPage() {
         <Card className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/50 dark:to-pink-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Admins</CardDescription>
-            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'admin').length}</CardTitle>
+            <CardTitle className="text-3xl">{userCounts.admin}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Users with administrative privileges</p>
@@ -131,7 +188,7 @@ export default function TeamPage() {
         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Managers</CardDescription>
-            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'manager').length}</CardTitle>
+            <CardTitle className="text-3xl">{userCounts.manager}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Project and team managers</p>
@@ -141,7 +198,7 @@ export default function TeamPage() {
         <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Regular Users</CardDescription>
-            <CardTitle className="text-3xl">{allUsers.filter(u => u.role.toLowerCase() === 'user').length}</CardTitle>
+            <CardTitle className="text-3xl">{userCounts.user}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Regular team members with standard access</p>
@@ -159,9 +216,13 @@ export default function TeamPage() {
               </CardDescription>
             </div>
             <div className="text-sm text-muted-foreground">
-              Showing {filteredUsers.length} {filteredUsers.length === 1 ? 'member' : 'members'}
-              {roleFilter !== 'all' && ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
-              {searchQuery && ` matching: "${searchQuery}"`}
+              {pagination && (
+                <span>
+                  Showing {users.length} of {pagination.totalCount} {pagination.totalCount === 1 ? 'member' : 'members'}
+                  {roleFilter !== 'all' && ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
+                  {searchQuery && ` matching: "${searchQuery}"`}
+                </span>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -207,21 +268,48 @@ export default function TeamPage() {
 
           <div className="mt-6">
             {viewMode === "grid" ? (
-              <UserGrid users={users} onDelete={handleDelete} />
+              <UserGrid users={users} onDelete={confirmDelete} />
             ) : (
-              <UserList users={users} onDelete={handleDelete} />
+              <UserList users={users} onDelete={confirmDelete} />
             )}
 
-            {filteredUsers.length > itemsPerPage && (
+            {pagination && pagination.totalPages > 1 && (
               <Pagination
                 currentPage={currentPage}
-                totalPages={totalPages}
+                totalPages={pagination.totalPages}
                 onPageChange={handlePageChange}
               />
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm User Deletion</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The user will be permanently removed from the system 
+              along with their data, tasks, and team memberships.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDelete}
+            >
+              Delete User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

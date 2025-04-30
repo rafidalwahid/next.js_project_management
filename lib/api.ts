@@ -136,20 +136,21 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
  * User API functions
  */
 export const userApi = {
-  getUsers: async (search?: string, limit = 10) => {
+  getUsers: async (options: any = {}) => {
+    const { search, limit = 10, page = 1, role, projectId } = options;
     const params = new URLSearchParams();
+    
     if (search) params.append('search', search);
-    if (limit) params.append('limit', limit.toString());
+    if (limit) params.append('take', limit.toString());
+    if (page) params.append('skip', ((page - 1) * limit).toString());
+    if (role) params.append('role', role);
+    if (projectId) params.append('projectId', projectId);
 
     return fetchAPI(`/api/users?${params.toString()}`);
   },
 
   getUsersInProject: async (projectId: string, limit = 10) => {
-    const params = new URLSearchParams();
-    params.append('projectId', projectId);
-    if (limit) params.append('limit', limit.toString());
-
-    return fetchAPI(`/api/users?${params.toString()}`);
+    return userApi.getUsers({ projectId, limit });
   },
 
   getUserProfile: async (userId: string) => {
@@ -201,6 +202,12 @@ export const userApi = {
       console.error('Error in uploadProfileImage:', error);
       throw error;
     }
+  },
+
+  deleteUser: async (userId: string) => {
+    return fetchAPI(`/api/users/${userId}`, {
+      method: 'DELETE'
+    });
   },
 };
 

@@ -12,22 +12,55 @@ type User = {
 
 type UsersResponse = {
   users: User[];
+  pagination?: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+  }
+};
+
+type UseUsersOptions = {
+  page?: number;
+  limit?: number;
+  role?: string;
+  search?: string;
+  projectId?: string;
 };
 
 /**
- * Hook to fetch users from the API
+ * Hook to fetch users from the API with server-side pagination and filtering
  */
-export function useUsers(search?: string, limit = 10) {
+export function useUsers(options: UseUsersOptions = {}) {
+  const { search = '', limit = 10, page = 1, role, projectId } = options;
+  
+  // Build query string with all parameters
+  const queryParams = new URLSearchParams();
+  if (search) queryParams.set('search', search);
+  if (limit) queryParams.set('take', limit.toString());
+  if (page) queryParams.set('skip', ((page - 1) * limit).toString());
+  if (role && role !== 'all') queryParams.set('role', role);
+  if (projectId) queryParams.set('projectId', projectId);
+  
+  const queryString = queryParams.toString();
+  
   const { data, error, isLoading, mutate } = useSWR(
-    `/api/users?search=${search || ''}&limit=${limit}`,
+    `/api/users?${queryString}`,
     async () => {
-      const response = await userApi.getUsers(search, limit);
+      const response = await userApi.getUsers({
+        search,
+        limit,
+        page,
+        role: role !== 'all' ? role : undefined,
+        projectId
+      });
       return response as UsersResponse;
     }
   );
 
   return {
     users: data?.users || [],
+    pagination: data?.pagination,
     isLoading,
     isError: error,
     mutate,
@@ -48,6 +81,7 @@ export function useProjectUsers(projectId: string, limit = 10) {
 
   return {
     users: data?.users || [],
+    pagination: data?.pagination,
     isLoading,
     isError: error,
     mutate,

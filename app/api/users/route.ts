@@ -18,15 +18,23 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const searchParams = req.nextUrl.searchParams;
-    const skip = searchParams.get('skip') ? parseInt(searchParams.get('skip')!) : undefined;
-    const take = searchParams.get('take') ? parseInt(searchParams.get('take')!) : undefined;
-    const orderBy = searchParams.get('orderBy');
+    const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
+    const limit = searchParams.get('take') ? parseInt(searchParams.get('take')!) : 10;
+    const skip = searchParams.get('skip') 
+      ? parseInt(searchParams.get('skip')!)
+      : (page - 1) * limit;
+    const orderBy = searchParams.get('orderBy') || 'createdAt';
     const direction = searchParams.get('direction') || 'desc';
     const includeProjects = searchParams.get('includeProjects') === 'true';
     const includeTasks = searchParams.get('includeTasks') === 'true';
+    const includeTeams = searchParams.get('includeTeams') === 'true';
+    const includeCounts = searchParams.get('includeCounts') === 'true';
     const role = searchParams.get('role');
     const search = searchParams.get('search');
     const projectId = searchParams.get('projectId');
+
+    // Build the where clause
+    const where: any = {};
 
     // For regular users, only return team members they work with
     // Managers and admins can see all users
@@ -57,10 +65,7 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    // Build the where clause
-    const where: any = {};
-
-    if (role) {
+    if (role && role !== 'all') {
       where.role = role;
     }
 
@@ -81,23 +86,31 @@ export async function GET(req: NextRequest) {
     }
 
     // Build the orderBy clause
-    let orderByClause: any = { createdAt: direction };
-    if (orderBy === 'name' || orderBy === 'email' || orderBy === 'role' || orderBy === 'updatedAt') {
-      orderByClause = { [orderBy]: direction };
-    }
+    let orderByClause: any = { [orderBy]: direction };
 
-    // Fetch users
-    const users = await getUsers({
+    // Fetch users with our enhanced getUsers function
+    const result = await getUsers({
       skip,
-      take,
+      take: limit,
       orderBy: orderByClause,
       where,
       includeProjects,
       includeTasks,
+      includeTeams,
+      includeCounts
     });
 
     // Return in the format expected by the client
-    return NextResponse.json({ users });
+    return NextResponse.json({
+      users: result.users,
+      pagination: {
+        page,
+        limit,
+        totalCount: result.pagination.totalCount,
+        totalPages: Math.ceil(result.pagination.totalCount / limit)
+      },
+      ...(result.counts ? { counts: result.counts } : {})
+    });
   } catch (error: any) {
     console.error('Error fetching users:', error);
     return NextResponse.json(

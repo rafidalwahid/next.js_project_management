@@ -47,20 +47,6 @@ export function UserList({ users, onDelete }: UserListProps) {
     return name.substring(0, 2).toUpperCase()
   }
 
-  // Get role badge variant
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "admin":
-        return "destructive"
-      case "manager":
-        return "default"
-      case "contributor":
-        return "secondary"
-      default:
-        return "outline"
-    }
-  }
-
   if (users.length === 0) {
     return (
       <div className="rounded-md border-0 shadow-sm overflow-hidden">
@@ -148,7 +134,7 @@ export function UserList({ users, onDelete }: UserListProps) {
                     {currentUserRole === "admin" && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/team/roles" className="cursor-pointer">
+                          <Link href={`/team/roles?userId=${user.id}`} className="cursor-pointer">
                             <ShieldCheck className="mr-2 h-4 w-4" />
                             Manage Role
                           </Link>

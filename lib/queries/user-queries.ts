@@ -26,7 +26,7 @@ export type UserCreateInput = {
 
 export type UserUpdateInput = Partial<UserCreateInput>;
 
-// Get all users with optional filters
+// Get all users with optional filters and pagination
 export async function getUsers(args: {
   skip?: number;
   take?: number;
@@ -35,6 +35,7 @@ export async function getUsers(args: {
   includeProjects?: boolean;
   includeTasks?: boolean;
   includeTeams?: boolean;
+  includeCounts?: boolean; // New option to include role counts
 } = {}) {
   const {
     skip = 0,
@@ -43,7 +44,8 @@ export async function getUsers(args: {
     where = {},
     includeProjects = false,
     includeTasks = false,
-    includeTeams = false
+    includeTeams = false,
+    includeCounts = false
   } = args;
 
   const select: Prisma.UserSelect = {
@@ -55,39 +57,50 @@ export async function getUsers(args: {
     createdAt: true,
     updatedAt: true,
     emailVerified: true,
+    lastLogin: true,
     // Never return the password
     password: false,
   };
 
   // Conditionally include relations
   if (includeProjects) {
-    select.projects = {
+    select.teams = {
       select: {
-        id: true,
-        title: true,
-        description: true,
-        status: true,
-        startDate: true,
-        endDate: true,
-      }
-    };
-  }
-
-  if (includeTasks) {
-    select.tasks = {
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        priority: true,
-        dueDate: true,
         project: {
           select: {
             id: true,
             title: true,
+            description: true,
+            startDate: true,
+            endDate: true,
           }
         }
-      }
+      },
+      take: 5
+    };
+  }
+
+  if (includeTasks) {
+    select.taskAssignments = {
+      select: {
+        task: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            priority: true,
+            dueDate: true,
+            completed: true,
+            project: {
+              select: {
+                id: true,
+                title: true,
+              }
+            }
+          }
+        }
+      },
+      take: 5
     };
   }
 
@@ -103,17 +116,55 @@ export async function getUsers(args: {
           }
         },
         createdAt: true,
-      }
+      },
+      take: 5
     };
   }
 
-  return prisma.user.findMany({
+  // Get total count of users matching the where clause
+  const totalCount = await prisma.user.count({ where });
+  
+  // Get users with pagination
+  const users = await prisma.user.findMany({
     skip,
     take,
     where,
     orderBy,
     select,
   });
+
+  // Get role counts if requested
+  let roleCounts = {};
+  if (includeCounts) {
+    // Count users by role
+    const adminCount = await prisma.user.count({ 
+      where: { ...where, role: 'admin' } 
+    });
+    
+    const managerCount = await prisma.user.count({ 
+      where: { ...where, role: 'manager' } 
+    });
+    
+    const userCount = await prisma.user.count({ 
+      where: { ...where, role: 'user' } 
+    });
+
+    roleCounts = {
+      admin: adminCount,
+      manager: managerCount,
+      user: userCount,
+    };
+  }
+
+  return {
+    users,
+    pagination: {
+      totalCount,
+      skip,
+      take,
+    },
+    ...(includeCounts ? { counts: roleCounts } : {})
+  };
 }
 
 // Get user by ID with option to include relations
