@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { RolePermissionService } from "@/lib/services/role-permission-service";
+import { PermissionService } from "@/lib/services/permission-service";
+import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -15,17 +16,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // For now, allow any authenticated user to access this endpoint
-    // We'll check for admin role instead of specific permission
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to manage roles
+    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
+        { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
       );
     }
 
-    // Get the permission matrix from the database
-    const permissionMatrix = await RolePermissionService.getPermissionMatrix();
+    // Get the permission matrix
+    const permissionMatrix = PermissionSystem.getPermissionMatrix();
 
     // Return the permission matrix
     return NextResponse.json(permissionMatrix);
@@ -50,10 +50,10 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // For now, allow any authenticated admin to access this endpoint
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to manage roles
+    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
+        { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
       );
     }

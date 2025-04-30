@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useUserRoles, useUserPermissions } from "@/hooks/use-permission"
+import { useUserRole, useUserPermissions } from "@/hooks/use-permission"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -21,7 +21,7 @@ import {
 
 export function RoleDashboard() {
   const { data: session } = useSession()
-  const { roles: userRoles, isLoading: rolesLoading } = useUserRoles()
+  const { role: userRole, isLoading: roleLoading } = useUserRole()
   const { permissions: userPermissions, isLoading: permissionsLoading } = useUserPermissions()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -56,10 +56,10 @@ export function RoleDashboard() {
     loadStats()
   }, [])
 
-  // Determine which dashboard view to show based on user roles
+  // Determine which dashboard view to show based on user role
   const getDashboardView = () => {
-    // Show loading skeleton while roles are being fetched
-    if (rolesLoading) {
+    // Show loading skeleton while role is being fetched
+    if (roleLoading) {
       return (
         <div className="space-y-4">
           <Skeleton className="h-10 w-full" />
@@ -77,10 +77,10 @@ export function RoleDashboard() {
       )
     }
 
-    // Once roles are loaded, show the appropriate dashboard
-    if (userRoles.includes("admin")) {
+    // Once role is loaded, show the appropriate dashboard
+    if (userRole === "admin") {
       return <AdminDashboard stats={stats} loading={loading} />
-    } else if (userRoles.includes("manager")) {
+    } else if (userRole === "manager") {
       return <ManagerDashboard stats={stats} loading={loading} />
     } else {
       return <UserDashboard stats={stats} loading={loading} />
@@ -92,22 +92,19 @@ export function RoleDashboard() {
       <div className="flex flex-col space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Welcome back, {session?.user?.name}</h2>
         <div className="flex flex-wrap gap-2">
-          {rolesLoading ? (
+          {roleLoading ? (
             <>
               <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-24" />
             </>
           ) : (
-            userRoles.map(role => (
-              <Badge key={role} variant="outline" className="capitalize">
-                {role === "admin" ? (
-                  <ShieldAlert className="mr-1 h-3 w-3" />
-                ) : role === "manager" ? (
-                  <ShieldCheck className="mr-1 h-3 w-3" />
-                ) : null}
-                {role}
-              </Badge>
-            ))
+            <Badge key={userRole} variant="outline" className="capitalize">
+              {userRole === "admin" ? (
+                <ShieldAlert className="mr-1 h-3 w-3" />
+              ) : userRole === "manager" ? (
+                <ShieldCheck className="mr-1 h-3 w-3" />
+              ) : null}
+              {userRole}
+            </Badge>
           )}
         </div>
       </div>

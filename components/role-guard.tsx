@@ -15,10 +15,10 @@ interface RoleGuardProps {
 export function RoleGuard({ roles, children, fallback = null }: RoleGuardProps) {
   const { data: session } = useSession()
   const userRole = session?.user?.role || "guest"
-  
+
   if (!roles.includes(userRole)) {
-    return fallback
+    return <>{fallback}</>
   }
-  
+
   return <>{children}</>
 }

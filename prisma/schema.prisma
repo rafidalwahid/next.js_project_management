@@ -37,8 +37,6 @@ model User {
   taskAssignments       TaskAssignee[]
   taskAttachments       TaskAttachment[]
   teams                 TeamMember[]
-  userPermissions       UserPermission[]
-  userRoles             UserRole[]
 
   @@map("user")
 }
@@ -83,78 +81,9 @@ model VerificationToken {
   @@map("verificationtoken")
 }
 
-model Role {
-  id              String           @id @default(cuid())
-  name            String           @unique
-  description     String?
-  isSystem        Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  rolePermissions RolePermission[]
-  userRoles       UserRole[]
-
-  @@map("role")
-}
-
-model Permission {
-  id              String           @id @default(cuid())
-  name            String           @unique
-  description     String?
-  category        String?
-  isSystem        Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  rolePermissions RolePermission[]
-  userPermissions UserPermission[]
-
-  @@map("permission")
-}
-
-model UserRole {
-  id        String   @id @default(cuid())
-  userId    String
-  roleId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roleId])
-  @@index([userId])
-  @@index([roleId])
-  @@map("user_role")
-}
-
-model RolePermission {
-  id           String     @id @default(cuid())
-  roleId       String
-  permissionId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, permissionId])
-  @@index([roleId])
-  @@index([permissionId])
-  @@map("role_permission")
-}
-
-model UserPermission {
-  id           String     @id @default(cuid())
-  userId       String
-  permissionId String
-  granted      Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, permissionId])
-  @@index([userId])
-  @@index([permissionId])
-  @@map("user_permission")
-}
+// Role and permission models have been removed in favor of a simplified role system
+// The User model still has a 'role' field with values like 'admin', 'manager', 'user'
+// Permissions are now managed through code in lib/permissions/permission-system.ts
 
 model Project {
   id             String          @id @default(cuid())

@@ -1,5 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
+import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
 
 /**
  * Check if a user has permission to access a project
@@ -35,20 +36,41 @@ export async function checkProjectPermission(
     return { hasPermission: false, project: null, error: "Project not found" };
   }
 
-  // Check if user is admin
-  const isAdmin = session.user.role === 'admin';
-  
+  // Get user role
+  const userRole = session.user.role;
+
   // Check if user is the project creator
   const isProjectCreator = project.createdById === session.user.id;
-  
+
   // Check if user is a team member of the project
   const isTeamMember = project.teamMembers.length > 0;
 
-  // For view actions, any of these conditions is sufficient
-  const hasPermission = isAdmin || isProjectCreator || isTeamMember;
+  // Initialize permission flag
+  let hasPermission = false;
 
-  return { 
-    hasPermission, 
+  // Check permissions based on action
+  if (action === 'view') {
+    // For view actions, check VIEW_PROJECTS permission or direct involvement
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS) ||
+                    isProjectCreator || isTeamMember;
+  }
+  else if (action === 'update') {
+    // For update actions, check PROJECT_MANAGEMENT permission or project creator status
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_MANAGEMENT) ||
+                    isProjectCreator;
+  }
+  else if (action === 'delete') {
+    // For delete actions, check PROJECT_DELETION permission or project creator status
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_DELETION) ||
+                    isProjectCreator;
+  }
+  else if (action === 'create') {
+    // For create actions, check PROJECT_CREATION permission
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
+  }
+
+  return {
+    hasPermission,
     project,
     error: hasPermission ? null : "You don't have permission to " + action + " this project"
   };

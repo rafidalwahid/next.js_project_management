@@ -1,5 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
+import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
 
 /**
  * Check if a user has permission to access a task
@@ -44,8 +45,8 @@ export async function checkTaskPermission(
     return { hasPermission: false, task: null, error: "Task not found" };
   }
 
-  // Check if user is admin
-  const isAdmin = session.user.role === 'admin';
+  // Get user role
+  const userRole = session.user.role;
 
   // Check if user is the project creator
   const isProjectCreator = task.project.createdById === session.user.id;
@@ -56,13 +57,27 @@ export async function checkTaskPermission(
   // Check if user is assigned to the task (via TaskAssignee model)
   const isTaskAssignee = task.assignees && task.assignees.length > 0;
 
-  // For view actions, any of these conditions is sufficient
-  let hasPermission = isAdmin || isProjectCreator || isTeamMember || isTaskAssignee;
+  // Initialize permission flag
+  let hasPermission = false;
 
-  // For delete actions, we might want stricter permissions
-  if (action === 'delete' && !hasPermission) {
+  // Check permissions based on action
+  if (action === 'view') {
+    // For view actions, check VIEW_PROJECTS permission or direct involvement
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS) ||
+                    isProjectCreator || isTeamMember || isTaskAssignee;
+  }
+  else if (action === 'update') {
+    // For update actions, check TASK_MANAGEMENT permission or direct involvement
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TASK_MANAGEMENT) ||
+                    isProjectCreator || isTaskAssignee;
+  }
+  else if (action === 'delete') {
+    // For delete actions, check TASK_DELETION permission or project creator status
+    hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.TASK_DELETION) ||
+                    isProjectCreator;
+
     // Special case for subtasks - check if user has permission on the parent task
-    if (task.parentId) {
+    if (!hasPermission && task.parentId) {
       const parentPermission = await checkTaskPermission(task.parentId, session, 'update');
       hasPermission = parentPermission.hasPermission;
     }

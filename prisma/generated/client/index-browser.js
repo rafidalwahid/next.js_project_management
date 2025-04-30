@@ -164,50 +164,6 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   expires: 'expires'
 };
 
-exports.Prisma.RoleScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  isSystem: 'isSystem',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.PermissionScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  category: 'category',
-  isSystem: 'isSystem',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.UserRoleScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  roleId: 'roleId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.RolePermissionScalarFieldEnum = {
-  id: 'id',
-  roleId: 'roleId',
-  permissionId: 'permissionId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.UserPermissionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  permissionId: 'permissionId',
-  granted: 'granted',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -412,37 +368,6 @@ exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
   token: 'token'
 };
 
-exports.Prisma.RoleOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description'
-};
-
-exports.Prisma.PermissionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  category: 'category'
-};
-
-exports.Prisma.UserRoleOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  roleId: 'roleId'
-};
-
-exports.Prisma.RolePermissionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  roleId: 'roleId',
-  permissionId: 'permissionId'
-};
-
-exports.Prisma.UserPermissionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  permissionId: 'permissionId'
-};
-
 exports.Prisma.ProjectOrderByRelevanceFieldEnum = {
   id: 'id',
   title: 'title',
@@ -553,11 +478,6 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken',
-  Role: 'Role',
-  Permission: 'Permission',
-  UserRole: 'UserRole',
-  RolePermission: 'RolePermission',
-  UserPermission: 'UserPermission',
   Project: 'Project',
   ProjectStatus: 'ProjectStatus',
   Task: 'Task',

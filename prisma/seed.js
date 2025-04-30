@@ -5,61 +5,53 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting database seeding process...');
-  
+
   // Clear existing data (optional - be careful in production!)
   await clearExistingData();
-  
-  // Seed core data
-  const roles = await seedRoles();
-  const permissions = await seedPermissions();
+
+  // Seed users with roles directly in the User model
   const users = await seedUsers();
-  
-  // Connect roles and permissions
-  await connectRolesAndPermissions(roles, permissions);
-  
-  // Assign roles to users
-  await assignRolesToUsers(users, roles);
-  
+
   // Create projects with statuses
   const projects = await seedProjects(users);
-  
+
   // Create team members for projects
   await seedTeamMembers(projects, users);
-  
+
   // Create tasks for projects
   const tasks = await seedTasks(projects, users);
-  
+
   // Create task assignments
   await seedTaskAssignees(tasks, users);
-  
+
   // Create comments on tasks
   await seedComments(tasks, users);
-  
+
   // Create attendance records
   await seedAttendanceRecords(users, projects, tasks);
-  
+
   // Create attendance settings
   await seedAttendanceSettings(users);
-  
+
   // Create events
   await seedEvents(projects);
-  
+
   // Create documents
   await seedDocuments(users);
-  
+
   // Create activities
   await seedActivities(users, projects, tasks);
-  
+
   // Create task attachments
   await seedTaskAttachments(tasks, users);
-  
+
   console.log('Database seeding completed successfully!');
 }
 
 // Clear existing data - be careful with this in production!
 async function clearExistingData() {
   console.log('Clearing existing data...');
-  
+
   // Delete dependent records first to avoid foreign key constraints
   await prisma.taskAttachment.deleteMany({});
   await prisma.activity.deleteMany({});
@@ -73,201 +65,23 @@ async function clearExistingData() {
   await prisma.attendance.deleteMany({});
   await prisma.attendanceSettings.deleteMany({});
   await prisma.project.deleteMany({});
-  await prisma.userPermission.deleteMany({});
-  await prisma.rolePermission.deleteMany({});
-  await prisma.userRole.deleteMany({});
-  await prisma.permission.deleteMany({});
-  await prisma.role.deleteMany({});
   await prisma.session.deleteMany({});
   await prisma.account.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.verificationToken.deleteMany({});
-  
+
   console.log('Existing data cleared.');
 }
 
-// Seed roles
-async function seedRoles() {
-  console.log('Seeding roles...');
-  
-  const rolesToCreate = [
-    { name: 'admin', description: 'System administrator with full access', isSystem: true },
-    { name: 'manager', description: 'Project manager with team management capabilities' },
-    { name: 'developer', description: 'Software developer with task management access' },
-    { name: 'designer', description: 'UI/UX designer with design task access' },
-    { name: 'tester', description: 'QA tester with testing task access' },
-    { name: 'viewer', description: 'Read-only access to projects and tasks' },
-    { name: 'hr', description: 'Human resources with attendance management' },
-    { name: 'client', description: 'External client with limited project view' }
-  ];
-  
-  const roles = {};
-  
-  for (const role of rolesToCreate) {
-    roles[role.name] = await prisma.role.create({
-      data: role
-    });
-    console.log(`Created role: ${role.name}`);
-  }
-  
-  return roles;
-}
-
-// Seed permissions
-async function seedPermissions() {
-  console.log('Seeding permissions...');
-  
-  const permissionCategories = {
-    project: [
-      'project.create',
-      'project.read',
-      'project.update',
-      'project.delete',
-      'project.manage_team'
-    ],
-    task: [
-      'task.create',
-      'task.read',
-      'task.update',
-      'task.delete',
-      'task.assign'
-    ],
-    user: [
-      'user.create',
-      'user.read',
-      'user.update',
-      'user.delete'
-    ],
-    attendance: [
-      'attendance.create',
-      'attendance.read',
-      'attendance.update',
-      'attendance.read_all',
-      'attendance.manage'
-    ],
-    role: [
-      'role.create',
-      'role.read',
-      'role.update',
-      'role.delete',
-      'role.assign'
-    ],
-    system: [
-      'system.settings',
-      'system.logs'
-    ],
-    reporting: [
-      'reporting.view',
-      'reporting.export'
-    ]
-  };
-  
-  const permissions = {};
-  
-  for (const category in permissionCategories) {
-    for (const permissionName of permissionCategories[category]) {
-      const description = `Can ${permissionName.split('.')[1]} ${permissionName.split('.')[0]}s`;
-      const permission = await prisma.permission.create({
-        data: {
-          name: permissionName,
-          description,
-          category,
-          isSystem: category === 'system'
-        }
-      });
-      
-      permissions[permissionName] = permission;
-      console.log(`Created permission: ${permissionName}`);
-    }
-  }
-  
-  return permissions;
-}
-
-// Connect roles and permissions
-async function connectRolesAndPermissions(roles, permissions) {
-  console.log('Connecting roles and permissions...');
-  
-  const rolePermissionMap = {
-    admin: Object.values(permissions).map(p => p.id), // Admin gets all permissions
-    manager: [
-      permissions['project.create'].id,
-      permissions['project.read'].id,
-      permissions['project.update'].id,
-      permissions['project.manage_team'].id,
-      permissions['task.create'].id,
-      permissions['task.read'].id,
-      permissions['task.update'].id,
-      permissions['task.delete'].id,
-      permissions['task.assign'].id,
-      permissions['user.read'].id,
-      permissions['attendance.read'].id,
-      permissions['attendance.read_all'].id,
-      permissions['reporting.view'].id,
-      permissions['reporting.export'].id,
-    ],
-    developer: [
-      permissions['project.read'].id,
-      permissions['task.read'].id,
-      permissions['task.update'].id,
-      permissions['task.create'].id,
-      permissions['attendance.create'].id,
-      permissions['attendance.read'].id,
-    ],
-    designer: [
-      permissions['project.read'].id,
-      permissions['task.read'].id,
-      permissions['task.update'].id,
-      permissions['attendance.create'].id,
-      permissions['attendance.read'].id,
-    ],
-    tester: [
-      permissions['project.read'].id,
-      permissions['task.read'].id,
-      permissions['task.update'].id,
-      permissions['attendance.create'].id,
-      permissions['attendance.read'].id,
-    ],
-    viewer: [
-      permissions['project.read'].id,
-      permissions['task.read'].id,
-    ],
-    hr: [
-      permissions['attendance.read'].id,
-      permissions['attendance.read_all'].id,
-      permissions['attendance.manage'].id,
-      permissions['attendance.update'].id,
-      permissions['user.read'].id,
-      permissions['reporting.view'].id,
-    ],
-    client: [
-      permissions['project.read'].id,
-      permissions['task.read'].id,
-    ]
-  };
-  
-  for (const roleName in rolePermissionMap) {
-    const permissionIds = rolePermissionMap[roleName];
-    
-    for (const permissionId of permissionIds) {
-      await prisma.rolePermission.create({
-        data: {
-          roleId: roles[roleName].id,
-          permissionId
-        }
-      });
-    }
-    
-    console.log(`Connected ${permissionIds.length} permissions to role: ${roleName}`);
-  }
-}
+// Role and permission functions have been removed
+// Permissions are now managed through code in lib/permissions/permission-system.ts
 
 // Seed users
 async function seedUsers() {
   console.log('Seeding users...');
-  
+
   const hashedPassword = await hash('password123', 10);
-  
+
   const usersToCreate = [
     {
       name: 'Admin User',
@@ -390,19 +204,19 @@ async function seedUsers() {
       skills: 'Marketing, Communication, Content Strategy'
     }
   ];
-  
+
   const users = {};
-  
+
   for (const userData of usersToCreate) {
     const { role, ...userDataWithoutRole } = userData;
     const user = await prisma.user.create({
       data: userDataWithoutRole
     });
-    
+
     users[role] = user;
     console.log(`Created user: ${userData.name} (${userData.email})`);
   }
-  
+
   // Create additional developers for team diversity
   const extraDevelopers = [];
   for (let i = 4; i <= 8; i++) {
@@ -423,50 +237,19 @@ async function seedUsers() {
     extraDevelopers.push(devUser);
     console.log(`Created additional developer: Developer ${i}`);
   }
-  
+
   users.extraDevelopers = extraDevelopers;
-  
+
   return users;
 }
 
-// Assign roles to users
-async function assignRolesToUsers(users, roles) {
-  console.log('Assigning roles to users...');
-  
-  const userRoleAssignments = [
-    { user: users.admin, role: roles.admin },
-    { user: users.manager, role: roles.manager },
-    { user: users.developer, role: roles.developer },
-    { user: users.designer, role: roles.designer },
-    { user: users.tester, role: roles.tester },
-    { user: users.hr, role: roles.hr },
-    { user: users.client, role: roles.client },
-    { user: users.viewer, role: roles.viewer }
-  ];
-  
-  // Assign developer role to all extra developers
-  for (const developer of users.extraDevelopers) {
-    userRoleAssignments.push({
-      user: developer,
-      role: roles.developer
-    });
-  }
-  
-  for (const { user, role } of userRoleAssignments) {
-    await prisma.userRole.create({
-      data: {
-        userId: user.id,
-        roleId: role.id
-      }
-    });
-    console.log(`Assigned role ${role.name} to user ${user.name}`);
-  }
-}
+// Role assignments are now handled directly in the User model
+// through the 'role' field
 
 // Seed projects
 async function seedProjects(users) {
   console.log('Seeding projects...');
-  
+
   const now = new Date();
   const projectsToCreate = [
     {
@@ -550,16 +333,16 @@ async function seedProjects(users) {
       ]
     }
   ];
-  
+
   const projects = [];
-  
+
   for (const projectData of projectsToCreate) {
     const { statuses, ...projectDataWithoutStatuses } = projectData;
-    
+
     const project = await prisma.project.create({
       data: projectDataWithoutStatuses
     });
-    
+
     // Create status columns for each project
     for (const statusData of statuses) {
       await prisma.projectStatus.create({
@@ -569,25 +352,25 @@ async function seedProjects(users) {
         }
       });
     }
-    
+
     projects.push(project);
     console.log(`Created project: ${projectData.title}`);
   }
-  
+
   return projects;
 }
 
 // Seed team members for projects
 async function seedTeamMembers(projects, users) {
   console.log('Assigning team members to projects...');
-  
+
   const teamAssignments = [
     // Website Redesign Project
     { project: projects[0], user: users.manager },
     { project: projects[0], user: users.developer },
     { project: projects[0], user: users.designer },
     { project: projects[0], user: users.tester },
-    
+
     // Mobile App Development
     { project: projects[1], user: users.manager },
     { project: projects[1], user: users.developer },
@@ -595,24 +378,24 @@ async function seedTeamMembers(projects, users) {
     { project: projects[1], user: users.extraDevelopers[1] },
     { project: projects[1], user: users.designer },
     { project: projects[1], user: users.tester },
-    
+
     // API Integration Project
     { project: projects[2], user: users.developer },
     { project: projects[2], user: users.extraDevelopers[2] },
     { project: projects[2], user: users.extraDevelopers[3] },
-    
+
     // Internal Dashboard
     { project: projects[3], user: users.manager },
     { project: projects[3], user: users.developer },
     { project: projects[3], user: users.designer },
     { project: projects[3], user: users.extraDevelopers[0] },
-    
+
     // Product Launch Campaign
     { project: projects[4], user: users.manager },
     { project: projects[4], user: users.designer },
     { project: projects[4], user: users.extraDevelopers[4] }
   ];
-  
+
   for (const { project, user } of teamAssignments) {
     await prisma.teamMember.create({
       data: {
@@ -636,21 +419,21 @@ async function getProjectStatuses(projectId) {
 // Seed tasks
 async function seedTasks(projects, users) {
   console.log('Creating tasks for projects...');
-  
+
   const tasks = [];
-  
+
   for (const project of projects) {
     const statuses = await getProjectStatuses(project.id);
-    
+
     // Create a mapping of status name to id for easier reference
     const statusMap = {};
     for (const status of statuses) {
       statusMap[status.name] = status.id;
     }
-    
+
     // Create different tasks based on project type
     let projectTasks;
-    
+
     if (project.title === 'Website Redesign') {
       projectTasks = [
         {
@@ -864,10 +647,10 @@ async function seedTasks(projects, users) {
         }
       ];
     }
-    
+
     for (const taskData of projectTasks) {
       const { subtasks, ...taskDataWithoutSubtasks } = taskData;
-      
+
       // Create the main task
       const task = await prisma.task.create({
         data: {
@@ -875,10 +658,10 @@ async function seedTasks(projects, users) {
           projectId: project.id
         }
       });
-      
+
       tasks.push(task);
       console.log(`Created task: ${task.title} for project "${project.title}"`);
-      
+
       // Create subtasks if any
       if (subtasks) {
         for (const subtaskData of subtasks) {
@@ -890,30 +673,30 @@ async function seedTasks(projects, users) {
               statusId: task.statusId
             }
           });
-          
+
           tasks.push(subtask);
           console.log(`Created subtask: ${subtask.title} for task "${task.title}"`);
         }
       }
     }
   }
-  
+
   return tasks;
 }
 
 // Seed task assignees
 async function seedTaskAssignees(tasks, users) {
   console.log('Assigning users to tasks...');
-  
+
   const developerUsers = [users.developer, ...users.extraDevelopers];
   const allUsers = [users.manager, ...developerUsers, users.designer, users.tester];
-  
+
   for (const task of tasks) {
     // Assign 1-3 users to each task
     const assigneeCount = Math.floor(Math.random() * 3) + 1;
     const shuffledUsers = [...allUsers].sort(() => 0.5 - Math.random());
     const taskAssignees = shuffledUsers.slice(0, assigneeCount);
-    
+
     for (const user of taskAssignees) {
       await prisma.taskAssignee.create({
         data: {
@@ -929,7 +712,7 @@ async function seedTaskAssignees(tasks, users) {
 // Seed comments on tasks
 async function seedComments(tasks, users) {
   console.log('Adding comments to tasks...');
-  
+
   const commentTemplates = [
     "I've started working on this. Should be done soon.",
     "Need some clarification on the requirements.",
@@ -942,17 +725,17 @@ async function seedComments(tasks, users) {
     "Let's discuss this in the next standup meeting.",
     "I've updated the approach based on feedback."
   ];
-  
+
   const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
-  
+
   for (const task of tasks) {
     // Add 0-5 comments per task
     const commentCount = Math.floor(Math.random() * 6);
-    
+
     for (let i = 0; i < commentCount; i++) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const randomComment = commentTemplates[Math.floor(Math.random() * commentTemplates.length)];
-      
+
       await prisma.comment.create({
         data: {
           content: randomComment,
@@ -962,7 +745,7 @@ async function seedComments(tasks, users) {
         }
       });
     }
-    
+
     console.log(`Added ${commentCount} comments to task "${task.title}"`);
   }
 }
@@ -970,36 +753,36 @@ async function seedComments(tasks, users) {
 // Seed attendance records
 async function seedAttendanceRecords(users, projects, tasks) {
   console.log('Creating attendance records...');
-  
+
   const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
   const now = new Date();
-  
+
   // Create attendance records for the last 30 days
   for (let day = 0; day < 30; day++) {
     const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
-    
+
     // Skip weekends (0 = Sunday, 6 = Saturday)
     if (date.getDay() === 0 || date.getDay() === 6) {
       continue;
     }
-    
+
     for (const user of allUsers) {
       // 90% chance of having an attendance record
       if (Math.random() < 0.9) {
         const checkInHour = 8 + Math.floor(Math.random() * 2); // Between 8-9 AM
         const checkInTime = new Date(date);
         checkInTime.setHours(checkInHour, Math.floor(Math.random() * 60), 0, 0);
-        
+
         const workHours = 7 + Math.random() * 3; // 7-10 hours
         const checkOutTime = new Date(checkInTime);
         checkOutTime.setHours(checkOutTime.getHours() + Math.floor(workHours));
         checkOutTime.setMinutes(Math.floor(Math.random() * 60));
-        
+
         // Choose a random project and task for this attendance
         const randomProject = projects[Math.floor(Math.random() * projects.length)];
         const projectTasks = tasks.filter(task => task.projectId === randomProject.id);
         const randomTask = projectTasks.length > 0 ? projectTasks[Math.floor(Math.random() * projectTasks.length)] : null;
-        
+
         await prisma.attendance.create({
           data: {
             userId: user.id,
@@ -1022,15 +805,15 @@ async function seedAttendanceRecords(users, projects, tasks) {
         });
       }
     }
-    
+
     console.log(`Created attendance records for ${date.toDateString()}`);
   }
-  
+
   // Create some attendance adjustments by HR
   for (let i = 0; i < 10; i++) {
     const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
     const adjustmentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - Math.floor(Math.random() * 30));
-    
+
     await prisma.attendance.create({
       data: {
         userId: randomUser.id,
@@ -1048,9 +831,9 @@ async function seedAttendanceRecords(users, projects, tasks) {
 // Seed attendance settings
 async function seedAttendanceSettings(users) {
   console.log('Creating attendance settings...');
-  
+
   const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
-  
+
   for (const user of allUsers) {
     await prisma.attendanceSettings.create({
       data: {
@@ -1063,7 +846,7 @@ async function seedAttendanceSettings(users) {
         autoCheckoutTime: '17:30'
       }
     });
-    
+
     console.log(`Created attendance settings for user ${user.name}`);
   }
 }
@@ -1071,7 +854,7 @@ async function seedAttendanceSettings(users) {
 // Seed events
 async function seedEvents(projects) {
   console.log('Creating events...');
-  
+
   const now = new Date();
   const eventTypes = [
     'Team Meeting',
@@ -1084,17 +867,17 @@ async function seedEvents(projects) {
     'Design Review',
     'Kickoff Meeting'
   ];
-  
+
   for (const project of projects) {
     // Create 3-8 events per project
     const eventCount = 3 + Math.floor(Math.random() * 6);
-    
+
     for (let i = 0; i < eventCount; i++) {
       const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
       const daysFromNow = -30 + Math.floor(Math.random() * 60); // Events from 30 days ago to 30 days in future
       const eventDate = new Date(now);
       eventDate.setDate(eventDate.getDate() + daysFromNow);
-      
+
       await prisma.event.create({
         data: {
           title: `${project.title} - ${eventType}`,
@@ -1104,7 +887,7 @@ async function seedEvents(projects) {
         }
       });
     }
-    
+
     console.log(`Created ${eventCount} events for project "${project.title}"`);
   }
 }
@@ -1112,7 +895,7 @@ async function seedEvents(projects) {
 // Seed documents
 async function seedDocuments(users) {
   console.log('Creating documents...');
-  
+
   const allUsers = [users.manager, users.developer, users.extraDevelopers[0], users.designer];
   const documentTypes = [
     { name: 'Requirements Doc', fileType: 'pdf', fileSize: 1024 * 1024 },
@@ -1124,14 +907,14 @@ async function seedDocuments(users) {
     { name: 'Meeting Minutes', fileType: 'docx', fileSize: 128 * 1024 },
     { name: 'Research Findings', fileType: 'pptx', fileSize: 4096 * 1024 }
   ];
-  
+
   for (const user of allUsers) {
     // Create 1-3 documents per user
     const docCount = 1 + Math.floor(Math.random() * 3);
-    
+
     for (let i = 0; i < docCount; i++) {
       const docTemplate = documentTypes[Math.floor(Math.random() * documentTypes.length)];
-      
+
       await prisma.document.create({
         data: {
           name: `${docTemplate.name} - ${user.name}`,
@@ -1143,7 +926,7 @@ async function seedDocuments(users) {
         }
       });
     }
-    
+
     console.log(`Created ${docCount} documents for user ${user.name}`);
   }
 }
@@ -1151,10 +934,10 @@ async function seedDocuments(users) {
 // Seed activities
 async function seedActivities(users, projects, tasks) {
   console.log('Creating activity logs...');
-  
+
   const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
   const now = new Date();
-  
+
   const activityTemplates = [
     { action: 'create', description: 'created' },
     { action: 'update', description: 'updated' },
@@ -1162,7 +945,7 @@ async function seedActivities(users, projects, tasks) {
     { action: 'complete', description: 'marked as complete' },
     { action: 'assign', description: 'assigned' }
   ];
-  
+
   // Project activities
   for (const project of projects) {
     // Create activities
@@ -1177,18 +960,18 @@ async function seedActivities(users, projects, tasks) {
         createdAt: project.createdAt
       }
     });
-    
+
     // Create 2-5 update activities per project
     const updateCount = 2 + Math.floor(Math.random() * 4);
-    
+
     for (let i = 0; i < updateCount; i++) {
-      const daysAfterCreation = Math.floor(Math.random() * 
+      const daysAfterCreation = Math.floor(Math.random() *
         Math.max(1, (now.getTime() - project.createdAt.getTime()) / (24 * 60 * 60 * 1000)));
       const activityDate = new Date(project.createdAt);
       activityDate.setDate(activityDate.getDate() + daysAfterCreation);
-      
+
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
-      
+
       await prisma.activity.create({
         data: {
           action: 'update',
@@ -1202,7 +985,7 @@ async function seedActivities(users, projects, tasks) {
       });
     }
   }
-  
+
   // Task activities
   for (const task of tasks) {
     // Create activity
@@ -1218,13 +1001,13 @@ async function seedActivities(users, projects, tasks) {
         createdAt: task.createdAt
       }
     });
-    
+
     // Create task update activities
     if (Math.random() > 0.3) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const updateDate = new Date(task.createdAt);
       updateDate.setDate(updateDate.getDate() + Math.floor(Math.random() * 7) + 1);
-      
+
       await prisma.activity.create({
         data: {
           action: 'update',
@@ -1238,14 +1021,14 @@ async function seedActivities(users, projects, tasks) {
         }
       });
     }
-    
+
     // Create task assignment activities
     if (Math.random() > 0.5) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const assignmentUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const assignDate = new Date(task.createdAt);
       assignDate.setDate(assignDate.getDate() + Math.floor(Math.random() * 3) + 1);
-      
+
       await prisma.activity.create({
         data: {
           action: 'assign',
@@ -1259,13 +1042,13 @@ async function seedActivities(users, projects, tasks) {
         }
       });
     }
-    
+
     // Create completed task activities
     if (task.completed) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const completeDate = new Date(task.createdAt);
       completeDate.setDate(completeDate.getDate() + Math.floor(Math.random() * 14) + 1);
-      
+
       await prisma.activity.create({
         data: {
           action: 'complete',
@@ -1280,14 +1063,14 @@ async function seedActivities(users, projects, tasks) {
       });
     }
   }
-  
+
   console.log('Activity logs created successfully');
 }
 
 // Seed task attachments
 async function seedTaskAttachments(tasks, users) {
   console.log('Creating task attachments...');
-  
+
   const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
   const attachmentTypes = [
     { fileType: 'png', size: 512 * 1024 },
@@ -1296,18 +1079,18 @@ async function seedTaskAttachments(tasks, users) {
     { fileType: 'docx', size: 1536 * 1024 },
     { fileType: 'xlsx', size: 256 * 1024 }
   ];
-  
+
   // Only add attachments to some tasks
   const tasksWithAttachments = tasks.filter(() => Math.random() > 0.7);
-  
+
   for (const task of tasksWithAttachments) {
     const attachmentCount = 1 + Math.floor(Math.random() * 3);
-    
+
     for (let i = 0; i < attachmentCount; i++) {
       const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
       const attachmentType = attachmentTypes[Math.floor(Math.random() * attachmentTypes.length)];
       const filename = `attachment_${task.id}_${i + 1}.${attachmentType.fileType}`;
-      
+
       await prisma.taskAttachment.create({
         data: {
           filename,
@@ -1319,7 +1102,7 @@ async function seedTaskAttachments(tasks, users) {
         }
       });
     }
-    
+
     console.log(`Created ${attachmentCount} attachments for task "${task.title}"`);
   }
 }
