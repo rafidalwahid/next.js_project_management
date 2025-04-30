@@ -22,7 +22,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
     const isProfile = req.nextUrl.searchParams.get('profile') === 'true';
 
     // Check if user has permission to view this user
@@ -215,7 +216,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to update this user
     // Users can update their own profile, admins can update any profile
@@ -272,7 +274,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
 
     // Only admins can delete users
     if (session.user.role !== 'admin') {

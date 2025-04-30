@@ -178,7 +178,6 @@ export const getUserTeamMemberships = cache(async (
             id: true,
             title: true,
             description: true,
-            status: true,
             dueDate: true,
             createdAt: true,
             createdBy: {
@@ -263,5 +262,3 @@ export const isUserProjectMember = cache(async (
     return false;
   }
 });
-
-// getUserProjectRole function removed as we no longer have project roles

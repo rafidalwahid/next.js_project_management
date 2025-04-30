@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { isSameDay, differenceInHours, isAfter, isBefore } from "date-fns";
+
+// Constants - keep consistent with other attendance endpoints
+const MAX_WORKING_HOURS_PER_DAY = 12;
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,40 +66,56 @@ export async function POST(req: NextRequest) {
 
     // Calculate total hours if both check-in and check-out times are provided
     let totalHours = attendance.totalHours;
-    if (checkInTime && checkOutTime) {
-      const checkIn = new Date(checkInTime);
-      const checkOut = new Date(checkOutTime);
-      
-      // Validate dates
-      if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
-        return NextResponse.json(
-          { error: "Invalid date format" },
-          { status: 400 }
-        );
-      }
-      
-      // Ensure check-out is after check-in
-      if (checkOut <= checkIn) {
+    let newCheckInTime = checkInTime ? new Date(checkInTime) : new Date(attendance.checkInTime);
+    let newCheckOutTime = checkOutTime ? new Date(checkOutTime) : (attendance.checkOutTime ? new Date(attendance.checkOutTime) : null);
+
+    // Validate dates
+    if (isNaN(newCheckInTime.getTime()) || (newCheckOutTime && isNaN(newCheckOutTime.getTime()))) {
+      return NextResponse.json(
+        { error: "Invalid date format" },
+        { status: 400 }
+      );
+    }
+    
+    // If check-out time is provided, ensure it's after check-in
+    if (newCheckOutTime) {
+      if (isBefore(newCheckOutTime, newCheckInTime)) {
         return NextResponse.json(
           { error: "Check-out time must be after check-in time" },
           { status: 400 }
         );
       }
       
-      // Calculate hours (limited to 24 hours per day)
-      const hoursDiff = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
-      totalHours = Math.min(hoursDiff, 24);
+      // Calculate hours with more precision
+      const hoursDiff = differenceInHours(newCheckOutTime, newCheckInTime);
+      const minutesDiff = (newCheckOutTime.getTime() - newCheckInTime.getTime()) % (1000 * 60 * 60) / (1000 * 60);
+      const calculatedHours = hoursDiff + (minutesDiff / 60);
+      
+      // Check if records span across multiple days
+      if (!isSameDay(newCheckInTime, newCheckOutTime)) {
+        return NextResponse.json(
+          { error: "Check-in and check-out must be on the same day" },
+          { status: 400 }
+        );
+      }
+      
+      // Apply consistent limits on working hours
+      totalHours = Math.min(calculatedHours, MAX_WORKING_HOURS_PER_DAY);
+    } else {
+      // If no check-out time, set total hours to null
+      totalHours = null;
     }
 
     // Update the attendance record
     const updatedAttendance = await prisma.attendance.update({
       where: { id: attendanceId },
       data: {
-        checkInTime: checkInTime ? new Date(checkInTime) : attendance.checkInTime,
-        checkOutTime: checkOutTime ? new Date(checkOutTime) : attendance.checkOutTime,
-        totalHours: parseFloat(totalHours.toFixed(2)),
+        checkInTime: newCheckInTime,
+        checkOutTime: newCheckOutTime,
+        totalHours: totalHours !== null ? parseFloat(totalHours.toFixed(2)) : null,
         adjustedById: session.user.id,
         adjustmentReason,
+        autoCheckout: false, // Reset auto-checkout flag since this is a manual adjustment
       },
     });
 

@@ -2,7 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { 
+  startOfWeek, 
+  endOfWeek, 
+  startOfMonth, 
+  endOfMonth, 
+  format, 
+  parseISO,
+  isSameDay,
+  addDays
+} from "date-fns";
+
+// Constants - keep consistent with other attendance endpoints
+const MAX_WORKING_HOURS_PER_DAY = 12;
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,11 +48,14 @@ export async function GET(req: NextRequest) {
       let periodStartDate, periodEndDate;
 
       if (period === "week") {
-        periodStartDate = startOfWeek(now);
-        periodEndDate = endOfWeek(now);
+        periodStartDate = startOfWeek(now, { weekStartsOn: 1 }); // Start week on Monday for consistency
+        periodEndDate = endOfWeek(now, { weekStartsOn: 1 });
       } else if (period === "month") {
         periodStartDate = startOfMonth(now);
         periodEndDate = endOfMonth(now);
+      } else if (period === "day") {
+        periodStartDate = new Date(now.setHours(0, 0, 0, 0));
+        periodEndDate = new Date(now.setHours(23, 59, 59, 999));
       }
 
       if (periodStartDate && periodEndDate) {
@@ -51,29 +66,32 @@ export async function GET(req: NextRequest) {
       }
     } else {
       // Add date filters if provided and no period specified
-      if (startDate) {
-        where.checkInTime = {
-          ...(where.checkInTime || {}),
-          gte: new Date(startDate),
-        };
-      }
-
-      if (endDate) {
-        where.checkInTime = {
-          ...(where.checkInTime || {}),
-          lte: new Date(endDate),
-        };
+      if (startDate || endDate) {
+        where.checkInTime = {};
+        
+        if (startDate) {
+          where.checkInTime.gte = new Date(startDate);
+        }
+        
+        if (endDate) {
+          // Include the full end date by setting time to end of day
+          const fullEndDate = new Date(endDate);
+          fullEndDate.setHours(23, 59, 59, 999);
+          where.checkInTime.lte = fullEndDate;
+        }
       }
     }
 
+    // Get total count for pagination first (for efficiency)
+    const totalCount = await prisma.attendance.count({ where });
+    
     // Get attendance records
-    // When grouping, we need to get all records to ensure proper grouping
     const attendanceRecords = await prisma.attendance.findMany({
       where,
       orderBy: {
         checkInTime: 'desc',
       },
-      // Only apply pagination when not grouping
+      // Apply pagination efficiently depending on grouping
       ...(groupBy ? {} : { skip, take: limit }),
       include: {
         project: {
@@ -93,175 +111,120 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Store the original records for non-grouped view
+    // Process records for individual view (apply pagination when not grouping)
     const paginatedRecords = groupBy
-      ? attendanceRecords.slice(skip, skip + limit)
+      ? attendanceRecords.slice(skip, Math.min(skip + limit, attendanceRecords.length))
       : attendanceRecords;
 
     // Group records if requested
-    let groupedRecords = null;
+    let groupedRecords = [];
     if (groupBy) {
-
-      // Debug the attendance records
-      console.log('Total attendance records:', attendanceRecords.length);
-
-      // Create a map to group records by day, week, or month
+      // Create a map to group records
       const groupMap = new Map();
 
-      // Print all record dates for debugging
-      console.log('All record dates:');
-      attendanceRecords.forEach(record => {
-        console.log(`Record ID: ${record.id}, Date: ${new Date(record.checkInTime).toISOString()}`);
-      });
-
+      // Process each record for grouping
       attendanceRecords.forEach(record => {
         try {
-          let groupKey = '';
+          // Skip records with invalid dates
           const date = new Date(record.checkInTime);
-
-          // Check if date is valid
           if (isNaN(date.getTime())) {
-            console.error('Invalid date:', record.checkInTime);
-            return; // Skip this record
+            return;
           }
 
+          // Generate appropriate group key based on groupBy parameter
+          let groupKey;
+          let displayLabel;
+          
           if (groupBy === 'day') {
             // Format: 2023-04-22
-            groupKey = date.toISOString().split('T')[0];
-            console.log(`Grouping record ${record.id} into day: ${groupKey}`);
-          } else if (groupBy === 'week') {
-            // Get the start and end of the week
-            const weekStart = startOfWeek(date, { weekStartsOn: 1 }); // Start week on Monday
+            groupKey = format(date, 'yyyy-MM-dd');
+            displayLabel = format(date, 'EEEE, MMMM d, yyyy');
+          } 
+          else if (groupBy === 'week') {
+            // Get the start and end of the week (starting Monday)
+            const weekStart = startOfWeek(date, { weekStartsOn: 1 });
             const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
             // Format: 2023-04-17 to 2023-04-23
-            groupKey = `${weekStart.toISOString().split('T')[0]} to ${weekEnd.toISOString().split('T')[0]}`;
-            console.log(`Grouping record ${record.id} into week: ${groupKey}`);
-          } else if (groupBy === 'month') {
+            groupKey = format(weekStart, 'yyyy-MM-dd');
+            displayLabel = `Week of ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+          } 
+          else if (groupBy === 'month') {
             // Format: 2023-04 (Year-Month)
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            groupKey = `${year}-${month}`;
-            console.log(`Grouping record ${record.id} into month: ${groupKey}`);
-          } else {
+            groupKey = format(date, 'yyyy-MM');
+            displayLabel = format(date, 'MMMM yyyy');
+          } 
+          else {
             // Default fallback
             groupKey = 'unknown';
+            displayLabel = 'Unknown Period';
           }
 
-          // Add the record to the appropriate group
+          // Create group if it doesn't exist yet
           if (!groupMap.has(groupKey)) {
             groupMap.set(groupKey, {
               period: groupKey,
+              displayLabel,
               records: [],
               totalHours: 0,
               checkInCount: 0,
+              uniqueDates: new Set(),
             });
           }
 
+          // Add record to its group
           const group = groupMap.get(groupKey);
           group.records.push(record);
-
-          // Add hours, but ensure we don't exceed 24 hours per day
-          // If this is a day grouping, limit total hours to 24
-          if (groupBy === 'day') {
-            group.totalHours = Math.min(group.totalHours + (record.totalHours || 0), 24);
-          } else {
-            // For week/month, we'll still add the hours but ensure each record doesn't exceed 24h
-            group.totalHours += Math.min(record.totalHours || 0, 24);
+          
+          // Track unique dates for accurate daily averaging
+          group.uniqueDates.add(format(date, 'yyyy-MM-dd'));
+          
+          // Add hours with the consistent MAX_WORKING_HOURS_PER_DAY limit per record
+          if (record.totalHours) {
+            group.totalHours += Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);
           }
-
+          
           group.checkInCount += 1;
-        } catch (error) {
-          console.error('Error processing record for grouping:', error, record);
+        } 
+        catch (error) {
           // Skip this record on error
         }
       });
 
-      // Convert the map to an array
-      groupedRecords = Array.from(groupMap.values());
-
-      // Calculate additional stats for each group
-      groupedRecords = groupedRecords.map(group => {
-        // For day grouping, average is just the total (since it's one day)
-        // For week/month, calculate based on unique days with records
-        let averageHoursPerDay;
-
-        if (groupBy === 'day') {
-          averageHoursPerDay = group.totalHours;
-        } else {
-          // Count unique days in this group
-          const uniqueDays = new Set(
-            group.records.map(record =>
-              new Date(record.checkInTime).toISOString().split('T')[0]
-            )
-          ).size;
-
-          // Calculate average hours per day based on unique days
-          averageHoursPerDay = uniqueDays > 0
-            ? group.totalHours / uniqueDays
-            : group.totalHours;
-        }
-
+      // Convert the map to an array with calculated stats
+      const tempGroupedRecords = Array.from(groupMap.values()).map(group => {
+        const uniqueDaysCount = group.uniqueDates.size;
+        
+        // Calculate average hours per day based on unique days with activity
+        const averageHoursPerDay = uniqueDaysCount > 0
+          ? group.totalHours / uniqueDaysCount
+          : 0;
+        
+        // Clean up the group object before returning
+        const { uniqueDates, ...cleanGroup } = group;
+        
         return {
-          ...group,
+          ...cleanGroup,
+          uniqueDaysCount,
           totalHours: parseFloat(group.totalHours.toFixed(2)),
           averageHoursPerDay: parseFloat(averageHoursPerDay.toFixed(2))
         };
       });
 
       // Sort by date (newest first)
-      try {
-        groupedRecords.sort((a, b) => {
-          if (groupBy === 'month') {
-            // For month grouping, compare the year-month strings directly
-            return b.period.localeCompare(a.period);
-          } else if (groupBy === 'week') {
-            // For week grouping, compare the start dates
-            const dateA = new Date(a.period.split(' ')[0]);
-            const dateB = new Date(b.period.split(' ')[0]);
-
-            // Check if dates are valid
-            if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-            if (isNaN(dateA.getTime())) return 1; // Invalid dates go to the end
-            if (isNaN(dateB.getTime())) return -1;
-
-            return dateB.getTime() - dateA.getTime();
-          } else {
-            // For day grouping or any other, compare the full dates
-            const dateA = new Date(a.period);
-            const dateB = new Date(b.period);
-
-            // Check if dates are valid
-            if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-            if (isNaN(dateA.getTime())) return 1; // Invalid dates go to the end
-            if (isNaN(dateB.getTime())) return -1;
-
-            return dateB.getTime() - dateA.getTime();
-          }
-        });
-      } catch (error) {
-        console.error('Error sorting grouped records:', error);
-        // Don't change the order if sorting fails
-      }
-
-      // Debug the grouped records
-      console.log('Grouped records count:', groupedRecords.length);
-      groupedRecords.forEach(group => {
-        console.log(`Group ${group.period}: ${group.records.length} records`);
+      tempGroupedRecords.sort((a, b) => {
+        // Compare the period strings (which are in sortable format)
+        return b.period.localeCompare(a.period);
       });
+
+      // Apply pagination to the grouped records
+      groupedRecords = tempGroupedRecords.slice(skip, skip + limit);
     }
 
-    // Get total count for pagination
-    const totalCount = await prisma.attendance.count({ where });
-
-    // Apply pagination to grouped records if needed
-    const paginatedGroupedRecords = groupBy
-      ? groupedRecords.slice(0, limit) // Just take the first 'limit' groups for now
-      : [];
-
+    // Return the response with both individual and grouped records
     return NextResponse.json({
-      attendanceRecords: paginatedRecords,
-      groupedRecords: groupBy ? paginatedGroupedRecords : [],
-      totalGroups: groupBy ? groupedRecords.length : null,
+      attendanceRecords: !groupBy ? paginatedRecords : [], // Only include if not grouping
+      groupedRecords: groupBy ? groupedRecords : [],
+      totalGroups: groupBy ? groupMap?.size || 0 : null,
       groupBy: groupBy || null,
       pagination: {
         total: totalCount,

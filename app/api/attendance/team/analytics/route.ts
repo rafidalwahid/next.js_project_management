@@ -2,7 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
-import { startOfDay, endOfDay, subDays, format } from "date-fns";
+import { 
+  startOfDay, 
+  endOfDay, 
+  subDays, 
+  format,
+  differenceInBusinessDays,
+  isSameDay
+} from "date-fns";
+
+// Constants - keep consistent with other attendance endpoints
+const MAX_WORKING_HOURS_PER_DAY = 12;
+const WORK_START_HOUR = 9; // 9:00 AM
+const LATE_THRESHOLD_MINUTES = 15; // 15 minutes grace period
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,7 +69,6 @@ export async function GET(req: NextRequest) {
     
     if (userIds.length === 0) {
       return NextResponse.json({
-        error: "No team members found",
         analytics: {
           totalMembers: 0,
           activeMembers: 0,
@@ -92,70 +103,110 @@ export async function GET(req: NextRequest) {
       }
     });
     
-    // Calculate team analytics
-    const totalHours = attendanceRecords.reduce((sum, record) => 
-      sum + (record.totalHours || 0), 0);
+    // Calculate business days in the period (excluding weekends)
+    const workingDays = differenceInBusinessDays(endDate, startDate) + 1;
+    
+    // Group records by user and day to handle multiple check-ins properly
+    const userDayHoursMap = new Map();
+    const userDayOnTimeMap = new Map();
+    const userDayPresenceMap = new Map();
+    
+    attendanceRecords.forEach(record => {
+      const userId = record.userId;
+      const recordDate = new Date(record.checkInTime);
+      const dateKey = format(recordDate, 'yyyy-MM-dd');
+      const userDayKey = `${userId}-${dateKey}`;
+      
+      // Track total hours (with cap) per user per day
+      if (record.totalHours) {
+        const cappedHours = Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);
+        
+        if (!userDayHoursMap.has(userDayKey)) {
+          userDayHoursMap.set(userDayKey, 0);
+        }
+        
+        userDayHoursMap.set(userDayKey, userDayHoursMap.get(userDayKey) + cappedHours);
+      }
+      
+      // Track user presence for this day
+      userDayPresenceMap.set(userDayKey, true);
+      
+      // Track if user was on time for this day
+      // Only use the earliest check-in for that user on that day
+      if (!userDayOnTimeMap.has(userDayKey)) {
+        const checkInHour = recordDate.getHours();
+        const checkInMinutes = recordDate.getMinutes();
+        
+        const isOnTime = (
+          checkInHour < WORK_START_HOUR || 
+          (checkInHour === WORK_START_HOUR && checkInMinutes <= LATE_THRESHOLD_MINUTES)
+        );
+        
+        userDayOnTimeMap.set(userDayKey, isOnTime);
+      }
+    });
+    
+    // Apply daily caps to total hours and calculate team-wide metrics
+    let teamTotalHours = 0;
+    Array.from(userDayHoursMap.entries()).forEach(([userDayKey, hours]) => {
+      // Apply daily hour cap
+      const cappedDayHours = Math.min(hours, MAX_WORKING_HOURS_PER_DAY);
+      teamTotalHours += cappedDayHours;
+    });
+    
+    // Calculate team-wide statistics
+    const totalAttendanceDays = userDayPresenceMap.size;
+    const totalOnTimeDays = Array.from(userDayOnTimeMap.values()).filter(Boolean).length;
     
     // Count unique active users (users with at least one attendance record)
     const activeUserIds = new Set(attendanceRecords.map(record => record.userId));
     const activeMembers = activeUserIds.size;
     
-    // Calculate attendance rate
-    const workingDays = Math.min(days, 22); // Assume max 22 working days in a month
-    const expectedAttendanceDays = userIds.length * workingDays;
-    
-    // Count unique user-day combinations
-    const userDayCombinations = new Set();
-    attendanceRecords.forEach(record => {
-      const day = format(new Date(record.checkInTime), "yyyy-MM-dd");
-      userDayCombinations.add(`${record.userId}-${day}`);
-    });
-    
+    // Calculate attendance rate: actual attendance days / potential working days
+    const expectedAttendanceDays = userIds.length * workingDays; 
     const attendanceRate = expectedAttendanceDays > 0 
-      ? (userDayCombinations.size / expectedAttendanceDays) * 100 
+      ? (totalAttendanceDays / expectedAttendanceDays) * 100 
       : 0;
     
-    // Calculate on-time rate (assuming 9 AM is the start time)
-    const workStartHour = 9;
-    let onTimeCount = 0;
-    
-    attendanceRecords.forEach(record => {
-      const checkInTime = new Date(record.checkInTime);
-      if (checkInTime.getHours() < workStartHour || 
-          (checkInTime.getHours() === workStartHour && checkInTime.getMinutes() <= 15)) {
-        onTimeCount++;
-      }
-    });
-    
-    const onTimeRate = attendanceRecords.length > 0 
-      ? (onTimeCount / attendanceRecords.length) * 100 
+    // Calculate on-time rate: days on time / days present
+    const onTimeRate = totalAttendanceDays > 0 
+      ? (totalOnTimeDays / totalAttendanceDays) * 100 
       : 0;
     
     // Calculate daily stats
     const dailyMap = new Map();
     
+    // Initialize with all days in range
     for (let i = 0; i < days; i++) {
       const day = subDays(endDate, i);
       const dayStr = format(day, "yyyy-MM-dd");
       dailyMap.set(dayStr, {
         date: dayStr,
+        displayDate: format(day, "MMM dd"),
         totalHours: 0,
         attendanceCount: 0,
         onTimeCount: 0
       });
     }
     
-    attendanceRecords.forEach(record => {
-      const day = format(new Date(record.checkInTime), "yyyy-MM-dd");
-      if (dailyMap.has(day)) {
-        const stats = dailyMap.get(day);
-        stats.totalHours += record.totalHours || 0;
-        stats.attendanceCount += 1;
+    // Collect daily statistics
+    Array.from(userDayPresenceMap.keys()).forEach(userDayKey => {
+      const dateKey = userDayKey.split('-').slice(1).join('-');
+      
+      if (dailyMap.has(dateKey)) {
+        const dayStats = dailyMap.get(dateKey);
+        dayStats.attendanceCount += 1;
         
-        const checkInTime = new Date(record.checkInTime);
-        if (checkInTime.getHours() < workStartHour || 
-            (checkInTime.getHours() === workStartHour && checkInTime.getMinutes() <= 15)) {
-          stats.onTimeCount += 1;
+        if (userDayOnTimeMap.get(userDayKey)) {
+          dayStats.onTimeCount += 1;
+        }
+        
+        // Get capped hours for this user-day
+        if (userDayHoursMap.has(userDayKey)) {
+          dayStats.totalHours += Math.min(
+            userDayHoursMap.get(userDayKey),
+            MAX_WORKING_HOURS_PER_DAY
+          );
         }
       }
     });
@@ -166,6 +217,7 @@ export async function GET(req: NextRequest) {
     // Calculate per-user stats
     const userStatsMap = new Map();
     
+    // Initialize stats for all users
     userIds.forEach(userId => {
       userStatsMap.set(userId, {
         userId,
@@ -174,69 +226,89 @@ export async function GET(req: NextRequest) {
         image: null,
         totalHours: 0,
         attendanceDays: 0,
-        onTimeCount: 0,
-        averageHoursPerDay: 0,
+        onTimeDays: 0,
+        lateDays: 0,
         attendanceRate: 0,
-        onTimeRate: 0
+        onTimeRate: 0,
+        days: new Set()
       });
     });
     
+    // Process attendance records for per-user statistics
     attendanceRecords.forEach(record => {
       const stats = userStatsMap.get(record.userId);
+      
       if (stats) {
+        // Set user info
         stats.name = record.user.name || "";
         stats.email = record.user.email;
         stats.image = record.user.image;
-        stats.totalHours += record.totalHours || 0;
         
-        // Count unique days
-        const day = format(new Date(record.checkInTime), "yyyy-MM-dd");
-        if (!stats.days) stats.days = new Set();
-        stats.days.add(day);
+        // Track unique days
+        const dateKey = format(new Date(record.checkInTime), "yyyy-MM-dd");
+        stats.days.add(dateKey);
+      }
+    });
+    
+    // Calculate per-user aggregated statistics 
+    Array.from(userDayHoursMap.entries()).forEach(([userDayKey, hours]) => {
+      const [userId, dateKey] = userDayKey.split('-');
+      const stats = userStatsMap.get(userId);
+      
+      if (stats) {
+        stats.totalHours += Math.min(hours, MAX_WORKING_HOURS_PER_DAY);
         
-        const checkInTime = new Date(record.checkInTime);
-        if (checkInTime.getHours() < workStartHour || 
-            (checkInTime.getHours() === workStartHour && checkInTime.getMinutes() <= 15)) {
-          stats.onTimeCount += 1;
+        // Count if this day was on time
+        if (userDayOnTimeMap.get(userDayKey)) {
+          stats.onTimeDays += 1;
+        } else {
+          stats.lateDays += 1;
         }
       }
     });
     
-    // Calculate derived stats for each user
+    // Finalize user statistics
     const userStats = Array.from(userStatsMap.values()).map(stats => {
-      const attendanceDays = stats.days ? stats.days.size : 0;
-      const recordCount = attendanceRecords.filter(r => r.userId === stats.userId).length;
+      const attendanceDays = stats.days.size;
+      
+      // Clean up internal data structures
+      const { days, ...cleanStats } = stats;
       
       return {
-        userId: stats.userId,
-        name: stats.name,
-        email: stats.email,
-        image: stats.image,
-        totalHours: parseFloat(stats.totalHours.toFixed(2)),
+        ...cleanStats,
         attendanceDays,
+        totalHours: parseFloat(stats.totalHours.toFixed(2)),
         averageHoursPerDay: attendanceDays > 0 
           ? parseFloat((stats.totalHours / attendanceDays).toFixed(2)) 
           : 0,
         attendanceRate: parseFloat(((attendanceDays / workingDays) * 100).toFixed(2)),
-        onTimeCount: stats.onTimeCount,
-        onTimeRate: recordCount > 0 
-          ? parseFloat(((stats.onTimeCount / recordCount) * 100).toFixed(2)) 
+        onTimeRate: attendanceDays > 0 
+          ? parseFloat(((stats.onTimeDays / attendanceDays) * 100).toFixed(2)) 
           : 0
       };
-    }).sort((a, b) => b.totalHours - a.totalHours);
+    }).sort((a, b) => b.totalHours - a.totalHours); // Sort by total hours (most to least)
+    
+    // Calculate team-wide average hours per day
+    const averageHoursPerDay = activeMembers > 0 && workingDays > 0
+      ? parseFloat((teamTotalHours / (activeMembers * workingDays)).toFixed(2))
+      : 0;
     
     return NextResponse.json({
       analytics: {
         totalMembers: userIds.length,
         activeMembers,
-        totalHours: parseFloat(totalHours.toFixed(2)),
-        averageHoursPerDay: activeMembers > 0 
-          ? parseFloat((totalHours / (activeMembers * workingDays)).toFixed(2)) 
-          : 0,
+        totalHours: parseFloat(teamTotalHours.toFixed(2)),
+        averageHoursPerDay,
+        workingDays,
         attendanceRate: parseFloat(attendanceRate.toFixed(2)),
         onTimeRate: parseFloat(onTimeRate.toFixed(2)),
         dailyStats,
-        userStats
+        userStats,
+        period: {
+          days,
+          startDate: format(startDate, "yyyy-MM-dd"),
+          endDate: format(endDate, "yyyy-MM-dd")
+        }
       }
     });
   } catch (error: any) {

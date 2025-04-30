@@ -26,25 +26,25 @@ export type UserProfileData = {
   projects: Array<{
     id: string;
     title: string;
-    statusId: string;
-    status: {
+    statusId?: string;
+    status?: {
       id: string;
       name: string;
       color: string;
       description?: string | null;
       isDefault: boolean;
     };
-    startDate: string | null;
-    endDate: string | null;
-    role: string;
-    joinedAt: string;
+    startDate?: string | null;
+    endDate?: string | null;
+    role?: string;
+    joinedAt?: string;
   }>;
   tasks: Array<{
     id: string;
     title: string;
     priority: string;
-    dueDate: string | null;
-    project: {
+    dueDate?: string | null;
+    project?: {
       id: string;
       title: string;
     };
@@ -53,13 +53,13 @@ export type UserProfileData = {
     id: string;
     action: string;
     entityType: string;
-    description: string | null;
+    description?: string | null;
     createdAt: string;
-    project: {
+    project?: {
       id: string;
       title: string;
     } | null;
-    task: {
+    task?: {
       id: string;
       title: string;
     } | null;
@@ -72,6 +72,13 @@ export type UserProfileData = {
   };
 };
 
+const DEFAULT_STATS = {
+  projectCount: 0,
+  taskCount: 0,
+  teamCount: 0,
+  completionRate: '0%'
+};
+
 export function useUserProfile(userId: string, initialUser?: UserProfile) {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -82,12 +89,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     projects: [],
     tasks: [],
     activities: [],
-    stats: {
-      projectCount: 0,
-      taskCount: 0,
-      teamCount: 0,
-      completionRate: '0%'
-    }
+    stats: DEFAULT_STATS
   } : undefined;
 
   const {
@@ -101,34 +103,58 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
       try {
         const response = await userApi.getUserProfile(userId);
 
-        // Transform the API response to match our expected format
-        // The API returns the user data directly with stats property
-        // But our client code expects a 'user' property
-        if (!response || typeof response !== 'object') {
-          throw new Error('Invalid profile data received');
+        if (!response) {
+          throw new Error('No profile data received');
         }
 
-        // If response has already the correct structure, use it directly
-        if (response.user) {
-          return response as UserProfileData;
+        // Handle different response formats safely
+        let userData: UserProfile;
+        let projectsData: any[] = [];
+        let tasksData: any[] = [];
+        let activitiesData: any[] = [];
+        let statsData = { ...DEFAULT_STATS };
+
+        // Case 1: Response has already the expected structure with 'user' property
+        if (response.user && typeof response.user === 'object') {
+          userData = response.user as UserProfile;
+          projectsData = Array.isArray(response.projects) ? response.projects : [];
+          tasksData = Array.isArray(response.tasks) ? response.tasks : [];
+          activitiesData = Array.isArray(response.activities) ? response.activities : [];
+          statsData = response.stats || DEFAULT_STATS;
+        }
+        // Case 2: Response is the user object itself with projects, tasks as properties
+        else if (response.id) {
+          // Extract user data from the response
+          const { 
+            projects, 
+            tasks, 
+            activities, 
+            stats, 
+            ...userObject 
+          } = response;
+          
+          userData = userObject as UserProfile;
+          projectsData = Array.isArray(projects) ? projects : [];
+          tasksData = Array.isArray(tasks) ? tasks : [];
+          activitiesData = Array.isArray(activities) ? activities : [];
+          statsData = stats || DEFAULT_STATS;
+        }
+        // Case 3: Unexpected response format
+        else {
+          console.error('Invalid profile data structure:', response);
+          throw new Error('Invalid profile data structure');
         }
 
-        // Otherwise, transform it to match our expected structure
-        // Extract stats and other fields from the response
-        const { stats, projects, tasks, activities, ...userData } = response;
-
+        // Safety check: Ensure required fields exist
+        if (!userData.id) userData.id = userId;
+        
         return {
-          user: userData as UserProfile,
-          projects: projects || [],
-          tasks: tasks || [],
-          activities: activities || [],
-          stats: stats || {
-            projectCount: 0,
-            taskCount: 0,
-            teamCount: 0,
-            completionRate: '0%'
-          }
-        } as UserProfileData;
+          user: userData,
+          projects: projectsData,
+          tasks: tasksData,
+          activities: activitiesData,
+          stats: statsData,
+        };
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
@@ -177,7 +203,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     try {
       const response = await userApi.uploadProfileImage(userId, file);
       if (response && response.image) {
-        await updateProfile({ image: response.image });
+        await mutate();
         return response.image;
       }
       return null;
@@ -199,12 +225,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     projects: data?.projects || [],
     tasks: data?.tasks || [],
     activities: data?.activities || [],
-    stats: data?.stats || {
-      projectCount: 0,
-      taskCount: 0,
-      teamCount: 0,
-      completionRate: '0%'
-    },
+    stats: data?.stats || DEFAULT_STATS,
     isLoading,
     isError: error,
     isUpdating,

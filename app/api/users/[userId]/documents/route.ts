@@ -25,7 +25,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to view this user's documents
     // Users can view their own documents, admins can view any user's documents
@@ -67,7 +68,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to upload documents for this user
     // Users can upload documents to their own profile, admins can upload to any profile
@@ -153,7 +155,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    // Extract userId from params, ensuring it's properly awaited
+    const { userId } = await Promise.resolve(params);
     const { searchParams } = new URL(req.url);
     const documentId = searchParams.get('documentId');
 
