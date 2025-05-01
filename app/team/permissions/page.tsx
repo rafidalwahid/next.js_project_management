@@ -335,7 +335,8 @@ export default function RolePermissionsPage() {
 
   // Get role badge
   const getRoleBadge = (roleId: string) => {
-    const role = ROLES.find(r => r.id === roleId)
+    // Get role from SYSTEM_ROLES instead of ROLES
+    const role = SYSTEM_ROLES[roleId as keyof typeof SYSTEM_ROLES]
     if (!role) return null
 
     switch (roleId) {
@@ -412,7 +413,7 @@ export default function RolePermissionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ROLES.map((role) => (
+                    {allRoles.map((role) => (
                       <TableRow key={role.id}>
                         <TableCell>
                           <div className="flex items-center justify-center">
@@ -427,16 +428,20 @@ export default function RolePermissionsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {PERMISSION_BADGES[role.id as keyof typeof PERMISSION_BADGES].map((badge) => (
+                            {PERMISSION_BADGES[role.id as keyof typeof PERMISSION_BADGES]?.map((badge) => (
                               <Badge key={badge.id} className={`${badge.color} text-white`}>
                                 {badge.name}
                               </Badge>
-                            ))}
+                            )) || (
+                              <Badge variant="outline">
+                                Custom Role
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Badge variant="outline" className="rounded-full">
-                            {role.count}
+                            {role.count || 0}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -598,7 +603,7 @@ export default function RolePermissionsPage() {
                       <TableHead className="min-w-[150px]">Permission</TableHead>
                       {allRoles.map((role) => (
                         <TableHead key={role.id} className="text-center min-w-[100px]">
-                          {getRoleBadge(role.name)}
+                          {getRoleBadge(role.id)}
                         </TableHead>
                       ))}
                     </TableRow>

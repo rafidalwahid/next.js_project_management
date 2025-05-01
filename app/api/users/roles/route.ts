@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 import { PermissionService } from "@/lib/services/permission-service";
-import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 // GET /api/users/roles?userId={userId} - Get roles for a user
 export async function GET(req: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting roles for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+      if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' roles' },
           { status: 403 }
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -119,7 +119,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { PermissionService } from "@/lib/services/permission-service";
-import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS, PERMISSION_MATRIX } from "@/lib/permissions/unified-permission-system";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get the permission matrix
-    const permissionMatrix = PermissionSystem.getPermissionMatrix();
+    const permissionMatrix = PERMISSION_MATRIX;
 
     // Return the permission matrix
     return NextResponse.json(permissionMatrix);
@@ -51,7 +51,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -71,7 +71,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Update the permissions in the database
-    const success = await RolePermissionService.updateAllRolePermissions(permissions);
+    const success = await PermissionService.updateAllRolePermissions(permissions);
 
     if (!success) {
       return NextResponse.json(

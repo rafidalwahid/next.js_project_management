@@ -17,7 +17,7 @@ The system supports the following roles:
 
 Permissions are defined in code rather than in the database. This makes the system more maintainable and easier to understand.
 
-The complete list of permissions is defined in `lib/permissions/permission-system.ts`.
+The complete list of permissions is defined in `lib/permissions/unified-permission-system.ts`.
 
 ### Key Permission Categories
 
@@ -29,7 +29,7 @@ The complete list of permissions is defined in `lib/permissions/permission-syste
 
 ## Permission Matrix
 
-The permission matrix maps roles to permissions. This is defined in code in `lib/permissions/permission-system.ts`.
+The permission matrix maps roles to permissions. This is defined in code in `lib/permissions/unified-permission-system.ts`.
 
 For example:
 - Admins have all permissions
@@ -42,10 +42,10 @@ For example:
 ### Server-side
 
 ```typescript
-import { PermissionSystem, PERMISSIONS } from "@/lib/permissions/permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 // Check if a user has a specific permission
-const hasPermission = PermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
+const hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
 ```
 
 ### Client-side
@@ -56,7 +56,7 @@ import { usePermission } from "@/hooks/use-permission";
 // In a React component
 function MyComponent() {
   const canCreateProject = usePermission(PERMISSIONS.PROJECT_CREATION);
-  
+
   return (
     <div>
       {canCreateProject && <button>Create Project</button>}
@@ -84,7 +84,7 @@ function MyComponent() {
 
 To add a new permission:
 
-1. Add the permission to the `PERMISSIONS` object in `lib/permissions/permission-system.ts`
+1. Add the permission to the `PERMISSIONS` object in `lib/permissions/unified-permission-system.ts`
 2. Update the `PERMISSION_MATRIX` to assign the permission to the appropriate roles
 3. Use the permission in your code
 

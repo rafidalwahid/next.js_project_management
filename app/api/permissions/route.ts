@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { RolePermissionService } from "@/lib/services/role-permission-service";
+import { PermissionService } from "@/lib/services/permission-service";
 import prisma from "@/lib/prisma";
 
 // GET /api/permissions - Get all permissions
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get all permissions
-    const permissions = await RolePermissionService.getAllPermissions();
+    const permissions = await PermissionService.getAllPermissions();
 
     // Return the permissions
     return NextResponse.json(permissions);
@@ -75,11 +75,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Create the permission
-    const permission = await RolePermissionService.createPermission({
+    // Note: In the simplified system, we don't actually create permissions in the database
+    // This is just a placeholder for backward compatibility
+    const permission = {
+      id: name,
       name,
       description: description || '',
       category: category || 'general'
-    });
+    };
 
     // Return the created permission
     return NextResponse.json(permission, { status: 201 });

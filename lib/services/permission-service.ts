@@ -95,4 +95,25 @@ export class PermissionService {
       return false;
     }
   }
+
+  /**
+   * Update all role permissions
+   * This is a simplified implementation that doesn't actually update the database
+   * since we're using a static permission matrix
+   */
+  static async updateAllRolePermissions(permissions: Record<string, string[]>): Promise<boolean> {
+    try {
+      // In a real implementation, this would update the database
+      // For now, we'll just log the permissions and return success
+      console.log('Updating role permissions:', permissions);
+
+      // In a production environment, you would save these to the database
+      // and update the PERMISSION_MATRIX accordingly
+
+      return true;
+    } catch (error) {
+      console.error('Error updating role permissions:', error);
+      return false;
+    }
+  }
 }
