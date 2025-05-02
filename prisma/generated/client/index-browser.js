@@ -125,6 +125,7 @@ exports.Prisma.UserScalarFieldEnum = {
   image: 'image',
   password: 'password',
   role: 'role',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   lastLogin: 'lastLogin',
@@ -254,8 +255,6 @@ exports.Prisma.AttendanceScalarFieldEnum = {
   updatedAt: 'updatedAt',
   checkInLocationName: 'checkInLocationName',
   checkOutLocationName: 'checkOutLocationName',
-  adjustedById: 'adjustedById',
-  adjustmentReason: 'adjustmentReason',
   projectId: 'projectId',
   taskId: 'taskId'
 };
@@ -422,8 +421,6 @@ exports.Prisma.AttendanceOrderByRelevanceFieldEnum = {
   notes: 'notes',
   checkInLocationName: 'checkInLocationName',
   checkOutLocationName: 'checkOutLocationName',
-  adjustedById: 'adjustedById',
-  adjustmentReason: 'adjustmentReason',
   projectId: 'projectId',
   taskId: 'taskId'
 };

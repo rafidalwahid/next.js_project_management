@@ -2108,7 +2108,6 @@ export namespace Prisma {
   export type UserCountOutputType = {
     accounts: number
     activities: number
-    attendanceAdjustments: number
     attendanceRecords: number
     comments: number
     documents: number
@@ -2122,7 +2121,6 @@ export namespace Prisma {
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | UserCountOutputTypeCountAccountsArgs
     activities?: boolean | UserCountOutputTypeCountActivitiesArgs
-    attendanceAdjustments?: boolean | UserCountOutputTypeCountAttendanceAdjustmentsArgs
     attendanceRecords?: boolean | UserCountOutputTypeCountAttendanceRecordsArgs
     comments?: boolean | UserCountOutputTypeCountCommentsArgs
     documents?: boolean | UserCountOutputTypeCountDocumentsArgs
@@ -2156,13 +2154,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountActivitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ActivityWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountAttendanceAdjustmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AttendanceWhereInput
   }
 
   /**
@@ -2427,6 +2418,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
+    active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     lastLogin: Date | null
@@ -2446,6 +2438,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string | null
+    active: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     lastLogin: Date | null
@@ -2465,6 +2458,7 @@ export namespace Prisma {
     image: number
     password: number
     role: number
+    active: number
     createdAt: number
     updatedAt: number
     lastLogin: number
@@ -2486,6 +2480,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
@@ -2505,6 +2500,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
@@ -2524,6 +2520,7 @@ export namespace Prisma {
     image?: true
     password?: true
     role?: true
+    active?: true
     createdAt?: true
     updatedAt?: true
     lastLogin?: true
@@ -2616,6 +2613,7 @@ export namespace Prisma {
     image: string | null
     password: string | null
     role: string
+    active: boolean
     createdAt: Date
     updatedAt: Date
     lastLogin: Date | null
@@ -2652,6 +2650,7 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     lastLogin?: boolean
@@ -2663,7 +2662,6 @@ export namespace Prisma {
     skills?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
-    attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
@@ -2686,6 +2684,7 @@ export namespace Prisma {
     image?: boolean
     password?: boolean
     role?: boolean
+    active?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     lastLogin?: boolean
@@ -2697,11 +2696,10 @@ export namespace Prisma {
     skills?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "createdAt" | "updatedAt" | "lastLogin" | "bio" | "department" | "jobTitle" | "location" | "phone" | "skills", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "password" | "role" | "active" | "createdAt" | "updatedAt" | "lastLogin" | "bio" | "department" | "jobTitle" | "location" | "phone" | "skills", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     activities?: boolean | User$activitiesArgs<ExtArgs>
-    attendanceAdjustments?: boolean | User$attendanceAdjustmentsArgs<ExtArgs>
     attendanceRecords?: boolean | User$attendanceRecordsArgs<ExtArgs>
     attendanceSettings?: boolean | User$attendanceSettingsArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
@@ -2719,7 +2717,6 @@ export namespace Prisma {
     objects: {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       activities: Prisma.$ActivityPayload<ExtArgs>[]
-      attendanceAdjustments: Prisma.$AttendancePayload<ExtArgs>[]
       attendanceRecords: Prisma.$AttendancePayload<ExtArgs>[]
       attendanceSettings: Prisma.$AttendanceSettingsPayload<ExtArgs> | null
       comments: Prisma.$CommentPayload<ExtArgs>[]
@@ -2738,6 +2735,7 @@ export namespace Prisma {
       image: string | null
       password: string | null
       role: string
+      active: boolean
       createdAt: Date
       updatedAt: Date
       lastLogin: Date | null
@@ -3089,7 +3087,6 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activities<T extends User$activitiesArgs<ExtArgs> = {}>(args?: Subset<T, User$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    attendanceAdjustments<T extends User$attendanceAdjustmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceAdjustmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceRecords<T extends User$attendanceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attendanceSettings<T extends User$attendanceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, User$attendanceSettingsArgs<ExtArgs>>): Prisma__AttendanceSettingsClient<$Result.GetResult<Prisma.$AttendanceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     comments<T extends User$commentsArgs<ExtArgs> = {}>(args?: Subset<T, User$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3135,6 +3132,7 @@ export namespace Prisma {
     readonly image: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'String'>
+    readonly active: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly lastLogin: FieldRef<"User", 'DateTime'>
@@ -3532,30 +3530,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ActivityScalarFieldEnum | ActivityScalarFieldEnum[]
-  }
-
-  /**
-   * User.attendanceAdjustments
-   */
-  export type User$attendanceAdjustmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Attendance
-     */
-    select?: AttendanceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Attendance
-     */
-    omit?: AttendanceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AttendanceInclude<ExtArgs> | null
-    where?: AttendanceWhereInput
-    orderBy?: AttendanceOrderByWithRelationInput | AttendanceOrderByWithRelationInput[]
-    cursor?: AttendanceWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: AttendanceScalarFieldEnum | AttendanceScalarFieldEnum[]
   }
 
   /**
@@ -13018,8 +12992,6 @@ export namespace Prisma {
     updatedAt: Date | null
     checkInLocationName: string | null
     checkOutLocationName: string | null
-    adjustedById: string | null
-    adjustmentReason: string | null
     projectId: string | null
     taskId: string | null
   }
@@ -13043,8 +13015,6 @@ export namespace Prisma {
     updatedAt: Date | null
     checkInLocationName: string | null
     checkOutLocationName: string | null
-    adjustedById: string | null
-    adjustmentReason: string | null
     projectId: string | null
     taskId: string | null
   }
@@ -13068,8 +13038,6 @@ export namespace Prisma {
     updatedAt: number
     checkInLocationName: number
     checkOutLocationName: number
-    adjustedById: number
-    adjustmentReason: number
     projectId: number
     taskId: number
     _all: number
@@ -13111,8 +13079,6 @@ export namespace Prisma {
     updatedAt?: true
     checkInLocationName?: true
     checkOutLocationName?: true
-    adjustedById?: true
-    adjustmentReason?: true
     projectId?: true
     taskId?: true
   }
@@ -13136,8 +13102,6 @@ export namespace Prisma {
     updatedAt?: true
     checkInLocationName?: true
     checkOutLocationName?: true
-    adjustedById?: true
-    adjustmentReason?: true
     projectId?: true
     taskId?: true
   }
@@ -13161,8 +13125,6 @@ export namespace Prisma {
     updatedAt?: true
     checkInLocationName?: true
     checkOutLocationName?: true
-    adjustedById?: true
-    adjustmentReason?: true
     projectId?: true
     taskId?: true
     _all?: true
@@ -13273,8 +13235,6 @@ export namespace Prisma {
     updatedAt: Date
     checkInLocationName: string | null
     checkOutLocationName: string | null
-    adjustedById: string | null
-    adjustmentReason: string | null
     projectId: string | null
     taskId: string | null
     _count: AttendanceCountAggregateOutputType | null
@@ -13317,11 +13277,8 @@ export namespace Prisma {
     updatedAt?: boolean
     checkInLocationName?: boolean
     checkOutLocationName?: boolean
-    adjustedById?: boolean
-    adjustmentReason?: boolean
     projectId?: boolean
     taskId?: boolean
-    adjustedBy?: boolean | Attendance$adjustedByArgs<ExtArgs>
     project?: boolean | Attendance$projectArgs<ExtArgs>
     task?: boolean | Attendance$taskArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -13348,15 +13305,12 @@ export namespace Prisma {
     updatedAt?: boolean
     checkInLocationName?: boolean
     checkOutLocationName?: boolean
-    adjustedById?: boolean
-    adjustmentReason?: boolean
     projectId?: boolean
     taskId?: boolean
   }
 
-  export type AttendanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "checkInTime" | "checkOutTime" | "checkInLatitude" | "checkInLongitude" | "checkOutLatitude" | "checkOutLongitude" | "checkInIpAddress" | "checkOutIpAddress" | "checkInDeviceInfo" | "checkOutDeviceInfo" | "totalHours" | "notes" | "createdAt" | "updatedAt" | "checkInLocationName" | "checkOutLocationName" | "adjustedById" | "adjustmentReason" | "projectId" | "taskId", ExtArgs["result"]["attendance"]>
+  export type AttendanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "checkInTime" | "checkOutTime" | "checkInLatitude" | "checkInLongitude" | "checkOutLatitude" | "checkOutLongitude" | "checkInIpAddress" | "checkOutIpAddress" | "checkInDeviceInfo" | "checkOutDeviceInfo" | "totalHours" | "notes" | "createdAt" | "updatedAt" | "checkInLocationName" | "checkOutLocationName" | "projectId" | "taskId", ExtArgs["result"]["attendance"]>
   export type AttendanceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    adjustedBy?: boolean | Attendance$adjustedByArgs<ExtArgs>
     project?: boolean | Attendance$projectArgs<ExtArgs>
     task?: boolean | Attendance$taskArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -13365,7 +13319,6 @@ export namespace Prisma {
   export type $AttendancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Attendance"
     objects: {
-      adjustedBy: Prisma.$UserPayload<ExtArgs> | null
       project: Prisma.$ProjectPayload<ExtArgs> | null
       task: Prisma.$TaskPayload<ExtArgs> | null
       user: Prisma.$UserPayload<ExtArgs>
@@ -13389,8 +13342,6 @@ export namespace Prisma {
       updatedAt: Date
       checkInLocationName: string | null
       checkOutLocationName: string | null
-      adjustedById: string | null
-      adjustmentReason: string | null
       projectId: string | null
       taskId: string | null
     }, ExtArgs["result"]["attendance"]>
@@ -13733,7 +13684,6 @@ export namespace Prisma {
    */
   export interface Prisma__AttendanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    adjustedBy<T extends Attendance$adjustedByArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$adjustedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     project<T extends Attendance$projectArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$projectArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     task<T extends Attendance$taskArgs<ExtArgs> = {}>(args?: Subset<T, Attendance$taskArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -13784,8 +13734,6 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Attendance", 'DateTime'>
     readonly checkInLocationName: FieldRef<"Attendance", 'String'>
     readonly checkOutLocationName: FieldRef<"Attendance", 'String'>
-    readonly adjustedById: FieldRef<"Attendance", 'String'>
-    readonly adjustmentReason: FieldRef<"Attendance", 'String'>
     readonly projectId: FieldRef<"Attendance", 'String'>
     readonly taskId: FieldRef<"Attendance", 'String'>
   }
@@ -14128,25 +14076,6 @@ export namespace Prisma {
      * Limit how many Attendances to delete.
      */
     limit?: number
-  }
-
-  /**
-   * Attendance.adjustedBy
-   */
-  export type Attendance$adjustedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    where?: UserWhereInput
   }
 
   /**
@@ -19227,6 +19156,7 @@ export namespace Prisma {
     image: 'image',
     password: 'password',
     role: 'role',
+    active: 'active',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     lastLogin: 'lastLogin',
@@ -19386,8 +19316,6 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     checkInLocationName: 'checkInLocationName',
     checkOutLocationName: 'checkOutLocationName',
-    adjustedById: 'adjustedById',
-    adjustmentReason: 'adjustmentReason',
     projectId: 'projectId',
     taskId: 'taskId'
   };
@@ -19608,8 +19536,6 @@ export namespace Prisma {
     notes: 'notes',
     checkInLocationName: 'checkInLocationName',
     checkOutLocationName: 'checkOutLocationName',
-    adjustedById: 'adjustedById',
-    adjustmentReason: 'adjustmentReason',
     projectId: 'projectId',
     taskId: 'taskId'
   };
@@ -19696,6 +19622,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -19706,13 +19639,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
   /**
    * Deep Input Types
@@ -19730,6 +19656,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
+    active?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -19741,7 +19668,6 @@ export namespace Prisma {
     skills?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     activities?: ActivityListRelationFilter
-    attendanceAdjustments?: AttendanceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
     comments?: CommentListRelationFilter
@@ -19761,6 +19687,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
@@ -19772,7 +19699,6 @@ export namespace Prisma {
     skills?: SortOrderInput | SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     activities?: ActivityOrderByRelationAggregateInput
-    attendanceAdjustments?: AttendanceOrderByRelationAggregateInput
     attendanceRecords?: AttendanceOrderByRelationAggregateInput
     attendanceSettings?: AttendanceSettingsOrderByWithRelationInput
     comments?: CommentOrderByRelationAggregateInput
@@ -19796,6 +19722,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     password?: StringNullableFilter<"User"> | string | null
     role?: StringFilter<"User"> | string
+    active?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -19807,7 +19734,6 @@ export namespace Prisma {
     skills?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     activities?: ActivityListRelationFilter
-    attendanceAdjustments?: AttendanceListRelationFilter
     attendanceRecords?: AttendanceListRelationFilter
     attendanceSettings?: XOR<AttendanceSettingsNullableScalarRelationFilter, AttendanceSettingsWhereInput> | null
     comments?: CommentListRelationFilter
@@ -19827,6 +19753,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     password?: SortOrderInput | SortOrder
     role?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
@@ -19852,6 +19779,7 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: StringWithAggregatesFilter<"User"> | string
+    active?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -20585,11 +20513,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
     checkInLocationName?: StringNullableFilter<"Attendance"> | string | null
     checkOutLocationName?: StringNullableFilter<"Attendance"> | string | null
-    adjustedById?: StringNullableFilter<"Attendance"> | string | null
-    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     projectId?: StringNullableFilter<"Attendance"> | string | null
     taskId?: StringNullableFilter<"Attendance"> | string | null
-    adjustedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     project?: XOR<ProjectNullableScalarRelationFilter, ProjectWhereInput> | null
     task?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -20614,11 +20539,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checkInLocationName?: SortOrderInput | SortOrder
     checkOutLocationName?: SortOrderInput | SortOrder
-    adjustedById?: SortOrderInput | SortOrder
-    adjustmentReason?: SortOrderInput | SortOrder
     projectId?: SortOrderInput | SortOrder
     taskId?: SortOrderInput | SortOrder
-    adjustedBy?: UserOrderByWithRelationInput
     project?: ProjectOrderByWithRelationInput
     task?: TaskOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
@@ -20647,11 +20569,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
     checkInLocationName?: StringNullableFilter<"Attendance"> | string | null
     checkOutLocationName?: StringNullableFilter<"Attendance"> | string | null
-    adjustedById?: StringNullableFilter<"Attendance"> | string | null
-    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     projectId?: StringNullableFilter<"Attendance"> | string | null
     taskId?: StringNullableFilter<"Attendance"> | string | null
-    adjustedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     project?: XOR<ProjectNullableScalarRelationFilter, ProjectWhereInput> | null
     task?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -20676,8 +20595,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checkInLocationName?: SortOrderInput | SortOrder
     checkOutLocationName?: SortOrderInput | SortOrder
-    adjustedById?: SortOrderInput | SortOrder
-    adjustmentReason?: SortOrderInput | SortOrder
     projectId?: SortOrderInput | SortOrder
     taskId?: SortOrderInput | SortOrder
     _count?: AttendanceCountOrderByAggregateInput
@@ -20709,8 +20626,6 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Attendance"> | Date | string
     checkInLocationName?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
     checkOutLocationName?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
-    adjustedById?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
-    adjustmentReason?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
     projectId?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
     taskId?: StringNullableWithAggregatesFilter<"Attendance"> | string | null
   }
@@ -21111,6 +21026,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -21122,7 +21038,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -21142,6 +21057,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -21153,7 +21069,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -21173,6 +21088,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21184,7 +21100,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -21204,6 +21119,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21215,7 +21131,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -21235,6 +21150,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -21254,6 +21170,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21273,6 +21190,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22035,8 +21953,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
     project?: ProjectCreateNestedOneWithoutAttendancesInput
     task?: TaskCreateNestedOneWithoutAttendancesInput
     user: UserCreateNestedOneWithoutAttendanceRecordsInput
@@ -22061,8 +21977,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
     taskId?: string | null
   }
@@ -22085,8 +21999,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
     project?: ProjectUpdateOneWithoutAttendancesNestedInput
     task?: TaskUpdateOneWithoutAttendancesNestedInput
     user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
@@ -22111,8 +22023,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -22136,8 +22046,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
     taskId?: string | null
   }
@@ -22160,7 +22068,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AttendanceUncheckedUpdateManyInput = {
@@ -22182,8 +22089,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -22626,6 +22531,11 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -22761,6 +22671,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
@@ -22780,6 +22691,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
@@ -22799,6 +22711,7 @@ export namespace Prisma {
     image?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    active?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lastLogin?: SortOrder
@@ -22858,6 +22771,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -23141,11 +23062,6 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -23215,14 +23131,6 @@ export namespace Prisma {
 
   export type ProjectStatusSumOrderByAggregateInput = {
     order?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -23437,11 +23345,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type UserNullableScalarRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
-  }
-
   export type ProjectNullableScalarRelationFilter = {
     is?: ProjectWhereInput | null
     isNot?: ProjectWhereInput | null
@@ -23472,8 +23375,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checkInLocationName?: SortOrder
     checkOutLocationName?: SortOrder
-    adjustedById?: SortOrder
-    adjustmentReason?: SortOrder
     projectId?: SortOrder
     taskId?: SortOrder
   }
@@ -23505,8 +23406,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checkInLocationName?: SortOrder
     checkOutLocationName?: SortOrder
-    adjustedById?: SortOrder
-    adjustmentReason?: SortOrder
     projectId?: SortOrder
     taskId?: SortOrder
   }
@@ -23530,8 +23429,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checkInLocationName?: SortOrder
     checkOutLocationName?: SortOrder
-    adjustedById?: SortOrder
-    adjustmentReason?: SortOrder
     projectId?: SortOrder
     taskId?: SortOrder
   }
@@ -23813,13 +23710,6 @@ export namespace Prisma {
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
   }
 
-  export type AttendanceCreateNestedManyWithoutAdjustedByInput = {
-    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
-    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
-    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
-    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-  }
-
   export type AttendanceCreateNestedManyWithoutUserInput = {
     create?: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput> | AttendanceCreateWithoutUserInput[] | AttendanceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutUserInput | AttendanceCreateOrConnectWithoutUserInput[]
@@ -23896,13 +23786,6 @@ export namespace Prisma {
     connect?: ActivityWhereUniqueInput | ActivityWhereUniqueInput[]
   }
 
-  export type AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput = {
-    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
-    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
-    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
-    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-  }
-
   export type AttendanceUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput> | AttendanceCreateWithoutUserInput[] | AttendanceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutUserInput | AttendanceCreateOrConnectWithoutUserInput[]
@@ -23977,6 +23860,10 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -24007,20 +23894,6 @@ export namespace Prisma {
     update?: ActivityUpdateWithWhereUniqueWithoutUserInput | ActivityUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityUpdateManyWithWhereWithoutUserInput | ActivityUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
-  }
-
-  export type AttendanceUpdateManyWithoutAdjustedByNestedInput = {
-    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
-    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
-    upsert?: AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput | AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput[]
-    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
-    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    update?: AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput | AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput[]
-    updateMany?: AttendanceUpdateManyWithWhereWithoutAdjustedByInput | AttendanceUpdateManyWithWhereWithoutAdjustedByInput[]
-    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
   }
 
   export type AttendanceUpdateManyWithoutUserNestedInput = {
@@ -24171,20 +24044,6 @@ export namespace Prisma {
     update?: ActivityUpdateWithWhereUniqueWithoutUserInput | ActivityUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityUpdateManyWithWhereWithoutUserInput | ActivityUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityScalarWhereInput | ActivityScalarWhereInput[]
-  }
-
-  export type AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput = {
-    create?: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput> | AttendanceCreateWithoutAdjustedByInput[] | AttendanceUncheckedCreateWithoutAdjustedByInput[]
-    connectOrCreate?: AttendanceCreateOrConnectWithoutAdjustedByInput | AttendanceCreateOrConnectWithoutAdjustedByInput[]
-    upsert?: AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput | AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput[]
-    createMany?: AttendanceCreateManyAdjustedByInputEnvelope
-    set?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    disconnect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    delete?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    connect?: AttendanceWhereUniqueInput | AttendanceWhereUniqueInput[]
-    update?: AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput | AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput[]
-    updateMany?: AttendanceUpdateManyWithWhereWithoutAdjustedByInput | AttendanceUpdateManyWithWhereWithoutAdjustedByInput[]
-    deleteMany?: AttendanceScalarWhereInput | AttendanceScalarWhereInput[]
   }
 
   export type AttendanceUncheckedUpdateManyWithoutUserNestedInput = {
@@ -24639,10 +24498,6 @@ export namespace Prisma {
     connect?: TaskWhereUniqueInput | TaskWhereUniqueInput[]
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -25055,12 +24910,6 @@ export namespace Prisma {
     update?: XOR<XOR<ProjectUpdateToOneWithWhereWithoutEventsInput, ProjectUpdateWithoutEventsInput>, ProjectUncheckedUpdateWithoutEventsInput>
   }
 
-  export type UserCreateNestedOneWithoutAttendanceAdjustmentsInput = {
-    create?: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAttendanceAdjustmentsInput
-    connect?: UserWhereUniqueInput
-  }
-
   export type ProjectCreateNestedOneWithoutAttendancesInput = {
     create?: XOR<ProjectCreateWithoutAttendancesInput, ProjectUncheckedCreateWithoutAttendancesInput>
     connectOrCreate?: ProjectCreateOrConnectWithoutAttendancesInput
@@ -25077,16 +24926,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAttendanceRecordsInput, UserUncheckedCreateWithoutAttendanceRecordsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAttendanceRecordsInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type UserUpdateOneWithoutAttendanceAdjustmentsNestedInput = {
-    create?: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAttendanceAdjustmentsInput
-    upsert?: UserUpsertWithoutAttendanceAdjustmentsInput
-    disconnect?: UserWhereInput | boolean
-    delete?: UserWhereInput | boolean
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAttendanceAdjustmentsInput, UserUpdateWithoutAttendanceAdjustmentsInput>, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
   }
 
   export type ProjectUpdateOneWithoutAttendancesNestedInput = {
@@ -25296,6 +25135,11 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -25379,6 +25223,14 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -25434,19 +25286,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -25562,64 +25401,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type AttendanceCreateWithoutAdjustedByInput = {
-    id?: string
-    checkInTime?: Date | string
-    checkOutTime?: Date | string | null
-    checkInLatitude?: number | null
-    checkInLongitude?: number | null
-    checkOutLatitude?: number | null
-    checkOutLongitude?: number | null
-    checkInIpAddress?: string | null
-    checkOutIpAddress?: string | null
-    checkInDeviceInfo?: string | null
-    checkOutDeviceInfo?: string | null
-    totalHours?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    checkInLocationName?: string | null
-    checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    project?: ProjectCreateNestedOneWithoutAttendancesInput
-    task?: TaskCreateNestedOneWithoutAttendancesInput
-    user: UserCreateNestedOneWithoutAttendanceRecordsInput
-  }
-
-  export type AttendanceUncheckedCreateWithoutAdjustedByInput = {
-    id?: string
-    userId: string
-    checkInTime?: Date | string
-    checkOutTime?: Date | string | null
-    checkInLatitude?: number | null
-    checkInLongitude?: number | null
-    checkOutLatitude?: number | null
-    checkOutLongitude?: number | null
-    checkInIpAddress?: string | null
-    checkOutIpAddress?: string | null
-    checkInDeviceInfo?: string | null
-    checkOutDeviceInfo?: string | null
-    totalHours?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    checkInLocationName?: string | null
-    checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    projectId?: string | null
-    taskId?: string | null
-  }
-
-  export type AttendanceCreateOrConnectWithoutAdjustedByInput = {
-    where: AttendanceWhereUniqueInput
-    create: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput>
-  }
-
-  export type AttendanceCreateManyAdjustedByInputEnvelope = {
-    data: AttendanceCreateManyAdjustedByInput | AttendanceCreateManyAdjustedByInput[]
-    skipDuplicates?: boolean
-  }
-
   export type AttendanceCreateWithoutUserInput = {
     id?: string
     checkInTime?: Date | string
@@ -25638,8 +25419,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
     project?: ProjectCreateNestedOneWithoutAttendancesInput
     task?: TaskCreateNestedOneWithoutAttendancesInput
   }
@@ -25662,8 +25441,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
     taskId?: string | null
   }
@@ -25980,20 +25757,20 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Activity"> | Date | string
   }
 
-  export type AttendanceUpsertWithWhereUniqueWithoutAdjustedByInput = {
+  export type AttendanceUpsertWithWhereUniqueWithoutUserInput = {
     where: AttendanceWhereUniqueInput
-    update: XOR<AttendanceUpdateWithoutAdjustedByInput, AttendanceUncheckedUpdateWithoutAdjustedByInput>
-    create: XOR<AttendanceCreateWithoutAdjustedByInput, AttendanceUncheckedCreateWithoutAdjustedByInput>
+    update: XOR<AttendanceUpdateWithoutUserInput, AttendanceUncheckedUpdateWithoutUserInput>
+    create: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput>
   }
 
-  export type AttendanceUpdateWithWhereUniqueWithoutAdjustedByInput = {
+  export type AttendanceUpdateWithWhereUniqueWithoutUserInput = {
     where: AttendanceWhereUniqueInput
-    data: XOR<AttendanceUpdateWithoutAdjustedByInput, AttendanceUncheckedUpdateWithoutAdjustedByInput>
+    data: XOR<AttendanceUpdateWithoutUserInput, AttendanceUncheckedUpdateWithoutUserInput>
   }
 
-  export type AttendanceUpdateManyWithWhereWithoutAdjustedByInput = {
+  export type AttendanceUpdateManyWithWhereWithoutUserInput = {
     where: AttendanceScalarWhereInput
-    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutAdjustedByInput>
+    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutUserInput>
   }
 
   export type AttendanceScalarWhereInput = {
@@ -26018,26 +25795,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Attendance"> | Date | string
     checkInLocationName?: StringNullableFilter<"Attendance"> | string | null
     checkOutLocationName?: StringNullableFilter<"Attendance"> | string | null
-    adjustedById?: StringNullableFilter<"Attendance"> | string | null
-    adjustmentReason?: StringNullableFilter<"Attendance"> | string | null
     projectId?: StringNullableFilter<"Attendance"> | string | null
     taskId?: StringNullableFilter<"Attendance"> | string | null
-  }
-
-  export type AttendanceUpsertWithWhereUniqueWithoutUserInput = {
-    where: AttendanceWhereUniqueInput
-    update: XOR<AttendanceUpdateWithoutUserInput, AttendanceUncheckedUpdateWithoutUserInput>
-    create: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput>
-  }
-
-  export type AttendanceUpdateWithWhereUniqueWithoutUserInput = {
-    where: AttendanceWhereUniqueInput
-    data: XOR<AttendanceUpdateWithoutUserInput, AttendanceUncheckedUpdateWithoutUserInput>
-  }
-
-  export type AttendanceUpdateManyWithWhereWithoutUserInput = {
-    where: AttendanceScalarWhereInput
-    data: XOR<AttendanceUpdateManyMutationInput, AttendanceUncheckedUpdateManyWithoutUserInput>
   }
 
   export type AttendanceSettingsUpsertWithoutUserInput = {
@@ -26286,6 +26045,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26296,7 +26056,6 @@ export namespace Prisma {
     phone?: string | null
     skills?: string | null
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -26316,6 +26075,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26326,7 +26086,6 @@ export namespace Prisma {
     phone?: string | null
     skills?: string | null
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -26362,6 +26121,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26372,7 +26132,6 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -26392,6 +26151,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26402,7 +26162,6 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -26422,6 +26181,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26433,7 +26193,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -26452,6 +26211,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26463,7 +26223,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -26498,6 +26257,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26509,7 +26269,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -26528,6 +26287,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26539,7 +26299,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -26600,8 +26359,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
     task?: TaskCreateNestedOneWithoutAttendancesInput
     user: UserCreateNestedOneWithoutAttendanceRecordsInput
   }
@@ -26625,8 +26382,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     taskId?: string | null
   }
 
@@ -26676,6 +26431,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26687,7 +26443,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -26706,6 +26461,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -26717,7 +26473,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -26929,6 +26684,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26940,7 +26696,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -26959,6 +26714,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26970,7 +26726,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -27282,8 +27037,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    adjustedBy?: UserCreateNestedOneWithoutAttendanceAdjustmentsInput
     project?: ProjectCreateNestedOneWithoutAttendancesInput
     user: UserCreateNestedOneWithoutAttendanceRecordsInput
   }
@@ -27307,8 +27060,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
   }
 
@@ -27887,6 +27638,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -27898,7 +27650,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -27917,6 +27668,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -27928,7 +27680,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -28022,6 +27773,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28033,7 +27785,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -28052,6 +27803,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28063,7 +27815,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -28125,6 +27876,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28136,7 +27888,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -28155,6 +27906,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28166,7 +27918,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -28250,6 +28001,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28261,7 +28013,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -28280,6 +28031,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28291,7 +28043,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -28392,71 +28143,6 @@ export namespace Prisma {
     statuses?: ProjectStatusUncheckedUpdateManyWithoutProjectNestedInput
     tasks?: TaskUncheckedUpdateManyWithoutProjectNestedInput
     teamMembers?: TeamMemberUncheckedUpdateManyWithoutProjectNestedInput
-  }
-
-  export type UserCreateWithoutAttendanceAdjustmentsInput = {
-    id?: string
-    name?: string | null
-    email: string
-    emailVerified?: Date | string | null
-    image?: string | null
-    password?: string | null
-    role?: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    lastLogin?: Date | string | null
-    bio?: string | null
-    department?: string | null
-    jobTitle?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
-    accounts?: AccountCreateNestedManyWithoutUserInput
-    activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
-    attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
-    comments?: CommentCreateNestedManyWithoutUserInput
-    documents?: DocumentCreateNestedManyWithoutUserInput
-    projects?: ProjectCreateNestedManyWithoutCreatedByInput
-    sessions?: SessionCreateNestedManyWithoutUserInput
-    taskAssignments?: TaskAssigneeCreateNestedManyWithoutUserInput
-    taskAttachments?: TaskAttachmentCreateNestedManyWithoutUserInput
-    teams?: TeamMemberCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutAttendanceAdjustmentsInput = {
-    id?: string
-    name?: string | null
-    email: string
-    emailVerified?: Date | string | null
-    image?: string | null
-    password?: string | null
-    role?: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    lastLogin?: Date | string | null
-    bio?: string | null
-    department?: string | null
-    jobTitle?: string | null
-    location?: string | null
-    phone?: string | null
-    skills?: string | null
-    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
-    activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
-    attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
-    comments?: CommentUncheckedCreateNestedManyWithoutUserInput
-    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
-    projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByInput
-    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
-    taskAssignments?: TaskAssigneeUncheckedCreateNestedManyWithoutUserInput
-    taskAttachments?: TaskAttachmentUncheckedCreateNestedManyWithoutUserInput
-    teams?: TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutAttendanceAdjustmentsInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
   }
 
   export type ProjectCreateWithoutAttendancesInput = {
@@ -28563,6 +28249,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28574,7 +28261,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
     documents?: DocumentCreateNestedManyWithoutUserInput
@@ -28593,6 +28279,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28604,7 +28291,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
@@ -28618,77 +28304,6 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutAttendanceRecordsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutAttendanceRecordsInput, UserUncheckedCreateWithoutAttendanceRecordsInput>
-  }
-
-  export type UserUpsertWithoutAttendanceAdjustmentsInput = {
-    update: XOR<UserUpdateWithoutAttendanceAdjustmentsInput, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
-    create: XOR<UserCreateWithoutAttendanceAdjustmentsInput, UserUncheckedCreateWithoutAttendanceAdjustmentsInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutAttendanceAdjustmentsInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutAttendanceAdjustmentsInput, UserUncheckedUpdateWithoutAttendanceAdjustmentsInput>
-  }
-
-  export type UserUpdateWithoutAttendanceAdjustmentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
-    accounts?: AccountUpdateManyWithoutUserNestedInput
-    activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
-    attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
-    comments?: CommentUpdateManyWithoutUserNestedInput
-    documents?: DocumentUpdateManyWithoutUserNestedInput
-    projects?: ProjectUpdateManyWithoutCreatedByNestedInput
-    sessions?: SessionUpdateManyWithoutUserNestedInput
-    taskAssignments?: TaskAssigneeUpdateManyWithoutUserNestedInput
-    taskAttachments?: TaskAttachmentUpdateManyWithoutUserNestedInput
-    teams?: TeamMemberUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutAttendanceAdjustmentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    department?: NullableStringFieldUpdateOperationsInput | string | null
-    jobTitle?: NullableStringFieldUpdateOperationsInput | string | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: NullableStringFieldUpdateOperationsInput | string | null
-    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
-    activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
-    attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
-    comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
-    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
-    projects?: ProjectUncheckedUpdateManyWithoutCreatedByNestedInput
-    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
-    taskAssignments?: TaskAssigneeUncheckedUpdateManyWithoutUserNestedInput
-    taskAttachments?: TaskAttachmentUncheckedUpdateManyWithoutUserNestedInput
-    teams?: TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProjectUpsertWithoutAttendancesInput = {
@@ -28818,6 +28433,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28829,7 +28445,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     documents?: DocumentUpdateManyWithoutUserNestedInput
@@ -28848,6 +28463,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28859,7 +28475,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
@@ -28878,6 +28493,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28889,7 +28505,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
     documents?: DocumentCreateNestedManyWithoutUserInput
@@ -28908,6 +28523,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -28919,7 +28535,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
@@ -28954,6 +28569,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28965,7 +28581,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     documents?: DocumentUpdateManyWithoutUserNestedInput
@@ -28984,6 +28599,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -28995,7 +28611,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
@@ -29110,6 +28725,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29120,7 +28736,6 @@ export namespace Prisma {
     phone?: string | null
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -29140,6 +28755,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29150,7 +28766,6 @@ export namespace Prisma {
     phone?: string | null
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -29294,6 +28909,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29304,7 +28920,6 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -29324,6 +28939,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29334,7 +28950,6 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -29354,6 +28969,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29365,7 +28981,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -29384,6 +28999,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29395,7 +29011,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -29430,6 +29045,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29441,7 +29057,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -29460,6 +29075,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29471,7 +29087,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -29543,6 +29158,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29554,7 +29170,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     documents?: DocumentCreateNestedManyWithoutUserInput
@@ -29573,6 +29188,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29584,7 +29200,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
@@ -29678,6 +29293,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29689,7 +29305,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     documents?: DocumentUpdateManyWithoutUserNestedInput
@@ -29708,6 +29323,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29719,7 +29335,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
@@ -29791,6 +29406,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29802,7 +29418,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     activities?: ActivityCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsCreateNestedOneWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
@@ -29821,6 +29436,7 @@ export namespace Prisma {
     image?: string | null
     password?: string | null
     role?: string
+    active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     lastLogin?: Date | string | null
@@ -29832,7 +29448,6 @@ export namespace Prisma {
     skills?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     activities?: ActivityUncheckedCreateNestedManyWithoutUserInput
-    attendanceAdjustments?: AttendanceUncheckedCreateNestedManyWithoutAdjustedByInput
     attendanceRecords?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     attendanceSettings?: AttendanceSettingsUncheckedCreateNestedOneWithoutUserInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
@@ -29926,6 +29541,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29937,7 +29553,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     activities?: ActivityUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUpdateOneWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
@@ -29956,6 +29571,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     password?: NullableStringFieldUpdateOperationsInput | string | null
     role?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -29967,7 +29583,6 @@ export namespace Prisma {
     skills?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     activities?: ActivityUncheckedUpdateManyWithoutUserNestedInput
-    attendanceAdjustments?: AttendanceUncheckedUpdateManyWithoutAdjustedByNestedInput
     attendanceRecords?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     attendanceSettings?: AttendanceSettingsUncheckedUpdateOneWithoutUserNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
@@ -30003,30 +29618,6 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type AttendanceCreateManyAdjustedByInput = {
-    id?: string
-    userId: string
-    checkInTime?: Date | string
-    checkOutTime?: Date | string | null
-    checkInLatitude?: number | null
-    checkInLongitude?: number | null
-    checkOutLatitude?: number | null
-    checkOutLongitude?: number | null
-    checkInIpAddress?: string | null
-    checkOutIpAddress?: string | null
-    checkInDeviceInfo?: string | null
-    checkOutDeviceInfo?: string | null
-    totalHours?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    checkInLocationName?: string | null
-    checkOutLocationName?: string | null
-    adjustmentReason?: string | null
-    projectId?: string | null
-    taskId?: string | null
-  }
-
   export type AttendanceCreateManyUserInput = {
     id?: string
     checkInTime?: Date | string
@@ -30045,8 +29636,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
     taskId?: string | null
   }
@@ -30189,78 +29778,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AttendanceUpdateWithoutAdjustedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    project?: ProjectUpdateOneWithoutAttendancesNestedInput
-    task?: TaskUpdateOneWithoutAttendancesNestedInput
-    user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
-  }
-
-  export type AttendanceUncheckedUpdateWithoutAdjustedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    projectId?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AttendanceUncheckedUpdateManyWithoutAdjustedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkOutTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    checkInLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLatitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkOutLongitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    checkInIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    checkInDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutDeviceInfo?: NullableStringFieldUpdateOperationsInput | string | null
-    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    projectId?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
   export type AttendanceUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     checkInTime?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30279,8 +29796,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
     project?: ProjectUpdateOneWithoutAttendancesNestedInput
     task?: TaskUpdateOneWithoutAttendancesNestedInput
   }
@@ -30303,8 +29818,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -30327,8 +29840,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -30564,8 +30075,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     taskId?: string | null
   }
 
@@ -30665,8 +30174,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
     task?: TaskUpdateOneWithoutAttendancesNestedInput
     user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
   }
@@ -30690,8 +30197,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -30714,8 +30219,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     taskId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -30982,8 +30485,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     checkInLocationName?: string | null
     checkOutLocationName?: string | null
-    adjustedById?: string | null
-    adjustmentReason?: string | null
     projectId?: string | null
   }
 
@@ -31082,8 +30583,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedBy?: UserUpdateOneWithoutAttendanceAdjustmentsNestedInput
     project?: ProjectUpdateOneWithoutAttendancesNestedInput
     user?: UserUpdateOneRequiredWithoutAttendanceRecordsNestedInput
   }
@@ -31107,8 +30606,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -31131,8 +30628,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checkInLocationName?: NullableStringFieldUpdateOperationsInput | string | null
     checkOutLocationName?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustedById?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
     projectId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 

@@ -13,7 +13,7 @@
     "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed-users",
     "prisma:seed": "node prisma/seed.js",
     "prisma:generate": "npx prisma generate",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

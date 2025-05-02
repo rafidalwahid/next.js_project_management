@@ -42,12 +42,7 @@ export const STATUS_COLORS = {
   HOLIDAY: "purple"
 }
 
-export const EXCEPTION_TYPES = {
-  ABSENT: "absent",
-  LATE: "late",
-  FORGOT_CHECKOUT: "forgot_checkout",
-  PATTERN: "pattern",
-}
+// Exception types removed as admin dashboard has been removed
 
 export const THRESHOLDS = {
   // Number of late arrivals that constitutes a pattern
@@ -77,11 +72,7 @@ export const DASHBOARD_DEFAULTS = {
   // Number of days to show in calendar view
   CALENDAR_DAYS: 31,
   // Default chart height in pixels
-  CHART_HEIGHT: 300,
-  // Refresh interval for dashboard metrics (in milliseconds)
-  METRICS_REFRESH_INTERVAL: 5 * 60 * 1000, // 5 minutes
-  // Recent exceptions to show on dashboard
-  RECENT_EXCEPTIONS_COUNT: 5
+  CHART_HEIGHT: 300
 }
 
 export const API_ERROR_CODES = {
@@ -99,7 +90,5 @@ export const ACTION_TYPES = {
   // Attendance action types for activity logging
   CHECK_IN: 'checked-in',
   CHECK_OUT: 'checked-out',
-  ADJUSTED: 'attendance-adjusted',
-  AUTO_CHECKOUT: 'auto-checkout',
-  EXCEPTION: 'attendance-exception'
+  AUTO_CHECKOUT: 'auto-checkout'
 }

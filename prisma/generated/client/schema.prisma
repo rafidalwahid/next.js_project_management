@@ -9,34 +9,35 @@ datasource db {
 }
 
 model User {
-  id                    String              @id @default(cuid())
-  name                  String?
-  email                 String              @unique
-  emailVerified         DateTime?
-  image                 String?
-  password              String?
-  role                  String              @default("user")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  lastLogin             DateTime?
-  bio                   String?             @db.Text
-  department            String?
-  jobTitle              String?
-  location              String?
-  phone                 String?
-  skills                String?             @db.Text
-  accounts              Account[]
-  activities            Activity[]
-  attendanceAdjustments Attendance[]        @relation("AttendanceAdjustments")
-  attendanceRecords     Attendance[]
-  attendanceSettings    AttendanceSettings?
-  comments              Comment[]
-  documents             Document[]
-  projects              Project[]
-  sessions              Session[]
-  taskAssignments       TaskAssignee[]
-  taskAttachments       TaskAttachment[]
-  teams                 TeamMember[]
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String     @default("user")
+  active        Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLogin     DateTime?
+  bio           String?    @db.Text
+  department    String?
+  jobTitle      String?
+  location      String?
+  phone         String?
+  skills        String?    @db.Text
+  accounts      Account[]
+  activities    Activity[]
+
+  attendanceRecords  Attendance[]
+  attendanceSettings AttendanceSettings?
+  comments           Comment[]
+  documents          Document[]
+  projects           Project[]
+  sessions           Session[]
+  taskAssignments    TaskAssignee[]
+  taskAttachments    TaskAttachment[]
+  teams              TeamMember[]
 
   @@map("user")
 }
@@ -224,11 +225,8 @@ model Attendance {
   updatedAt            DateTime  @updatedAt
   checkInLocationName  String?   @db.Text
   checkOutLocationName String?   @db.Text
-  adjustedById         String?
-  adjustmentReason     String?   @db.Text
   projectId            String?
   taskId               String?
-  adjustedBy           User?     @relation("AttendanceAdjustments", fields: [adjustedById], references: [id])
   project              Project?  @relation(fields: [projectId], references: [id])
   task                 Task?     @relation(fields: [taskId], references: [id])
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -237,7 +235,6 @@ model Attendance {
   @@index([projectId])
   @@index([taskId])
   @@index([checkInTime])
-  @@index([adjustedById])
   @@map("attendance")
 }
 

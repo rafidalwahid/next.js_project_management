@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, Users } from "lucide-react"
+import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, Users, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Collapsible,
@@ -43,11 +43,11 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
       roles: ["user", "manager", "admin"],
     },
     {
-      title: "Admin",
-      href: "/attendance/admin",
-      icon: Users,
-      roles: ["manager", "admin"],
-    },
+      title: "Settings",
+      href: "/attendance/settings",
+      icon: Settings,
+      roles: ["user", "manager", "admin"],
+    }
   ]
 
   // Filter items based on user role

@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useUserRole, useUserPermissions } from "@/hooks/use-permission"
@@ -18,48 +17,18 @@ import {
   ShieldCheck,
   Users
 } from "lucide-react"
+import { useDashboardStats } from "@/hooks/use-dashboard-stats"
 
 export function RoleDashboard() {
   const { data: session } = useSession()
   const { role: userRole, isLoading: roleLoading } = useUserRole()
   const { permissions: userPermissions, isLoading: permissionsLoading } = useUserPermissions()
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    projects: 0,
-    tasks: 0,
-    completedTasks: 0,
-    teamMembers: 0,
-    upcomingEvents: 0,
-    attendanceRate: 0,
-  })
-
-  useEffect(() => {
-    // Simulate loading stats
-    const loadStats = async () => {
-      setLoading(true)
-
-      // In a real app, you would fetch this data from your API
-      // For now, we'll just use dummy data
-      setTimeout(() => {
-        setStats({
-          projects: 12,
-          tasks: 48,
-          completedTasks: 32,
-          teamMembers: 8,
-          upcomingEvents: 5,
-          attendanceRate: 92,
-        })
-        setLoading(false)
-      }, 1000)
-    }
-
-    loadStats()
-  }, [])
+  const { stats, isLoading: statsLoading } = useDashboardStats()
 
   // Determine which dashboard view to show based on user role
   const getDashboardView = () => {
-    // Show loading skeleton while role is being fetched
-    if (roleLoading) {
+    // Show loading skeleton while role or stats are being fetched
+    if (roleLoading || statsLoading) {
       return (
         <div className="space-y-4">
           <Skeleton className="h-10 w-full" />
@@ -79,11 +48,11 @@ export function RoleDashboard() {
 
     // Once role is loaded, show the appropriate dashboard
     if (userRole === "admin") {
-      return <AdminDashboard stats={stats} loading={loading} />
+      return <AdminDashboard stats={stats} />
     } else if (userRole === "manager") {
-      return <ManagerDashboard stats={stats} loading={loading} />
+      return <ManagerDashboard stats={stats} />
     } else {
-      return <UserDashboard stats={stats} loading={loading} />
+      return <UserDashboard stats={stats} />
     }
   }
 
@@ -141,7 +110,25 @@ export function RoleDashboard() {
   )
 }
 
-function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
+function AdminDashboard({ stats }: { stats: any }) {
+  // Calculate derived stats
+  const totalProjects = stats?.totalProjects || 0
+  const recentProjects = stats?.recentProjects || []
+  const projectGrowth = stats?.projectGrowth || 0
+
+  // Calculate total tasks and completed tasks from recent projects
+  const totalTasks = recentProjects.reduce((sum, project) => sum + (project.taskCount || 0), 0)
+  const completedTasks = recentProjects.reduce((sum, project) => sum + (project.completedTaskCount || 0), 0)
+
+  // Calculate team members (unique users across projects)
+  const teamMembersSet = new Set()
+  recentProjects.forEach(project => {
+    project.team?.forEach(member => {
+      if (member?.id) teamMembersSet.add(member.id)
+    })
+  })
+  const teamMembersCount = teamMembersSet.size
+
   return (
     <div className="space-y-4">
       <Tabs defaultValue="overview">
@@ -149,73 +136,78 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               title="Total Projects"
-              value={stats.projects}
-              description="Active projects across all teams"
+              value={totalProjects}
+              description={projectGrowth > 0 ? `+${projectGrowth}% growth` : projectGrowth < 0 ? `${projectGrowth}% decline` : "No change"}
               icon={<Layers className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
               title="Total Tasks"
-              value={stats.tasks}
-              description={`${stats.completedTasks} completed`}
+              value={totalTasks}
+              description={`${completedTasks} completed`}
               icon={<FileText className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
               title="Team Members"
-              value={stats.teamMembers}
+              value={teamMembersCount}
               description="Across all projects"
               icon={<Users className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
-              title="Attendance Rate"
-              value={`${stats.attendanceRate}%`}
-              description="Team average this month"
-              icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
+              title="Completion Rate"
+              value={`${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%`}
+              description="Tasks completed"
+              icon={<CheckCircle2 className="h-4 w-4 text-muted-foreground" />}
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>System Status</CardTitle>
+                <CardTitle>Recent Projects</CardTitle>
                 <CardDescription>
-                  Overall system health and performance
+                  Your most recently updated projects
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No recent projects found
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>System Load</span>
-                      <span className="font-medium">23%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Database Status</span>
-                      <span className="font-medium text-green-500">Healthy</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Storage Usage</span>
-                      <span className="font-medium">42%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>API Response Time</span>
-                      <span className="font-medium">120ms</span>
-                    </div>
+                  <div className="space-y-4 text-sm">
+                    {recentProjects.slice(0, 3).map(project => (
+                      <div key={project.id} className="border-l-2 border-primary pl-3">
+                        <p className="font-medium">{project.title}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {project.taskCount} tasks ({project.progress}% complete)
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {project.team?.slice(0, 3).map(member => (
+                            <div key={member.id} className="w-5 h-5 rounded-full bg-muted overflow-hidden">
+                              {member.image ? (
+                                <img
+                                  src={member.image}
+                                  alt={member.name || 'Team member'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[8px] bg-primary text-primary-foreground">
+                                  {member.name?.charAt(0) || '?'}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {project.team?.length > 3 && (
+                            <span className="text-xs text-muted-foreground">+{project.team.length - 3}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -223,32 +215,33 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>Project Distribution</CardTitle>
                 <CardDescription>
-                  Latest system-wide activities
+                  Project completion status
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No project data available
                   </div>
                 ) : (
-                  <div className="space-y-4 text-sm">
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">New user registered</p>
-                      <p className="text-muted-foreground">2 hours ago</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Project "Marketing Campaign" created</p>
-                      <p className="text-muted-foreground">Yesterday at 15:32</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">System backup completed</p>
-                      <p className="text-muted-foreground">Yesterday at 02:00</p>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      {recentProjects.slice(0, 5).map(project => (
+                        <div key={project.id} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="truncate max-w-[180px]">{project.title}</span>
+                            <span className="font-medium">{project.progress}%</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -296,32 +289,33 @@ function AdminDashboard({ stats, loading }: { stats: any, loading: boolean }) {
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="system">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Management</CardTitle>
-              <CardDescription>
-                Manage system settings and configurations
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">System Management</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  System management tools would be displayed here
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   )
 }
 
-function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) {
+function ManagerDashboard({ stats }: { stats: any }) {
+  // Calculate derived stats
+  const totalProjects = stats?.totalProjects || 0
+  const recentProjects = stats?.recentProjects || []
+
+  // Calculate total tasks and completed tasks from recent projects
+  const totalTasks = recentProjects.reduce((sum, project) => sum + (project.taskCount || 0), 0)
+  const completedTasks = recentProjects.reduce((sum, project) => sum + (project.completedTaskCount || 0), 0)
+  const pendingTasks = totalTasks - completedTasks
+
+  // Calculate team members (unique users across projects)
+  const teamMembersSet = new Set()
+  recentProjects.forEach(project => {
+    project.team?.forEach(member => {
+      if (member?.id) teamMembersSet.add(member.id)
+    })
+  })
+  const teamMembersCount = teamMembersSet.size
+
+  // Calculate completion rate
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+
   return (
     <div className="space-y-4">
       <Tabs defaultValue="overview">
@@ -334,31 +328,27 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               title="Active Projects"
-              value={stats.projects}
+              value={totalProjects}
               description="Projects you're managing"
               icon={<Layers className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
               title="Pending Tasks"
-              value={stats.tasks - stats.completedTasks}
-              description={`${stats.completedTasks} completed`}
+              value={pendingTasks}
+              description={`${completedTasks} completed`}
               icon={<FileText className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
               title="Team Members"
-              value={stats.teamMembers}
+              value={teamMembersCount}
               description="In your projects"
               icon={<Users className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
-              title="Upcoming Events"
-              value={stats.upcomingEvents}
-              description="In the next 7 days"
-              icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
+              title="Completion Rate"
+              value={`${completionRate}%`}
+              description="Tasks completed"
+              icon={<CheckCircle2 className="h-4 w-4 text-muted-foreground" />}
             />
           </div>
 
@@ -367,33 +357,39 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
               <CardHeader>
                 <CardTitle>Team Performance</CardTitle>
                 <CardDescription>
-                  Task completion and attendance metrics
+                  Task completion and project metrics
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No project data available
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Task Completion Rate</span>
-                      <span className="font-medium">78%</span>
+                      <span className="font-medium">{completionRate}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>On-time Delivery</span>
-                      <span className="font-medium">92%</span>
+                      <span>Projects in Progress</span>
+                      <span className="font-medium">
+                        {recentProjects.filter(p => p.progress > 0 && p.progress < 100).length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Team Attendance</span>
-                      <span className="font-medium">{stats.attendanceRate}%</span>
+                      <span>Completed Projects</span>
+                      <span className="font-medium">
+                        {recentProjects.filter(p => p.progress === 100).length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Average Task Duration</span>
-                      <span className="font-medium">2.3 days</span>
+                      <span>Average Project Progress</span>
+                      <span className="font-medium">
+                        {recentProjects.length > 0
+                          ? Math.round(recentProjects.reduce((sum, p) => sum + p.progress, 0) / recentProjects.length)
+                          : 0}%
+                      </span>
                     </div>
                   </div>
                 )}
@@ -402,33 +398,46 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent Updates</CardTitle>
+                <CardTitle>Recent Projects</CardTitle>
                 <CardDescription>
-                  Latest activities in your projects
+                  Your most recently updated projects
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No recent projects found
                   </div>
                 ) : (
                   <div className="space-y-4 text-sm">
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Task "Design Homepage" completed</p>
-                      <p className="text-muted-foreground">3 hours ago by John Doe</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">New task added to "Marketing Campaign"</p>
-                      <p className="text-muted-foreground">Yesterday at 14:20</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Project status updated to "In Progress"</p>
-                      <p className="text-muted-foreground">Yesterday at 10:45</p>
-                    </div>
+                    {recentProjects.slice(0, 3).map(project => (
+                      <div key={project.id} className="border-l-2 border-primary pl-3">
+                        <p className="font-medium">{project.title}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {project.taskCount} tasks ({project.progress}% complete)
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {project.team?.slice(0, 3).map(member => (
+                            <div key={member.id} className="w-5 h-5 rounded-full bg-muted overflow-hidden">
+                              {member.image ? (
+                                <img
+                                  src={member.image}
+                                  alt={member.name || 'Team member'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[8px] bg-primary text-primary-foreground">
+                                  {member.name?.charAt(0) || '?'}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {project.team?.length > 3 && (
+                            <span className="text-xs text-muted-foreground">+{project.team.length - 3}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -480,7 +489,18 @@ function ManagerDashboard({ stats, loading }: { stats: any, loading: boolean }) 
   )
 }
 
-function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
+function UserDashboard({ stats }: { stats: any }) {
+  // Calculate derived stats
+  const totalProjects = stats?.totalProjects || 0
+  const recentProjects = stats?.recentProjects || []
+
+  // Calculate total tasks and completed tasks from recent projects
+  const totalTasks = recentProjects.reduce((sum, project) => sum + (project.taskCount || 0), 0)
+  const completedTasks = recentProjects.reduce((sum, project) => sum + (project.completedTaskCount || 0), 0)
+
+  // Calculate completion rate
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+
   return (
     <div className="space-y-4">
       <Tabs defaultValue="overview">
@@ -493,59 +513,54 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <StatsCard
               title="My Projects"
-              value={Math.floor(stats.projects / 2)}
+              value={totalProjects}
               description="Projects you're part of"
               icon={<Layers className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
               title="My Tasks"
-              value={Math.floor(stats.tasks / 4)}
-              description={`${Math.floor(stats.completedTasks / 4)} completed`}
+              value={totalTasks}
+              description={`${completedTasks} completed`}
               icon={<FileText className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
             />
             <StatsCard
-              title="Upcoming Events"
-              value={Math.floor(stats.upcomingEvents / 2)}
-              description="In the next 7 days"
-              icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-              loading={loading}
+              title="Completion Rate"
+              value={`${completionRate}%`}
+              description="Tasks completed"
+              icon={<CheckCircle2 className="h-4 w-4 text-muted-foreground" />}
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>My Performance</CardTitle>
+                <CardTitle>Project Progress</CardTitle>
                 <CardDescription>
-                  Your task completion and attendance metrics
+                  Your current project status
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No project data available
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Task Completion Rate</span>
-                      <span className="font-medium">85%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>On-time Delivery</span>
-                      <span className="font-medium">96%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Attendance Rate</span>
-                      <span className="font-medium">{stats.attendanceRate + 3}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Average Task Duration</span>
-                      <span className="font-medium">1.8 days</span>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      {recentProjects.slice(0, 4).map(project => (
+                        <div key={project.id} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="truncate max-w-[180px]">{project.title}</span>
+                            <span className="font-medium">{project.progress}%</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -554,33 +569,46 @@ function UserDashboard({ stats, loading }: { stats: any, loading: boolean }) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>Recent Projects</CardTitle>
                 <CardDescription>
-                  Your latest activities
+                  Your most recently updated projects
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No recent projects found
                   </div>
                 ) : (
                   <div className="space-y-4 text-sm">
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Completed task "Create User Flow"</p>
-                      <p className="text-muted-foreground">Today at 10:30</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Checked in for the day</p>
-                      <p className="text-muted-foreground">Today at 09:05</p>
-                    </div>
-                    <div className="border-l-2 border-primary pl-3">
-                      <p className="font-medium">Commented on "Homepage Redesign"</p>
-                      <p className="text-muted-foreground">Yesterday at 16:45</p>
-                    </div>
+                    {recentProjects.slice(0, 3).map(project => (
+                      <div key={project.id} className="border-l-2 border-primary pl-3">
+                        <p className="font-medium">{project.title}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {project.taskCount} tasks ({project.progress}% complete)
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {project.team?.slice(0, 3).map(member => (
+                            <div key={member.id} className="w-5 h-5 rounded-full bg-muted overflow-hidden">
+                              {member.image ? (
+                                <img
+                                  src={member.image}
+                                  alt={member.name || 'Team member'}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[8px] bg-primary text-primary-foreground">
+                                  {member.name?.charAt(0) || '?'}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {project.team?.length > 3 && (
+                            <span className="text-xs text-muted-foreground">+{project.team.length - 3}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -636,14 +664,12 @@ function StatsCard({
   title,
   value,
   description,
-  icon,
-  loading
+  icon
 }: {
   title: string
   value: number | string
   description: string
   icon: React.ReactNode
-  loading: boolean
 }) {
   return (
     <Card>
@@ -654,19 +680,10 @@ function StatsCard({
         {icon}
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <>
-            <Skeleton className="h-7 w-1/2 mb-1" />
-            <Skeleton className="h-4 w-3/4" />
-          </>
-        ) : (
-          <>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">
-              {description}
-            </p>
-          </>
-        )}
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">
+          {description}
+        </p>
       </CardContent>
     </Card>
   )

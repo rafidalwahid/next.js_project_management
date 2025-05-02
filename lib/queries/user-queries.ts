@@ -1,5 +1,5 @@
 import prisma from '../prisma';
-import { Prisma, User } from '../prisma-client';
+import { Prisma, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { getTaskListIncludeObject } from "./task-queries"; // Assuming this is correctly imported
 
@@ -123,7 +123,7 @@ export async function getUsers(args: {
 
   // Get total count of users matching the where clause
   const totalCount = await prisma.user.count({ where });
-  
+
   // Get users with pagination
   const users = await prisma.user.findMany({
     skip,
@@ -137,16 +137,16 @@ export async function getUsers(args: {
   let roleCounts = {};
   if (includeCounts) {
     // Count users by role
-    const adminCount = await prisma.user.count({ 
-      where: { ...where, role: 'admin' } 
+    const adminCount = await prisma.user.count({
+      where: { ...where, role: 'admin' }
     });
-    
-    const managerCount = await prisma.user.count({ 
-      where: { ...where, role: 'manager' } 
+
+    const managerCount = await prisma.user.count({
+      where: { ...where, role: 'manager' }
     });
-    
-    const userCount = await prisma.user.count({ 
-      where: { ...where, role: 'user' } 
+
+    const userCount = await prisma.user.count({
+      where: { ...where, role: 'user' }
     });
 
     roleCounts = {

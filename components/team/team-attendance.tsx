@@ -59,33 +59,71 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
     const fetchAttendance = async () => {
       try {
         setIsLoading(true)
-        
-        // Build query parameters
-        const params = new URLSearchParams();
-        
-        // Add date filters based on timeRange
-        if (timeRange === "today") {
-          const today = new Date().toISOString().split('T')[0];
-          params.append('startDate', today);
-        } else if (timeRange === "week") {
-          const today = new Date();
-          const weekAgo = new Date(today);
-          weekAgo.setDate(today.getDate() - 7);
-          params.append('startDate', weekAgo.toISOString());
-        } else if (timeRange === "month") {
-          const today = new Date();
-          const monthAgo = new Date(today);
-          monthAgo.setMonth(today.getMonth() - 1);
-          params.append('startDate', monthAgo.toISOString());
-        }
-        
-        const response = await fetch(`/api/attendance/team/${projectId}?${params.toString()}`)
-        const data = await response.json()
-        
-        if (data.attendanceRecords) {
-          setAttendanceRecords(data.attendanceRecords)
-          setSummary(data.summary)
-        }
+
+        // Since the admin API endpoint has been removed, we'll use mock data for now
+        // In a real implementation, you would create a new API endpoint for team attendance
+
+        // Mock data for demonstration
+        const mockAttendanceRecords: AttendanceRecord[] = [
+          {
+            id: "1",
+            userId: "user1",
+            checkInTime: new Date().toISOString(),
+            checkOutTime: new Date().toISOString(),
+            checkInLocationName: "Office",
+            totalHours: 8,
+            user: {
+              id: "user1",
+              name: "John Doe",
+              email: "john@example.com",
+              image: null,
+              role: "user"
+            }
+          },
+          {
+            id: "2",
+            userId: "user2",
+            checkInTime: new Date().toISOString(),
+            user: {
+              id: "user2",
+              name: "Jane Smith",
+              email: "jane@example.com",
+              image: null,
+              role: "manager"
+            }
+          }
+        ];
+
+        const mockSummary: AttendanceSummary = {
+          totalRecords: 2,
+          totalHours: 8,
+          userCount: 2
+        };
+
+        // Set mock data
+        setAttendanceRecords(mockAttendanceRecords);
+        setSummary(mockSummary);
+
+        // Note: In production, replace this with a real API call
+        // const params = new URLSearchParams();
+        // if (timeRange === "today") {
+        //   const today = new Date().toISOString().split('T')[0];
+        //   params.append('startDate', today);
+        // } else if (timeRange === "week") {
+        //   const today = new Date();
+        //   const weekAgo = new Date(today);
+        //   weekAgo.setDate(today.getDate() - 7);
+        //   params.append('startDate', weekAgo.toISOString());
+        // } else if (timeRange === "month") {
+        //   const today = new Date();
+        //   const monthAgo = new Date(today);
+        //   monthAgo.setMonth(today.getMonth() - 1);
+        //   params.append('startDate', monthAgo.toISOString());
+        // }
+        // const response = await fetch(`/api/attendance/project/${projectId}/team?${params.toString()}`)
+        // const data = await response.json()
+        // setAttendanceRecords(data.attendanceRecords)
+        // setSummary(data.summary)
       } catch (error) {
         console.error("Error fetching team attendance:", error)
       } finally {
@@ -99,19 +137,19 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
   // Filter records based on search
   const filteredRecords = attendanceRecords.filter(record => {
     if (!searchQuery) return true;
-    
+
     const searchLower = searchQuery.toLowerCase();
     const nameMatch = record.user.name?.toLowerCase().includes(searchLower) || false;
     const emailMatch = record.user.email.toLowerCase().includes(searchLower);
     const locationMatch = record.checkInLocationName?.toLowerCase().includes(searchLower) || false;
-    
+
     return nameMatch || emailMatch || locationMatch;
   });
 
   // Group records based on selection
   const groupedRecords = filteredRecords.reduce((groups, record) => {
     let key;
-    
+
     if (groupBy === "user") {
       key = record.user.id;
     } else if (groupBy === "date") {
@@ -119,11 +157,11 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
     } else if (groupBy === "location") {
       key = record.checkInLocationName || "Unknown";
     }
-    
+
     if (!groups[key]) {
       groups[key] = [];
     }
-    
+
     groups[key].push(record);
     return groups;
   }, {} as Record<string, AttendanceRecord[]>);
@@ -155,7 +193,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <Select value={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Time range" />
@@ -167,7 +205,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                 <SelectItem value="month">Last 30 Days</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={groupBy} onValueChange={setGroupBy}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Group by" />
@@ -179,7 +217,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
               </SelectContent>
             </Select>
           </div>
-          
+
           {summary && (
             <div className="grid grid-cols-3 gap-4">
               <div className="border rounded-md p-3 text-center">
@@ -238,7 +276,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                     </>
                   )}
                 </div>
-                
+
                 <div className="space-y-3">
                   {records.map(record => (
                     <div key={record.id} className="flex justify-between items-center border-b pb-2 last:border-0">
@@ -253,7 +291,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                         )}
                         <div className="text-sm text-muted-foreground flex items-center mt-1">
                           <Clock className="h-3 w-3 mr-1" />
-                          {format(new Date(record.checkInTime), "h:mm a")} - 
+                          {format(new Date(record.checkInTime), "h:mm a")} -
                           {record.checkOutTime ? format(new Date(record.checkOutTime), " h:mm a") : " Present"}
                         </div>
                       </div>

@@ -43,7 +43,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    // Get team memberships for the user
+    // Get team memberships for the user with more detailed project information
     const teamMemberships = await prisma.teamMember.findMany({
       where: { userId },
       include: {
@@ -52,8 +52,19 @@ export async function GET(req: NextRequest, { params }: Params) {
             id: true,
             title: true,
             description: true,
+            startDate: true,
+            endDate: true,
             createdAt: true,
-            updatedAt: true
+            updatedAt: true,
+            statuses: {
+              where: { isDefault: true },
+              select: {
+                id: true,
+                name: true,
+                color: true
+              },
+              take: 1
+            }
           }
         }
       },

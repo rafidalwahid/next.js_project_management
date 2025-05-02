@@ -18,12 +18,15 @@ import { RoleBadge } from "@/components/ui/role-badge"
 import { UserProjectRoles } from "@/components/profile/user-project-roles"
 import { UserAttendanceSummary } from "@/components/profile/user-attendance-summary"
 import { UserDocumentList } from "@/components/profile/user-document-list"
+import { UserProfileProjects } from "@/components/profile/user-profile-projects"
+import { UserProfileTasks } from "@/components/profile/user-profile-tasks"
 
 interface UserProfileViewProps {
   profile: UserProfile
   projects: any[]
   tasks: any[]
   activities: any[]
+  teamMemberships?: any[]
   stats: {
     projectCount: number
     taskCount: number
@@ -41,6 +44,7 @@ export function UserProfileView({
   projects,
   tasks,
   activities,
+  teamMemberships = [],
   stats,
   canEdit,
   isOwnProfile,
@@ -444,7 +448,7 @@ export function UserProfileView({
 
                   {/* Project Roles Section */}
                   <div className="mt-6 pt-6 border-t">
-                    <UserProjectRoles userId={profile.id} />
+                    <UserProjectRoles userId={profile.id} teamMemberships={teamMemberships} />
                   </div>
 
                   {/* Account Actions */}
@@ -494,68 +498,13 @@ export function UserProfileView({
         </TabsContent>
 
         <TabsContent value="projects" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Projects</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Check if real projects exist */}
-              {projects.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <File className="h-10 w-10 text-muted-foreground/60 mb-4" />
-                  <h3 className="text-lg font-medium">No Projects</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    You haven't been assigned to any projects yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {projects.map(project => (
-                    <div key={project.id} className="rounded-lg border p-4 h-full flex flex-col">
-                      <h3 className="text-lg font-semibold truncate">{project.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 break-all">Project ID: {project.id}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {console.log('Projects data in UserProfileView:', projects)}
+          <UserProfileProjects projects={projects} />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tasks</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Check if real tasks exist */}
-              {tasks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <CalendarClock className="h-10 w-10 text-muted-foreground/60 mb-4" />
-                  <h3 className="text-lg font-medium">No Tasks</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    You don't have any assigned tasks at the moment.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {tasks.map(task => (
-                    <div key={task.id} className="rounded-lg border p-4 h-full flex flex-col">
-                      <h3 className="text-lg font-semibold truncate">{task.title}</h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="outline" className="capitalize">{task.priority}</Badge>
-                        {task.project && (
-                          <Badge variant="secondary" className="truncate max-w-full">
-                            {task.project.title}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {console.log('Tasks data in UserProfileView:', tasks)}
+          <UserProfileTasks tasks={tasks} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">

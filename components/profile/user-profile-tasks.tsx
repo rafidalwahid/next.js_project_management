@@ -32,7 +32,7 @@ interface UserProfileTasksProps {
 }
 
 export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
-  if (tasks.length === 0) {
+  if (!tasks || tasks.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -42,7 +42,7 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
               <CardDescription>Tasks assigned to the user</CardDescription>
             </div>
             <Button size="sm" variant="outline" asChild>
-              <Link href="/tasks/new">
+              <Link href="/app/tasks/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Task
               </Link>
@@ -73,12 +73,12 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href="/tasks">
+              <Link href="/app/tasks">
                 View All
               </Link>
             </Button>
             <Button size="sm" variant="default" asChild>
-              <Link href="/tasks/new">
+              <Link href="/app/tasks/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Task
               </Link>
@@ -120,7 +120,7 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                       {task.priority}
                     </Badge>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -131,13 +131,13 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>
-                        <Link href={`/tasks/${task.id}`} className="w-full">
+                        <Link href={`/app/tasks/${task.id}`} className="w-full">
                           View Task
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
-                        <Link href={`/tasks/${task.id}/edit`} className="w-full">
+                        <Link href={`/app/tasks/${task.id}/edit`} className="w-full">
                           Edit Task
                         </Link>
                       </DropdownMenuItem>
@@ -145,19 +145,21 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                   </DropdownMenu>
                 </div>
                 <CardTitle className="mt-2 text-lg">
-                  <Link href={`/tasks/${task.id}`} className="hover:text-primary">
+                  <Link href={`/app/tasks/${task.id}`} className="hover:text-primary">
                     {task.title}
                   </Link>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center">
-                    <Clock className="mr-2 h-4 w-4" />
-                    <Link href={`/projects/${task.project.id}`} className="hover:text-primary hover:underline">
-                      {task.project.title}
-                    </Link>
-                  </div>
+                  {task.project && (
+                    <div className="flex items-center">
+                      <Clock className="mr-2 h-4 w-4" />
+                      <Link href={`/app/projects/${task.project.id}`} className="hover:text-primary hover:underline">
+                        {task.project.title}
+                      </Link>
+                    </div>
+                  )}
                   {task.dueDate && (
                     <div className="flex items-center">
                       <Calendar className="mr-2 h-4 w-4" />

@@ -2,7 +2,7 @@
  * Utility functions for handling date and time operations in the attendance system
  * These functions provide consistent date manipulation across the application
  */
-import { format, parse, isWeekend, startOfDay, endOfDay, addMinutes, setHours, setMinutes } from 'date-fns';
+import { format, parse, isWeekend, startOfDay, endOfDay, addMinutes, setHours, setMinutes, parseISO } from 'date-fns';
 import { GRACE_PERIODS, WORK_DAY, DATE_FORMATS } from '@/lib/constants/attendance';
 
 /**
@@ -68,7 +68,7 @@ export function formatDate(dateString: string, formatStr: string = DATE_FORMATS.
     if (!isNaN(date.getTime())) {
       return format(date, formatStr);
     }
-    
+
     // Fallback to parsing as YYYY-MM-DD
     return format(parse(dateString, DATE_FORMATS.API_DATE, new Date()), formatStr);
   } catch (error) {
@@ -128,4 +128,28 @@ export function calculateWorkHours(checkInTime: Date, checkOutTime: Date): numbe
 export function calculateWorkPercentage(checkInTime: Date, checkOutTime: Date): number {
   const durationMs = checkOutTime.getTime() - checkInTime.getTime();
   return Math.min(100, Math.round((durationMs / WORK_DAY.WORKING_HOURS_MS) * 100));
+}
+
+/**
+ * Safely parses an ISO date string to a Date object
+ * @param dateString ISO date string to parse
+ * @returns Date object or current date if parsing fails
+ */
+export function safeParseISO(dateString: string): Date {
+  try {
+    if (!dateString) return new Date();
+
+    const parsedDate = parseISO(dateString);
+
+    // Check if the date is valid
+    if (isNaN(parsedDate.getTime())) {
+      console.warn(`Invalid date string: ${dateString}`);
+      return new Date();
+    }
+
+    return parsedDate;
+  } catch (error) {
+    console.error(`Error parsing date: ${dateString}`, error);
+    return new Date();
+  }
 }

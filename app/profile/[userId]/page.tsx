@@ -14,26 +14,27 @@ export default function UserProfilePage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
   const userId = params.userId as string
-  
+
   // Check if this is the current user's profile
   const isOwnProfile = session?.user?.id === userId
-  
+
   // Determine if the current user can edit this profile
   const canEdit = isOwnProfile || session?.user?.role === "admin"
-  
+
   // Use the user profile hook to fetch profile data
   const {
     profile,
     projects,
     tasks,
     activities,
+    teamMemberships,
     stats,
     isLoading,
     isError,
     updateProfile,
     uploadProfileImage
   } = useUserProfile(userId)
-  
+
   // Handle errors
   useEffect(() => {
     if (isError) {
@@ -45,7 +46,7 @@ export default function UserProfilePage() {
       router.push("/team")
     }
   }, [isError, router, toast])
-  
+
   // Show loading state
   if (status === "loading" || isLoading) {
     return (
@@ -54,20 +55,20 @@ export default function UserProfilePage() {
       </div>
     )
   }
-  
+
   // If not authenticated, redirect to login
   if (status === "unauthenticated") {
     router.push("/login")
     return null
   }
-  
+
   // If profile data is not available, show error
   if (!profile) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center flex-col gap-4">
         <h1 className="text-2xl font-bold">User not found</h1>
         <p className="text-muted-foreground">The requested user profile does not exist.</p>
-        <button 
+        <button
           onClick={() => router.push("/team")}
           className="text-primary hover:underline"
         >
@@ -76,7 +77,7 @@ export default function UserProfilePage() {
       </div>
     )
   }
-  
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <UserProfileView
@@ -84,6 +85,7 @@ export default function UserProfilePage() {
         projects={projects}
         tasks={tasks}
         activities={activities}
+        teamMemberships={teamMemberships}
         stats={stats}
         canEdit={canEdit}
         isOwnProfile={isOwnProfile}

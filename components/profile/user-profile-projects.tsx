@@ -18,13 +18,12 @@ import {
 interface Project {
   id: string
   title: string
-  statusId: string
   status: {
     id: string
     name: string
     color: string
     description?: string | null
-    isDefault: boolean
+    isDefault?: boolean
   }
   startDate: string | null
   endDate: string | null
@@ -37,7 +36,7 @@ interface UserProfileProjectsProps {
 }
 
 export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
-  if (projects.length === 0) {
+  if (!projects || projects.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -47,7 +46,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
               <CardDescription>Projects the user is involved in</CardDescription>
             </div>
             <Button size="sm" variant="outline" asChild>
-              <Link href="/projects/new">
+              <Link href="/app/projects/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Project
               </Link>
@@ -78,12 +77,12 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href="/projects">
+              <Link href="/app/projects">
                 View All
               </Link>
             </Button>
             <Button size="sm" variant="default" asChild>
-              <Link href="/projects/new">
+              <Link href="/app/projects/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Project
               </Link>
@@ -113,13 +112,13 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>
-                        <Link href={`/projects/${project.id}`} className="w-full">
+                        <Link href={`/app/projects/${project.id}`} className="w-full">
                           View Project
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
-                        <Link href={`/projects/${project.id}/edit`} className="w-full">
+                        <Link href={`/app/projects/${project.id}/edit`} className="w-full">
                           Edit Project
                         </Link>
                       </DropdownMenuItem>
@@ -127,7 +126,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                   </DropdownMenu>
                 </div>
                 <CardTitle className="mt-2 text-xl">
-                  <Link href={`/projects/${project.id}`} className="hover:text-primary">
+                  <Link href={`/app/projects/${project.id}`} className="hover:text-primary">
                     {project.title}
                   </Link>
                 </CardTitle>
@@ -149,7 +148,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                   )}
                   <div className="flex items-center">
                     <Clock className="mr-2 h-4 w-4" />
-                    <span>Joined {formatDate(project.joinedAt)}</span>
+                    <span>Joined {project.joinedAt ? formatDate(project.joinedAt) : 'Recently'}</span>
                   </div>
                 </div>
               </CardContent>

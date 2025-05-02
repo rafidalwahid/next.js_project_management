@@ -16,61 +16,55 @@ interface ProjectMembership {
 
 interface UserProjectRolesProps {
   userId: string
+  teamMemberships?: ProjectMembership[]
 }
 
-export function UserProjectRoles({ userId }: UserProjectRolesProps) {
+export function UserProjectRoles({ userId, teamMemberships }: UserProjectRolesProps) {
   const [projects, setProjects] = useState<ProjectMembership[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // If teamMemberships are provided as a prop, use them directly
+    if (teamMemberships && teamMemberships.length > 0) {
+      setProjects(teamMemberships);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise fetch them from the API
     const fetchProjects = async () => {
       if (!userId) return;
-      
+
       setIsLoading(true)
       setError(null)
-      
-      // Use the shared utility for consistent error handling
-      const { data, error } = await fetchProfileData<any>(
-        `/api/users/${userId}/teams`
-      );
-
-      if (error) {
-        setError(error);
-        setProjects([]);
-        setIsLoading(false);
-        return;
-      }
 
       try {
-        // Handle different possible response formats
-        if (!data) {
-          setProjects([]);
-        } else if (Array.isArray(data)) {
-          // Direct array response
-          setProjects(data);
-        } else if (Array.isArray(data.teamMemberships)) {
-          // Response with teamMemberships property
-          setProjects(data.teamMemberships);
-        } else if (Array.isArray(data.teams)) {
-          // Response with teams property
-          setProjects(data.teams);
-        } else if (data && typeof data === 'object') {
-          // Try to extract array from response object
-          const memberships = Object.values(data).find(val => Array.isArray(val));
-          if (memberships) {
-            setProjects(memberships as ProjectMembership[]);
-          } else {
-            console.warn("Unexpected response format:", data);
-            setProjects([]);
-          }
+        // Directly fetch team memberships from the database
+        const response = await fetch(`/api/team/user/${userId}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch team memberships: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Team memberships data:', data);
+
+        // Format the data for display
+        if (data && Array.isArray(data.teamMemberships)) {
+          const formattedMemberships = data.teamMemberships.map(membership => ({
+            id: membership.id,
+            projectId: membership.project.id,
+            projectTitle: membership.project.title
+          }));
+          setProjects(formattedMemberships);
         } else {
           console.warn("Unexpected response format:", data);
           setProjects([]);
         }
       } catch (err) {
-        console.error("Error processing project data:", err);
-        setError("Failed to process project memberships data");
+        console.error("Error fetching project data:", err);
+        setError("Failed to fetch project memberships");
         setProjects([]);
       } finally {
         setIsLoading(false);
@@ -78,7 +72,7 @@ export function UserProjectRoles({ userId }: UserProjectRolesProps) {
     };
 
     fetchProjects();
-  }, [userId]);
+  }, [userId, teamMemberships]);
 
   return (
     <div className="space-y-4">
@@ -91,7 +85,7 @@ export function UserProjectRoles({ userId }: UserProjectRolesProps) {
       )}
 
       <h3 className="text-sm font-medium mb-2">Project Memberships</h3>
-      
+
       {isLoading ? (
         <div className="space-y-2">
           <Skeleton className="h-5 w-full" />
@@ -106,8 +100,8 @@ export function UserProjectRoles({ userId }: UserProjectRolesProps) {
         <div className="max-h-[200px] overflow-y-auto pr-1 scrollbar-thin">
           <div className="space-y-3">
             {projects.map((membership) => (
-              <div 
-                key={membership.id} 
+              <div
+                key={membership.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 last:border-0 gap-2"
               >
                 <div className="font-medium truncate">

@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '../prisma/generated/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 // Add prisma to the global type
 declare global {
@@ -11,7 +11,7 @@ declare global {
 
 // Configure Prisma Client options
 const prismaClientOptions: Prisma.PrismaClientOptions = {
-  log: process.env.NODE_ENV === 'development' 
+  log: process.env.NODE_ENV === 'development'
     ? ['query', 'error', 'warn'] as Prisma.LogLevel[]
     : ['error'] as Prisma.LogLevel[],
   errorFormat: 'pretty',
@@ -39,7 +39,7 @@ prisma.$use(async (params, next) => {
         args: params.args,
       },
     });
-    
+
     // Re-throw the error to be handled by the API route
     throw error;
   }

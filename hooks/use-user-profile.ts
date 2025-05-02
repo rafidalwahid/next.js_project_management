@@ -64,6 +64,17 @@ export type UserProfileData = {
       title: string;
     } | null;
   }>;
+  teamMemberships?: Array<{
+    id: string;
+    projectId: string;
+    projectTitle: string;
+    projectStatus?: {
+      id: string;
+      name: string;
+      color: string;
+    } | null;
+    joinedAt: string;
+  }>;
   stats: {
     projectCount: number;
     taskCount: number;
@@ -101,7 +112,9 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     userId ? `/api/users/${userId}?profile=true` : null,
     async () => {
       try {
+        console.log('Fetching user profile for:', userId);
         const response = await userApi.getUserProfile(userId);
+        console.log('User profile response:', response);
 
         if (!response) {
           throw new Error('No profile data received');
@@ -121,23 +134,26 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
           tasksData = Array.isArray(response.tasks) ? response.tasks : [];
           activitiesData = Array.isArray(response.activities) ? response.activities : [];
           statsData = response.stats || DEFAULT_STATS;
+          const teamMembershipsData = Array.isArray(response.teamMemberships) ? response.teamMemberships : [];
         }
         // Case 2: Response is the user object itself with projects, tasks as properties
         else if (response.id) {
           // Extract user data from the response
-          const { 
-            projects, 
-            tasks, 
-            activities, 
-            stats, 
-            ...userObject 
+          const {
+            projects,
+            tasks,
+            activities,
+            stats,
+            teamMemberships,
+            ...userObject
           } = response;
-          
+
           userData = userObject as UserProfile;
           projectsData = Array.isArray(projects) ? projects : [];
           tasksData = Array.isArray(tasks) ? tasks : [];
           activitiesData = Array.isArray(activities) ? activities : [];
           statsData = stats || DEFAULT_STATS;
+          const teamMembershipsData = Array.isArray(teamMemberships) ? teamMemberships : [];
         }
         // Case 3: Unexpected response format
         else {
@@ -147,12 +163,21 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
 
         // Safety check: Ensure required fields exist
         if (!userData.id) userData.id = userId;
-        
+
+        // Define teamMembershipsData in the outer scope
+        let teamMembershipsData: any[] = [];
+
+        // Check if teamMemberships exists in the response
+        if (Array.isArray(response.teamMemberships)) {
+          teamMembershipsData = response.teamMemberships;
+        }
+
         return {
           user: userData,
           projects: projectsData,
           tasks: tasksData,
           activities: activitiesData,
+          teamMemberships: teamMembershipsData,
           stats: statsData,
         };
       } catch (error) {
@@ -225,6 +250,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     projects: data?.projects || [],
     tasks: data?.tasks || [],
     activities: data?.activities || [],
+    teamMemberships: data?.teamMemberships || [],
     stats: data?.stats || DEFAULT_STATS,
     isLoading,
     isError: error,
