@@ -30,6 +30,7 @@ model User {
 
   attendanceRecords     Attendance[]
   attendanceSettings    AttendanceSettings?
+  correctionRequests    AttendanceCorrectionRequest[]
   comments              Comment[]
   documents             Document[]
   projects              Project[]
@@ -207,9 +208,9 @@ model Event {
 }
 
 model Attendance {
-  id                   String    @id @default(cuid())
+  id                   String                        @id @default(cuid())
   userId               String
-  checkInTime          DateTime  @default(now())
+  checkInTime          DateTime                      @default(now())
   checkOutTime         DateTime?
   checkInLatitude      Float?
   checkInLongitude     Float?
@@ -217,16 +218,18 @@ model Attendance {
   checkOutLongitude    Float?
   checkInIpAddress     String?
   checkOutIpAddress    String?
-  checkInDeviceInfo    String?   @db.Text
-  checkOutDeviceInfo   String?   @db.Text
+  checkInDeviceInfo    String?                       @db.Text
+  checkOutDeviceInfo   String?                       @db.Text
   totalHours           Float?
-  notes                String?   @db.Text
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  checkInLocationName  String?   @db.Text
-  checkOutLocationName String?   @db.Text
+  notes                String?                       @db.Text
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  checkInLocationName  String?                       @db.Text
+  checkOutLocationName String?                       @db.Text
   projectId            String?
   taskId               String?
+  autoCheckout         Boolean                       @default(false)
+  correctionRequests   AttendanceCorrectionRequest[]
   project              Project?  @relation(fields: [projectId], references: [id])
   task                 Task?     @relation(fields: [taskId], references: [id])
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -291,6 +294,30 @@ model Document {
 
   @@index([userId])
   @@map("document")
+}
+
+model AttendanceCorrectionRequest {
+  id                   String     @id @default(cuid())
+  attendanceId         String
+  userId               String
+  originalCheckInTime  DateTime
+  originalCheckOutTime DateTime?
+  requestedCheckInTime DateTime
+  requestedCheckOutTime DateTime?
+  reason               String     @db.Text
+  status               String     @default("pending") // pending, approved, rejected
+  reviewedBy           String?
+  reviewedAt           DateTime?
+  reviewNotes          String?    @db.Text
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  attendance           Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([attendanceId])
+  @@index([userId])
+  @@index([status])
+  @@map("attendance_correction_request")
 }
 
 model Comment {

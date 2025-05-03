@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { 
-  startOfWeek, 
-  endOfWeek, 
-  startOfMonth, 
-  endOfMonth, 
-  format, 
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  format,
   parseISO,
   isSameDay,
   addDays
@@ -68,11 +68,11 @@ export async function GET(req: NextRequest) {
       // Add date filters if provided and no period specified
       if (startDate || endDate) {
         where.checkInTime = {};
-        
+
         if (startDate) {
           where.checkInTime.gte = new Date(startDate);
         }
-        
+
         if (endDate) {
           // Include the full end date by setting time to end of day
           const fullEndDate = new Date(endDate);
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
 
     // Get total count for pagination first (for efficiency)
     const totalCount = await prisma.attendance.count({ where });
-    
+
     // Get attendance records
     const attendanceRecords = await prisma.attendance.findMany({
       where,
@@ -118,9 +118,10 @@ export async function GET(req: NextRequest) {
 
     // Group records if requested
     let groupedRecords = [];
+    // Create a map to group records (declared outside the if block so it can be referenced in the response)
+    const groupMap = new Map();
+
     if (groupBy) {
-      // Create a map to group records
-      const groupMap = new Map();
 
       // Process each record for grouping
       attendanceRecords.forEach(record => {
@@ -134,12 +135,12 @@ export async function GET(req: NextRequest) {
           // Generate appropriate group key based on groupBy parameter
           let groupKey;
           let displayLabel;
-          
+
           if (groupBy === 'day') {
             // Format: 2023-04-22
             groupKey = format(date, 'yyyy-MM-dd');
             displayLabel = format(date, 'EEEE, MMMM d, yyyy');
-          } 
+          }
           else if (groupBy === 'week') {
             // Get the start and end of the week (starting Monday)
             const weekStart = startOfWeek(date, { weekStartsOn: 1 });
@@ -147,12 +148,12 @@ export async function GET(req: NextRequest) {
             // Format: 2023-04-17 to 2023-04-23
             groupKey = format(weekStart, 'yyyy-MM-dd');
             displayLabel = `Week of ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
-          } 
+          }
           else if (groupBy === 'month') {
             // Format: 2023-04 (Year-Month)
             groupKey = format(date, 'yyyy-MM');
             displayLabel = format(date, 'MMMM yyyy');
-          } 
+          }
           else {
             // Default fallback
             groupKey = 'unknown';
@@ -174,17 +175,17 @@ export async function GET(req: NextRequest) {
           // Add record to its group
           const group = groupMap.get(groupKey);
           group.records.push(record);
-          
+
           // Track unique dates for accurate daily averaging
           group.uniqueDates.add(format(date, 'yyyy-MM-dd'));
-          
+
           // Add hours with the consistent MAX_WORKING_HOURS_PER_DAY limit per record
           if (record.totalHours) {
             group.totalHours += Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);
           }
-          
+
           group.checkInCount += 1;
-        } 
+        }
         catch (error) {
           // Skip this record on error
         }
@@ -193,15 +194,15 @@ export async function GET(req: NextRequest) {
       // Convert the map to an array with calculated stats
       const tempGroupedRecords = Array.from(groupMap.values()).map(group => {
         const uniqueDaysCount = group.uniqueDates.size;
-        
+
         // Calculate average hours per day based on unique days with activity
         const averageHoursPerDay = uniqueDaysCount > 0
           ? group.totalHours / uniqueDaysCount
           : 0;
-        
+
         // Clean up the group object before returning
         const { uniqueDates, ...cleanGroup } = group;
-        
+
         return {
           ...cleanGroup,
           uniqueDaysCount,
@@ -224,7 +225,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       attendanceRecords: !groupBy ? paginatedRecords : [], // Only include if not grouping
       groupedRecords: groupBy ? groupedRecords : [],
-      totalGroups: groupBy ? groupMap?.size || 0 : null,
+      totalGroups: groupBy ? groupMap.size : null,
       groupBy: groupBy || null,
       pagination: {
         total: totalCount,

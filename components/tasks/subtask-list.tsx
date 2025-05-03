@@ -46,14 +46,14 @@ export function SubtaskList({
   useEffect(() => {
     if (depth < maxInitialDepth) {
       const initialExpanded: Record<string, boolean> = {};
-      
+
       // Find subtasks with children and mark them as expanded
       subtasks.forEach(subtask => {
         if (subtask.subtasks && subtask.subtasks.length > 0) {
           initialExpanded[subtask.id] = true;
         }
       });
-      
+
       // Update expanded state if we found any subtasks to expand
       if (Object.keys(initialExpanded).length > 0) {
         setExpandedSubtasks(prev => ({ ...prev, ...initialExpanded }));
@@ -89,10 +89,10 @@ export function SubtaskList({
       if (!response.ok) {
         throw new Error("Failed to load subtasks")
       }
-      
+
       // Parse the response
       const data = await response.json()
-      
+
       // Update the subtasks in the parent component
       onSubtaskChange()
 
@@ -213,7 +213,7 @@ export function SubtaskList({
   const handleToggleStatus = async (taskId: string, isCompleted: boolean) => {
     try {
       setIsLoading(true)
-      
+
       // Call the API to update the task's completed status
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'PATCH',
@@ -222,7 +222,7 @@ export function SubtaskList({
         },
         body: JSON.stringify({ completed: !isCompleted }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to update task status");
@@ -343,10 +343,7 @@ export function SubtaskList({
                 {/* Expand/collapse button for subtasks with children */}
                 {subtask.subtasks && subtask.subtasks.length > 0 ? (
                   <button
-                    onClick={() => {
-                      console.log(`Toggling expand for subtask: ${subtask.id}`);
-                      toggleSubtaskExpansion(subtask.id);
-                    }}
+                    onClick={() => toggleSubtaskExpansion(subtask.id)}
                     className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
                     type="button"
@@ -523,7 +520,6 @@ export function SubtaskList({
             {/* Render nested subtasks if they exist and are expanded */}
             {subtask.subtasks && subtask.subtasks.length > 0 && (
               <>
-                {console.log(`Subtask ${subtask.id} expanded: ${expandedSubtasks[subtask.id]}`)}
                 {expandedSubtasks[subtask.id] && (
                   <div className="pl-6 border-l-2 border-muted ml-3">
                     <SubtaskList

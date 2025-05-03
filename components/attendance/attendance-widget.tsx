@@ -1,13 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Clock, MapPin, LogIn, LogOut, Laptop, Info, ExternalLink, Calendar, CheckCircle, AlertCircle } from "lucide-react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import {
+  Clock, MapPin, LogIn, LogOut, Info, ExternalLink,
+  Calendar, CheckCircle, AlertCircle, WifiOff, RefreshCw
+} from "lucide-react"
 import { useSession } from "next-auth/react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatDistanceToNow, format } from "date-fns"
+import { formatDistanceToNow } from "date-fns"
 import { useToast } from "@/components/ui/use-toast"
 import { getDeviceInfo } from "@/lib/geo-utils"
 import { LocationMap } from "@/components/attendance/location-map"
@@ -15,24 +18,22 @@ import { LocationMap } from "@/components/attendance/location-map"
 export function AttendanceWidget() {
   const { data: session } = useSession()
   const { toast } = useToast()
+  
+  // Basic state
   const [loading, setLoading] = useState(true)
   const [checkingIn, setCheckingIn] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
   const [currentAttendance, setCurrentAttendance] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchCurrentAttendance()
-    }
-  }, [session?.user?.id])
-
-  const fetchCurrentAttendance = async () => {
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
+  
+  // Fetch attendance data
+  const fetchAttendance = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/attendance/current')
       const data = await response.json()
-
+      
       if (response.ok) {
         setCurrentAttendance(data.attendance)
         setError(null)
@@ -45,16 +46,47 @@ export function AttendanceWidget() {
     } finally {
       setLoading(false)
     }
-  }
-
+  }, [])
+  
+  // Load attendance data on mount
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchAttendance()
+    }
+  }, [session?.user?.id, fetchAttendance])
+  
+  // Simple online/offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+  
+  // Handle check-in
   const handleCheckIn = async () => {
+    if (!isOnline) {
+      toast({
+        title: "Offline Mode",
+        description: "Check-in is not available in offline mode. Please try again when online.",
+        variant: "destructive",
+      })
+      return
+    }
+    
     try {
       setCheckingIn(true)
       setError(null)
-
+      
       // Get current position
       const position = await getCurrentPosition()
-
+      
       // Send check-in request
       const response = await fetch('/api/attendance/check-in', {
         method: 'POST',
@@ -66,9 +98,9 @@ export function AttendanceWidget() {
           longitude: position.coords.longitude,
         }),
       })
-
+      
       const data = await response.json()
-
+      
       if (response.ok) {
         setCurrentAttendance(data.attendance)
         toast({
@@ -95,15 +127,35 @@ export function AttendanceWidget() {
       setCheckingIn(false)
     }
   }
-
+  
+  // Handle check-out
   const handleCheckOut = async () => {
+    if (!isOnline) {
+      toast({
+        title: "Offline Mode",
+        description: "Check-out is not available in offline mode. Please try again when online.",
+        variant: "destructive",
+      })
+      return
+    }
+    
     try {
       setCheckingOut(true)
       setError(null)
-
+      
+      if (!currentAttendance) {
+        setError("No active check-in found")
+        toast({
+          title: "Check-out Failed",
+          description: "No active check-in found. Please check in first.",
+          variant: "destructive",
+        })
+        return
+      }
+      
       // Get current position
       const position = await getCurrentPosition()
-
+      
       // Send check-out request
       const response = await fetch('/api/attendance/check-out', {
         method: 'POST',
@@ -116,9 +168,9 @@ export function AttendanceWidget() {
           longitude: position.coords.longitude,
         }),
       })
-
+      
       const data = await response.json()
-
+      
       if (response.ok) {
         setCurrentAttendance(data.attendance)
         toast({
@@ -145,339 +197,227 @@ export function AttendanceWidget() {
       setCheckingOut(false)
     }
   }
-
+  
+  // Get current position
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error("Geolocation is not supported by your browser"))
         return
       }
-
+      
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position),
         (error) => {
           console.error("Geolocation error:", error)
-          reject(new Error("Unable to retrieve your location. Please enable location services."))
+          
+          // Handle specific geolocation errors with more helpful messages
+          if (error.code === 1) { // Permission denied
+            reject(new Error("Location permission denied. Please enable location services in your browser settings."))
+          } else if (error.code === 2) { // Position unavailable
+            reject(new Error("Unable to determine your location. Please try again in a different area."))
+          } else if (error.code === 3) { // Timeout
+            reject(new Error("Location request timed out. Please check your connection and try again."))
+          } else {
+            reject(new Error("Unable to retrieve your location. Please enable location services."))
+          }
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       )
     })
   }
-
+  
+  // Loading state
   if (loading) {
     return (
-      <Card className="overflow-hidden border shadow-md bg-card/50 backdrop-blur-sm">
+      <Card className="overflow-hidden border shadow-md">
         <CardHeader className="pb-3 border-b bg-muted/30">
-          <div className="flex items-center">
-            <Clock className="mr-2 h-4 w-4 text-primary" />
-            <CardTitle className="text-base font-medium">Attendance Tracker</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Clock className="mr-2 h-4 w-4 text-primary" />
+              <CardTitle className="text-base font-medium">Field Attendance</CardTitle>
+            </div>
+            <Skeleton className="h-5 w-16 rounded-full" />
           </div>
-          <CardDescription className="text-xs mt-1">
-            Record your work hours with geolocation tracking
-          </CardDescription>
         </CardHeader>
-        <CardContent className="p-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="h-2 w-2 rounded-full bg-primary/70 mr-2"></div>
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <div className="space-y-4 md:space-y-5">
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
-                  <div className="space-y-1 flex-1">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                  <div className="ml-6 space-y-1">
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-[90%]" />
-                    <Skeleton className="h-3 w-[80%]" />
-                  </div>
-                </div>
-                <Skeleton className="h-[180px] w-full rounded-lg" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="h-2 w-2 rounded-full bg-primary/70 mr-2"></div>
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-3 w-full" />
-                </div>
-                <div className="pt-3 mt-2 border-t flex justify-center">
-                  <Skeleton className="h-3 w-[80%] sm:w-48" />
-                </div>
-                <div className="flex justify-center sm:justify-end mt-2">
-                  <Skeleton className="h-9 w-full sm:w-24 rounded-md" />
-                </div>
-              </div>
-            </div>
+        <CardContent className="p-4">
+          <div className="mb-4">
+            <Skeleton className="h-16 w-full rounded-lg" />
+          </div>
+          
+          <div className="flex justify-center mt-2">
+            <Skeleton className="h-10 w-full sm:w-32 rounded-md" />
           </div>
         </CardContent>
       </Card>
     )
   }
-
+  
+  // Render component
   return (
-    <Card className="overflow-hidden border shadow-md bg-card/50 backdrop-blur-sm">
+    <Card className="overflow-hidden border shadow-md">
       <CardHeader className="pb-3 border-b bg-muted/30">
-        <div className="flex items-center">
-          <Clock className="mr-2 h-4 w-4 text-primary" />
-          <CardTitle className="text-base font-medium">Attendance Tracker</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Clock className="mr-2 h-4 w-4 text-primary" />
+            <CardTitle className="text-base font-medium">Field Attendance</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isOnline && (
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+                <WifiOff className="h-3 w-3" /> Offline
+              </Badge>
+            )}
+            {currentAttendance && !currentAttendance.checkOutTime ? (
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+            ) : (
+              <Badge variant="outline" className="bg-muted text-muted-foreground">Inactive</Badge>
+            )}
+          </div>
         </div>
-        <CardDescription className="text-xs mt-1">
-          Record your work hours with geolocation tracking
-        </CardDescription>
       </CardHeader>
-      <CardContent className="p-5">
+      
+      <CardContent className="p-4">
         {error && (
-          <div className="mb-5 p-3 bg-destructive/10 text-destructive rounded-md text-xs flex items-center gap-2 border border-destructive/20">
-            <AlertCircle className="h-4 w-4" />
+          <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-xs flex items-center gap-2 border border-destructive/20">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          {/* Left column */}
-          <div>
-            <div className="flex items-center mb-4">
-              <div className="h-2 w-2 rounded-full bg-primary/70 mr-2"></div>
-              <h3 className="text-xs font-medium uppercase tracking-wider">STATUS</h3>
+        
+        {/* Current Status */}
+        <div className="mb-4">
+          {currentAttendance && !currentAttendance.checkOutTime ? (
+            <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
+              <div className="flex items-center">
+                <div className="bg-primary/10 p-2 rounded-full mr-3 flex-shrink-0">
+                  <Clock className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium">Currently Checked In</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {formatDistanceToNow(new Date(currentAttendance.checkInTime), { addSuffix: true })}
+                  </div>
+                </div>
+              </div>
             </div>
-
-            {currentAttendance && !currentAttendance.checkOutTime ? (
-              <div className="space-y-4 md:space-y-5">
-                <div className="flex items-center bg-primary/5 p-3 rounded-lg border border-primary/20">
-                  <div className="bg-primary/10 p-2 rounded-full mr-3 flex-shrink-0">
-                    <Clock className="h-5 w-5 text-primary" />
+          ) : (
+            <div className="bg-muted/30 p-3 rounded-lg border">
+              {currentAttendance ? (
+                <div className="flex items-center">
+                  <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
-                      <span className="truncate">Currently Checked In</span>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] h-5 flex-shrink-0">Active</Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {formatDistanceToNow(new Date(currentAttendance.checkInTime), { addSuffix: true })}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">Checked Out</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      Last session: {formatDistanceToNow(new Date(currentAttendance.checkOutTime || currentAttendance.checkInTime), { addSuffix: true })}
                     </div>
                   </div>
                 </div>
-
-                <div className="space-y-3 bg-muted/30 p-3 rounded-lg border">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-primary flex-shrink-0" />
-                    <div className="text-sm font-medium">Location</div>
+              ) : (
+                <div className="flex items-center">
+                  <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
+                    <Info className="h-4 w-4 text-blue-600" />
                   </div>
-                  <div className="ml-6 space-y-1">
-                    <div className="text-xs font-medium break-words">
-                      {currentAttendance.checkInLocationName || 'Location name not available'}
-                    </div>
-                    <div className="text-xs text-muted-foreground break-all">
-                      <span className="inline-block">Coordinates: </span>
-                      <span className="inline-block">{currentAttendance.checkInLatitude?.toFixed(6)}, {currentAttendance.checkInLongitude?.toFixed(6)}</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-                      <Calendar className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{format(new Date(currentAttendance.checkInTime), "MMM d, yyyy 'at' h:mm a")}</span>
-                    </div>
-                  </div>
+                  <span className="text-sm">You haven't checked in today</span>
                 </div>
-
-                {currentAttendance.checkInLatitude && currentAttendance.checkInLongitude && (
-                  <div className="relative border rounded-lg overflow-hidden shadow-sm">
-                    <LocationMap
-                      latitude={currentAttendance.checkInLatitude}
-                      longitude={currentAttendance.checkInLongitude}
-                      className="h-[180px] w-full"
-                    />
-                    <div className="absolute bottom-0 right-0 p-1.5 bg-background/90 text-xs rounded-tl-md backdrop-blur-sm">
-                      <a
-                        href={`https://www.openstreetmap.org/?mlat=${currentAttendance.checkInLatitude}&mlon=${currentAttendance.checkInLongitude}#map=16/${currentAttendance.checkInLatitude}/${currentAttendance.checkInLongitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:underline"
-                      >
-                        View larger map <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-4 bg-muted/30 rounded-lg border">
-                {currentAttendance ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
-                          <span className="truncate">Checked Out</span>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] h-5 flex-shrink-0">Complete</Badge>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-0.5 truncate">
-                          Last session: {formatDistanceToNow(new Date(currentAttendance.checkOutTime || currentAttendance.checkInTime), { addSuffix: true })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
-                      <Info className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-sm">You haven't checked in today</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right column */}
-          <div>
-            <div className="flex items-center mb-4">
-              <div className="h-2 w-2 rounded-full bg-primary/70 mr-2"></div>
-              <h3 className="text-xs font-medium uppercase tracking-wider">DEVICE INFO</h3>
+              )}
             </div>
-
-            {currentAttendance && currentAttendance.checkInDeviceInfo ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-xs">
-                  <div className="font-medium">Device Name:</div>
-                  <div className="text-muted-foreground break-words">
-                    {currentAttendance.checkInDeviceInfo ?
-                      getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[0] :
-                      'Unknown'}
-                  </div>
-
-                  <div className="font-medium">Device Type:</div>
-                  <div className="text-muted-foreground break-words">
-                    {currentAttendance.checkInDeviceInfo ?
-                      getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[1] :
-                      'Unknown'}
-                  </div>
-
-                  <div className="font-medium">Operating System:</div>
-                  <div className="text-muted-foreground break-words">
-                    {currentAttendance.checkInDeviceInfo ?
-                      getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[2] :
-                      'Unknown'}
-                  </div>
-
-                  <div className="font-medium">Browser:</div>
-                  <div className="text-muted-foreground break-words">
-                    {currentAttendance.checkInDeviceInfo ?
-                      getDeviceInfo(currentAttendance.checkInDeviceInfo).split(' - ')[3] :
-                      'Unknown'}
-                  </div>
-
-                  <div className="font-medium">IP Address:</div>
-                  <div className="text-muted-foreground break-words">
-                    {currentAttendance.checkInIpAddress || 'Unknown'}
-                  </div>
-                </div>
-
-                <div className="text-xs text-center text-muted-foreground border-t pt-3 mt-2">
-                  <MapPin className="h-3 w-3 inline mr-1" />
-                  Location is only recorded during check-in/out
-                </div>
-
-                <div className="flex justify-center sm:justify-end mt-4">
-                  {currentAttendance && !currentAttendance.checkOutTime ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCheckOut}
-                      disabled={checkingOut}
-                      className="text-xs w-full sm:w-auto"
-                    >
-                      {checkingOut ? (
-                        <>
-                          <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          Check Out <LogOut className="ml-1 h-3 w-3" />
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCheckIn}
-                      disabled={checkingIn}
-                      className="text-xs w-full sm:w-auto"
-                    >
-                      {checkingIn ? (
-                        <>
-                          <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          Check In <LogIn className="ml-1 h-3 w-3" />
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  Device information will be available after check-in
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCheckIn}
-                  disabled={checkingIn}
-                  className="w-full text-xs"
-                >
-                  {checkingIn ? (
-                    <>
-                      <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Check In <LogIn className="ml-1 h-3 w-3" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
+        
+        {/* Location Information (only shown when checked in) */}
+        {currentAttendance && !currentAttendance.checkOutTime && (
+          <div className="mb-4">
+            <div className="flex items-center mb-2">
+              <MapPin className="h-4 w-4 mr-2 text-primary" />
+              <h3 className="text-sm font-medium">Current Location</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="text-xs font-medium">
+                {currentAttendance.checkInLocationName || 'Location name not available'}
+              </div>
+              
+              {/* Map */}
+              {currentAttendance.checkInLatitude && currentAttendance.checkInLongitude && (
+                <div className="relative border rounded-lg overflow-hidden shadow-sm">
+                  <LocationMap
+                    latitude={currentAttendance.checkInLatitude}
+                    longitude={currentAttendance.checkInLongitude}
+                    className="h-[150px] w-full"
+                  />
+                  <div className="absolute bottom-0 right-0 p-1.5 bg-background/90 text-xs rounded-tl-md backdrop-blur-sm">
+                    <a
+                      href={`https://www.openstreetmap.org/?mlat=${currentAttendance.checkInLatitude}&mlon=${currentAttendance.checkInLongitude}#map=16/${currentAttendance.checkInLatitude}/${currentAttendance.checkInLongitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-primary hover:underline"
+                    >
+                      View larger map <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Check In/Out Button */}
+        <div className="flex justify-center mt-2">
+          {currentAttendance && !currentAttendance.checkOutTime ? (
+            <Button
+              onClick={handleCheckOut}
+              disabled={checkingOut || !isOnline}
+              className="w-full sm:w-auto bg-black hover:bg-black/90 text-white"
+            >
+              {checkingOut ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Check Out
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleCheckIn}
+              disabled={checkingIn || !isOnline}
+              className="w-full sm:w-auto bg-black hover:bg-black/90 text-white"
+            >
+              {checkingIn ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Check In
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+        
+        {!isOnline && (
+          <div className="mt-4 pt-3 border-t text-center">
+            <p className="text-xs text-muted-foreground">
+              You are currently offline. Check-in and check-out are only available when online.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

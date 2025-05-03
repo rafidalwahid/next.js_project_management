@@ -17,7 +17,8 @@ interface AttendanceRecord {
   notes: string | null
   project?: {
     id: string
-    name: string
+    title?: string
+    name?: string
   } | null
   task?: {
     id: string
@@ -131,7 +132,7 @@ export default function AttendanceDashboardPage() {
                       )}
                       {record.project && (
                         <div className="text-xs mt-1 truncate">
-                          Project: {record.project.title}
+                          Project: {record.project.title || record.project.name}
                         </div>
                       )}
                     </div>

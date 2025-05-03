@@ -59,6 +59,7 @@ interface User {
 interface TaskFormProps {
   projectId: string
   taskId?: string
+  parentId?: string | null
   onSuccess?: () => void
   onCancel?: () => void
 }
@@ -87,7 +88,7 @@ const taskFormSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskFormSchema>
 
-export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormProps) {
+export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: TaskFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(!!taskId)
   const [statuses, setStatuses] = useState<ProjectStatus[]>([])
@@ -108,7 +109,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
       timeSpent: null,
       statusId: null,
       assigneeIds: [],
-      parentId: null,
+      parentId: parentId || null,
     },
   })
 

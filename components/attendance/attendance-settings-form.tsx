@@ -58,11 +58,11 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
     try {
       setIsLoading(true)
       const response = await fetch('/api/attendance/settings')
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch settings')
       }
-      
+
       const data = await response.json()
       setSettings(data)
     } catch (error) {
@@ -79,18 +79,18 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    
+
     if (!settings) return
-    
+
     try {
       setIsSaving(true)
-      
+
       // Convert selected days array back to comma-separated string
       const updatedSettings = {
         ...settings,
         workDays: selectedDays.join(',')
       }
-      
+
       const response = await fetch('/api/attendance/settings', {
         method: 'PATCH',
         headers: {
@@ -98,14 +98,14 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
         },
         body: JSON.stringify(updatedSettings)
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to update settings')
       }
-      
+
       const data = await response.json()
       setSettings(data)
-      
+
       toast({
         title: "Success",
         description: "Attendance settings updated successfully",
@@ -151,125 +151,168 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Settings className="mr-2 h-5 w-5" />
-          Attendance Settings
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center text-lg">
+          <Settings className="mr-2 h-5 w-5 text-primary" />
+          Field Attendance Settings
         </CardTitle>
         <CardDescription>
-          Configure your work schedule and attendance preferences
+          Configure your work schedule and location tracking preferences
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-6">
-            {/* Work Days Section */}
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-2 text-primary" />
-                <h3 className="text-sm font-medium">Work Days</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
+          {/* Work Schedule Section */}
+          <div className="bg-muted/30 rounded-lg p-4 border">
+            <div className="flex items-center mb-4">
+              <Calendar className="h-4 w-4 mr-2 text-primary" />
+              <h3 className="font-medium">Work Schedule</h3>
+            </div>
+
+            {/* Work Days */}
+            <div className="space-y-3 mb-5">
+              <Label htmlFor="workDays" className="text-sm text-muted-foreground">
+                Select your work days
+              </Label>
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {DAYS_OF_WEEK.map(day => (
-                  <Badge 
+                  <div
                     key={day.value}
-                    variant={selectedDays.includes(day.value) ? "default" : "outline"}
-                    className="cursor-pointer hover:opacity-80"
+                    className={`flex flex-col items-center justify-center p-2 rounded-md cursor-pointer transition-colors ${
+                      selectedDays.includes(day.value)
+                        ? 'bg-black text-white'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
                     onClick={() => handleDayToggle(day.value)}
                   >
-                    {day.label}
-                  </Badge>
+                    <span className="text-xs sm:text-sm">{day.label}</span>
+                  </div>
                 ))}
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Tap on days to select or deselect them
+              </p>
             </div>
 
-            {/* Work Hours Section */}
-            <div className="space-y-3">
+            {/* Work Hours */}
+            <div className="space-y-2">
+              <Label htmlFor="workHoursPerDay" className="text-sm text-muted-foreground">
+                Expected hours per work day
+              </Label>
               <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-primary" />
-                <h3 className="text-sm font-medium">Work Hours</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="workHoursPerDay">Hours Per Day</Label>
-                  <Input
-                    id="workHoursPerDay"
-                    type="number"
-                    min="1"
-                    max="24"
-                    step="0.5"
-                    value={settings?.workHoursPerDay || 8}
-                    onChange={e => setSettings(prev => prev ? {...prev, workHoursPerDay: parseFloat(e.target.value)} : null)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Reminders Section */}
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Bell className="h-4 w-4 mr-2 text-primary" />
-                <h3 className="text-sm font-medium">Reminders</h3>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reminderEnabled" className="cursor-pointer">Enable Check-in Reminders</Label>
-                  <Switch
-                    id="reminderEnabled"
-                    checked={settings?.reminderEnabled || false}
-                    onCheckedChange={checked => setSettings(prev => prev ? {...prev, reminderEnabled: checked} : null)}
-                  />
-                </div>
-                {settings?.reminderEnabled && (
-                  <div className="pl-6 space-y-2">
-                    <Label htmlFor="reminderTime">Reminder Time</Label>
-                    <Input
-                      id="reminderTime"
-                      type="time"
-                      value={settings?.reminderTime || "09:00"}
-                      onChange={e => setSettings(prev => prev ? {...prev, reminderTime: e.target.value} : null)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Auto-Checkout Section */}
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <CheckCircle2 className="h-4 w-4 mr-2 text-primary" />
-                <h3 className="text-sm font-medium">Auto-Checkout</h3>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="autoCheckoutEnabled" className="cursor-pointer">Enable Auto-Checkout</Label>
-                  <Switch
-                    id="autoCheckoutEnabled"
-                    checked={settings?.autoCheckoutEnabled || false}
-                    onCheckedChange={checked => setSettings(prev => prev ? {...prev, autoCheckoutEnabled: checked} : null)}
-                  />
-                </div>
-                {settings?.autoCheckoutEnabled && (
-                  <div className="pl-6 space-y-2">
-                    <Label htmlFor="autoCheckoutTime">Auto-Checkout Time</Label>
-                    <Input
-                      id="autoCheckoutTime"
-                      type="time"
-                      value={settings?.autoCheckoutTime || "17:00"}
-                      onChange={e => setSettings(prev => prev ? {...prev, autoCheckoutTime: e.target.value} : null)}
-                    />
-                  </div>
-                )}
+                <Input
+                  id="workHoursPerDay"
+                  type="number"
+                  min="1"
+                  max="24"
+                  step="0.5"
+                  value={settings?.workHoursPerDay || 8}
+                  onChange={e => setSettings(prev => prev ? {...prev, workHoursPerDay: parseFloat(e.target.value)} : null)}
+                  className="w-24"
+                />
+                <span className="ml-2 text-sm">hours</span>
               </div>
             </div>
           </div>
 
-          <Button type="submit" disabled={isSaving} className="w-full">
+          {/* Notifications Section */}
+          <div className="bg-muted/30 rounded-lg p-4 border">
+            <div className="flex items-center mb-4">
+              <Bell className="h-4 w-4 mr-2 text-primary" />
+              <h3 className="font-medium">Notifications</h3>
+            </div>
+
+            {/* Check-in Reminders */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="reminderEnabled" className="cursor-pointer flex items-center">
+                    Check-in Reminders
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get notified when it's time to check in
+                  </p>
+                </div>
+                <Switch
+                  id="reminderEnabled"
+                  checked={settings?.reminderEnabled || false}
+                  onCheckedChange={checked => setSettings(prev => prev ? {...prev, reminderEnabled: checked} : null)}
+                />
+              </div>
+
+              {settings?.reminderEnabled && (
+                <div className="bg-background rounded-md p-3 space-y-2 border">
+                  <Label htmlFor="reminderTime" className="text-sm">Reminder Time</Label>
+                  <Input
+                    id="reminderTime"
+                    type="time"
+                    value={settings?.reminderTime || "09:00"}
+                    onChange={e => setSettings(prev => prev ? {...prev, reminderTime: e.target.value} : null)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    You'll receive a notification at this time on your work days
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Auto-Checkout Section */}
+          <div className="bg-muted/30 rounded-lg p-4 border">
+            <div className="flex items-center mb-4">
+              <CheckCircle2 className="h-4 w-4 mr-2 text-primary" />
+              <h3 className="font-medium">Automatic Check-out</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="autoCheckoutEnabled" className="cursor-pointer">
+                    Auto-Checkout
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Automatically check out at a specific time
+                  </p>
+                </div>
+                <Switch
+                  id="autoCheckoutEnabled"
+                  checked={settings?.autoCheckoutEnabled || false}
+                  onCheckedChange={checked => setSettings(prev => prev ? {...prev, autoCheckoutEnabled: checked} : null)}
+                />
+              </div>
+
+              {settings?.autoCheckoutEnabled && (
+                <div className="bg-background rounded-md p-3 space-y-2 border">
+                  <Label htmlFor="autoCheckoutTime" className="text-sm">Auto-Checkout Time</Label>
+                  <Input
+                    id="autoCheckoutTime"
+                    type="time"
+                    value={settings?.autoCheckoutTime || "17:00"}
+                    onChange={e => setSettings(prev => prev ? {...prev, autoCheckoutTime: e.target.value} : null)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    You'll be automatically checked out at this time if you forget to do so
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSaving}
+            className="w-full bg-black hover:bg-black/90 text-white"
+          >
             {isSaving ? <Spinner className="mr-2 h-4 w-4" /> : null}
             Save Settings
           </Button>
         </form>
       </CardContent>
+      <CardFooter className="bg-muted/30 px-6 py-4 border-t text-xs text-muted-foreground">
+        <p>
+          These settings affect how your attendance is tracked and recorded. Your location is only recorded during check-in and check-out.
+        </p>
+      </CardFooter>
     </Card>
   )
 }

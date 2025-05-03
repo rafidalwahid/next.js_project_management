@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Search, List, Filter, Grid, ArrowDownAZ, Calendar, Flag, CircleDotDashed } from "lucide-react"
+import { Plus, Search, Filter, ArrowDownAZ, Flag, CircleDotDashed } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 
@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 
 export default function TasksPage() {
   const searchParams = useSearchParams()
@@ -41,9 +41,6 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>(searchParams.get("priority") || "all")
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all")
   const [sortBy, setSortBy] = useState<string>(searchParams.get("sort") || "dueDate")
-  const [viewMode, setViewMode] = useState<"list" | "grid">(
-    (searchParams.get("view") as "list" | "grid") || "list"
-  )
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"))
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
@@ -59,12 +56,11 @@ export default function TasksPage() {
     if (priorityFilter !== "all") params.set("priority", priorityFilter)
     if (statusFilter !== "all") params.set("status", statusFilter)
     if (sortBy !== "dueDate") params.set("sort", sortBy)
-    if (viewMode !== "list") params.set("view", viewMode)
     if (currentPage !== 1) params.set("page", currentPage.toString())
 
     const queryString = params.toString()
     router.push(queryString ? `?${queryString}` : "/tasks", { scroll: false })
-  }, [searchQuery, priorityFilter, statusFilter, sortBy, viewMode, currentPage, router])
+  }, [searchQuery, priorityFilter, statusFilter, sortBy, currentPage, router])
 
   // Filter tasks by priority, status, and search query
   const filteredTasks = allTasks.filter((task: Task) => {
@@ -188,17 +184,6 @@ export default function TasksPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {/* View mode toggle */}
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "list" | "grid")} className="hidden md:block">
-            <TabsList className="h-9">
-              <TabsTrigger value="list" className="px-3">
-                <List className="h-4 w-4" />
-              </TabsTrigger>
-              <TabsTrigger value="grid" className="px-3">
-                <Grid className="h-4 w-4" />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
 
           {/* Mobile filters button */}
           <DropdownMenu open={isFilterMenuOpen} onOpenChange={setIsFilterMenuOpen}>

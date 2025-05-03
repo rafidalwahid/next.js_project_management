@@ -589,40 +589,40 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Consolidated task header */}
-      <div className="flex items-start gap-3 bg-card rounded-lg border p-4 shadow-sm">
+      <div className="flex items-start gap-2 sm:gap-3 bg-card rounded-lg border p-3 sm:p-4 shadow-sm">
         {/* Completion toggle */}
         <Button
           variant={task.completed ? "default" : "outline"}
           size="icon"
           onClick={handleToggleCompletion}
           className={cn(
-            "h-10 w-10 rounded-full flex-shrink-0 transition-colors",
+            "h-8 w-8 sm:h-10 sm:w-10 rounded-full flex-shrink-0 transition-colors",
             task.completed ? "bg-green-500 hover:bg-green-600 text-white border-0" : "border-2"
           )}
           title={task.completed ? "Mark as incomplete" : "Mark as complete"}
         >
           {task.completed ? (
-            <CheckCircle className="h-5 w-5" />
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
           ) : (
-            <Circle className="h-5 w-5" />
+            <Circle className="h-4 w-4 sm:h-5 sm:w-5" />
           )}
         </Button>
 
         {/* Task title and metadata */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-2 sm:gap-4">
             <h1 className={cn(
-              "text-2xl font-bold tracking-tight break-words",
+              "text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words",
               task.completed && "text-muted-foreground line-through"
             )}>
               {task.title}
             </h1>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
+                  <Button variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+                    <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -645,18 +645,18 @@ export default function TaskDetailPage() {
           </div>
 
           {/* Task metadata row */}
-          <div className="flex flex-wrap items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
             {/* Status badge */}
             {task.status && (
               <div
-                className="px-2 py-1 rounded-md text-sm flex items-center gap-1"
+                className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
                 style={{
                   backgroundColor: `${task.status.color}20`,
                   color: task.status.color
                 }}
               >
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
                   style={{ backgroundColor: task.status.color }}
                 />
                 {task.status.name}
@@ -666,43 +666,48 @@ export default function TaskDetailPage() {
             {/* Priority badge */}
             <Badge
               variant={task.priority === "high" ? "destructive" : task.priority === "low" ? "outline" : "secondary"}
-              className="capitalize"
+              className="capitalize text-xs sm:text-sm h-6 sm:h-7"
             >
-              {task.priority} priority
+              {task.priority}
+              <span className="hidden sm:inline"> priority</span>
             </Badge>
 
             {/* Due date */}
             {task.dueDate && (
               <span className={cn(
-                "text-sm flex items-center gap-1 px-2 py-1 rounded-md",
+                "text-xs sm:text-sm flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md",
                 new Date(task.dueDate) < new Date() ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"
               )}>
-                <Calendar className="h-3.5 w-3.5" />
+                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {new Date(task.dueDate) < new Date()
-                  ? `Overdue: ${formatDate(task.dueDate)}`
-                  : `Due: ${formatDate(task.dueDate)}`
+                  ? <span>
+                      <span className="sm:hidden">Due: </span>
+                      <span>{formatDate(task.dueDate)}</span>
+                      <span className="hidden sm:inline"> (Overdue)</span>
+                    </span>
+                  : <span>Due: {formatDate(task.dueDate)}</span>
                 }
               </span>
             )}
 
             {/* Assignees */}
             {task.assignees && task.assignees.length > 0 && (
-              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md">
-                <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                <div className="flex -space-x-2 mr-1">
+              <div className="flex items-center gap-1 bg-muted px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
+                <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+                <div className="flex -space-x-1.5 sm:-space-x-2 mr-1">
                   {task.assignees.slice(0, 3).map((assignee) => (
-                    <Avatar key={assignee.id} className="h-5 w-5 border border-background">
+                    <Avatar key={assignee.id} className="h-4 w-4 sm:h-5 sm:w-5 border border-background">
                       {assignee.user.image ? (
                         <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
                       ) : null}
-                      <AvatarFallback className="text-[10px]">
-                        {assignee.user.name?.split(" ").map(n => n[0]).join("") || "U"}
+                      <AvatarFallback className="text-[8px] sm:text-[10px]">
+                        {assignee.user.name?.split(" ").map((n: string) => n[0]).join("") || "U"}
                       </AvatarFallback>
                     </Avatar>
                   ))}
                   {task.assignees.length > 3 && (
-                    <Avatar className="h-5 w-5 border border-background">
-                      <AvatarFallback className="text-[10px] bg-muted">
+                    <Avatar className="h-4 w-4 sm:h-5 sm:w-5 border border-background">
+                      <AvatarFallback className="text-[8px] sm:text-[10px] bg-muted">
                         +{task.assignees.length - 3}
                       </AvatarFallback>
                     </Avatar>
@@ -713,10 +718,10 @@ export default function TaskDetailPage() {
 
             {/* Time tracking summary */}
             {(task.timeSpent || task.estimatedTime) && (
-              <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex items-center gap-1 bg-muted px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs sm:text-sm">
+                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                 <span>{task.timeSpent || 0}h</span>
-                {task.estimatedTime && (
+                {task.estimatedTime && task.estimatedTime > 0 && (
                   <>
                     <span>/</span>
                     <span>{task.estimatedTime}h</span>
@@ -728,8 +733,8 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="md:col-span-2 space-y-3 sm:space-y-4">
           {/* Description section - simplified */}
           <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
             <div className="flex items-center justify-between p-3 border-b">
@@ -760,31 +765,31 @@ export default function TaskDetailPage() {
           </div>
 
           {/* Consolidated tabs with simplified design */}
-          <Tabs defaultValue="subtasks" className="space-y-4">
-            <TabsList className="bg-muted/50 p-1 h-auto">
-              <TabsTrigger value="subtasks" className="flex items-center gap-1.5 text-xs h-8">
-                <CheckCircle className="h-3.5 w-3.5" />
+          <Tabs defaultValue="subtasks" className="space-y-3 sm:space-y-4">
+            <TabsList className="bg-muted/50 p-0.5 sm:p-1 h-auto w-full">
+              <TabsTrigger value="subtasks" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+                <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>Subtasks</span>
                 {task.subtasks && task.subtasks.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.subtasks.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="comments" className="flex items-center gap-1.5 text-xs h-8">
-                <MessageSquare className="h-3.5 w-3.5" />
+              <TabsTrigger value="comments" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+                <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>Comments</span>
                 {task.comments && task.comments.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.comments.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="attachments" className="flex items-center gap-1.5 text-xs h-8">
-                <Paperclip className="h-3.5 w-3.5" />
+              <TabsTrigger value="attachments" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+                <Paperclip className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>Files</span>
                 {task.attachments && task.attachments.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">
+                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.attachments.length}
                   </Badge>
                 )}
