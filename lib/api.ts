@@ -21,10 +21,10 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     // Read the response text only once and store it
     const textResponse = await response.text();
     console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
-    
+
     // Parse the data only if the response is successful
     let data;
-    
+
     // Handle empty responses
     if (!textResponse || textResponse.trim() === '') {
       console.warn('Empty response received from API');
@@ -139,7 +139,7 @@ export const userApi = {
   getUsers: async (options: any = {}) => {
     const { search, limit = 10, page = 1, role, projectId } = options;
     const params = new URLSearchParams();
-    
+
     if (search) params.append('search', search);
     if (limit) params.append('take', limit.toString());
     if (page) params.append('skip', ((page - 1) * limit).toString());
@@ -326,7 +326,7 @@ export const taskApi = {
       console.warn('API client: getTask called with invalid ID:', id);
       return { task: null };
     }
-    
+
     console.log('API client: Getting task with ID:', id);
     try {
       const result = await fetchAPI(`/api/tasks/${id}`);
@@ -334,14 +334,14 @@ export const taskApi = {
         console.warn('API client: Task not found or empty response for ID:', id);
         return { task: null };
       }
-      
+
       console.log('API client: Get task success for ID:', id);
       return result;
     } catch (error) {
       console.error('API client: Error getting task:', error);
       // Instead of rethrowing, return a structured error response
-      return { 
-        task: null, 
+      return {
+        task: null,
         error: error instanceof Error ? error.message : 'Unknown error fetching task'
       };
     }
@@ -357,15 +357,15 @@ export const taskApi = {
       if (!task.projectId) {
         throw new Error("Project ID is required");
       }
-      
+
       // Remove status if present (it should be statusId instead)
       const { status, ...taskWithoutStatus } = task;
-      
+
       const result = await fetchAPI('/api/tasks', {
         method: 'POST',
         body: JSON.stringify(taskWithoutStatus),
       });
-      
+
       console.log('API client: Create task response:', result);
       return result;
     } catch (error) {
@@ -407,6 +407,13 @@ export const taskApi = {
 
   reorderTask: async (taskId: string, newParentId: string | null, oldParentId: string | null, targetTaskId?: string, isSameParentReorder?: boolean) => {
     console.log('Calling reorderTask API with:', { taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder });
+
+    // Add a small delay to ensure the UI updates before making the API call
+    // This helps with the perceived performance
+    if (isSameParentReorder) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
     try {
       const result = await fetchAPI('/api/tasks/reorder', {
         method: 'POST',

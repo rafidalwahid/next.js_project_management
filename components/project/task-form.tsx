@@ -276,11 +276,17 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
         timeSpent: values.timeSpent === "" ? null : values.timeSpent,
         // Make sure assigneeIds is an array
         assigneeIds: Array.isArray(values.assigneeIds) ? values.assigneeIds : [],
-        // Format dates
-        startDate: values.startDate ? values.startDate.toISOString() : null,
-        endDate: values.endDate ? values.endDate.toISOString() : null,
-        dueDate: values.dueDate ? values.dueDate.toISOString() : null,
+        // Format dates - ensure they're properly formatted ISO strings
+        startDate: values.startDate ? new Date(values.startDate).toISOString() : null,
+        endDate: values.endDate ? new Date(values.endDate).toISOString() : null,
+        dueDate: values.dueDate ? new Date(values.dueDate).toISOString() : null,
       }
+
+      console.log("Submitting task with dates:", {
+        startDate: payload.startDate,
+        endDate: payload.endDate,
+        dueDate: payload.dueDate
+      });
 
       // Log assignee information
       console.log("Assignee IDs being submitted:", values.assigneeIds);
@@ -296,7 +302,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
       });
 
       console.log("Response status:", response.status);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("Error response:", errorData);
@@ -305,6 +311,18 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
 
       const result = await response.json();
       console.log("Task form submission result:", result);
+
+      // Try to refresh the task context if we're in a project context
+      try {
+        // Find the TaskContext and refresh tasks
+        const taskContextRefreshEvent = new CustomEvent('refreshTasks', {
+          detail: { projectId }
+        });
+        window.dispatchEvent(taskContextRefreshEvent);
+        console.log("Dispatched refreshTasks event");
+      } catch (refreshError) {
+        console.warn("Could not refresh task context:", refreshError);
+      }
 
       toast({
         title: taskId ? "Task updated" : "Task created",
@@ -468,6 +486,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={(date) => {
+                        console.log("Selected start date:", date);
                         field.onChange(date);
                       }}
                       disabled={(date) => false}
@@ -511,6 +530,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={(date) => {
+                        console.log("Selected end date:", date);
                         field.onChange(date);
                       }}
                       disabled={(date) => false}
@@ -554,6 +574,7 @@ export function TaskForm({ projectId, taskId, onSuccess, onCancel }: TaskFormPro
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={(date) => {
+                        console.log("Selected due date:", date);
                         field.onChange(date);
                       }}
                       disabled={(date) => false}

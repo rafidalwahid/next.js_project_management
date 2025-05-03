@@ -18,22 +18,21 @@ interface User {
 }
 
 interface AssignMembersPopupProps {
-  projectId: string
-  taskId: string
-  currentAssignees: string[]
-  onAssigneesChange: (assigneeIds: string[]) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  selectedUserIds: string[]
+  onAssign: (userIds: string[]) => void
 }
 
 export function AssignMembersPopup({
-  projectId,
-  taskId,
-  currentAssignees,
-  onAssigneesChange
+  open,
+  onOpenChange,
+  selectedUserIds,
+  onAssign
 }: AssignMembersPopupProps) {
-  const [open, setOpen] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedUsers, setSelectedUsers] = useState<string[]>(currentAssignees)
+  const [selectedUsers, setSelectedUsers] = useState<string[]>(selectedUserIds)
   const { toast } = useToast()
 
   // Fetch team members when the popup opens
@@ -41,12 +40,23 @@ export function AssignMembersPopup({
     if (open) {
       fetchTeamMembers()
     }
-  }, [open, projectId])
+  }, [open])
+
+  // Update selected users when selectedUserIds prop changes
+  useEffect(() => {
+    setSelectedUsers(selectedUserIds)
+  }, [selectedUserIds])
 
   // Fetch team members for the project
   const fetchTeamMembers = async () => {
     try {
       setIsLoading(true)
+      // Get the project ID from the current URL
+      const projectId = window.location.pathname.split('/')[2]
+      if (!projectId) {
+        throw new Error("Could not determine project ID")
+      }
+
       const response = await fetch(`/api/projects/${projectId}/team`)
 
       if (!response.ok) {
@@ -64,6 +74,7 @@ export function AssignMembersPopup({
         setUsers(teamUsers)
       }
     } catch (error) {
+      console.error("Error fetching team members:", error)
       toast({
         title: "Error",
         description: "Failed to fetch team members",
@@ -85,17 +96,17 @@ export function AssignMembersPopup({
 
   // Apply changes when the popup is closed
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen && JSON.stringify(selectedUsers) !== JSON.stringify(currentAssignees)) {
+    if (!newOpen && JSON.stringify(selectedUsers) !== JSON.stringify(selectedUserIds)) {
       // Only update if there are changes
-      onAssigneesChange(selectedUsers)
+      onAssign(selectedUsers)
     }
-    setOpen(newOpen)
+    onOpenChange(newOpen)
   }
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <div className="h-7 w-7 rounded-full border-2 border-dashed border-black bg-background cursor-pointer hover:bg-muted transition-colors hover:border-primary flex items-center justify-center">
+        <div className="h-7 w-7 rounded-full border-2 border-dashed border-black bg-background cursor-pointer hover:bg-muted transition-colors hover:border-primary flex items-center justify-center ml-1">
           <Plus className="h-4 w-4 text-black" />
         </div>
       </PopoverTrigger>

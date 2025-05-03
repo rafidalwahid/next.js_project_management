@@ -10,7 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KanbanBoard } from "@/components/project/kanban-board"
 import { StatusListView } from "@/components/project/status-list-view"
-import { TaskFilter, TaskFilters } from "@/components/project/task-filter"
+import { TaskProvider } from "@/components/project/task-context"
+import { TaskFilterNew } from "@/components/project/task-filter"
+import { TaskFilters } from "@/components/project/task-context"
 import { ProjectSettingsDialog } from "@/components/project/project-settings-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
@@ -18,7 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TaskForm } from "@/components/project/task-form"
 import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
 import { format } from "date-fns"
-import { CreateStatusDialog } from "@/components/project/create-status-dialog"
+import { CreateStatusDialogNew } from "@/components/project/create-status-dialog"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import {
   AlertDialog,
@@ -341,7 +343,7 @@ export default function ProjectPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
-                {project.title.split('hgh')[0]}
+                {project.title}
               </h1>
               <Button
                 variant="outline"
@@ -353,7 +355,7 @@ export default function ProjectPage() {
                 <Settings className="h-4 w-4" />
               </Button>
             </div>
-            {project.description && !project.description.includes('hgh') && (
+            {project.description && (
               <p className="text-muted-foreground text-sm sm:text-base mt-1">
                 {project.description}
               </p>
@@ -362,11 +364,9 @@ export default function ProjectPage() {
         </div>
       </div>
       <div className="bg-muted/10 p-4 rounded-lg mb-6">
-        <TaskFilter
-          statuses={statuses}
-          users={users}
-          onFilterChange={setTaskFilters}
-        />
+        <TaskProvider projectId={projectId}>
+          <TaskFilterNew />
+        </TaskProvider>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -377,42 +377,31 @@ export default function ProjectPage() {
             <TabsTrigger value="analytics" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analytics</TabsTrigger>
           </TabsList>
           {activeTab === "board" && (
-            <CreateStatusDialog
-              projectId={projectId}
-              onStatusCreated={async () => {
-                await fetchTasks();
-              }}
-            />
+            <TaskProvider projectId={projectId}>
+              <CreateStatusDialogNew
+                projectId={projectId}
+              />
+            </TaskProvider>
           )}
         </div>
         <TabsContent value="board">
           <div className="space-y-4">
-            <KanbanBoard
-              projectId={projectId}
-              onCreateTask={handleCreateTask}
-              onEditTask={handleEditTask}
-              initialTasks={filteredTasks.length > 0 || Object.values(taskFilters).some(v =>
-                Array.isArray(v) ? v.length > 0 : v !== null && v !== ""
-              ) ? filteredTasks : tasks}
-              initialStatuses={statuses}
-              onTasksChange={setTasks}
-              onStatusesChange={setStatuses}
-              onRefresh={fetchTasks}
-            />
+            <TaskProvider projectId={projectId}>
+              <KanbanBoard
+                projectId={projectId}
+                onEditTask={handleEditTask}
+              />
+            </TaskProvider>
           </div>
         </TabsContent>
         <TabsContent value="list">
           <div className="space-y-4">
-            <StatusListView
-              projectId={projectId}
-              statuses={statuses}
-              tasks={filteredTasks.length > 0 || Object.values(taskFilters).some(v =>
-                Array.isArray(v) ? v.length > 0 : v !== null && v !== ""
-              ) ? filteredTasks : tasks}
-              isLoading={isTasksLoading}
-              onEditTask={handleEditTask}
-              onRefresh={fetchTasks}
-            />
+            <TaskProvider projectId={projectId}>
+              <StatusListView
+                projectId={projectId}
+                onEditTask={handleEditTask}
+              />
+            </TaskProvider>
           </div>
         </TabsContent>
         <TabsContent value="team">
@@ -546,7 +535,7 @@ export default function ProjectPage() {
                     <span className="text-sm font-medium">Completion Rate</span>
                     <span className="text-sm text-muted-foreground">
                       {project._count?.tasks ?
-                        Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100) : 0}%
+                        Math.round((tasks.filter(t => t.status?.isCompletedStatus).length / project._count.tasks) * 100) : 0}%
                     </span>
                   </div>
                   <div className="h-4 bg-muted rounded-full overflow-hidden mt-2">
@@ -554,13 +543,13 @@ export default function ProjectPage() {
                       className="h-full bg-primary"
                       style={{
                         width: project._count?.tasks ?
-                          `${Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100)}%` : "0%"
+                          `${Math.round((tasks.filter(t => t.status?.isCompletedStatus).length / project._count.tasks) * 100)}%` : "0%"
                       }}
                     />
                   </div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-sm text-muted-foreground">
-                      {tasks.filter(t => t.completed).length} / {project._count?.tasks || 0} tasks completed
+                      {tasks.filter(t => t.status?.isCompletedStatus).length} / {project._count?.tasks || 0} tasks completed
                     </span>
                   </div>
                 </div>

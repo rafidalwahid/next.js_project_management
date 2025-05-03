@@ -349,7 +349,7 @@ export default function TaskDetailPage() {
           {task.assignees && task.assignees.length > 0 ? (
             <div className="flex -space-x-2">
               {task.assignees.map((assignee) => (
-                <Avatar key={assignee.id} className="border-2 border-background">
+                <Avatar key={assignee.id} className="border border-black">
                   <AvatarImage src={assignee.user.image || undefined} />
                   <AvatarFallback>
                     {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}

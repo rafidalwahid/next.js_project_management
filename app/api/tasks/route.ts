@@ -201,15 +201,18 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       }
     }
 
+    // Log date fields for debugging
+    console.log("Creating task with date fields:", { startDate, endDate, dueDate });
+
     // Create task
     const task = await prisma.task.create({
       data: {
         title,
         description,
         priority,
-        startDate: startDate && startDate.trim() !== "" ? new Date(startDate) : null,
-        endDate: endDate && endDate.trim() !== "" ? new Date(endDate) : null,
-        dueDate: dueDate && dueDate.trim() !== "" ? new Date(dueDate) : null,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        dueDate: dueDate ? new Date(dueDate) : null,
         estimatedTime,
         timeSpent,
         projectId,

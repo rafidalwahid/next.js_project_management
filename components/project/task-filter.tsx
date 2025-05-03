@@ -17,7 +17,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command"
 import {
   Select,
@@ -27,82 +26,49 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useTaskContext, TaskFilters } from "./task-context"
 
-interface TaskFilterProps {
-  statuses: {
-    id: string
-    name: string
-    color: string
-  }[]
-  users: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }[]
-  onFilterChange: (filters: TaskFilters) => void
-}
-
-export interface TaskFilters {
-  search: string
-  statusIds: string[]
-  assigneeIds: string[]
-  priority: string | null
-  completed: boolean | null
-}
-
-export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps) {
-  const [filters, setFilters] = useState<TaskFilters>({
-    search: "",
-    statusIds: [],
-    assigneeIds: [],
-    priority: null,
-    completed: null,
-  })
-
-  const [statusOpen, setStatusOpen] = useState(false)
-  const [assigneeOpen, setAssigneeOpen] = useState(false)
-
-  // Update parent component when filters change
-  useEffect(() => {
-    onFilterChange(filters)
-  }, [filters, onFilterChange])
+export function TaskFilterNew() {
+  const { statuses, users, filters, setFilters } = useTaskContext();
+  
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [assigneeOpen, setAssigneeOpen] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({ ...prev, search: e.target.value }))
-  }
+    setFilters({ ...filters, search: e.target.value });
+  };
 
   const toggleStatus = (statusId: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      statusIds: prev.statusIds.includes(statusId)
-        ? prev.statusIds.filter((id) => id !== statusId)
-        : [...prev.statusIds, statusId],
-    }))
-  }
+    setFilters({
+      ...filters,
+      statusIds: filters.statusIds.includes(statusId)
+        ? filters.statusIds.filter((id) => id !== statusId)
+        : [...filters.statusIds, statusId],
+    });
+  };
 
   const toggleAssignee = (userId: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      assigneeIds: prev.assigneeIds.includes(userId)
-        ? prev.assigneeIds.filter((id) => id !== userId)
-        : [...prev.assigneeIds, userId],
-    }))
-  }
+    setFilters({
+      ...filters,
+      assigneeIds: filters.assigneeIds.includes(userId)
+        ? filters.assigneeIds.filter((id) => id !== userId)
+        : [...filters.assigneeIds, userId],
+    });
+  };
 
   const handlePriorityChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, priority: value === "all" ? null : value }))
-  }
+    setFilters({ ...filters, priority: value === "all" ? null : value });
+  };
 
   const handleCompletedChange = (value: string) => {
     if (value === "all") {
-      setFilters((prev) => ({ ...prev, completed: null }))
+      setFilters({ ...filters, completed: null });
     } else if (value === "completed") {
-      setFilters((prev) => ({ ...prev, completed: true }))
+      setFilters({ ...filters, completed: true });
     } else {
-      setFilters((prev) => ({ ...prev, completed: false }))
+      setFilters({ ...filters, completed: false });
     }
-  }
+  };
 
   const clearFilters = () => {
     setFilters({
@@ -111,15 +77,15 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
       assigneeIds: [],
       priority: null,
       completed: null,
-    })
-  }
+    });
+  };
 
   const hasActiveFilters =
     filters.search !== "" ||
     filters.statusIds.length > 0 ||
     filters.assigneeIds.length > 0 ||
     filters.priority !== null ||
-    filters.completed !== null
+    filters.completed !== null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -137,7 +103,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
               variant="ghost"
               size="sm"
               className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-primary"
-              onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
+              onClick={() => setFilters({ ...filters, search: "" })}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -273,7 +239,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
-                  onClick={() => setFilters((prev) => ({ ...prev, statusIds: [] }))}
+                  onClick={() => setFilters({ ...filters, statusIds: [] })}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -286,7 +252,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
-                  onClick={() => setFilters((prev) => ({ ...prev, assigneeIds: [] }))}
+                  onClick={() => setFilters({ ...filters, assigneeIds: [] })}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -299,7 +265,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
-                  onClick={() => setFilters((prev) => ({ ...prev, priority: null }))}
+                  onClick={() => setFilters({ ...filters, priority: null })}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -312,7 +278,7 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 ml-1 p-0 hover:bg-transparent hover:text-destructive"
-                  onClick={() => setFilters((prev) => ({ ...prev, completed: null }))}
+                  onClick={() => setFilters({ ...filters, completed: null })}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -330,5 +296,5 @@ export function TaskFilter({ statuses, users, onFilterChange }: TaskFilterProps)
         </div>
       )}
     </div>
-  )
+  );
 }

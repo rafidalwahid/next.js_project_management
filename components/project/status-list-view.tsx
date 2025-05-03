@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { format } from "date-fns"
 import {
   DndContext,
   KeyboardSensor,
@@ -15,7 +14,6 @@ import {
   rectIntersection,
   DragOverEvent,
 } from "@dnd-kit/core"
-import { AssignMembersPopup } from "@/components/project/assign-members-popup"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
@@ -27,24 +25,21 @@ import { CSS } from "@dnd-kit/utilities"
 import {
   ChevronDown,
   ChevronRight,
-  Clock,
-  Calendar,
   MoreHorizontal,
   GripVertical,
   Pencil,
   Trash,
   Check,
   X,
+  Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Spinner } from "@/components/ui/spinner"
-import { useToast } from "@/hooks/use-toast"
-import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
-import { taskApi } from "@/lib/api"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { TaskCard } from "./task-card"
+import { useTaskContext, Task, ProjectStatus } from "./task-context"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,59 +62,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-interface Task {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  startDate?: string | null
-  endDate?: string | null
-  dueDate?: string | null
-  timeSpent?: number | null
-  estimatedTime?: number | null
-  projectId: string
-  statusId?: string | null
-  parentId?: string | null
-  order: number
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-  assignees?: TaskAssignee[]
-  status?: {
-    id: string
-    name: string
-    color: string
-  } | null
-}
-
-interface TaskAssignee {
-  id: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface ProjectStatus {
-  id: string
-  name: string
-  color: string
-  description?: string | null
-  order: number
-  isDefault: boolean
-  projectId: string
-}
+import { QuickTaskDialogNew } from "@/components/project/quick-task-dialog"
 
 interface StatusListViewProps {
-  projectId: string
-  statuses: ProjectStatus[]
-  tasks: Task[]
-  isLoading: boolean
-  onEditTask?: (taskId: string) => void
-  onRefresh: () => Promise<void>
+  projectId: string;
+  onEditTask?: (taskId: string) => void;
 }
 
 // Task item component that can be dragged
@@ -130,11 +77,11 @@ function DraggableTaskItem({
   onDelete,
   onUpdateAssignees,
 }: {
-  task: Task
-  onToggleComplete: (taskId: string, completed: boolean) => void
-  onEdit?: (taskId: string) => void
-  onDelete?: (taskId: string) => void
-  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void
+  task: Task;
+  onToggleComplete: (taskId: string) => void;
+  onEdit?: (taskId: string) => void;
+  onDelete?: (taskId: string) => void;
+  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -142,138 +89,37 @@ function DraggableTaskItem({
       type: 'task',
       task,
     },
-  })
+  });
 
-  // Format date for display
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return null
-    return format(new Date(dateString), "MMM d, yyyy")
-  }
-
-  // Get priority badge color
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "bg-red-100 text-red-800"
-      case "medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "low":
-        return "bg-blue-100 text-blue-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
     <div
       ref={setNodeRef}
+      style={style}
       {...attributes}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-      }}
-      className={`mb-2 rounded-md border bg-background p-3 shadow-sm flex flex-col min-h-[120px] ${
-        task.completed ? "opacity-60" : ""
-      }`}
+      className="touch-manipulation"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3">
-          <div {...listeners} className="mt-1 cursor-grab">
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={task.completed}
-                onCheckedChange={() => onToggleComplete(task.id, task.completed)}
-              />
-              <span className={task.completed ? "line-through text-muted-foreground" : "font-medium"}>
-                {task.title}
-              </span>
-            </div>
-            {task.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {task.description}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-1 flex-grow">
-              <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                {task.priority}
-              </Badge>
-
-              {task.dueDate && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(task.dueDate)}
-                </Badge>
-              )}
-
-              {task.estimatedTime && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {task.estimatedTime}h
-                </Badge>
-              )}
-            </div>
-          </div>
+      <div className="flex items-start gap-2">
+        <div {...listeners} className="mt-1 cursor-grab">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit && onEdit(task.id)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onToggleComplete(task.id, task.completed)}>
-              <Check className="mr-2 h-4 w-4" />
-              Mark as {task.completed ? "Incomplete" : "Complete"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => onDelete && onDelete(task.id)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="flex justify-end mt-3">
-        <div className="flex -space-x-2">
-          {task.assignees && task.assignees.length > 0 ? (
-            <>
-              {task.assignees.slice(0, 3).map((assignee) => (
-                <Avatar key={assignee.id} className="h-7 w-7 border border-black">
-                  <AvatarImage src={assignee.user.image || undefined} />
-                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                    {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {task.assignees.length > 3 && (
-                <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs border border-black">
-                  +{task.assignees.length - 3}
-                </div>
-              )}
-            </>
-          ) : null}
-          <AssignMembersPopup
-            projectId={task.projectId}
-            taskId={task.id}
-            currentAssignees={task.assignees?.map(a => a.user.id) || []}
-            onAssigneesChange={(assigneeIds) => onUpdateAssignees(task.id, assigneeIds)}
+        <div className="flex-1">
+          <TaskCard
+            task={task}
+            isDragging={isDragging}
+            onToggleComplete={onToggleComplete}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onUpdateAssignees={onUpdateAssignees}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Status section component with collapsible task list
@@ -295,22 +141,22 @@ function StatusSection({
   onCancelEdit,
   onUpdateAssignees,
 }: {
-  status: ProjectStatus
-  tasks: Task[]
-  onToggleComplete: (taskId: string, completed: boolean) => void
-  onEdit?: (taskId: string) => void
-  onCreateTask: () => void
-  isOpen: boolean
-  onToggle: () => void
-  onEditStatus: (status: ProjectStatus) => void
-  onDeleteStatus: (statusId: string) => void
-  onDeleteTask: (taskId: string) => void
-  isEditing: boolean
-  editingName: string
-  onEditingNameChange: (value: string) => void
-  onSaveEdit: () => void
-  onCancelEdit: () => void
-  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void
+  status: ProjectStatus;
+  tasks: Task[];
+  onToggleComplete: (taskId: string) => void;
+  onEdit?: (taskId: string) => void;
+  onCreateTask: () => void;
+  isOpen: boolean;
+  onToggle: () => void;
+  onEditStatus: (status: ProjectStatus) => void;
+  onDeleteStatus: (statusId: string) => void;
+  onDeleteTask: (taskId: string) => void;
+  isEditing: boolean;
+  editingName: string;
+  onEditingNameChange: (value: string) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onUpdateAssignees: (taskId: string, assigneeIds: string[]) => void;
 }) {
   // Reference for the status input field
   const statusInputRef = useRef<HTMLInputElement>(null);
@@ -329,13 +175,16 @@ function StatusSection({
     if (isOver && !isOpen) {
       onToggle();
     }
-  }, [isOver, isOpen]);
+  }, [isOver, isOpen, onToggle]);
 
   return (
     <Collapsible
       open={isOpen}
       onOpenChange={onToggle}
-      className={`mb-4 ${isOver ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+      className={cn(
+        "mb-4",
+        isOver && "ring-2 ring-primary ring-offset-2"
+      )}
     >
       <div
         className="flex items-center justify-between rounded-t-md p-3"
@@ -346,9 +195,9 @@ function StatusSection({
             {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         </CollapsibleTrigger>
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <div
-            className="w-3 h-3 rounded-full"
+            className="w-3 h-3 rounded-full flex-shrink-0"
             style={{ backgroundColor: status.color }}
           />
 
@@ -385,38 +234,38 @@ function StatusSection({
               </Button>
             </div>
           ) : (
-            <h3 className="font-medium">{status.name}</h3>
+            <h3 className="font-medium truncate">{status.name}</h3>
           )}
 
-          <Badge variant="outline">{tasks.length}</Badge>
+          <div className="flex items-center justify-center h-5 min-w-[1.5rem] px-1.5 text-xs font-medium rounded-full bg-muted">
+            {tasks.length}
+          </div>
         </div>
 
         <div className="flex items-center gap-1">
-          {!isEditing && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEditStatus(status)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit Status
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDeleteStatus(status.id)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash className="mr-2 h-4 w-4" />
-                  Delete Status
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEditStatus(status)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDeleteStatus(status.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <QuickTaskDialog
+          <QuickTaskDialogNew
             projectId={status.projectId}
             statusId={status.id}
             statusName={status.name}
@@ -427,183 +276,153 @@ function StatusSection({
       <CollapsibleContent>
         <div
           ref={setNodeRef}
-          className={`rounded-b-md border border-t-0 p-2 min-h-[100px] transition-colors duration-200
-            ${isOver ? 'bg-primary/10 border-primary/30 border-2' : tasks.length === 0 ? 'bg-muted/20 border-dashed border-2' : ''}`}
+          className={cn(
+            "rounded-b-md border border-t-0 p-2 min-h-[100px] transition-colors duration-200",
+            isOver ? "bg-primary/10 border-primary/30 border-2" :
+                    tasks.length === 0 ? "bg-muted/20 border-dashed border-2" : ""
+          )}
           data-status-id={status.id}
           data-droppable="true"
         >
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-sm">
-              <div className={`p-4 rounded-md border-2 ${isOver ? 'border-primary bg-primary/5' : 'border-dashed border-muted-foreground/30'}`}>
-                <p className={isOver ? 'text-primary font-medium' : 'text-muted-foreground'}>
+              <div className={cn(
+                "p-4 rounded-md border-2",
+                isOver ? "border-primary bg-primary/5" : "border-dashed border-muted-foreground/30"
+              )}>
+                <p className={isOver ? "text-primary font-medium" : "text-muted-foreground"}>
                   No tasks in this status
-                </p>
-                <p className={`text-xs mt-2 ${isOver ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {isOver ? '✓ Drop here to add task' : 'Drop tasks here'}
                 </p>
               </div>
             </div>
           ) : (
             <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-              {tasks.map((task) => (
-                <DraggableTaskItem
-                  key={task.id}
-                  task={task}
-                  onToggleComplete={onToggleComplete}
-                  onEdit={onEdit}
-                  onDelete={onDeleteTask}
-                  onUpdateAssignees={onUpdateAssignees}
-                />
-              ))}
+              <div className="space-y-2">
+                {tasks.map((task) => (
+                  <DraggableTaskItem
+                    key={task.id}
+                    task={task}
+                    onToggleComplete={onToggleComplete}
+                    onEdit={onEdit}
+                    onDelete={onDeleteTask}
+                    onUpdateAssignees={onUpdateAssignees}
+                  />
+                ))}
+              </div>
             </SortableContext>
           )}
         </div>
       </CollapsibleContent>
     </Collapsible>
-  )
+  );
 }
 
-export function StatusListView({
-  projectId,
-  statuses,
-  tasks,
-  isLoading,
-  onEditTask,
-  onRefresh
-}: StatusListViewProps) {
-  const [openStatuses, setOpenStatuses] = useState<Record<string, boolean>>({})
-  const [activeTask, setActiveTask] = useState<Task | null>(null)
-  const [activeStatusId, setActiveStatusId] = useState<string | null>(null)
-  const [editingStatusId, setEditingStatusId] = useState<string | null>(null)
-  const [editingStatusName, setEditingStatusName] = useState<string>("")
-  const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null)
-  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null)
-  const statusInputRef = useRef<HTMLInputElement>(null)
-  const { toast } = useToast()
+export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
+  const {
+    tasks,
+    statuses,
+    isLoading,
+    refreshTasks,
+    toggleTaskCompletion,
+    deleteTask,
+    updateTaskAssignees,
+    moveTask
+  } = useTaskContext();
 
-  // Initialize all statuses as open
+  const [openStatuses, setOpenStatuses] = useState<Record<string, boolean>>({});
+  const [expandAll, setExpandAll] = useState(true);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeStatusId, setActiveStatusId] = useState<string | null>(null);
+  const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
+  const [editingStatusName, setEditingStatusName] = useState<string>("");
+  const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+
+  // Set up sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  // Initialize open states based on user preference or default
   useEffect(() => {
-    const initialOpenState: Record<string, boolean> = {};
-    statuses.forEach(status => {
-      initialOpenState[status.id] = true;
+    // Try to load from localStorage
+    try {
+      const savedState = localStorage.getItem(`project-${projectId}-open-statuses`);
+      if (savedState) {
+        setOpenStatuses(JSON.parse(savedState));
+        // Check if all are closed to set expandAll state
+        const allStatuses = JSON.parse(savedState);
+        const allClosed = Object.values(allStatuses).every(v => !v);
+        setExpandAll(!allClosed);
+      } else {
+        // Default: open all statuses
+        const initialState: Record<string, boolean> = {};
+        statuses.forEach(status => {
+          initialState[status.id] = true;
+        });
+        setOpenStatuses(initialState);
+      }
+    } catch (e) {
+      console.error("Error loading saved status states:", e);
+      // Fallback to all open
+      const initialState: Record<string, boolean> = {};
+      statuses.forEach(status => {
+        initialState[status.id] = true;
+      });
+      setOpenStatuses(initialState);
+    }
+  }, [statuses, projectId]);
+
+  // Save open states to localStorage when changed
+  useEffect(() => {
+    if (Object.keys(openStatuses).length > 0) {
+      localStorage.setItem(
+        `project-${projectId}-open-statuses`,
+        JSON.stringify(openStatuses)
+      );
+    }
+  }, [openStatuses, projectId]);
+
+  // Toggle a single status
+  const toggleStatus = (statusId: string) => {
+    setOpenStatuses(prev => {
+      const newState = { ...prev, [statusId]: !prev[statusId] };
+      // Check if all are now closed/open to update expandAll state
+      const allClosed = Object.values(newState).every(v => !v);
+      setExpandAll(!allClosed);
+      return newState;
     });
-    setOpenStatuses(initialOpenState);
-  }, [statuses]);
+  };
+
+  // Toggle all statuses
+  const toggleAllStatuses = () => {
+    const newExpandAll = !expandAll;
+    setExpandAll(newExpandAll);
+
+    const newState: Record<string, boolean> = {};
+    statuses.forEach(status => {
+      newState[status.id] = newExpandAll;
+    });
+    setOpenStatuses(newState);
+  };
 
   // Group tasks by status
   const getTasksByStatus = (statusId: string) => {
     return tasks
       .filter(task => task.statusId === statusId)
       .sort((a, b) => a.order - b.order);
-  }
-
-  // Toggle status section open/closed
-  const toggleStatus = (statusId: string) => {
-    setOpenStatuses(prev => ({
-      ...prev,
-      [statusId]: !prev[statusId]
-    }));
-  }
-
-  // Auto-open a status when dragging over it
-  useEffect(() => {
-    if (activeStatusId && !openStatuses[activeStatusId]) {
-      setOpenStatuses(prev => ({
-        ...prev,
-        [activeStatusId]: true
-      }));
-    }
-  }, [activeStatusId, openStatuses]);
-
-  // Focus input when editing status
-  useEffect(() => {
-    if (editingStatusId && statusInputRef.current) {
-      statusInputRef.current.focus();
-      statusInputRef.current.select();
-    }
-  }, [editingStatusId]);
-
-  // Handle task completion toggle
-  const toggleTaskCompletion = async (taskId: string, completed: boolean) => {
-    try {
-      console.log(`Toggling task completion: ${taskId}, current state: ${completed}`);
-
-      // Update on the server
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: !completed })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to update task completion:", errorData);
-        throw new Error(errorData.error || "Failed to update task");
-      }
-
-      // Refresh data
-      await onRefresh();
-
-      toast({
-        title: `Task marked as ${!completed ? "completed" : "incomplete"}`,
-        description: "Task status updated successfully",
-      })
-    } catch (error) {
-      console.error("Error toggling task completion:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update task",
-        variant: "destructive"
-      })
-    }
-  }
-
-  // Update task assignees
-  const updateTaskAssignees = async (taskId: string, assigneeIds: string[]) => {
-    try {
-      // Update on the server
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assigneeIds })
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update task assignees");
-      }
-
-      // Refresh data
-      await onRefresh();
-
-      toast({
-        title: "Task updated",
-        description: "Task assignees updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating task assignees:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update task assignees",
-        variant: "destructive"
-      });
-    }
-  }
-
-  // Set up sensors for drag and drop
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 5, // 5px of movement required before activation
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250, // 250ms delay for touch
-        tolerance: 5, // 5px of movement allowed during delay
-      },
-    }),
-    useSensor(KeyboardSensor, {})
-  )
+  };
 
   // Handle drag start
   const handleDragStart = (event: DragStartEvent) => {
@@ -613,40 +432,72 @@ export function StatusListView({
     if (activeData?.type === 'task') {
       setActiveTask(activeData.task);
     }
-  }
+  };
 
   // Handle drag over
   const handleDragOver = (event: DragOverEvent) => {
-    const { over } = event;
+    const { active, over } = event;
 
-    if (!over) return;
+    if (!over) {
+      setActiveStatusId(null);
+      return;
+    }
 
-    console.log('Drag over event:', {
-      overId: over.id,
-      isStatusContainer: over.id.toString().startsWith('status-'),
-      data: over.data.current,
-    });
-
-    // Check if we're over a status container
-    if (over.id.toString().startsWith('status-')) {
-      const statusId = over.id.toString().replace('status-', '');
+    // If hovering over a status
+    if (over.data.current?.type === 'status') {
+      const statusId = over.data.current.status.id;
       setActiveStatusId(statusId);
+    }
+    // If hovering over another task
+    else if (over.data.current?.type === 'task') {
+      const task = over.data.current.task;
+      setActiveStatusId(task.statusId);
+    }
+  };
 
-      // Make sure the status is open
-      if (!openStatuses[statusId]) {
-        setOpenStatuses(prev => ({
-          ...prev,
-          [statusId]: true
-        }));
-      }
-    } else {
-      // If over a task, find its status
-      const overTask = tasks.find(task => task.id === over.id);
-      if (overTask && overTask.statusId) {
-        setActiveStatusId(overTask.statusId);
+  // Handle drag end
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveTask(null);
+      setActiveStatusId(null);
+      return;
+    }
+
+    const draggedTask = active.data.current?.task as Task;
+    if (!draggedTask) {
+      setActiveTask(null);
+      setActiveStatusId(null);
+      return;
+    }
+
+    // If dropping onto a status
+    if (over.data.current?.type === 'status') {
+      const newStatusId = over.data.current.status.id;
+
+      // If the status is changing
+      if (draggedTask.statusId !== newStatusId) {
+        await moveTask(draggedTask.id, newStatusId);
       }
     }
-  }
+    // If dropping onto another task
+    else if (over.data.current?.type === 'task') {
+      const targetTask = over.data.current.task as Task;
+
+      // If the status is changing
+      if (draggedTask.statusId !== targetTask.statusId) {
+        await moveTask(draggedTask.id, targetTask.statusId, targetTask.id);
+      }
+      // If just reordering within the same status
+      else if (draggedTask.id !== targetTask.id) {
+        await moveTask(draggedTask.id, targetTask.statusId, targetTask.id);
+      }
+    }
+
+    setActiveTask(null);
+    setActiveStatusId(null);
+  };
 
   // Start editing a status
   const handleEditStatus = (status: ProjectStatus) => {
@@ -669,27 +520,21 @@ export function StatusListView({
         throw new Error("Failed to update status");
       }
 
-      // Refresh data
-      await onRefresh();
+      // Refresh tasks to get updated status
+      await refreshTasks();
 
-      toast({
-        title: "Status updated",
-        description: "Status name has been updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update status",
-        variant: "destructive",
-      });
-    } finally {
+      // Reset editing state
       setEditingStatusId(null);
+      setEditingStatusName("");
+    } catch (error) {
+      console.error("Error updating status:", error);
     }
   };
 
   // Cancel editing
   const handleCancelEdit = () => {
     setEditingStatusId(null);
+    setEditingStatusName("");
   };
 
   // Delete status
@@ -697,18 +542,10 @@ export function StatusListView({
     if (!deleteStatusId) return;
 
     try {
-      console.log(`Attempting to delete status: ${deleteStatusId}`);
-
       // Check if status has tasks
       const tasksInStatus = tasks.filter(task => task.statusId === deleteStatusId);
-      console.log(`Status has ${tasksInStatus.length} tasks`);
 
       if (tasksInStatus.length > 0) {
-        toast({
-          title: "Cannot delete status",
-          description: "This status contains tasks. Move or delete them first.",
-          variant: "destructive",
-        });
         setDeleteStatusId(null);
         return;
       }
@@ -718,25 +555,13 @@ export function StatusListView({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to delete status:", errorData);
-        throw new Error(errorData.error || "Failed to delete status");
+        throw new Error("Failed to delete status");
       }
 
-      // Refresh data
-      await onRefresh();
-
-      toast({
-        title: "Status deleted",
-        description: "Status has been deleted successfully",
-      });
+      // Refresh tasks to get updated statuses
+      await refreshTasks();
     } catch (error) {
       console.error("Error deleting status:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete status",
-        variant: "destructive",
-      });
     } finally {
       setDeleteStatusId(null);
     }
@@ -747,177 +572,48 @@ export function StatusListView({
     if (!deleteTaskId) return;
 
     try {
-      console.log(`Deleting task: ${deleteTaskId}`);
-
-      const response = await fetch(`/api/tasks/${deleteTaskId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Failed to delete task:", errorData);
-        throw new Error(errorData.error || "Failed to delete task");
-      }
-
-      // Refresh data
-      await onRefresh();
-
-      toast({
-        title: "Task deleted",
-        description: "Task has been deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete task",
-        variant: "destructive",
-      });
+      await deleteTask(deleteTaskId);
     } finally {
       setDeleteTaskId(null);
     }
   };
-
-  // Handle drag end
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    console.log('Drag end event:', {
-      activeId: active.id,
-      overId: over?.id,
-      isStatusContainer: over?.id.toString().startsWith('status-'),
-    });
-
-    if (!over) {
-      setActiveTask(null);
-      setActiveStatusId(null);
-      return;
-    }
-
-    // Find the task being dragged
-    const draggedTask = tasks.find(task => task.id === active.id);
-    if (!draggedTask) {
-      setActiveTask(null);
-      setActiveStatusId(null);
-      return;
-    }
-
-    // Check if dropping onto a status container
-    if (over.id.toString().startsWith('status-')) {
-      const newStatusId = over.id.toString().replace('status-', '');
-
-      // If the status is changing
-      if (draggedTask.statusId !== newStatusId) {
-        try {
-          // Update the task status on the server
-          const response = await fetch(`/api/tasks/${draggedTask.id}/status`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ statusId: newStatusId })
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to update task status");
-          }
-
-          // Refresh data
-          await onRefresh();
-
-          toast({
-            title: "Task moved",
-            description: `Task moved to ${statuses.find(s => s.id === newStatusId)?.name || 'new status'}`,
-          });
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: error instanceof Error ? error.message : "Failed to move task",
-            variant: "destructive"
-          });
-        }
-      }
-    }
-    // If dropping onto another task
-    else {
-      // Find the task being dropped onto
-      const targetTask = tasks.find(task => task.id === over.id);
-
-      if (targetTask) {
-        // If the status is changing (moving to a different status)
-        if (draggedTask.statusId !== targetTask.statusId) {
-          try {
-            // Update the task status on the server
-            const response = await fetch(`/api/tasks/${draggedTask.id}/status`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ statusId: targetTask.statusId })
-            });
-
-            if (!response.ok) {
-              throw new Error("Failed to update task status");
-            }
-
-            // Now reorder within the new status
-            await taskApi.reorderTask(
-              draggedTask.id,
-              null, // newParentId
-              null, // oldParentId
-              targetTask.id, // targetTaskId
-              true // isSameParentReorder
-            );
-
-            // Refresh data
-            await onRefresh();
-
-            toast({
-              title: "Task moved",
-              description: `Task moved to ${targetTask.status?.name || 'new status'}`,
-            });
-          } catch (error) {
-            toast({
-              title: "Error",
-              description: error instanceof Error ? error.message : "Failed to move task",
-              variant: "destructive"
-            });
-          }
-        }
-        // If just reordering within the same status
-        else {
-          try {
-            await taskApi.reorderTask(
-              draggedTask.id,
-              null, // newParentId
-              null, // oldParentId
-              targetTask.id, // targetTaskId
-              true // isSameParentReorder
-            );
-
-            // Refresh data
-            await onRefresh();
-          } catch (error) {
-            toast({
-              title: "Error",
-              description: error instanceof Error ? error.message : "Failed to reorder task",
-              variant: "destructive"
-            });
-          }
-        }
-      }
-    }
-
-    setActiveTask(null);
-    setActiveStatusId(null);
-  }
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex justify-between items-center mb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleAllStatuses}
+          className="text-xs"
+        >
+          {expandAll ? (
+            <>
+              <ChevronDown className="h-3.5 w-3.5 mr-1" />
+              Collapse All
+            </>
+          ) : (
+            <>
+              <ChevronRight className="h-3.5 w-3.5 mr-1" />
+              Expand All
+            </>
+          )}
+        </Button>
+
+        <div className="text-xs text-muted-foreground">
+          {tasks.length} tasks in {statuses.length} statuses
+        </div>
+      </div>
+
       <DndContext
         sensors={sensors}
         collisionDetection={rectIntersection}
@@ -933,7 +629,7 @@ export function StatusListView({
             tasks={getTasksByStatus(status.id)}
             onToggleComplete={toggleTaskCompletion}
             onEdit={onEditTask}
-            onCreateTask={onRefresh}
+            onCreateTask={refreshTasks}
             isOpen={!!openStatuses[status.id]}
             onToggle={() => toggleStatus(status.id)}
             onEditStatus={handleEditStatus}
@@ -968,26 +664,34 @@ export function StatusListView({
         </DragOverlay>
       </DndContext>
 
-      {/* Delete Status Confirmation Dialog */}
-      <AlertDialog open={!!deleteStatusId} onOpenChange={(open) => !open && setDeleteStatusId(null)}>
+      {/* Delete status confirmation dialog */}
+      <AlertDialog open={!!deleteStatusId} onOpenChange={() => setDeleteStatusId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Status</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this status? This action cannot be undone.
+              {tasks.some(task => task.statusId === deleteStatusId) && (
+                <p className="text-destructive mt-2 font-medium">
+                  This status contains tasks. Move or delete them first.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteStatus} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDeleteStatus}
+              disabled={tasks.some(task => task.statusId === deleteStatusId)}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Task Confirmation Dialog */}
-      <AlertDialog open={!!deleteTaskId} onOpenChange={(open) => !open && setDeleteTaskId(null)}>
+      {/* Delete task confirmation dialog */}
+      <AlertDialog open={!!deleteTaskId} onOpenChange={() => setDeleteTaskId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task</AlertDialogTitle>
@@ -997,12 +701,12 @@ export function StatusListView({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTask} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDeleteTask}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

@@ -304,7 +304,7 @@ export function TaskListView({
                     {task.assignees && task.assignees.length > 0 ? (
                       <div className="flex -space-x-2">
                         {task.assignees.slice(0, 3).map((assignee) => (
-                          <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
+                          <Avatar key={assignee.id} className="h-6 w-6 border border-black">
                             <AvatarImage src={assignee.user.image || undefined} />
                             <AvatarFallback className="text-xs">
                               {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}

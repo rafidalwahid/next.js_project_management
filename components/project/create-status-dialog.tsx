@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Spinner } from "@/components/ui/spinner"
+import { useTaskContext } from "./task-context"
 import {
   Dialog,
   DialogContent,
@@ -21,13 +22,11 @@ import {
 
 interface CreateStatusDialogProps {
   projectId: string
-  onStatusCreated: () => void
   trigger?: React.ReactNode
 }
 
-export function CreateStatusDialog({
+export function CreateStatusDialogNew({
   projectId,
-  onStatusCreated,
   trigger
 }: CreateStatusDialogProps) {
   const [open, setOpen] = useState(false)
@@ -39,6 +38,7 @@ export function CreateStatusDialog({
     isDefault: false
   })
   const { toast } = useToast()
+  const { refreshTasks } = useTaskContext();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -53,11 +53,6 @@ export function CreateStatusDialog({
     e.preventDefault()
 
     if (!formData.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Status name is required",
-        variant: "destructive"
-      })
       return
     }
 
@@ -92,8 +87,8 @@ export function CreateStatusDialog({
       })
       setOpen(false)
 
-      // Notify parent component
-      onStatusCreated()
+      // Refresh tasks to get updated statuses
+      await refreshTasks();
     } catch (error) {
       toast({
         title: "Error",
@@ -109,8 +104,8 @@ export function CreateStatusDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button size="sm" className="h-8">
+            <Plus className="h-4 w-4 mr-1" />
             New Status
           </Button>
         )}
@@ -162,6 +157,7 @@ export function CreateStatusDialog({
                 value={formData.description}
                 onChange={handleInputChange}
                 placeholder="Describe what this status represents"
+                className="resize-none"
                 rows={3}
               />
             </div>
@@ -180,15 +176,9 @@ export function CreateStatusDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Spinner className="mr-2 h-4 w-4" />
-                  Creating...
-                </>
-              ) : (
-                "Create Status"
-              )}
+            <Button type="submit" disabled={isSubmitting || !formData.name.trim()}>
+              {isSubmitting ? <Spinner className="mr-2" /> : null}
+              {isSubmitting ? "Creating..." : "Create Status"}
             </Button>
           </DialogFooter>
         </form>

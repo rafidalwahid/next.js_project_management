@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { useTaskContext } from "./task-context"
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ interface QuickTaskDialogProps {
   trigger?: React.ReactNode
 }
 
-export function QuickTaskDialog({
+export function QuickTaskDialogNew({
   projectId,
   statusId,
   statusName,
@@ -45,7 +45,7 @@ export function QuickTaskDialog({
     title: "",
     priority: "medium"
   })
-  const { toast } = useToast()
+  const { createTask } = useTaskContext();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -60,40 +60,18 @@ export function QuickTaskDialog({
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Task title is required",
-        variant: "destructive"
-      })
       return
     }
 
     try {
       setIsSubmitting(true)
 
-      const response = await fetch(`/api/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          priority: formData.priority,
-          projectId,
-          statusId
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create task")
-      }
-
-      toast({
-        title: "Task created",
-        description: `Task "${formData.title}" has been created successfully`,
-      })
+      await createTask({
+        title: formData.title,
+        priority: formData.priority,
+        projectId,
+        statusId
+      });
 
       // Reset form and close dialog
       setFormData({
@@ -105,11 +83,7 @@ export function QuickTaskDialog({
       // Notify parent component
       onTaskCreated()
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create task",
-        variant: "destructive"
-      })
+      console.error("Error creating task:", error);
     } finally {
       setIsSubmitting(false)
     }
@@ -119,7 +93,12 @@ export function QuickTaskDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            title="Add Task"
+          >
             <Plus className="h-4 w-4" />
           </Button>
         )}
@@ -165,15 +144,9 @@ export function QuickTaskDialog({
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Spinner className="mr-2 h-4 w-4" />
-                  Creating...
-                </>
-              ) : (
-                "Create Task"
-              )}
+            <Button type="submit" disabled={isSubmitting || !formData.title.trim()}>
+              {isSubmitting ? <Spinner className="mr-2" /> : null}
+              {isSubmitting ? "Creating..." : "Create Task"}
             </Button>
           </DialogFooter>
         </form>

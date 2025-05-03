@@ -91,7 +91,7 @@ export function SubtaskItem({
             {subtask.priority}
           </Badge>
         )}
-        
+
         {subtask.dueDate && (
           <span className="text-xs text-muted-foreground">
             {new Date(subtask.dueDate).toLocaleDateString()}
@@ -104,10 +104,10 @@ export function SubtaskItem({
         <AssigneeAvatars assignees={subtask.assignees} />
 
         {/* Action buttons */}
-        <SubtaskActions 
-          subtaskId={subtask.id} 
-          onAddNested={onAddNested} 
-          onDelete={onDelete} 
+        <SubtaskActions
+          subtaskId={subtask.id}
+          onAddNested={onAddNested}
+          onDelete={onDelete}
         />
       </div>
     </div>
@@ -117,14 +117,14 @@ export function SubtaskItem({
 // Component for assignee avatars
 function AssigneeAvatars({ assignees }: { assignees?: { id: string, user: any }[] }) {
   if (!assignees || assignees.length === 0) return null;
-  
+
   return (
     <div className="flex -space-x-2">
       {assignees.slice(0, 2).map((assignee) => (
         <TooltipProvider key={assignee.id}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Avatar className="h-6 w-6 border border-background">
+              <Avatar className="h-6 w-6 border border-black">
                 {assignee.user.image ? (
                   <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
                 ) : null}
@@ -140,7 +140,7 @@ function AssigneeAvatars({ assignees }: { assignees?: { id: string, user: any }[
         </TooltipProvider>
       ))}
       {assignees.length > 2 && (
-        <Avatar className="h-6 w-6 border border-background">
+        <Avatar className="h-6 w-6 border border-black">
           <AvatarFallback className="text-xs bg-muted">
             +{assignees.length - 2}
           </AvatarFallback>
@@ -151,14 +151,14 @@ function AssigneeAvatars({ assignees }: { assignees?: { id: string, user: any }[
 }
 
 // Component for action buttons
-function SubtaskActions({ 
-  subtaskId, 
-  onAddNested, 
-  onDelete 
-}: { 
-  subtaskId: string, 
-  onAddNested: (id: string) => void, 
-  onDelete: (id: string) => void 
+function SubtaskActions({
+  subtaskId,
+  onAddNested,
+  onDelete
+}: {
+  subtaskId: string,
+  onAddNested: (id: string) => void,
+  onDelete: (id: string) => void
 }) {
   return (
     <>

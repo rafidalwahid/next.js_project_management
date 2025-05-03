@@ -152,9 +152,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (timeSpent !== undefined) updateData.timeSpent = timeSpent;
 
     // Handle nullable date fields
-    if (startDate !== undefined) updateData.startDate = startDate ? new Date(startDate) : null;
-    if (endDate !== undefined) updateData.endDate = endDate ? new Date(endDate) : null;
-    if (dueDate !== undefined) updateData.dueDate = dueDate ? new Date(dueDate) : null;
+    console.log("Updating task with date fields:", { startDate, endDate, dueDate });
+
+    if (startDate !== undefined) {
+      updateData.startDate = startDate ? new Date(startDate) : null;
+      console.log("Setting startDate to:", updateData.startDate);
+    }
+    if (endDate !== undefined) {
+      updateData.endDate = endDate ? new Date(endDate) : null;
+      console.log("Setting endDate to:", updateData.endDate);
+    }
+    if (dueDate !== undefined) {
+      updateData.dueDate = dueDate ? new Date(dueDate) : null;
+      console.log("Setting dueDate to:", updateData.dueDate);
+    }
 
     // Handle project change (if allowed and provided)
     if (projectId !== undefined && projectId !== task.projectId) {
