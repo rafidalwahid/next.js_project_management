@@ -145,7 +145,11 @@ export function TaskProvider({
       const data = await response.json();
       setUsers(data.users || []);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch team members",
+        variant: "destructive",
+      });
     }
   };
 
@@ -425,7 +429,6 @@ export function TaskProvider({
         description: "New task has been created",
       });
     } catch (error) {
-      console.error("Error creating task:", error);
       toast({
         title: "Error",
         description: "Failed to create task",

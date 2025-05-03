@@ -139,6 +139,7 @@ model Task {
   order         Int              @default(0)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  completed     Boolean          @default(false)
   endDate       DateTime?
   estimatedTime Float?
   startDate     DateTime?

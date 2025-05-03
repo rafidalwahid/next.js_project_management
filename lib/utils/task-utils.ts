@@ -2,12 +2,19 @@ import { Task } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
 /**
- * Check if a task is completed based on its status
+ * Check if a task is completed based on its status or completed field
  * @param task The task to check
- * @returns True if the task's status is marked as completed
+ * @returns True if the task is completed
  */
 export function isTaskCompleted(task: Task & { status?: { isCompletedStatus: boolean } | null }): boolean {
-  return !!task.status?.isCompletedStatus;
+  // First check the status.isCompletedStatus field (preferred method)
+  if (task.status?.isCompletedStatus) {
+    return true;
+  }
+
+  // Fall back to the completed field if status approach isn't available
+  // This is for backward compatibility
+  return !!(task as any).completed;
 }
 
 /**
@@ -27,9 +34,9 @@ export async function getDefaultCompletedStatus(projectId: string): Promise<{ id
       name: true,
     },
   });
-  
+
   if (status) return status;
-  
+
   // If no default completed status exists, try to find any completed status
   return prisma.projectStatus.findFirst({
     where: {
@@ -60,9 +67,9 @@ export async function getDefaultNonCompletedStatus(projectId: string): Promise<{
       name: true,
     },
   });
-  
+
   if (status) return status;
-  
+
   // If no default non-completed status exists, try to find any non-completed status
   return prisma.projectStatus.findFirst({
     where: {
@@ -124,10 +131,13 @@ export async function toggleTaskCompletion(taskId: string) {
     );
   }
 
-  // Update the task with the new status
+  // Update the task with the new status and completed field for backward compatibility
   return prisma.task.update({
     where: { id: taskId },
-    data: { statusId: targetStatusId },
+    data: {
+      statusId: targetStatusId,
+      completed: !isCurrentlyCompleted // Update the completed field to match the status
+    },
     include: {
       status: true,
       project: {
