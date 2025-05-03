@@ -111,15 +111,15 @@ export function TaskCard({
       }}
     >
       {/* Header with title and actions */}
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex items-start gap-2 min-w-0">
+      <div className="flex justify-between items-start gap-1 sm:gap-2">
+        <div className="flex items-start gap-1 sm:gap-2 min-w-0 flex-1">
           <Checkbox
             checked={task.completed}
             onCheckedChange={() => onToggleComplete(task.id)}
-            className="mt-1"
+            className="mt-1 flex-shrink-0"
             aria-label={`Mark task "${task.title}" as ${task.completed ? "incomplete" : "complete"}`}
           />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className={cn(
               "font-medium text-sm leading-tight break-words",
               task.completed ? "line-through text-muted-foreground" : ""

@@ -81,11 +81,23 @@ export function useProject(id: string | null) {
       try {
         const response = await projectApi.getProject(id);
         console.log('Project fetch response:', response);
+
+        // Ensure we have a project object with a title
+        if (response && response.project && response.project.title) {
+          console.log('Project title for breadcrumbs:', response.project.title);
+        } else {
+          console.warn('Project data missing or incomplete:', response);
+        }
+
         return response;
       } catch (err) {
         console.error('Error in useProject hook:', err);
         throw err;
       }
+    },
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 5000, // Cache for 5 seconds
     }
   );
 

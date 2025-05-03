@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { KanbanBoard } from "@/components/project/kanban-board"
 import { StatusListView } from "@/components/project/status-list-view"
 import { TaskProvider } from "@/components/project/task-context"
@@ -21,7 +22,6 @@ import { TaskForm } from "@/components/project/task-form"
 import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
 import { format } from "date-fns"
 import { CreateStatusDialogNew } from "@/components/project/create-status-dialog"
-import { Breadcrumbs } from "@/components/breadcrumbs"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -339,6 +339,7 @@ export default function ProjectPage() {
   return (
     <div>
       <div className="flex flex-col gap-4">
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
@@ -416,7 +417,7 @@ export default function ProjectPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border border-black">
+                  <Avatar className="h-12 w-12 border border-black flex-shrink-0">
                     {project.createdBy?.image ? (
                       <AvatarImage src={project.createdBy.image} alt={project.createdBy.name || ""} />
                     ) : (
@@ -425,9 +426,9 @@ export default function ProjectPage() {
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <div>
-                    <p className="font-medium">{project.createdBy?.name || "Unknown"}</p>
-                    <p className="text-sm text-muted-foreground">{project.createdBy?.email || ""}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{project.createdBy?.name || "Unknown"}</p>
+                    <p className="text-sm text-muted-foreground truncate">{project.createdBy?.email || ""}</p>
                     {users.some(user => user.id === project.createdBy?.id) && (
                       <p className="text-xs text-muted-foreground mt-1 italic">
                         Also a team member
@@ -472,8 +473,8 @@ export default function ProjectPage() {
                       .slice(0, 5)
                       .map((user) => (
                       <div key={user.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8 border border-black">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Avatar className="h-8 w-8 border border-black flex-shrink-0">
                             {user.image ? (
                               <AvatarImage src={user.image} alt={user.name || ""} />
                             ) : (
@@ -482,9 +483,9 @@ export default function ProjectPage() {
                               </AvatarFallback>
                             )}
                           </Avatar>
-                          <div>
-                            <p className="font-medium">{user.name || "Unknown"}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium truncate">{user.name || "Unknown"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
                         {/* Don't show remove button for project creator */}
@@ -492,7 +493,7 @@ export default function ProjectPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0 ml-2"
                             onClick={() => setUserToRemove(user)}
                             title="Remove from team"
                           >
@@ -520,7 +521,7 @@ export default function ProjectPage() {
           </div>
         </TabsContent>
         <TabsContent value="analytics">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Progress Card */}
             <Card>
               <CardHeader>

@@ -57,6 +57,13 @@ export function Breadcrumbs() {
   const projectIdMatch = pathname.match(/\/projects\/([a-zA-Z0-9_-]+)/)
   const projectId = projectIdMatch ? projectIdMatch[1] : null
 
+  // Log the extracted project ID for debugging
+  useEffect(() => {
+    if (projectId) {
+      console.log("Extracted project ID from URL:", projectId);
+    }
+  }, [projectId])
+
   // Extract task ID from task path if present
   const taskIdMatch = pathname.match(/\/tasks\/([a-zA-Z0-9_-]+)/)
   const taskId = taskIdMatch ? taskIdMatch[1] : null
@@ -70,6 +77,36 @@ export function Breadcrumbs() {
 
   // Fetch project if we're on a project page (but not for "new" project)
   const { project, isLoading: isProjectLoading } = useProject(isNewProjectRoute ? null : projectId)
+
+  // State to store project title from direct API call if needed
+  const [directProjectTitle, setDirectProjectTitle] = useState<string | null>(null)
+
+  // Log project data for debugging
+  useEffect(() => {
+    if (projectId && !isNewProjectRoute) {
+      console.log("Breadcrumbs - Project data:", {
+        projectId,
+        projectTitle: project?.title,
+        isLoading: isProjectLoading,
+        project: project
+      });
+
+      // Force a fetch of the project data if it's not available
+      if (!project && !isProjectLoading) {
+        fetch(`/api/projects/${projectId}`)
+          .then(res => res.json())
+          .then(data => {
+            console.log("Direct project fetch result:", data);
+            if (data.project && data.project.title) {
+              setDirectProjectTitle(data.project.title);
+            }
+          })
+          .catch(err => {
+            console.error("Error fetching project directly:", err);
+          });
+      }
+    }
+  }, [projectId, project, isProjectLoading, isNewProjectRoute])
 
   // Fetch task if we're on a task page (but not for "new" task)
   const { task, isLoading: isTaskLoading } = useTask(isNewTaskRoute ? null : taskId)
@@ -113,9 +150,15 @@ export function Breadcrumbs() {
             } else if (isProjectLoading) {
               label = 'Loading...';
             } else if (project && project.title) {
-              // Clean up any gibberish in the project title
-              label = project.title.split('hgh')[0];
+              // Use the project title directly
+              label = project.title;
+              console.log("Using project title in breadcrumb:", project.title);
+            } else if (directProjectTitle) {
+              // Use the directly fetched project title
+              label = directProjectTitle;
+              console.log("Using directly fetched project title in breadcrumb:", directProjectTitle);
             } else {
+              console.log("Project data not available for breadcrumb:", { project, id: segment });
               label = 'Project Details';
             }
           }
