@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Edit, Trash, MoreHorizontal, CheckCircle2, ArrowUpDown, Circle, CircleDotDashed, CircleCheck } from "lucide-react"
+import { Edit, Trash, MoreHorizontal, CheckCircle2, ArrowUpDown, Circle, CircleDotDashed, CircleCheck, Calendar } from "lucide-react"
 import {
   ColumnDef,
   SortingState,
@@ -356,61 +356,166 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
   const columnCount = React.useMemo(() => columns(onDelete).length, [onDelete])
 
   return (
-    <div className="rounded-md border shadow-sm overflow-x-auto">
-      <Table className="min-w-full">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                   key={header.id}
-                   className={cn(
-                     "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
-                     header.id === 'project.title' && "hidden lg:table-cell",
-                     header.id === 'dueDate' && "hidden md:table-cell"
-                   )}
-                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                     key={cell.id}
-                     className={cn(
-                       "px-3 py-2.5 text-sm",
-                       cell.column.id === 'project.title' && "hidden lg:table-cell",
-                       cell.column.id === 'dueDate' && "hidden md:table-cell"
-                     )}
+    <div className="rounded-md border shadow-sm overflow-hidden">
+      {/* Responsive table with horizontal scrolling on small screens */}
+      <div className="overflow-x-auto">
+        <Table className="min-w-[800px] w-full">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
+                      header.id === 'project.title' && "hidden lg:table-cell",
+                      header.id === 'dueDate' && "hidden md:table-cell",
+                      header.id === 'assignees' && "hidden sm:table-cell"
+                    )}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columnCount} className="h-24 text-center">
-                No tasks found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="group hover:bg-muted/50"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        "px-3 py-2.5 text-sm",
+                        cell.column.id === 'project.title' && "hidden lg:table-cell",
+                        cell.column.id === 'dueDate' && "hidden md:table-cell",
+                        cell.column.id === 'assignees' && "hidden sm:table-cell"
+                      )}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columnCount} className="h-24 text-center">
+                  No tasks found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Mobile view - card layout for very small screens */}
+      <div className="md:hidden">
+        {table.getRowModel().rows?.length ? (
+          <div className="divide-y">
+            {table.getRowModel().rows.map((row) => {
+              const task = row.original;
+              return (
+                <div key={task.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <Link
+                      href={`/tasks/${task.id}`}
+                      className="font-medium hover:text-primary hover:underline"
+                    >
+                      {task.title}
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                            <CheckCircle2 className="mr-2 h-4 w-4" /> View
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                            <Edit className="mr-2 h-4 w-4" /> Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
+                          onClick={() => onDelete(task.id)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {task.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                      {task.description}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 items-center text-xs">
+                    <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize whitespace-nowrap text-xs font-medium">
+                      {task.priority}
+                    </Badge>
+
+                    {task.status && (
+                      <Badge
+                        style={task.status.color ? {
+                          backgroundColor: `${task.status.color}1A`,
+                          borderColor: `${task.status.color}4D`,
+                          color: task.status.color,
+                        } : {}}
+                        variant={!task.status.color ? getStatusBadgeVariant(task.status.name) : null}
+                        className={cn(
+                          "capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border",
+                          !task.status.color && "px-2 py-0.5",
+                          task.status.color && "px-2 py-0.5"
+                        )}
+                      >
+                        {getStatusIcon(task.status.name)}
+                        {task.status.name || "No Status"}
+                      </Badge>
+                    )}
+
+                    {task.dueDate && (
+                      <span className="text-xs text-muted-foreground flex items-center">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {new Date(task.dueDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+
+                  {task.project && (
+                    <div className="text-xs text-muted-foreground">
+                      Project: <Link href={`/projects/${task.project.id}`} className="hover:underline">{task.project.title}</Link>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">No tasks found.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
