@@ -19,6 +19,12 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const statusParam = url.searchParams.get('status');
     const statusIdParam = url.searchParams.get('statusId');
+    const titleParam = url.searchParams.get('title');
+    const startDateParam = url.searchParams.get('startDate');
+    const endDateParam = url.searchParams.get('endDate');
+    const teamMemberIdsParam = url.searchParams.get('teamMemberIds');
+    const sortFieldParam = url.searchParams.get('sortField') || 'updatedAt';
+    const sortDirectionParam = url.searchParams.get('sortDirection') || 'desc';
 
     const skip = (page - 1) * limit;
 
@@ -29,6 +35,11 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate sort parameters
+    const validSortFields = ['title', 'startDate', 'endDate', 'createdAt', 'updatedAt'];
+    const sortField = validSortFields.includes(sortFieldParam) ? sortFieldParam : 'updatedAt';
+    const sortDirection = sortDirectionParam === 'asc' ? 'asc' : 'desc';
 
     let where: any = {};
 
@@ -47,6 +58,51 @@ export async function GET(req: NextRequest) {
 
       if (status) {
         where.statusId = status.id;
+      }
+    }
+
+    // Add title search filter if provided
+    if (titleParam) {
+      where.title = {
+        contains: titleParam,
+        mode: 'insensitive' // Case-insensitive search
+      };
+    }
+
+    // Add date filters if provided
+    if (startDateParam) {
+      try {
+        const startDate = new Date(startDateParam);
+        where.startDate = {
+          gte: startDate
+        };
+      } catch (error) {
+        console.error("Invalid start date format:", error);
+      }
+    }
+
+    if (endDateParam) {
+      try {
+        const endDate = new Date(endDateParam);
+        where.endDate = {
+          lte: endDate
+        };
+      } catch (error) {
+        console.error("Invalid end date format:", error);
+      }
+    }
+
+    // Add team member filter if provided
+    if (teamMemberIdsParam) {
+      const teamMemberIds = teamMemberIdsParam.split(',');
+      if (teamMemberIds.length > 0) {
+        where.teamMembers = {
+          some: {
+            userId: {
+              in: teamMemberIds
+            }
+          }
+        };
       }
     }
 
@@ -77,6 +133,19 @@ export async function GET(req: NextRequest) {
             }
           },
           statuses: true, // Project-specific statuses
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                }
+              }
+            },
+            take: 10, // Limit to 10 team members per project for performance
+          },
           _count: {
             select: {
               tasks: true,
@@ -85,7 +154,7 @@ export async function GET(req: NextRequest) {
           }
         },
         orderBy: {
-          updatedAt: "desc"
+          [sortField]: sortDirection
         },
         take: limit,
         skip: skip,

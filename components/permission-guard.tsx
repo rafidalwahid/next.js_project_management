@@ -1,23 +1,37 @@
 "use client"
 
-import { useSession } from "next-auth/react"
 import { ReactNode } from "react"
 import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { useAuthSession } from "@/hooks/use-auth-session"
 
 interface PermissionGuardProps {
   permission: string
   children: ReactNode
   fallback?: ReactNode
+  showLoading?: boolean
+  loadingComponent?: ReactNode
 }
 
 /**
  * Component that only renders its children if the user has the specified permission
  * Uses the unified permission system for consistent permission checking
  */
-export function PermissionGuard({ permission, children, fallback = null }: PermissionGuardProps) {
-  const { data: session } = useSession()
+export function PermissionGuard({
+  permission,
+  children,
+  fallback = null,
+  showLoading = false,
+  loadingComponent = null
+}: PermissionGuardProps) {
+  const { session, status } = useAuthSession()
   const userRole = session?.user?.role || "guest"
 
+  // Show loading state if requested and authentication is still loading
+  if (showLoading && status === "loading") {
+    return <>{loadingComponent || <div>Loading...</div>}</>
+  }
+
+  // Check permission using the unified permission system
   if (!UnifiedPermissionSystem.hasPermission(userRole, permission)) {
     return <>{fallback}</>
   }

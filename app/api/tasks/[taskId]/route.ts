@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth-options";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskIncludeObject } from "@/lib/queries/task-queries";
 import { Prisma } from "@prisma/client";
+import { toggleTaskCompletion } from "@/lib/utils/task-utils";
 
 interface Params {
   params: {
@@ -82,7 +83,7 @@ const updateTaskSchema = z.object({
   estimatedTime: z.number().optional().nullable(),
   timeSpent: z.number().optional().nullable(),
   statusId: z.string().optional().nullable(),
-  completed: z.boolean().optional(),
+  toggleCompletion: z.boolean().optional(), // New field to toggle completion status
   assigneeIds: z.array(z.string()).optional(),
   projectId: z.string().optional(),
   parentId: z.string().optional().nullable(),
@@ -120,11 +121,24 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       estimatedTime,
       timeSpent,
       statusId,
-      completed,
+      toggleCompletion,
       assigneeIds,
       projectId,
       parentId
     } = validationResult.data;
+
+    // Handle completion toggle if requested
+    if (toggleCompletion === true) {
+      try {
+        const updatedTask = await toggleTaskCompletion(taskId);
+        return NextResponse.json({ task: updatedTask });
+      } catch (error) {
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : "Failed to toggle task completion" },
+          { status: 500 }
+        );
+      }
+    }
 
     // Prepare update data (direct fields)
     const updateData: Prisma.TaskUpdateInput = {};
@@ -132,7 +146,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
-    if (completed !== undefined) updateData.completed = completed;
     if (statusId !== undefined) updateData.statusId = statusId;
     if (parentId !== undefined) updateData.parentId = parentId;
     if (estimatedTime !== undefined) updateData.estimatedTime = estimatedTime;

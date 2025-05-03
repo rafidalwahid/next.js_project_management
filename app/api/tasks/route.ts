@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { withAuth } from "@/lib/api-middleware";
+import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
@@ -10,14 +10,8 @@ import { getNextOrderValue } from "@/lib/ordering/task-ordering";
 import { createTaskSchema, CreateTaskValues } from "@/lib/validations/task";
 
 // GET handler to list tasks
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req: NextRequest, _, session) => {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     // Get search params
     const searchParams = req.nextUrl.searchParams;
     const projectId = searchParams.get("projectId");
@@ -70,8 +64,6 @@ export async function GET(req: NextRequest) {
       skip: skip,
     });
 
-    console.log('Tasks fetched:', JSON.stringify(tasks.map(t => ({ id: t.id, title: t.title, dueDate: t.dueDate })), null, 2));
-
     return NextResponse.json({
       tasks,
       pagination: {
@@ -88,31 +80,21 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+}, PERMISSIONS.VIEW_PROJECTS);
 
 // Validation schema for creating a task
 // export const createTaskSchema = z.object({ ... }); // Remove schema definition
 // export type CreateTaskValues = z.infer<typeof createTaskSchema>; // Remove type definition
 
 // POST handler to create a task
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async (req: NextRequest, _, session) => {
   try {
-    const session = await getServerSession(authOptions);
-
-    console.log('POST /api/tasks: Session user ID:', session?.user?.id);
-
-    if (!session || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await req.json();
-    console.log('POST /api/tasks: Request body:', JSON.stringify(body, null, 2));
 
     // Validate request body
     const validationResult = createTaskSchema.safeParse(body);
 
     if (!validationResult.success) {
-      console.log('POST /api/tasks: Validation error:', validationResult.error.format());
       return NextResponse.json(
         { error: "Validation error", details: validationResult.error.format() },
         { status: 400 }
@@ -441,4 +423,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+}, PERMISSIONS.TASK_CREATION);

@@ -6,17 +6,31 @@ import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-
  * Check if a user has permission to access a task
  * @param taskId The ID of the task to check
  * @param session The user's session
- * @param action The action being performed (view, update, delete)
+ * @param action The action being performed (view, update, delete, create)
  * @returns An object with hasPermission and task properties
  */
 export async function checkTaskPermission(
   taskId: string,
   session: Session | null,
-  action: 'view' | 'update' | 'delete' = 'view'
+  action: 'view' | 'update' | 'delete' | 'create' = 'view'
 ) {
   // If no session, no permission
   if (!session || !session.user.id) {
     return { hasPermission: false, task: null, error: "Unauthorized" };
+  }
+
+  // For create action, we only need to check the permission
+  if (action === 'create') {
+    const hasPermission = UnifiedPermissionSystem.hasPermission(
+      session.user.role,
+      PERMISSIONS.TASK_CREATION
+    );
+
+    return {
+      hasPermission,
+      task: null,
+      error: hasPermission ? null : "You don't have permission to create tasks"
+    };
   }
 
   // Get the task with related data needed for permission checks

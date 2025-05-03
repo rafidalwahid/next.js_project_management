@@ -155,7 +155,7 @@ export default function ProjectSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div>
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{project.title} Settings</h1>
         <p className="text-muted-foreground">Manage project settings and configuration</p>

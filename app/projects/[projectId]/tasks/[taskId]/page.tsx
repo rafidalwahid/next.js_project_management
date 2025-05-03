@@ -259,9 +259,7 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <Breadcrumbs />
-
+    <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/projects/${projectId}`}>

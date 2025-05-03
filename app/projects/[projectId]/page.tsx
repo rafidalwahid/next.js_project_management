@@ -335,14 +335,14 @@ export default function ProjectPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <Breadcrumbs />
-
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">{project.title.split('hgh')[0]}</h1>
+    <div>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
+                {project.title.split('hgh')[0]}
+              </h1>
               <Button
                 variant="outline"
                 size="icon"
@@ -354,13 +354,14 @@ export default function ProjectPage() {
               </Button>
             </div>
             {project.description && !project.description.includes('hgh') && (
-              <p className="text-muted-foreground text-sm sm:text-base">{project.description}</p>
+              <p className="text-muted-foreground text-sm sm:text-base mt-1">
+                {project.description}
+              </p>
             )}
           </div>
         </div>
-        {/* Removed the card with project details to make the view cleaner */}
       </div>
-      <div className="bg-muted/10 p-4 rounded-lg border mb-6">
+      <div className="bg-muted/10 p-4 rounded-lg mb-6">
         <TaskFilter
           statuses={statuses}
           users={users}
@@ -368,8 +369,8 @@ export default function ProjectPage() {
         />
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-2 border-b">
-          <TabsList className="w-full sm:w-auto bg-background border">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <TabsList className="w-full sm:w-auto bg-background">
             <TabsTrigger value="board" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Board</TabsTrigger>
             <TabsTrigger value="list" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">List</TabsTrigger>
             <TabsTrigger value="team" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Team</TabsTrigger>

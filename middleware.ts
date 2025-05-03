@@ -3,70 +3,96 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { UnifiedPermissionSystem, PERMISSIONS } from '@/lib/permissions/unified-permission-system'
 
-// This function can be marked `async` if using `await` inside
+// Public paths that don't require authentication
+const PUBLIC_PATHS = [
+  '/login',
+  '/register',
+  '/api/auth',
+  '/api/register',
+  '/api/auth-status',
+  '/_next',
+  '/favicon.ico',
+  '/images',
+  '/fonts'
+]
+
+// Permission-protected paths mapping
+const PROTECTED_PATHS = {
+  // Admin-only paths
+  '/team/permissions': PERMISSIONS.MANAGE_ROLES,
+  '/team/roles': PERMISSIONS.MANAGE_ROLES,
+  '/api/roles': PERMISSIONS.MANAGE_ROLES,
+  '/api/permissions': PERMISSIONS.MANAGE_ROLES,
+
+  // User management paths
+  '/team/new': PERMISSIONS.USER_MANAGEMENT,
+  '/api/users': PERMISSIONS.USER_MANAGEMENT,
+
+  // Project management paths
+  '/projects/new': PERMISSIONS.PROJECT_CREATION,
+
+  // Attendance management paths
+  '/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
+  '/api/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
+
+  // System settings paths
+  '/settings': PERMISSIONS.SYSTEM_SETTINGS,
+  '/api/settings': PERMISSIONS.SYSTEM_SETTINGS,
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip authentication check for these paths
-  if (
-    pathname.includes('/login') ||
-    pathname.includes('/register') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/register') ||
-    pathname.startsWith('/_next') ||
-    pathname.includes('/favicon.ico')
-  ) {
+  // Check if the path is public
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
+  if (isPublicPath) {
     return NextResponse.next()
   }
 
   // Check if the user is authenticated
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  })
 
-  // If not authenticated and not on an auth page, redirect to login
-  if (!token && !pathname.includes('/login')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // If not authenticated, redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(pathname)}`, request.url))
   }
 
   // Role-based access control for specific paths
-  if (token) {
-    const userRole = token.role as string || 'guest'
-    const userId = token.sub as string
+  const userRole = token.role as string || 'guest'
+  const userId = token.sub as string
 
-    // Admin-only routes
-    if (pathname.startsWith('/team/permissions') || pathname.startsWith('/team/roles')) {
-      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
+  // Check if the path is protected by a specific permission
+  for (const [protectedPath, requiredPermission] of Object.entries(PROTECTED_PATHS)) {
+    if (pathname.startsWith(protectedPath)) {
+      // Special case for user-specific API routes
+      if (protectedPath === '/api/users') {
+        // Allow users to access their own data
+        const userIdInPath = pathname.match(/\/api\/users\/([^\/]+)/)?.[1]
+        if (userIdInPath && userIdInPath === userId) {
+          return NextResponse.next()
+        }
+      }
+
+      // Check if the user has the required permission
+      if (!UnifiedPermissionSystem.hasPermission(userRole, requiredPermission)) {
+        // For API routes, return a JSON error
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json(
+            { error: 'Forbidden: Insufficient permissions' },
+            { status: 403 }
+          )
+        }
+
+        // For UI routes, redirect to dashboard
         return NextResponse.redirect(new URL('/dashboard', request.url))
-      }
-    }
-
-    // Manager and admin routes
-    if (pathname.startsWith('/team/new')) {
-      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
-      }
-    }
-
-    // Check permissions for specific API routes
-    if (pathname.startsWith('/api/roles') || pathname.startsWith('/api/permissions')) {
-      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.MANAGE_ROLES)) {
-        return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
-      }
-    }
-
-    // Check permissions for user management API routes
-    if (pathname.startsWith('/api/users')) {
-      // Allow users to access their own data
-      const userIdInPath = pathname.match(/\/api\/users\/([^\/]+)/)?.[1]
-      if (userIdInPath && userIdInPath === userId) {
-        return NextResponse.next()
-      }
-
-      if (!UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.USER_MANAGEMENT)) {
-        return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 })
       }
     }
   }
 
+  // If we get here, the user is authenticated and has the required permissions
   return NextResponse.next()
 }
 

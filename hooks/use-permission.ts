@@ -1,15 +1,15 @@
 "use client"
 
-import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { useAuthSession } from "./use-auth-session"
 
 /**
  * Hook to check if the current user has a specific permission
  * Uses the unified permission system for consistent permission checking
  */
 export function usePermission(permission: string) {
-  const { data: session } = useSession()
+  const { session } = useAuthSession()
   const [hasPermission, setHasPermission] = useState(false)
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function usePermission(permission: string) {
  * Hook to check if the current user has a specific role
  */
 export function useRole(role: string) {
-  const { data: session } = useSession()
+  const { session } = useAuthSession()
   const [hasRole, setHasRole] = useState(false)
 
   useEffect(() => {
@@ -55,11 +55,13 @@ export function useRole(role: string) {
  * Uses the unified permission system for consistent permission retrieval
  */
 export function useUserPermissions() {
-  const { data: session } = useSession()
+  const { session, status } = useAuthSession()
   const [permissions, setPermissions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    setIsLoading(status === 'loading')
+
     // If no session, user has no permissions
     if (!session?.user?.id) {
       setPermissions([])
@@ -72,7 +74,7 @@ export function useUserPermissions() {
     const rolePermissions = UnifiedPermissionSystem.getPermissionsForRole(userRole)
     setPermissions(rolePermissions)
     setIsLoading(false)
-  }, [session])
+  }, [session, status])
 
   return { permissions, isLoading }
 }
@@ -82,11 +84,13 @@ export function useUserPermissions() {
  * Provides the current user's role with loading state
  */
 export function useUserRole() {
-  const { data: session } = useSession()
+  const { session, status } = useAuthSession()
   const [role, setRole] = useState<string>("guest")
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    setIsLoading(status === 'loading')
+
     // If no session, user is a guest
     if (!session?.user?.id) {
       setRole("guest")
@@ -98,7 +102,7 @@ export function useUserRole() {
     const userRole = session.user.role || "guest"
     setRole(userRole)
     setIsLoading(false)
-  }, [session])
+  }, [session, status])
 
   return { role, isLoading }
 }

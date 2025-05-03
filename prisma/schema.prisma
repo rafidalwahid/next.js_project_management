@@ -110,17 +110,18 @@ model Project {
 }
 
 model ProjectStatus {
-  id          String   @id @default(cuid())
-  name        String
-  color       String?
-  description String?
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  order       Int      @default(0)
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tasks       Task[]
+  id                String   @id @default(cuid())
+  name              String
+  color             String?
+  description       String?
+  isDefault         Boolean  @default(false)
+  isCompletedStatus Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  order             Int      @default(0)
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks             Task[]
 
   @@unique([projectId, name])
   @@index([projectId])
@@ -138,7 +139,6 @@ model Task {
   order         Int              @default(0)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  completed     Boolean          @default(false)
   endDate       DateTime?
   estimatedTime Float?
   startDate     DateTime?

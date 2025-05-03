@@ -6,10 +6,17 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    return NextResponse.json({
+    // Create a response with the session data
+    const response = NextResponse.json({
       authenticated: !!session,
       session,
     });
+
+    // Add cache control headers to prevent frequent calls
+    // Cache for 5 minutes but allow revalidation
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=300');
+
+    return response;
   } catch (error) {
     console.error("Error fetching auth status:", error);
     return NextResponse.json(

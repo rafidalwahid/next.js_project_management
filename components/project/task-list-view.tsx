@@ -39,7 +39,6 @@ interface Task {
   statusId?: string | null
   parentId?: string | null
   order: number
-  completed: boolean
   createdAt: string
   updatedAt: string
   assignees?: TaskAssignee[]
@@ -47,6 +46,7 @@ interface Task {
     id: string
     name: string
     color: string
+    isCompletedStatus?: boolean
   } | null
 }
 
@@ -67,6 +67,7 @@ interface ProjectStatus {
   description?: string | null
   order: number
   isDefault: boolean
+  isCompletedStatus: boolean
   projectId: string
 }
 
@@ -162,24 +163,28 @@ export function TaskListView({
   }
 
   // Handle task completion toggle
-  const toggleTaskCompletion = async (taskId: string, completed: boolean) => {
+  const toggleTaskCompletion = async (taskId: string) => {
     try {
-      // Update on the server
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: !completed })
+      // Update on the server using the new dedicated endpoint
+      const response = await fetch(`/api/tasks/${taskId}/toggle-completion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       })
 
       if (!response.ok) {
-        throw new Error("Failed to update task")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update task");
       }
+
+      // Get the updated task to determine its new status
+      const data = await response.json();
+      const isCompleted = data.task?.status?.isCompletedStatus || false;
 
       // Refresh data
       await onRefresh()
-      
+
       toast({
-        title: `Task marked as ${!completed ? "completed" : "incomplete"}`,
+        title: `Task marked as ${isCompleted ? "completed" : "incomplete"}`,
         description: "Task status updated successfully",
       })
     } catch (error) {
@@ -259,14 +264,14 @@ export function TaskListView({
               </TableRow>
             ) : (
               sortedTasks.map((task) => (
-                <TableRow key={task.id} className={task.completed ? "opacity-60 bg-muted/20" : ""}>
+                <TableRow key={task.id} className={task.status?.isCompletedStatus ? "opacity-60 bg-muted/20" : ""}>
                   <TableCell>
                     <Checkbox
-                      checked={task.completed}
-                      onCheckedChange={() => toggleTaskCompletion(task.id, task.completed)}
+                      checked={task.status?.isCompletedStatus || false}
+                      onCheckedChange={() => toggleTaskCompletion(task.id)}
                     />
                   </TableCell>
-                  <TableCell className={task.completed ? "line-through text-muted-foreground" : ""}>
+                  <TableCell className={task.status?.isCompletedStatus ? "line-through text-muted-foreground" : ""}>
                     {task.title}
                   </TableCell>
                   <TableCell>
@@ -327,8 +332,8 @@ export function TaskListView({
                         <DropdownMenuItem onClick={() => onEditTask && onEditTask(task.id)}>
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toggleTaskCompletion(task.id, task.completed)}>
-                          Mark as {task.completed ? "Incomplete" : "Complete"}
+                        <DropdownMenuItem onClick={() => toggleTaskCompletion(task.id)}>
+                          Mark as {task.status?.isCompletedStatus ? "Incomplete" : "Complete"}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
