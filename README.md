@@ -6,9 +6,10 @@ A comprehensive project management application built with Next.js, Prisma, and M
 
 - User authentication and role-based access control
 - Project management with team collaboration
-- Task management with Kanban board
-- Resource allocation and tracking
-- Event scheduling and calendar view
+- Task management with Kanban and list views
+- Nested subtasks with ordering capabilities
+- Field attendance tracking with geolocation
+- Attendance analytics and reporting
 - Activity logging and reporting
 
 ## Tech Stack
@@ -109,20 +110,20 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 ### Core Models
 
 #### User
-- **Fields**: id (cuid), name (String?), email (String, unique), emailVerified (DateTime?), image (String?), password (String?), role (String), createdAt (DateTime), updatedAt (DateTime)
+- **Fields**: id (cuid), name (String?), email (String, unique), emailVerified (DateTime?), image (String?), password (String?), role (String), bio (Text?), jobTitle (String?), location (String?), department (String?), phone (String?), skills (String?), createdAt (DateTime), updatedAt (DateTime)
 - **Role Values**: "admin", "manager", "user" (default)
-- **Relations**: One-to-many with Projects, Tasks, TeamMembers, Accounts, Sessions, Activities
+- **Relations**: One-to-many with Projects, Tasks, TeamMembers, Accounts, Sessions, Activities, Attendance
 
 #### Project
-- **Fields**: id (cuid), title (String), description (Text?), status (String), startDate (DateTime?), endDate (DateTime?), createdAt (DateTime), updatedAt (DateTime), createdById (String)
-- **Status Values**: "active" (default), "completed", "on-hold", "cancelled"
-- **Relations**: Many-to-one with User (createdBy), One-to-many with Tasks, TeamMembers, Events, Resources, Activities
+- **Fields**: id (cuid), title (String), description (Text?), startDate (DateTime?), endDate (DateTime?), totalTimeSpent (Float?), createdAt (DateTime), updatedAt (DateTime), createdById (String)
+- **Relations**: Many-to-one with User (createdBy), One-to-many with Tasks, TeamMembers, Events, Resources, Activities, ProjectStatuses
+- **Status**: Projects use a flexible ProjectStatus model that allows multiple statuses per project
 
 #### Task
-- **Fields**: id (cuid), title (String), description (Text?), status (String), priority (String), dueDate (DateTime?), projectId (String), assignedToId (String?), createdAt (DateTime), updatedAt (DateTime)
-- **Status Values**: "pending" (default), "in-progress", "completed"
+- **Fields**: id (cuid), title (String), description (Text?), statusId (String), priority (String), dueDate (DateTime?), projectId (String), assignedToId (String?), parentId (String?), order (Int), estimatedTime (Float?), timeSpent (Float?), createdAt (DateTime), updatedAt (DateTime)
 - **Priority Values**: "low", "medium" (default), "high"
-- **Relations**: Many-to-one with Project and User (assignedTo), One-to-many with Activities
+- **Relations**: Many-to-one with Project, User (assignedTo), and ProjectStatus; One-to-many with Subtasks (self-relation) and Activities
+- **Subtasks**: Tasks can have nested subtasks with explicit ordering
 
 #### TeamMember
 - **Fields**: id (cuid), userId (String), projectId (String), createdAt (DateTime), updatedAt (DateTime)
@@ -171,6 +172,11 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **User-Activity**: One-to-many (A user can generate multiple activities)
 - **Project-Activity**: One-to-many (A project can have multiple activities)
 - **Task-Activity**: One-to-many (A task can have multiple activities)
+- **Task-Subtask**: One-to-many (A task can have multiple subtasks)
+- **Project-ProjectStatus**: One-to-many (A project can have multiple statuses)
+- **User-Attendance**: One-to-many (A user can have multiple attendance records)
+- **Project-Attendance**: One-to-many (Attendance can be linked to projects)
+- **Task-Attendance**: One-to-many (Attendance can be linked to tasks)
 
 ### Important Notes on Data Types
 
@@ -225,7 +231,9 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Date Handling**: Dates are stored in ISO format in the database but should be properly formatted for display in the UI.
 - **Cascading Deletes**: The schema includes cascading deletes for related records (e.g., deleting a project will delete all its tasks).
 - **Type Safety**: The Prisma schema enforces type safety, but be careful with dynamic values and user inputs.
-- **Status Enums**: Status fields like project status and task status are stored as strings but should only contain predefined values.
+- **Status Handling**: Projects use a flexible ProjectStatus model, while tasks reference these statuses directly. The isCompletedStatus field on ProjectStatus determines if a task is considered complete.
+- **Subtask Ordering**: When creating or updating subtasks, ensure the order field is properly set to maintain the correct sequence.
+- **Attendance Geolocation**: The attendance system collects geolocation data, which requires proper user consent and privacy considerations.
 
 ## API Routes
 
@@ -236,6 +244,7 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - `/api/events` - Event management
 - `/api/resources` - Resource management
 - `/api/activities` - Activity logging
+- `/api/attendance` - Attendance tracking and management
 
 ## Development Workflow
 
