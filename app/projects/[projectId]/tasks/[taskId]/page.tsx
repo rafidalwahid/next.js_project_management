@@ -586,8 +586,8 @@ export default function TaskDetailPage() {
 
       {/* Edit Task Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl" style={{ zIndex: 100 }}>
-          <DialogHeader>
+        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6" style={{ zIndex: 100 }}>
+          <DialogHeader className="mb-4">
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
           <TaskForm

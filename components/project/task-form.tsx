@@ -8,10 +8,8 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { CalendarIcon, Clock } from "lucide-react"
+import { format, parseISO } from "date-fns"
+import { Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "@/components/ui/spinner"
@@ -68,9 +66,9 @@ const taskFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional().nullable(),
   priority: z.enum(["low", "medium", "high"]),
-  startDate: z.date().optional().nullable(),
-  endDate: z.date().optional().nullable(),
-  dueDate: z.date().optional().nullable(),
+  startDate: z.string().optional().nullable().transform(val => val ? val : null),
+  endDate: z.string().optional().nullable().transform(val => val ? val : null),
+  dueDate: z.string().optional().nullable().transform(val => val ? val : null),
   estimatedTime: z.union([
     z.coerce.number().min(0).optional().nullable(),
     z.literal("")
@@ -226,13 +224,20 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         console.log("Extracted assignee IDs:", assigneeIds);
 
         if (task) {
+          // Format dates as YYYY-MM-DD for HTML date inputs
+          const formatDateForInput = (dateString: string | null) => {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+          };
+
           form.reset({
             title: task.title,
             description: task.description || "",
             priority: task.priority,
-            startDate: task.startDate ? new Date(task.startDate) : null,
-            endDate: task.endDate ? new Date(task.endDate) : null,
-            dueDate: task.dueDate ? new Date(task.dueDate) : null,
+            startDate: formatDateForInput(task.startDate),
+            endDate: formatDateForInput(task.endDate),
+            dueDate: formatDateForInput(task.dueDate),
             estimatedTime: task.estimatedTime,
             timeSpent: task.timeSpent,
             statusId: task.statusId,
@@ -391,7 +396,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="priority"
@@ -455,46 +460,23 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="startDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        type="button"
-                        variant={"outline"}
-                        className={cn(
-                          "pl-3 text-left font-normal w-full",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => {
-                        console.log("Selected start date:", date);
-                        field.onChange(date);
-                      }}
-                      disabled={(date) => false}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -506,39 +488,16 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>End Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        type="button"
-                        variant={"outline"}
-                        className={cn(
-                          "pl-3 text-left font-normal w-full",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => {
-                        console.log("Selected end date:", date);
-                        field.onChange(date);
-                      }}
-                      disabled={(date) => false}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -550,46 +509,23 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Due Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        type="button"
-                        variant={"outline"}
-                        className={cn(
-                          "pl-3 text-left font-normal w-full",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[200]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => {
-                        console.log("Selected due date:", date);
-                        field.onChange(date);
-                      }}
-                      disabled={(date) => false}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={form.control}
             name="estimatedTime"
@@ -697,11 +633,20 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
           />
         )}
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             {isLoading && <Spinner className="mr-2 h-4 w-4" />}
             {taskId ? "Update Task" : "Create Task"}
           </Button>

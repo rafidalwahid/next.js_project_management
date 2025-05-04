@@ -32,6 +32,7 @@ import {
   Upload,
   X,
   ChevronRight,
+  ChevronDown,
   MoreHorizontal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -618,27 +619,27 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* Streamlined breadcrumb navigation */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Button variant="ghost" size="sm" asChild className="p-0 h-8 w-8">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground overflow-hidden">
+        <Button variant="ghost" size="sm" asChild className="p-0 h-8 w-8 flex-shrink-0">
           <Link href="/tasks">
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to Tasks</span>
           </Link>
         </Button>
-        <Link href="/tasks" className="hover:text-foreground transition-colors">
+        <Link href="/tasks" className="hover:text-foreground transition-colors flex-shrink-0">
           Tasks
         </Link>
         {task.project && (
           <>
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
+            <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
             <Link
               href={`/projects/${task.project.id}`}
-              className="hover:text-foreground transition-colors flex items-center gap-1"
+              className="hover:text-foreground transition-colors flex items-center gap-1 truncate"
             >
-              <Briefcase className="h-3 w-3" />
-              <span>{task.project.title}</span>
+              <Briefcase className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{task.project.title}</span>
             </Link>
           </>
         )}
@@ -802,8 +803,8 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-        <div className="md:col-span-2 space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Enhanced description section */}
           <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
             <div className="flex items-center justify-between p-3 border-b">
@@ -846,30 +847,30 @@ export default function TaskDetailPage() {
 
           {/* Consolidated tabs with simplified design */}
           <Tabs defaultValue="subtasks" className="space-y-3 sm:space-y-4">
-            <TabsList className="bg-muted/50 p-0.5 sm:p-1 h-auto w-full">
-              <TabsTrigger value="subtasks" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+            <TabsList className="bg-muted/50 p-0.5 sm:p-1 h-auto w-full grid grid-cols-3">
+              <TabsTrigger value="subtasks" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
                 <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span>Subtasks</span>
+                <span className="hidden xs:inline">Subtasks</span>
                 {task.subtasks && task.subtasks.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.subtasks.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="comments" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+              <TabsTrigger value="comments" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
                 <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span>Comments</span>
+                <span className="hidden xs:inline">Comments</span>
                 {task.comments && task.comments.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.comments.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="attachments" className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-7 sm:h-8 flex-1">
+              <TabsTrigger value="attachments" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
                 <Paperclip className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span>Files</span>
+                <span className="hidden xs:inline">Files</span>
                 {task.attachments && task.attachments.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
                     {task.attachments.length}
                   </Badge>
                 )}
@@ -879,82 +880,69 @@ export default function TaskDetailPage() {
             <TabsContent value="subtasks">
               <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
                 {/* Subtasks header with progress */}
-                <div className="p-3 border-b">
+                <div className="p-4 border-b">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                      <h3 className="font-medium">Subtasks</h3>
-
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                          {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2.5">
+                      <div className="bg-primary/10 rounded-full p-1.5">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Subtasks</h3>
+                        {task.subtasks && task.subtasks.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {task.subtasks.filter(s => s.completed).length} of {task.subtasks.length} completed
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Progress bar */}
-                  {task.subtasks && task.subtasks.length > 0 && (
-                    <div className="mt-2.5">
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="text-muted-foreground">
-                          {Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}% complete
-                        </span>
-                        <span className="text-muted-foreground">
-                          {task.subtasks.filter(s => s.completed).length} of {task.subtasks.length} completed
-                        </span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary"
-                          style={{
-                            width: `${Math.round((task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100)}%`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Subtasks list with inline creation */}
                 <div className="p-3 sm:p-4">
                   {/* Inline subtask creation form */}
-                  <div className="mb-4 flex items-center gap-2">
-                    <Input
-                      placeholder="Add a new subtask..."
-                      value={newTask.title}
-                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                      className="h-9"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newTask.title.trim().length >= 3) {
-                          handleCreateSubtask();
-                        }
-                      }}
-                    />
+                  <div className="mb-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 relative">
+                    <div className="relative flex-1">
+                      <Input
+                        placeholder="Add a new subtask..."
+                        value={newTask.title}
+                        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                        className="h-10 pl-10 pr-4 border-dashed focus:border-solid"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newTask.title.trim().length >= 3) {
+                            handleCreateSubtask();
+                          }
+                        }}
+                      />
+                      <Plus className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                    </div>
                     <Button
-                      className="h-9 px-3 bg-black hover:bg-black/90 text-white flex-shrink-0"
-                      size="sm"
+                      className="h-10 px-4 bg-black hover:bg-black/90 text-white flex-shrink-0"
                       onClick={handleCreateSubtask}
-                      disabled={newTask.title.trim().length < 3}
+                      disabled={!task || newTask.title.trim().length < 3}
                     >
-                      <Plus className="h-3.5 w-3.5 mr-1.5" />
-                      Add
+                      <span className="sm:hidden">Add</span>
+                      <span className="hidden sm:inline">Add Subtask</span>
                     </Button>
                   </div>
 
                   {task.subtasks && task.subtasks.length > 0 ? (
-                    <SubtaskList
-                      parentTaskId={task.id}
-                      projectId={task.projectId}
-                      subtasks={task.subtasks}
-                      onSubtaskChange={handleSubtaskChange}
-                    />
+                    <div className="border rounded-lg overflow-hidden">
+                      <SubtaskList
+                        parentTaskId={task.id}
+                        projectId={task.projectId}
+                        subtasks={task.subtasks}
+                        onSubtaskChange={handleSubtaskChange}
+                      />
+                    </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-6 text-center">
-                      <CheckCircle className="h-8 w-8 text-muted-foreground mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No subtasks yet</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Break down this task into smaller steps by adding subtasks
+                    <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-lg border border-dashed">
+                      <div className="bg-muted/30 rounded-full p-3 mb-3">
+                        <CheckCircle className="h-6 w-6 text-muted-foreground opacity-70" />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">No subtasks yet</p>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                        Break down this task into smaller steps by adding subtasks using the form above
                       </p>
                     </div>
                   )}
@@ -981,8 +969,8 @@ export default function TaskDetailPage() {
 
                 <div className="p-3 sm:p-4">
                   {/* Enhanced comment input */}
-                  <div className="flex gap-2 mb-4">
-                    <Avatar className="h-8 w-8 border border-black/10 flex-shrink-0">
+                  <div className="flex flex-col xs:flex-row gap-2 mb-4">
+                    <Avatar className="h-8 w-8 border border-black/10 flex-shrink-0 hidden xs:block">
                       <AvatarFallback className="text-xs">ME</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -996,11 +984,12 @@ export default function TaskDetailPage() {
                         <Button
                           onClick={handleAddComment}
                           disabled={!newComment.trim() || isAddingComment}
-                          className="flex items-center gap-1.5"
+                          className="flex items-center gap-1.5 w-full xs:w-auto justify-center"
                           size="sm"
                         >
                           {isAddingComment ? <Spinner className="h-3.5 w-3.5 mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
-                          Post Comment
+                          <span className="xs:hidden">Post</span>
+                          <span className="hidden xs:inline">Post Comment</span>
                         </Button>
                       </div>
                     </div>
@@ -1076,12 +1065,13 @@ export default function TaskDetailPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3"
+                      className="h-8 px-2 sm:px-3"
                       onClick={() => document.getElementById('file-upload')?.click()}
                       disabled={isUploadingAttachment}
                     >
-                      <Upload className="h-3.5 w-3.5 mr-1.5" />
-                      Upload File
+                      <Upload className="h-3.5 w-3.5 mr-1 sm:mr-1.5" />
+                      <span className="hidden xs:inline">Upload File</span>
+                      <span className="xs:hidden">Upload</span>
                     </Button>
                     <Input
                       id="file-upload"
@@ -1123,7 +1113,8 @@ export default function TaskDetailPage() {
                           disabled={isUploadingAttachment}
                         >
                           {isUploadingAttachment ? <Spinner className="h-3.5 w-3.5 mr-1.5" /> : <Upload className="h-3.5 w-3.5 mr-1.5" />}
-                          Upload
+                          <span className="xs:hidden">Add</span>
+                          <span className="hidden xs:inline">Upload</span>
                         </Button>
                         <Button
                           variant="ghost"
@@ -1143,7 +1134,7 @@ export default function TaskDetailPage() {
                       {task.attachments.map((attachment) => (
                         <div
                           key={attachment.id}
-                          className="border rounded-md p-2.5 flex items-center gap-3 group hover:bg-muted/30 transition-colors"
+                          className="border rounded-md p-2.5 flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 group hover:bg-muted/30 transition-colors"
                         >
                           <div className={cn(
                             "h-9 w-9 rounded flex items-center justify-center flex-shrink-0",
@@ -1157,17 +1148,19 @@ export default function TaskDetailPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium truncate">{attachment.filename}</div>
-                            <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1">
                               <span>{formatFileSize(attachment.fileSize)}</span>
-                              <span>•</span>
+                              <span className="hidden xs:inline">•</span>
                               <span>
                                 {format(new Date(attachment.createdAt), "MMM d, yyyy")}
                               </span>
                               {attachment.user && (
                                 <>
-                                  <span>•</span>
-                                  <span className="truncate">
-                                    Added by {attachment.user.name || attachment.user.email}
+                                  <span className="hidden xs:inline">•</span>
+                                  <span className="truncate w-full xs:w-auto">
+                                    <span className="xs:hidden">Added by: </span>
+                                    <span className="hidden xs:inline">Added by </span>
+                                    {attachment.user.name || attachment.user.email}
                                   </span>
                                 </>
                               )}
@@ -1317,17 +1310,34 @@ export default function TaskDetailPage() {
           </Tabs>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 order-1 lg:order-2">
           {/* Enhanced Task Details Card */}
           <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
             <div className="p-3 border-b">
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-medium">Details</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="font-medium">Details</h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 lg:hidden"
+                  onClick={() => {
+                    // Scroll to the details section on mobile
+                    window.scrollTo({
+                      top: document.querySelector('.task-details-card')?.getBoundingClientRect().top
+                        + window.scrollY - 80,
+                      behavior: 'smooth'
+                    });
+                  }}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
-            <div className="p-3 sm:p-4 space-y-4 text-sm">
+            <div className="p-3 sm:p-4 space-y-4 text-sm task-details-card">
               {/* Parent Task - with improved styling */}
               {task.parent && (
                 <div className="bg-muted/30 rounded-md p-2.5 border-l-2 border-primary">
@@ -1505,8 +1515,8 @@ export default function TaskDetailPage() {
 
       {/* Edit Task Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="mb-4">
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
           {task && isEditDialogOpen && (

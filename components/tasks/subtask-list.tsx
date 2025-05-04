@@ -34,8 +34,6 @@ export function SubtaskList({
   showHeader = true
 }: SubtaskListProps) {
   const { toast } = useToast()
-  const [newSubtaskTitle, setNewSubtaskTitle] = useState("")
-  const [isAddingSubtask, setIsAddingSubtask] = useState(false)
   const [addingNestedToId, setAddingNestedToId] = useState<string | null>(null)
   const [nestedSubtaskTitle, setNestedSubtaskTitle] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -123,49 +121,6 @@ export function SubtaskList({
       }))
     }
   }, [expandedSubtasks, loadSubtasks])
-
-  const handleAddSubtask = async () => {
-    const trimmedTitle = newSubtaskTitle.trim()
-    if (!trimmedTitle) return
-
-    // Validate title length
-    if (trimmedTitle.length < 3) {
-      toast({
-        title: "Validation Error",
-        description: "Subtask title must be at least 3 characters long",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      setIsLoading(true)
-      await taskApi.createTask({
-        title: trimmedTitle,
-        projectId,
-        parentId: parentTaskId,
-        priority: "medium",
-      })
-
-      setNewSubtaskTitle("")
-      setIsAddingSubtask(false)
-      onSubtaskChange()
-
-      toast({
-        title: "Subtask added",
-        description: "Subtask has been added successfully",
-      })
-    } catch (error) {
-      console.error("Error adding subtask:", error)
-      toast({
-        title: "Error",
-        description: "Failed to add subtask. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleAddNestedSubtask = async (parentSubtaskId: string) => {
     const trimmedTitle = nestedSubtaskTitle.trim()
@@ -276,132 +231,88 @@ export function SubtaskList({
 
   return (
     <div className="space-y-3">
-      {/* Header with add button - only show if showHeader is true */}
-      {showHeader && (
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">
-            Subtasks ({subtasks.length})
-          </h3>
-          {!isAddingSubtask && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => setIsAddingSubtask(true)}
-            >
-              <Plus className="mr-1 h-3 w-3" />
-              Add Subtask
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Add subtask form */}
-      {isAddingSubtask && (
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Enter subtask title..."
-            value={newSubtaskTitle}
-            onChange={(e) => setNewSubtaskTitle(e.target.value)}
-            className="h-8 text-sm"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddSubtask()
-              if (e.key === "Escape") {
-                setIsAddingSubtask(false)
-                setNewSubtaskTitle("")
-              }
-            }}
-          />
-          <Button
-            size="sm"
-            className="h-8"
-            onClick={handleAddSubtask}
-          >
-            Add
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2"
-            onClick={() => {
-              setIsAddingSubtask(false)
-              setNewSubtaskTitle("")
-            }}
-          >
-            Cancel
-          </Button>
-        </div>
-      )}
-
       {/* Subtask list */}
-      <ul className="space-y-2 mt-2">
+      <ul className="divide-y divide-border">
         {subtasks.map((subtask) => (
-          <li key={subtask.id} className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-md border bg-card border-border">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+          <li key={subtask.id}>
+            <div className={cn(
+              "flex items-center justify-between p-3 group hover:bg-muted/30 transition-colors",
+              subtask.completed && "bg-muted/20"
+            )}>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Expand/collapse button for subtasks with children */}
-                {subtask.subtasks && subtask.subtasks.length > 0 ? (
+                <div className="flex items-center">
+                  {subtask.subtasks && subtask.subtasks.length > 0 ? (
+                    <button
+                      onClick={() => toggleSubtaskExpansion(subtask.id)}
+                      className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer mr-1"
+                      aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
+                      type="button"
+                    >
+                      {expandedSubtasks[subtask.id] ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                  ) : (
+                    <div className="w-4 mr-1" /> // Spacer for alignment
+                  )}
+
                   <button
-                    onClick={() => toggleSubtaskExpansion(subtask.id)}
-                    className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
-                    type="button"
+                    onClick={() => handleToggleStatus(subtask.id, subtask.completed || false)}
+                    className={cn(
+                      "flex-shrink-0 transition-colors rounded-full",
+                      subtask.completed
+                        ? "text-primary hover:text-primary/80"
+                        : "text-muted-foreground hover:text-primary"
+                    )}
                   >
-                    {expandedSubtasks[subtask.id] ? (
-                      <ChevronDown className="h-4 w-4" />
+                    {subtask.completed ? (
+                      <CheckCircle2 className="h-5 w-5" />
                     ) : (
-                      <ChevronRight className="h-4 w-4" />
+                      <Circle className="h-5 w-5" />
                     )}
                   </button>
-                ) : (
-                  <div className="w-4" /> // Spacer for alignment
-                )}
+                </div>
 
-                <button
-                  onClick={() => handleToggleStatus(subtask.id, subtask.completed || false)}
-                  className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
-                >
-                  {subtask.completed ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
-                  )}
-                </button>
+                <div className="flex-1 min-w-0">
+                  <div className={cn(
+                    "text-sm font-medium",
+                    subtask.completed ? "text-muted-foreground line-through" : "text-foreground"
+                  )}>
+                    {subtask.title}
+                  </div>
 
-                <span className={cn(
-                  "text-sm truncate",
-                  subtask.completed ? "text-muted-foreground line-through" : "text-foreground"
-                )}>
-                  {subtask.title}
-                </span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {subtask.priority && (
+                      <Badge
+                        variant={
+                          subtask.priority === "high"
+                            ? "destructive"
+                            : subtask.priority === "low"
+                              ? "secondary"
+                              : "default"
+                        }
+                        className="text-[10px] px-1.5 py-0 h-4"
+                      >
+                        {subtask.priority}
+                      </Badge>
+                    )}
 
-                {subtask.priority && (
-                  <Badge
-                    variant={
-                      subtask.priority === "high"
-                        ? "destructive"
-                        : subtask.priority === "low"
-                          ? "secondary"
-                          : "default"
-                    }
-                    className="text-[10px] px-1 py-0 h-4"
-                  >
-                    {subtask.priority}
-                  </Badge>
-                )}
-
-                {subtask.dueDate && (
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(subtask.dueDate).toLocaleDateString()}
-                  </span>
-                )}
+                    {subtask.dueDate && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(subtask.dueDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 {/* Assignees */}
                 {subtask.assignees && subtask.assignees.length > 0 ? (
-                  <div className="flex -space-x-2">
+                  <div className="flex -space-x-2 mr-1">
                     {subtask.assignees.slice(0, 2).map((assignee) => (
                       <TooltipProvider key={assignee.id}>
                         <Tooltip>
@@ -430,7 +341,7 @@ export function SubtaskList({
                     )}
                   </div>
                 ) : subtask.assignedTo ? (
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-6 w-6 mr-1">
                     {subtask.assignedTo.image ? (
                       <AvatarImage src={subtask.assignedTo.image} alt={subtask.assignedTo.name || "User"} />
                     ) : null}
@@ -463,35 +374,38 @@ export function SubtaskList({
 
             {/* Show form for adding nested subtask */}
             {addingNestedToId === subtask.id && (
-              <div className="pl-6 border-l-2 border-muted ml-3 mt-2">
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Enter nested subtask title..."
-                    value={nestedSubtaskTitle}
-                    onChange={(e) => setNestedSubtaskTitle(e.target.value)}
-                    className="h-8 text-sm"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddNestedSubtask(subtask.id);
-                      } else if (e.key === 'Escape') {
-                        setAddingNestedToId(null);
-                        setNestedSubtaskTitle('');
-                      }
-                    }}
-                  />
+              <div className="pl-8 border-l-2 border-primary/30 ml-3 mt-3 mb-2">
+                <div className="flex items-center gap-2 bg-muted/20 p-3 rounded-md">
+                  <div className="relative flex-1">
+                    <Input
+                      placeholder="Enter nested subtask title..."
+                      value={nestedSubtaskTitle}
+                      onChange={(e) => setNestedSubtaskTitle(e.target.value)}
+                      className="h-9 pl-9 text-sm border-dashed focus:border-solid"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddNestedSubtask(subtask.id);
+                        } else if (e.key === 'Escape') {
+                          setAddingNestedToId(null);
+                          setNestedSubtaskTitle('');
+                        }
+                      }}
+                    />
+                    <ChevronRight className="h-4 w-4 absolute left-3 top-2.5 text-muted-foreground" />
+                  </div>
                   <Button
                     size="sm"
-                    className="h-8"
+                    className="h-9 bg-black hover:bg-black/90 text-white"
                     onClick={() => handleAddNestedSubtask(subtask.id)}
                   >
                     Add
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="h-8"
+                    className="h-9"
                     onClick={() => {
                       setAddingNestedToId(null);
                       setNestedSubtaskTitle('');
@@ -505,14 +419,16 @@ export function SubtaskList({
 
             {/* Loading state for nested subtasks */}
             {loadingSubtasks[subtask.id] && (
-              <div className="pl-6 border-l-2 border-muted ml-3 py-2">
-                <div className="space-y-2">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="flex items-center gap-2 animate-pulse">
-                      <Skeleton className="h-4 w-4 rounded-full" />
-                      <Skeleton className="h-4 w-40" />
-                    </div>
-                  ))}
+              <div className="pl-8 border-l-2 border-primary/30 ml-3 mt-3 mb-2">
+                <div className="bg-muted/20 p-3 rounded-md">
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex items-center gap-3 animate-pulse">
+                        <Skeleton className="h-5 w-5 rounded-full" />
+                        <Skeleton className="h-5 w-40" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -521,16 +437,18 @@ export function SubtaskList({
             {subtask.subtasks && subtask.subtasks.length > 0 && (
               <>
                 {expandedSubtasks[subtask.id] && (
-                  <div className="pl-6 border-l-2 border-muted ml-3">
-                    <SubtaskList
-                      parentTaskId={subtask.id}
-                      projectId={projectId}
-                      subtasks={subtask.subtasks}
-                      onSubtaskChange={onSubtaskChange}
-                      depth={depth + 1}
-                      maxInitialDepth={maxInitialDepth}
-                      showHeader={false}
-                    />
+                  <div className="pl-8 border-l-2 border-primary/30 ml-3 mt-3 mb-2">
+                    <div className="bg-muted/10 rounded-md overflow-hidden">
+                      <SubtaskList
+                        parentTaskId={subtask.id}
+                        projectId={projectId}
+                        subtasks={subtask.subtasks}
+                        onSubtaskChange={onSubtaskChange}
+                        depth={depth + 1}
+                        maxInitialDepth={maxInitialDepth}
+                        showHeader={false}
+                      />
+                    </div>
                   </div>
                 )}
               </>
@@ -538,9 +456,9 @@ export function SubtaskList({
           </li>
         ))}
 
-        {subtasks.length === 0 && !isAddingSubtask && (
-          <li className="text-sm text-muted-foreground text-center py-2">
-            No subtasks yet. Add one to break down this task.
+        {subtasks.length === 0 && (
+          <li className="text-sm text-muted-foreground text-center py-3">
+            No subtasks yet.
           </li>
         )}
       </ul>
