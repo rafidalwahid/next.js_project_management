@@ -153,7 +153,7 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
           <Link
             href={`/tasks/${task.id}`}
             className={cn(
-              "font-medium hover:text-primary hover:underline max-w-[200px] md:max-w-[300px] truncate",
+              "font-medium hover:text-primary hover:underline max-w-[250px] md:max-w-[350px] lg:max-w-[450px] truncate",
               task.completed && "line-through text-muted-foreground"
             )}
             title={task.title}
@@ -162,7 +162,7 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
           </Link>
           {task.description && (
             <p className={cn(
-              "text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[200px] md:max-w-[300px]",
+              "text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[250px] md:max-w-[350px] lg:max-w-[450px]",
               task.completed && "line-through"
             )}>
               {task.description}
@@ -232,7 +232,7 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
       return project ? (
         <Link
           href={`/projects/${project.id}`}
-          className="text-sm hover:underline whitespace-nowrap max-w-[150px] truncate"
+          className="text-sm hover:underline whitespace-nowrap max-w-[120px] lg:max-w-[180px] truncate block"
           title={project.title}
         >
           {project.title}
@@ -400,8 +400,8 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
   return (
     <div className="rounded-md border shadow-sm overflow-hidden">
       {/* Responsive table with horizontal scrolling on small screens */}
-      <div className="overflow-x-auto">
-        <Table className="min-w-[800px] w-full">
+      <div className="hidden sm:block overflow-x-auto">
+        <Table className="w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -412,8 +412,10 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                       "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
                       header.id === 'project.title' && "hidden lg:table-cell",
                       header.id === 'dueDate' && "hidden md:table-cell",
-                      header.id === 'assignees' && "hidden sm:table-cell",
-                      header.id === 'completed' && "w-10"
+                      header.id === 'assignees' && "hidden md:table-cell",
+                      header.id === 'completed' && "w-10",
+                      header.id === 'status' && "hidden md:table-cell",
+                      header.id === 'priority' && "hidden md:table-cell"
                     )}
                   >
                     {header.isPlaceholder
@@ -442,8 +444,10 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                         "px-3 py-2.5 text-sm",
                         cell.column.id === 'project.title' && "hidden lg:table-cell",
                         cell.column.id === 'dueDate' && "hidden md:table-cell",
-                        cell.column.id === 'assignees' && "hidden sm:table-cell",
-                        cell.column.id === 'completed' && "w-10"
+                        cell.column.id === 'assignees' && "hidden md:table-cell",
+                        cell.column.id === 'completed' && "w-10",
+                        cell.column.id === 'status' && "hidden md:table-cell",
+                        cell.column.id === 'priority' && "hidden md:table-cell"
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -462,8 +466,8 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
         </Table>
       </div>
 
-      {/* Mobile view - card layout for very small screens */}
-      <div className="md:hidden">
+      {/* Mobile view - card layout for small screens */}
+      <div className="sm:hidden">
         {table.getRowModel().rows?.length ? (
           <div className="divide-y">
             {table.getRowModel().rows.map((row) => {
@@ -493,9 +497,10 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                       <Link
                         href={`/tasks/${task.id}`}
                         className={cn(
-                          "font-medium hover:text-primary hover:underline",
+                          "font-medium hover:text-primary hover:underline break-words line-clamp-2",
                           task.completed && "line-through text-muted-foreground"
                         )}
+                        title={task.title}
                       >
                         {task.title}
                       </Link>
@@ -571,11 +576,36 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                     )}
                   </div>
 
-                  {task.project && (
-                    <div className="text-xs text-muted-foreground">
-                      Project: <Link href={`/projects/${task.project.id}`} className="hover:underline">{task.project.title}</Link>
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {task.project && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-medium">Project:</span> <Link href={`/projects/${task.project.id}`} className="hover:underline">{task.project.title}</Link>
+                      </div>
+                    )}
+
+                    {task.assignees && task.assignees.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground font-medium">Assigned to:</span>
+                        <div className="flex -space-x-2">
+                          {task.assignees.slice(0, 3).map((assignee) => (
+                            <Avatar key={assignee.id} className="h-5 w-5 border border-background">
+                              {assignee.user.image ? (
+                                <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                              ) : null}
+                              <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">
+                                {getUserInitials(assignee.user.name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+                          {task.assignees.length > 3 && (
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full border border-background bg-muted text-[10px] text-muted-foreground">
+                              +{task.assignees.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

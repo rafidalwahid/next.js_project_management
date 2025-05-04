@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Search, Filter, ArrowDownAZ, Flag, CircleDotDashed } from "lucide-react"
+import { Plus, Search, Filter, ArrowDownAZ, Flag, CircleDotDashed, Users } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 
@@ -13,6 +13,7 @@ import { Pagination } from "@/components/tasks/pagination"
 import { useTasks } from "@/hooks/use-data"
 import { taskApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { useUsers } from "@/hooks/use-users"
 import type { Task } from "@/components/tasks/task-list"
 import { TaskCreateModal } from "@/components/modals/task-create-modal"
 import {
@@ -39,7 +40,7 @@ export default function TasksPage() {
   // State with URL params as defaults
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
   const [priorityFilter, setPriorityFilter] = useState<string>(searchParams.get("priority") || "all")
-  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all")
+  const [teamMemberFilter, setTeamMemberFilter] = useState<string>(searchParams.get("assignee") || "all")
   const [sortBy, setSortBy] = useState<string>(searchParams.get("sort") || "dueDate")
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"))
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -47,6 +48,7 @@ export default function TasksPage() {
 
   const itemsPerPage = 12
   const { tasks: allTasks, isLoading, isError, mutate } = useTasks(1, 100) // Increased limit
+  const { users, isLoading: usersLoading } = useUsers({ limit: 100 }) // Fetch all users
   const { toast } = useToast()
 
   // Update URL when filters change
@@ -54,23 +56,27 @@ export default function TasksPage() {
     const params = new URLSearchParams()
     if (searchQuery) params.set("q", searchQuery)
     if (priorityFilter !== "all") params.set("priority", priorityFilter)
-    if (statusFilter !== "all") params.set("status", statusFilter)
+    if (teamMemberFilter !== "all") params.set("assignee", teamMemberFilter)
     if (sortBy !== "dueDate") params.set("sort", sortBy)
     if (currentPage !== 1) params.set("page", currentPage.toString())
 
     const queryString = params.toString()
     router.push(queryString ? `?${queryString}` : "/tasks", { scroll: false })
-  }, [searchQuery, priorityFilter, statusFilter, sortBy, currentPage, router])
+  }, [searchQuery, priorityFilter, teamMemberFilter, sortBy, currentPage, router])
 
-  // Filter tasks by priority, status, and search query
+  // Filter tasks by priority, team member, and search query
   const filteredTasks = allTasks.filter((task: Task) => {
     const matchesPriority = priorityFilter === "all" || task.priority.toLowerCase() === priorityFilter.toLowerCase()
-    const matchesStatus = statusFilter === "all" ||
-      (task.status && task.status.name.toLowerCase() === statusFilter.toLowerCase())
+
+    // Check if task is assigned to the selected team member
+    const matchesTeamMember = teamMemberFilter === "all" ||
+      (task.assignees && task.assignees.some(assignee => assignee.user.id === teamMemberFilter))
+
     const matchesSearch = searchQuery === "" ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesPriority && matchesStatus && matchesSearch
+
+    return matchesPriority && matchesTeamMember && matchesSearch
   })
 
   // Sort tasks
@@ -105,14 +111,7 @@ export default function TasksPage() {
     setCurrentPage(1) // Reset to first page when searching
   }
 
-  // Get unique statuses for filter
-  const uniqueStatuses = Array.from(
-    new Set(
-      allTasks
-        .filter(task => task.status)
-        .map(task => task.status?.name)
-    )
-  )
+  // No longer needed - removed status filter
 
   const deleteTask = async (id: string) => {
     try {
@@ -262,16 +261,16 @@ export default function TasksPage() {
               </div>
 
               <div className="p-2">
-                <p className="text-xs font-medium mb-1">Status</p>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <p className="text-xs font-medium mb-1">Team Member</p>
+                <Select value={teamMemberFilter} onValueChange={setTeamMemberFilter}>
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Select team member" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    {uniqueStatuses.map((status) => (
-                      <SelectItem key={status} value={status || ""}>
-                        {status}
+                    <SelectItem value="all">All Team Members</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name || user.email}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -309,16 +308,16 @@ export default function TasksPage() {
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={teamMemberFilter} onValueChange={setTeamMemberFilter}>
               <SelectTrigger className="h-9 w-[130px]">
-                <CircleDotDashed className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Status" />
+                <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Team Member" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {uniqueStatuses.map((status) => (
-                  <SelectItem key={status} value={status || ""}>
-                    {status}
+                <SelectItem value="all">All Members</SelectItem>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name || user.email}
                   </SelectItem>
                 ))}
               </SelectContent>
