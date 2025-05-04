@@ -47,6 +47,12 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
       href: "/attendance/settings",
       icon: Settings,
       roles: ["user", "manager", "admin"],
+    },
+    {
+      title: "Admin",
+      href: "/attendance/admin",
+      icon: Users,
+      roles: ["manager", "admin"],
     }
   ]
 

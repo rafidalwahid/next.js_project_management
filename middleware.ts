@@ -34,6 +34,8 @@ const PROTECTED_PATHS = {
   // Attendance management paths
   '/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
   '/api/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
+  '/api/attendance/admin/records': PERMISSIONS.ATTENDANCE_MANAGEMENT,
+  '/api/attendance/admin/correction-requests': PERMISSIONS.ATTENDANCE_MANAGEMENT,
 
   // System settings paths
   '/settings': PERMISSIONS.SYSTEM_SETTINGS,

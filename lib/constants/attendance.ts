@@ -42,7 +42,7 @@ export const STATUS_COLORS = {
   HOLIDAY: "purple"
 }
 
-// Exception types removed as admin dashboard has been removed
+// Attendance status thresholds
 
 export const THRESHOLDS = {
   // Number of late arrivals that constitutes a pattern
