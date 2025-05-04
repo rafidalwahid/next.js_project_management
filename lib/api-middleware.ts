@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system";
+import { PermissionService } from "@/lib/permissions/permission-service";
 
 /**
  * Middleware for API routes to handle authentication and authorization
- * 
+ *
  * @param handler The API route handler function
  * @param requiredPermission Optional permission required to access the route
  * @returns A new handler function with authentication and authorization checks
  */
 export function withAuth(
-  handler: (req: NextRequest, context: any, session: any) => Promise<NextResponse>,
+  handler: (req: NextRequest, context: any, session: Session) => Promise<NextResponse>,
   requiredPermission?: string
 ) {
   return async (req: NextRequest, context: any) => {
     try {
       // Check authentication
       const session = await getServerSession(authOptions);
-      
+
       if (!session) {
         return NextResponse.json(
           { error: "Unauthorized" },
@@ -28,9 +29,12 @@ export function withAuth(
 
       // Check authorization if a permission is required
       if (requiredPermission) {
-        const userRole = session.user.role;
-        
-        if (!UnifiedPermissionSystem.hasPermission(userRole, requiredPermission)) {
+        const hasPermission = PermissionService.hasPermission(
+          session.user.role,
+          requiredPermission
+        );
+
+        if (!hasPermission) {
           return NextResponse.json(
             { error: "Forbidden: Insufficient permissions" },
             { status: 403 }
@@ -51,40 +55,73 @@ export function withAuth(
 }
 
 /**
- * Middleware for API routes that need to check resource-specific permissions
- * 
- * @param permissionChecker Function that checks if the user has permission for the specific resource
+ * Middleware for API routes that require a specific permission
+ *
+ * @param permission The permission required to access the route
  * @param handler The API route handler function
- * @returns A new handler function with resource-specific permission checks
+ * @returns A new handler function with permission checks
  */
-export function withResourcePermission(
-  permissionChecker: (resourceId: string, session: any, action: string) => Promise<{ hasPermission: boolean, error?: string }>,
-  handler: (req: NextRequest, context: any, session: any, resource: any) => Promise<NextResponse>
+export function withPermission(
+  permission: string,
+  handler: (req: NextRequest, context: any, session: Session) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, context: any) => {
+  return withAuth(async (req: NextRequest, context: any, session: Session) => {
     try {
-      // Check authentication
-      const session = await getServerSession(authOptions);
-      
-      if (!session) {
+      // Check if the user has the required permission
+      const hasPermission = PermissionService.hasPermission(
+        session.user.role,
+        permission
+      );
+
+      if (!hasPermission) {
         return NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
+          { error: `Forbidden: You don't have the required permission (${permission})` },
+          { status: 403 }
         );
       }
 
-      // Get the resource ID from the context
-      const resourceId = context.params?.id || context.params?.taskId || context.params?.projectId;
-      
+      // Call the original handler
+      return handler(req, context, session);
+    } catch (error) {
+      console.error("API permission middleware error:", error);
+      return NextResponse.json(
+        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
+  });
+}
+
+/**
+ * Middleware for API routes that need to check resource-specific permissions
+ *
+ * @param resourceIdParam The name of the parameter containing the resource ID
+ * @param permissionChecker Function that checks if the user has permission for the specific resource
+ * @param handler The API route handler function
+ * @param defaultAction The default action to use if not determined from the HTTP method
+ * @returns A new handler function with resource-specific permission checks
+ */
+export function withResourcePermission(
+  resourceIdParam: string,
+  permissionChecker: (resourceId: string, session: Session | null, action: string) => Promise<{ hasPermission: boolean, error?: string }>,
+  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  defaultAction: string = 'view'
+) {
+  return withAuth(async (req: NextRequest, context: any, session: Session) => {
+    try {
+      // Get the resource ID from the params
+      const params = await context.params;
+      const resourceId = params[resourceIdParam];
+
       if (!resourceId) {
         return NextResponse.json(
-          { error: "Resource ID not found in request" },
+          { error: `${resourceIdParam} is required` },
           { status: 400 }
         );
       }
 
       // Determine the action based on the HTTP method
-      let action = 'view';
+      let action = defaultAction;
       switch (req.method) {
         case 'POST':
           action = 'create';
@@ -100,15 +137,15 @@ export function withResourcePermission(
 
       // Check resource-specific permission
       const { hasPermission, error } = await permissionChecker(resourceId, session, action);
-      
+
       if (!hasPermission) {
         return NextResponse.json(
           { error: error || "Forbidden: Insufficient permissions" },
-          { status: error === "Resource not found" ? 404 : 403 }
+          { status: error?.includes("not found") ? 404 : 403 }
         );
       }
 
-      // Call the original handler with the session and resource
+      // Call the original handler with the resource ID
       return handler(req, context, session, resourceId);
     } catch (error) {
       console.error("API resource permission middleware error:", error);
@@ -117,5 +154,69 @@ export function withResourcePermission(
         { status: 500 }
       );
     }
-  };
+  });
+}
+
+/**
+ * Middleware for checking if a user is the owner of a resource or has admin privileges
+ *
+ * @param resourceIdParam The name of the parameter containing the resource ID
+ * @param resourceFetcher Function that fetches the resource and returns the user ID associated with it
+ * @param handler The API route handler function
+ * @param adminOnly Whether only admins should have access regardless of ownership
+ * @returns A new handler function with ownership checks
+ */
+export function withOwnerOrAdmin(
+  resourceIdParam: string,
+  resourceFetcher: (resourceId: string) => Promise<{ userId: string } | null>,
+  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  adminOnly: boolean = false
+) {
+  return withAuth(async (req: NextRequest, context: any, session: Session) => {
+    try {
+      // Get the resource ID from the params
+      const params = await context.params;
+      const resourceId = params[resourceIdParam];
+
+      if (!resourceId) {
+        return NextResponse.json(
+          { error: `${resourceIdParam} is required` },
+          { status: 400 }
+        );
+      }
+
+      // Fetch the resource
+      const resource = await resourceFetcher(resourceId);
+
+      if (!resource) {
+        return NextResponse.json(
+          { error: "Resource not found" },
+          { status: 404 }
+        );
+      }
+
+      // Check if the user is the owner or an admin
+      const { hasPermission, error } = PermissionService.checkOwnerOrAdmin(
+        session,
+        resource.userId,
+        adminOnly
+      );
+
+      if (!hasPermission) {
+        return NextResponse.json(
+          { error: error || "Forbidden: Insufficient permissions" },
+          { status: 403 }
+        );
+      }
+
+      // Call the original handler with the resource ID
+      return handler(req, context, session, resourceId);
+    } catch (error) {
+      console.error("API owner/admin permission middleware error:", error);
+      return NextResponse.json(
+        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
+  });
 }

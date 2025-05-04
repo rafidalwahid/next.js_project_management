@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { Session } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskIncludeObject } from "@/lib/queries/task-queries";
 import { Prisma } from "@prisma/client";
 import { toggleTaskCompletion } from "@/lib/utils/task-utils";
+import { withResourcePermission } from "@/lib/api-middleware";
 
 interface Params {
   params: {
@@ -15,62 +15,56 @@ interface Params {
 }
 
 // GET handler to get a task by ID
-export async function GET(req: NextRequest, { params }: Params) {
-  try {
-    const session = await getServerSession(authOptions);
-    // In Next.js, params might be a promise that needs to be awaited
-    const { taskId } = await params;
+export const GET = withResourcePermission(
+  'taskId',
+  checkTaskPermission,
+  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+    try {
+      // Get task with full details - include 3 levels of subtasks and activities
+      const taskWithDetails = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: getTaskIncludeObject(3, true, 5) // 3 levels deep, include activities, 5 activities max
+      });
 
-    // Check permission
-    const { hasPermission, task, error } = await checkTaskPermission(taskId, session, 'view');
+      console.log('GET task response:', JSON.stringify({
+        id: taskWithDetails?.id,
+        title: taskWithDetails?.title,
+        dueDate: taskWithDetails?.dueDate
+      }, null, 2));
 
-    if (!hasPermission) {
-      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
-    }
+      return NextResponse.json({ task: taskWithDetails });
+    } catch (error) {
+      console.error("Error fetching task:", error);
 
-    // Get task with full details - include 3 levels of subtasks and activities
-    const taskWithDetails = await prisma.task.findUnique({
-      where: { id: taskId },
-      include: getTaskIncludeObject(3, true, 5) // 3 levels deep, include activities, 5 activities max
-    });
+      // Provide more detailed error information
+      let errorMessage = "An error occurred while fetching the task";
+      let errorDetails = {};
 
-    console.log('GET task response:', JSON.stringify({
-      id: taskWithDetails?.id,
-      title: taskWithDetails?.title,
-      dueDate: taskWithDetails?.dueDate
-    }, null, 2));
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        errorDetails = { stack: error.stack };
 
-    return NextResponse.json({ task: taskWithDetails });
-  } catch (error) {
-    console.error("Error fetching task:", error);
-
-    // Provide more detailed error information
-    let errorMessage = "An error occurred while fetching the task";
-    let errorDetails = {};
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      errorDetails = { stack: error.stack };
-
-      // Check for Prisma-specific errors
-      if (error.message.includes("Unknown field")) {
-        errorMessage = "Database schema mismatch: field is missing";
-        errorDetails = {
-          ...errorDetails,
-          hint: "The Prisma client needs to be regenerated. Run 'npx prisma generate' to update it."
-        };
+        // Check for Prisma-specific errors
+        if (error.message.includes("Unknown field")) {
+          errorMessage = "Database schema mismatch: field is missing";
+          errorDetails = {
+            ...errorDetails,
+            hint: "The Prisma client needs to be regenerated. Run 'npx prisma generate' to update it."
+          };
+        }
       }
-    }
 
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        details: errorDetails
-      },
-      { status: 500 }
-    );
-  }
-}
+      return NextResponse.json(
+        {
+          error: errorMessage,
+          details: errorDetails
+        },
+        { status: 500 }
+      );
+    }
+  },
+  'view'
+);
 
 // Validation schema for updating a task
 const updateTaskSchema = z.object({
@@ -90,26 +84,26 @@ const updateTaskSchema = z.object({
 });
 
 // PATCH handler to update a task
-export async function PATCH(req: NextRequest, { params }: Params) {
-  try {
-    const session = await getServerSession(authOptions);
-    const { taskId } = await params;
-    const body = await req.json();
+export const PATCH = withResourcePermission(
+  'taskId',
+  checkTaskPermission,
+  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+    try {
+      const body = await req.json();
 
-    const validationResult = updateTaskSchema.safeParse(body);
+      const validationResult = updateTaskSchema.safeParse(body);
 
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
-        { status: 400 }
-      );
-    }
+      if (!validationResult.success) {
+        return NextResponse.json(
+          { error: "Validation error", details: validationResult.error.format() },
+          { status: 400 }
+        );
+      }
 
-    const { hasPermission, task, error } = await checkTaskPermission(taskId, session, 'update');
-
-    if (!hasPermission) {
-      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
-    }
+      // Get the task to update
+      const task = await prisma.task.findUnique({
+        where: { id: taskId }
+      });
 
     const {
       title,
@@ -250,24 +244,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       { status: 500 }
     );
   }
-}
+}, 'update');
 
 // DELETE handler to delete a task
-export async function DELETE(req: NextRequest, { params }: Params) {
-  try {
-    console.log('DELETE task handler called with params:', params);
-    const session = await getServerSession(authOptions);
-    // In Next.js, params might be a promise that needs to be awaited
-    const { taskId } = await params;
-    console.log('DELETE task: Task ID to delete:', taskId);
+export const DELETE = withResourcePermission(
+  'taskId',
+  checkTaskPermission,
+  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+    try {
+      console.log('DELETE task handler called for taskId:', taskId);
 
-    // Check permission
-    const { hasPermission, task, error } = await checkTaskPermission(taskId, session, 'delete');
-
-    if (!hasPermission) {
-      console.log('DELETE task: Permission denied -', error);
-      return NextResponse.json({ error }, { status: error === "Task not found" ? 404 : 403 });
-    }
+      // Get the task to delete
+      const task = await prisma.task.findUnique({
+        where: { id: taskId }
+      });
 
     console.log('DELETE task: Found task:', {
       id: task.id,
@@ -348,4 +338,4 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       { status: 500 }
     );
   }
-}
+}, 'delete');

@@ -430,8 +430,53 @@ export const taskApi = {
 
 /**
  * Team API functions
+ *
+ * @deprecated The old team API endpoints are deprecated. Use the new teamManagementApi instead.
  */
 export const teamApi = {
+  // Generic fetcher for SWR
+  fetcher: async (url: string) => {
+    console.warn('teamApi.fetcher is deprecated. Use teamManagementApi instead.');
+    return fetchAPI(url);
+  },
+
+  getTeamMembers: async (projectId?: string, page = 1, limit = 10, search?: string) => {
+    console.warn('teamApi.getTeamMembers is deprecated. Use teamManagementApi.getTeamMembers instead.');
+    return teamManagementApi.getTeamMembers(projectId, page, limit, search);
+  },
+
+  getTeamMember: async (id: string) => {
+    console.warn('teamApi.getTeamMember is deprecated. Use teamManagementApi.getTeamMember instead.');
+    return teamManagementApi.getTeamMember(id);
+  },
+
+  getUserTeamMemberships: async (userId: string) => {
+    console.warn('teamApi.getUserTeamMemberships is deprecated. Use teamManagementApi.getUserTeamMemberships instead.');
+    return teamManagementApi.getUserTeamMemberships(userId);
+  },
+
+  addTeamMember: async (teamMember: any) => {
+    console.warn('teamApi.addTeamMember is deprecated. Use teamManagementApi.addTeamMember instead.');
+    return teamManagementApi.addTeamMember(teamMember);
+  },
+
+  removeTeamMember: async (id: string) => {
+    console.warn('teamApi.removeTeamMember is deprecated. Use teamManagementApi.removeTeamMember instead.');
+    return teamManagementApi.removeTeamMember(id);
+  },
+
+  checkProjectMembership: async (projectId: string) => {
+    console.warn('teamApi.checkProjectMembership is deprecated. Use teamManagementApi.checkProjectMembership instead.');
+    return teamManagementApi.checkProjectMembership(projectId);
+  },
+};
+
+/**
+ * Team Management API functions
+ *
+ * Consolidated API for managing team members
+ */
+export const teamManagementApi = {
   // Generic fetcher for SWR
   fetcher: async (url: string) => {
     return fetchAPI(url);
@@ -444,32 +489,25 @@ export const teamApi = {
     params.append('limit', limit.toString());
     if (search) params.append('search', search);
 
-    return fetchAPI(`/api/team?${params.toString()}`);
+    return fetchAPI(`/api/team-management?${params.toString()}`);
   },
 
   getTeamMember: async (id: string) => {
-    return fetchAPI(`/api/team/${id}`);
+    return fetchAPI(`/api/team-management/${id}`);
   },
 
-  getUserTeamMemberships: async (userId: string) => {
+  getUserTeamMemberships: async (userId: string, page = 1, limit = 10) => {
     try {
       console.log(`Fetching team memberships for user: ${userId}`);
-      const response = await fetchAPI(`/api/team/user/${userId}`);
+      const params = new URLSearchParams();
+      params.append('userId', userId);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+
+      const response = await fetchAPI(`/api/team-management?${params.toString()}`);
       console.log(`Team memberships response:`, response);
 
-      // Handle different response formats
-      if (Array.isArray(response)) {
-        return response;
-      } else if (response && typeof response === 'object') {
-        // Try to extract array data if it exists
-        const possibleArrays = Object.values(response).filter(val => Array.isArray(val));
-        if (possibleArrays.length > 0) {
-          return possibleArrays[0];
-        }
-      }
-
-      // If we can't determine the format, return the response as is
-      return response || [];
+      return response.teamMembers || [];
     } catch (error) {
       console.error(`Error fetching team memberships for user ${userId}:`, error);
       // Return empty array on error to prevent UI crashes
@@ -478,22 +516,20 @@ export const teamApi = {
   },
 
   addTeamMember: async (teamMember: any) => {
-    return fetchAPI('/api/team', {
+    return fetchAPI('/api/team-management', {
       method: 'POST',
       body: JSON.stringify(teamMember),
     });
   },
 
-  // updateTeamMember function removed as we no longer need to update team member roles
-
   removeTeamMember: async (id: string) => {
-    return fetchAPI(`/api/team/${id}`, {
+    return fetchAPI(`/api/team-management/${id}`, {
       method: 'DELETE',
     });
   },
 
   checkProjectMembership: async (projectId: string) => {
-    return fetchAPI(`/api/projects/${projectId}/membership`);
+    return fetchAPI(`/api/team-management/membership?projectId=${projectId}`);
   },
 };
 

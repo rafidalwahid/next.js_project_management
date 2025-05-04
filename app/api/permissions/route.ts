@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/services/permission-service";
-import prisma from "@/lib/prisma";
+import { PermissionService } from "@/lib/permissions/permission-service";
 
 // GET /api/permissions - Get all permissions
 export async function GET(req: NextRequest) {
@@ -62,30 +61,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if permission already exists
-    const existingPermission = await prisma.permission.findUnique({
-      where: { name },
-    });
-
-    if (existingPermission) {
-      return NextResponse.json(
-        { error: 'Permission already exists' },
-        { status: 409 }
-      );
-    }
-
-    // Create the permission
-    // Note: In the simplified system, we don't actually create permissions in the database
-    // This is just a placeholder for backward compatibility
-    const permission = {
-      id: name,
-      name,
-      description: description || '',
-      category: category || 'general'
-    };
-
-    // Return the created permission
-    return NextResponse.json(permission, { status: 201 });
+    // In the centralized permission system, permissions are defined in code
+    // This endpoint is kept for backward compatibility but doesn't actually create permissions
+    return NextResponse.json(
+      {
+        error: 'Creating permissions dynamically is not supported in the centralized permission system',
+        message: 'Permissions are now defined in code in lib/permissions/unified-permission-system.ts'
+      },
+      { status: 400 }
+    );
   } catch (error: any) {
     console.error('Error creating permission:', error);
     return NextResponse.json(
@@ -126,35 +110,15 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Check if permission exists
-    const permission = await prisma.permission.findUnique({
-      where: { name },
-    });
-
-    if (!permission) {
-      return NextResponse.json(
-        { error: 'Permission not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if it's a system permission
-    if (permission.isSystem) {
-      return NextResponse.json(
-        { error: 'Cannot delete system permissions' },
-        { status: 403 }
-      );
-    }
-
-    // Delete the permission
-    await prisma.permission.delete({
-      where: { id: permission.id },
-    });
-
-    // Return success
-    return NextResponse.json({
-      message: `Permission '${name}' deleted successfully`,
-    });
+    // In the centralized permission system, permissions are defined in code
+    // This endpoint is kept for backward compatibility but doesn't actually delete permissions
+    return NextResponse.json(
+      {
+        error: 'Deleting permissions dynamically is not supported in the centralized permission system',
+        message: 'Permissions are now defined in code in lib/permissions/unified-permission-system.ts'
+      },
+      { status: 400 }
+    );
   } catch (error: any) {
     console.error('Error deleting permission:', error);
     return NextResponse.json(

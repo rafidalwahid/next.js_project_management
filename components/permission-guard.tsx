@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode } from "react"
-import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { PermissionService } from "@/lib/permissions/permission-service"
 import { useAuthSession } from "@/hooks/use-auth-session"
 
 interface PermissionGuardProps {
@@ -14,7 +14,7 @@ interface PermissionGuardProps {
 
 /**
  * Component that only renders its children if the user has the specified permission
- * Uses the unified permission system for consistent permission checking
+ * Uses the permission service for consistent permission checking
  */
 export function PermissionGuard({
   permission,
@@ -31,8 +31,8 @@ export function PermissionGuard({
     return <>{loadingComponent || <div>Loading...</div>}</>
   }
 
-  // Check permission using the unified permission system
-  if (!UnifiedPermissionSystem.hasPermission(userRole, permission)) {
+  // Check permission using the permission service
+  if (!PermissionService.hasPermission(userRole, permission)) {
     return <>{fallback}</>
   }
 

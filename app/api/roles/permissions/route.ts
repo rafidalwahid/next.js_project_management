@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/services/permission-service";
-import { UnifiedPermissionSystem, PERMISSIONS, PERMISSION_MATRIX } from "@/lib/permissions/unified-permission-system";
+import { PermissionService } from "@/lib/permissions/permission-service";
+import { PERMISSIONS, PERMISSION_MATRIX } from "@/lib/permissions/unified-permission-system";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -51,7 +51,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }

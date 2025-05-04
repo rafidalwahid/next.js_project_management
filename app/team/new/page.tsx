@@ -18,7 +18,8 @@ import { DashboardNav } from "@/components/dashboard-nav"
 import { UserNav } from "@/components/user-nav"
 import { useProjects } from "@/hooks/use-data"
 import { useUsers } from "@/hooks/use-users"
-import { teamApi } from "@/lib/api"
+import { teamManagementApi } from "@/lib/api"
+import { useAddTeamMember } from "@/hooks/use-team-management"
 import { useToast } from "@/hooks/use-toast"
 
 export default function NewTeamMemberPage() {
@@ -102,6 +103,9 @@ export default function NewTeamMemberPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Use the addTeamMember hook
+  const { addTeamMember, isAdding, error: addTeamMemberError } = useAddTeamMember();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -137,8 +141,8 @@ export default function NewTeamMemberPage() {
 
       const createdUser = await response.json()
 
-      // Now add the newly created user to the team
-      await teamApi.addTeamMember({
+      // Now add the newly created user to the team using the new API
+      await addTeamMember({
         userId: createdUser.id,
         projectId: userData.projectId,
       })

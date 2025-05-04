@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { UnifiedPermissionSystem, PERMISSIONS } from '@/lib/permissions/unified-permission-system'
+import { PERMISSIONS } from '@/lib/permissions/unified-permission-system'
+import { EdgePermissionService } from '@/lib/permissions/edge-permission-service'
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
@@ -79,7 +80,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Check if the user has the required permission
-      if (!UnifiedPermissionSystem.hasPermission(userRole, requiredPermission)) {
+      if (!EdgePermissionService.hasPermission(userRole, requiredPermission)) {
         // For API routes, return a JSON error
         if (pathname.startsWith('/api/')) {
           return NextResponse.json(

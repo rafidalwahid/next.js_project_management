@@ -23,7 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
 import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
-import { MoreHorizontal, ArrowUpDown, Clock, Calendar } from "lucide-react"
+import { MoreHorizontal, ArrowUpDown, Clock, Calendar, Plus, UserPlus } from "lucide-react"
+import { AssignMembersPopup } from "@/components/project/assign-members-popup"
 
 interface Task {
   id: string
@@ -78,6 +79,66 @@ interface TaskListViewProps {
   isLoading: boolean
   onEditTask?: (taskId: string) => void
   onRefresh: () => Promise<void>
+}
+
+// Component to manage assignees in the list view
+interface ManageAssigneesProps {
+  taskId: string;
+  assignees: TaskAssignee[];
+  onRefresh: () => Promise<void>;
+}
+
+function ManageAssignees({ taskId, assignees, onRefresh }: ManageAssigneesProps) {
+  const [isAssignPopupOpen, setIsAssignPopupOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleAssign = async (userIds: string[]) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assigneeIds: userIds })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update assignees");
+      }
+
+      // Refresh the task list
+      await onRefresh();
+
+      toast({
+        title: "Assignees updated",
+        description: "Task assignees have been updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating assignees:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update assignees",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="ml-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 rounded-full"
+        onClick={() => setIsAssignPopupOpen(true)}
+      >
+        <UserPlus className="h-3.5 w-3.5" />
+      </Button>
+      <AssignMembersPopup
+        open={isAssignPopupOpen}
+        onOpenChange={setIsAssignPopupOpen}
+        selectedUserIds={assignees.map(a => a.user.id)}
+        onAssign={handleAssign}
+      />
+    </div>
+  );
 }
 
 export function TaskListView({
@@ -264,14 +325,14 @@ export function TaskListView({
               </TableRow>
             ) : (
               sortedTasks.map((task) => (
-                <TableRow key={task.id} className={task.status?.isCompletedStatus ? "opacity-60 bg-muted/20" : ""}>
+                <TableRow key={task.id} className={task.completed ? "opacity-60 bg-muted/20" : ""}>
                   <TableCell>
                     <Checkbox
-                      checked={task.status?.isCompletedStatus || false}
+                      checked={task.completed}
                       onCheckedChange={() => toggleTaskCompletion(task.id)}
                     />
                   </TableCell>
-                  <TableCell className={task.status?.isCompletedStatus ? "line-through text-muted-foreground" : ""}>
+                  <TableCell className={task.completed ? "line-through text-muted-foreground" : ""}>
                     {task.title}
                   </TableCell>
                   <TableCell>
@@ -301,25 +362,39 @@ export function TaskListView({
                     )}
                   </TableCell>
                   <TableCell>
-                    {task.assignees && task.assignees.length > 0 ? (
-                      <div className="flex -space-x-2">
-                        {task.assignees.slice(0, 3).map((assignee) => (
-                          <Avatar key={assignee.id} className="h-6 w-6 border border-black">
-                            <AvatarImage src={assignee.user.image || undefined} />
-                            <AvatarFallback className="text-xs">
-                              {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                        {task.assignees.length > 3 && (
-                          <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs">
-                            +{task.assignees.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">Unassigned</span>
-                    )}
+                    <div className="flex items-center">
+                      {task.assignees && task.assignees.length > 0 ? (
+                        <div className="flex -space-x-2 overflow-hidden">
+                          {task.assignees.slice(0, 3).map((assignee) => (
+                            <Avatar key={assignee.id} className="h-6 w-6 border border-black">
+                              {assignee.user.image ? (
+                                <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                              ) : (
+                                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                  {assignee.user.name
+                                    ? assignee.user.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)
+                                    : assignee.user.email.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                          ))}
+                          {task.assignees.length > 3 && (
+                            <div className="flex items-center justify-center h-6 w-6 rounded-full border border-black bg-muted text-xs font-medium">
+                              +{task.assignees.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground mr-2">Unassigned</span>
+                      )}
+
+                      {/* Add manage assignees button */}
+                      <ManageAssignees
+                        taskId={task.id}
+                        assignees={task.assignees || []}
+                        onRefresh={onRefresh}
+                      />
+                    </div>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

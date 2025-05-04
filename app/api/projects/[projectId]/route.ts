@@ -1,76 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { Session } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { withResourcePermission } from "@/lib/api-middleware";
+import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 
 // GET handler to fetch a specific project
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { projectId: string } | Promise<{ projectId: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { projectId } = await params;
-
-    // Get the project with related data
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
+export const GET = withResourcePermission(
+  'projectId',
+  checkProjectPermission,
+  async (req: NextRequest, context: any, session: Session, projectId: string) => {
+    try {
+      // Get the project with related data
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
           },
-        },
-        teamMembers: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                },
               },
             },
           },
-        },
-        statuses: true,
-        _count: {
-          select: {
-            tasks: true,
-            teamMembers: true,
+          statuses: true,
+          _count: {
+            select: {
+              tasks: true,
+              teamMembers: true,
+            },
           },
         },
-      },
-    });
-
-    if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
-    }
-
-    // Check if user has access to the project
-    const isTeamMember = project.teamMembers.some(
-      (member) => member.userId === session.user.id
-    );
-    const isAdmin = session.user.role === "admin";
-
-    if (!isTeamMember && !isAdmin) {
-      return NextResponse.json(
-        { error: "You don't have permission to view this project" },
-        { status: 403 }
-      );
-    }
+      });
 
     // Format dates for the response
     const formattedProject = {
@@ -90,7 +63,7 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+}, 'view');
 
 // Validation schema for updating a project
 const updateProjectSchema = z.object({
@@ -104,46 +77,11 @@ const updateProjectSchema = z.object({
 });
 
 // PATCH handler to update a project
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { projectId: string } | Promise<{ projectId: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { projectId } = await params;
-
-    // Check if project exists and user has access
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        teamMembers: {
-          where: { userId: session.user.id },
-        },
-      },
-    });
-
-    if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
-    }
-
-    // Only project team members or admins can update the project
-    const isTeamMember = project.teamMembers.length > 0;
-    const isAdmin = session.user.role === "admin";
-
-    if (!isTeamMember && !isAdmin) {
-      return NextResponse.json(
-        { error: "You don't have permission to update this project" },
-        { status: 403 }
-      );
-    }
+export const PATCH = withResourcePermission(
+  'projectId',
+  checkProjectPermission,
+  async (req: NextRequest, context: any, session: Session, projectId: string) => {
+    try {
 
     const body = await req.json();
 
@@ -227,49 +165,14 @@ export async function PATCH(
       { status: 500 }
     );
   }
-}
+}, 'update');
 
 // DELETE handler to delete a project
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { projectId: string } | Promise<{ projectId: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { projectId } = await params;
-
-    // Check if project exists and user has access
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-      include: {
-        teamMembers: {
-          where: { userId: session.user.id },
-        },
-      },
-    });
-
-    if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
-    }
-
-    // Only project creator or admins can delete the project
-    const isCreator = project.createdById === session.user.id;
-    const isAdmin = session.user.role === "admin";
-
-    if (!isCreator && !isAdmin) {
-      return NextResponse.json(
-        { error: "You don't have permission to delete this project" },
-        { status: 403 }
-      );
-    }
+export const DELETE = withResourcePermission(
+  'projectId',
+  checkProjectPermission,
+  async (req: NextRequest, context: any, session: Session, projectId: string) => {
+    try {
 
     // Delete the project (cascades to statuses, tasks, etc.)
     await prisma.project.delete({
@@ -284,4 +187,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+}, 'delete');

@@ -8,7 +8,7 @@ import { toggleTaskCompletion } from "@/lib/utils/task-utils";
 interface Params {
   params: {
     taskId: string;
-  };
+  } | Promise<{ taskId: string }>;
 }
 
 /**
@@ -23,7 +23,9 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = params.taskId;
+    // Await params before accessing properties
+    const resolvedParams = await params;
+    const taskId = resolvedParams.taskId;
 
     // Check if user has permission to update the task
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         action: "completion_toggled",
         entityType: "task",
         entityId: taskId,
-        description: `Task "${updatedTask.title}" completion status toggled to ${updatedTask.status?.isCompletedStatus ? 'completed' : 'not completed'}`,
+        description: `Task "${updatedTask.title}" completion status toggled to ${updatedTask.completed ? 'completed' : 'not completed'}`,
         userId: session.user.id,
         projectId: updatedTask.project.id,
         taskId,

@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
-import { isUserProjectMember } from "@/lib/queries/team-queries";
+
+/**
+ * @deprecated This API endpoint is deprecated. Use /api/team-management/membership?projectId={projectId} instead.
+ */
 
 interface Params {
   params: {
@@ -13,8 +16,10 @@ interface Params {
 /**
  * GET /api/projects/[projectId]/membership
  * Check if the current user is a member of the project
+ * @deprecated Use /api/team-management/membership?projectId={projectId} instead
  */
 export async function GET(_req: NextRequest, { params }: Params) {
+  console.warn("This API endpoint is deprecated. Use /api/team-management/membership?projectId={projectId} instead.");
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -60,7 +65,16 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 
     // Check if the user is a team member
-    const isMember = await isUserProjectMember(session.user.id, projectId);
+    const teamMember = await prisma.teamMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: session.user.id,
+        },
+      },
+    });
+
+    const isMember = !!teamMember;
 
     return NextResponse.json({
       isMember

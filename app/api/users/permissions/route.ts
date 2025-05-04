@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/services/permission-service";
-import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PermissionService } from "@/lib/permissions/permission-service";
+import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 // GET /api/users/permissions?userId={userId} - Get permissions for a user
 export async function GET(req: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting permissions for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+      if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' permissions' },
           { status: 403 }
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Get permissions based on the user's role
-    const permissions = user ? UnifiedPermissionSystem.getPermissionsForRole(user.role) : [];
+    const permissions = user ? PermissionService.getPermissionsForRole(user.role) : [];
 
     // Return the permissions
     return NextResponse.json({ permissions });
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     // We need to update the user's role to one that has the permission
 
     // Get all roles that have this permission
-    const rolesWithPermission = UnifiedPermissionSystem.getRolesWithPermission(permissionName);
+    const rolesWithPermission = PermissionService.getRolesWithPermission(permissionName);
 
     if (rolesWithPermission.length === 0) {
       return NextResponse.json(
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     }
 
     // If the user already has a role with this permission, we don't need to do anything
-    if (PermissionSystem.hasPermission(user.role, permissionName)) {
+    if (PermissionService.hasPermission(user.role, permissionName)) {
       return NextResponse.json({
         message: `User already has permission '${permissionName}'`,
       });
@@ -146,7 +146,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -183,7 +183,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    if (!UnifiedPermissionSystem.hasPermission(user.role, permissionName)) {
+    if (!PermissionService.hasPermission(user.role, permissionName)) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });
@@ -219,7 +219,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -255,7 +255,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    if (!UnifiedPermissionSystem.hasPermission(user.role, permissionName)) {
+    if (!PermissionService.hasPermission(user.role, permissionName)) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });

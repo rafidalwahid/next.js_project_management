@@ -316,12 +316,12 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div
-          className="h-auto max-h-[calc(100vh-240px)] min-h-[400px] sm:min-h-[500px] overflow-hidden relative"
+          className="h-auto max-h-[calc(100vh-240px)] min-h-[350px] xs:min-h-[400px] sm:min-h-[500px] overflow-hidden relative"
           style={{ contain: 'paint' }}
         >
           <div
             ref={scrollContainerRef}
-            className="flex overflow-x-auto pb-4 gap-3 sm:gap-4 md:gap-6 h-full pr-2 sm:pr-4 pl-1 -ml-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent touch-pan-x"
+            className="flex overflow-x-auto pb-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6 h-full pr-2 sm:pr-4 pl-1 -ml-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent touch-pan-x no-scrollbar"
             aria-label="Kanban board columns"
           >
             {statuses.sort((a, b) => a.order - b.order).map((status) => (
@@ -331,7 +331,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={cn(
-                      "flex-shrink-0 w-[250px] xs:w-[280px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md",
+                      "flex-shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md",
                       snapshot.isDraggingOver && "ring-2 ring-primary ring-opacity-50"
                     )}
                   >

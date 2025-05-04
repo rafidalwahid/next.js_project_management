@@ -33,7 +33,7 @@ interface AttendanceSummary {
   firstCheckIn?: string | null
   lastCheckOut?: string | null
   lastCheckIn?: string | null
-  adjustedCount?: number // Changed from autoCheckout to adjustedCount
+  autoCheckoutCount?: number
 }
 
 interface UserAttendanceSummaryProps {
@@ -54,7 +54,7 @@ export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
         setIsLoading(true)
         setIsError(false)
         setErrorMessage("")
-        
+
         console.log(`Fetching attendance for user ${userId}`)
         const response = await fetch(`/api/users/${userId}/attendance?limit=5`)
 
@@ -73,7 +73,7 @@ export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
           console.warn("No attendance records array found in response", data)
           setAttendanceRecords([])
         }
-        
+
         // Set summary with safety checks
         if (data.summary && typeof data.summary === 'object') {
           setSummary(data.summary)
@@ -89,7 +89,7 @@ export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
         console.error("Error fetching attendance:", error)
         setIsError(true)
         setErrorMessage(error?.message || "Failed to load attendance data")
-        
+
         // Set empty data on error to prevent UI from breaking
         setAttendanceRecords([])
         setSummary({

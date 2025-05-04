@@ -84,19 +84,20 @@ export async function getDefaultNonCompletedStatus(projectId: string): Promise<{
 }
 
 /**
- * Toggle a task's completion status
+ * Toggle a task's completion status without changing its status
  * @param taskId The task ID
  * @returns The updated task
  */
 export async function toggleTaskCompletion(taskId: string) {
-  // Get the task with its current status and project
+  // Get the task with its current status
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: {
       status: true,
       project: {
-        include: {
-          statuses: true,
+        select: {
+          id: true,
+          title: true,
         },
       },
     },
@@ -106,37 +107,11 @@ export async function toggleTaskCompletion(taskId: string) {
     throw new Error("Task not found");
   }
 
-  // Determine if the task is currently completed
-  const isCurrentlyCompleted = task.status?.isCompletedStatus || false;
-
-  // Find an appropriate status to switch to
-  let targetStatusId: string | null = null;
-
-  if (isCurrentlyCompleted) {
-    // If task is completed, find a non-completed status
-    const nonCompletedStatus = await getDefaultNonCompletedStatus(task.projectId);
-    targetStatusId = nonCompletedStatus?.id || null;
-  } else {
-    // If task is not completed, find a completed status
-    const completedStatus = await getDefaultCompletedStatus(task.projectId);
-    targetStatusId = completedStatus?.id || null;
-  }
-
-  // If no appropriate status was found, we can't toggle
-  if (!targetStatusId) {
-    throw new Error(
-      isCurrentlyCompleted
-        ? "No non-completed status found for this project"
-        : "No completed status found for this project"
-    );
-  }
-
-  // Update the task with the new status and completed field for backward compatibility
+  // Simply toggle the completed field without changing status
   return prisma.task.update({
     where: { id: taskId },
     data: {
-      statusId: targetStatusId,
-      completed: !isCurrentlyCompleted // Update the completed field to match the status
+      completed: !task.completed
     },
     include: {
       status: true,

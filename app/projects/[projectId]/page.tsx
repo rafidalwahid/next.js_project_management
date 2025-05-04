@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Settings, Calendar, Clock, Users, BarChart2, UserPlus, Trash2, UserMinus } from "lucide-react"
+import { useRemoveTeamMember } from "@/hooks/use-team-management"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -191,13 +192,17 @@ export default function ProjectPage() {
   // Fetch users for the project
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/team`)
+      console.log("Fetching team members for project:", projectId)
+      const response = await fetch(`/api/team-management?projectId=${projectId}`)
 
       if (!response.ok) {
-        throw new Error("Failed to fetch project members")
+        const errorData = await response.json()
+        console.error("API error response:", errorData)
+        throw new Error(`Failed to fetch project members: ${errorData.error || response.statusText}`)
       }
 
       const data = await response.json()
+      console.log("Team members API response:", data)
 
       // Check if we have team members data
       if (data.teamMembers && Array.isArray(data.teamMembers)) {
@@ -211,6 +216,11 @@ export default function ProjectPage() {
       }
     } catch (error) {
       console.error("Error fetching users:", error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch team members",
+        variant: "destructive",
+      })
     }
   }
 
@@ -280,19 +290,32 @@ export default function ProjectPage() {
     await fetchTasks()
   }
 
+  // Use the removeTeamMember hook
+  const { removeTeamMember, isRemoving: isRemovingMember, error: removeError } = useRemoveTeamMember()
+
   const handleRemoveTeamMember = async () => {
     if (!userToRemove) return
 
     try {
       setIsRemovingUser(true)
-      const response = await fetch(`/api/projects/${projectId}/team/${userToRemove.id}`, {
-        method: "DELETE",
-      })
+
+      // Find the team member ID for this user in this project
+      const response = await fetch(`/api/team-management?projectId=${projectId}&userId=${userToRemove.id}`)
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to remove team member")
+        throw new Error("Failed to find team member")
       }
+
+      const data = await response.json()
+
+      if (!data.teamMembers || data.teamMembers.length === 0) {
+        throw new Error("Team member not found")
+      }
+
+      const teamMemberId = data.teamMembers[0].id
+
+      // Remove the team member using the new API
+      await removeTeamMember(teamMemberId)
 
       toast({
         title: "Team member removed",
@@ -338,51 +361,100 @@ export default function ProjectPage() {
 
   return (
     <div>
+      {/* Project Header - Enhanced for Mobile */}
       <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words pr-2 flex-1">
+              {project.title}
+            </h1>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0 rounded-full mt-1"
+              title="Edit Project"
+              onClick={() => setIsSettingsDialogOpen(true)}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">
-                {project.title}
-              </h1>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 flex-shrink-0 rounded-full"
-                title="Edit Project"
-                onClick={() => setIsSettingsDialogOpen(true)}
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-            {project.description && (
-              <p className="text-muted-foreground text-sm sm:text-base mt-1">
-                {project.description}
-              </p>
+          {project.description && (
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {project.description}
+            </p>
+          )}
+
+          {/* Project Timeline Summary */}
+          <div className="flex flex-wrap gap-3 mt-1">
+            {project.startDate && (
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground bg-muted/30 px-2 py-1 rounded-md">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>Start: {formatDate(project.startDate)}</span>
+              </div>
             )}
+
+            {project.endDate && (
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground bg-muted/30 px-2 py-1 rounded-md">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>End: {formatDate(project.endDate)}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground bg-muted/30 px-2 py-1 rounded-md">
+              <Users className="h-3.5 w-3.5" />
+              <span>{project._count?.teamMembers || 0} team members</span>
+            </div>
           </div>
         </div>
       </div>
-      <div className="bg-muted/10 p-4 rounded-lg mb-6">
+
+      {/* Task Filters - Responsive */}
+      <div className="bg-muted/10 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
         <TaskProvider projectId={projectId}>
           <TaskFilterNew />
         </TaskProvider>
       </div>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <TabsList className="w-full sm:w-auto bg-background">
-            <TabsTrigger value="board" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Board</TabsTrigger>
-            <TabsTrigger value="list" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">List</TabsTrigger>
-            <TabsTrigger value="team" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Team</TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analytics</TabsTrigger>
-          </TabsList>
+      {/* Responsive Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-2 sm:mb-4">
+          <div className="w-full overflow-x-auto pb-1 -mb-1 no-scrollbar">
+            <TabsList className="bg-background w-full sm:w-auto inline-flex">
+              <TabsTrigger
+                value="board"
+                className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[80px]"
+              >
+                <span className="whitespace-nowrap">Board</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="list"
+                className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[80px]"
+              >
+                <span className="whitespace-nowrap">List</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="team"
+                className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[80px]"
+              >
+                <span className="whitespace-nowrap">Team</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="analytics"
+                className="flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground min-w-[80px]"
+              >
+                <span className="whitespace-nowrap">Analytics</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
           {activeTab === "board" && (
-            <TaskProvider projectId={projectId}>
-              <CreateStatusDialogNew
-                projectId={projectId}
-              />
-            </TaskProvider>
+            <div className="w-full sm:w-auto flex justify-end mt-2 sm:mt-0">
+              <TaskProvider projectId={projectId}>
+                <CreateStatusDialogNew
+                  projectId={projectId}
+                />
+              </TaskProvider>
+            </div>
           )}
         </div>
         <TabsContent value="board">
@@ -408,16 +480,16 @@ export default function ProjectPage() {
         <TabsContent value="team">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Project Creator Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Creator</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Project Creator</CardTitle>
                 <CardDescription>
                   The person who created this project
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border border-black flex-shrink-0">
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border border-black flex-shrink-0">
                     {project.createdBy?.image ? (
                       <AvatarImage src={project.createdBy.image} alt={project.createdBy.name || ""} />
                     ) : (
@@ -440,40 +512,41 @@ export default function ProjectPage() {
             </Card>
 
             {/* Team Members Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>
-                  People working on this project
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-muted-foreground">
-                    {project.createdBy && users.some(user => user.id === project.createdBy?.id)
-                      ? (project._count?.teamMembers || 0) - 1
-                      : (project._count?.teamMembers || 0)} other members assigned to this project
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsTeamDialogOpen(true)}
-                    >
-                      <UserPlus className="h-4 w-4 mr-1" />
-                      Add Members
-                    </Button>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-lg sm:text-xl">Team Members</CardTitle>
+                    <CardDescription>
+                      People working on this project
+                    </CardDescription>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsTeamDialogOpen(true)}
+                    className="self-start sm:self-center"
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    <span className="whitespace-nowrap">Add Members</span>
+                  </Button>
                 </div>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {project.createdBy && users.some(user => user.id === project.createdBy?.id)
+                    ? (project._count?.teamMembers || 0) - 1
+                    : (project._count?.teamMembers || 0)} other members assigned to this project
+                </p>
 
                 {users.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {users
                       .filter(user => user.id !== project.createdBy?.id)
                       .slice(0, 5)
                       .map((user) => (
                       <div key={user.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                           <Avatar className="h-8 w-8 border border-black flex-shrink-0">
                             {user.image ? (
                               <AvatarImage src={user.image} alt={user.name || ""} />
@@ -484,7 +557,7 @@ export default function ProjectPage() {
                             )}
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium truncate">{user.name || "Unknown"}</p>
+                            <p className="font-medium truncate text-sm sm:text-base">{user.name || "Unknown"}</p>
                             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
@@ -493,7 +566,7 @@ export default function ProjectPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0 ml-2"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0 ml-1 sm:ml-2"
                             onClick={() => setUserToRemove(user)}
                             title="Remove from team"
                           >
@@ -504,13 +577,13 @@ export default function ProjectPage() {
                     ))}
 
                     {users.filter(user => user.id !== project.createdBy?.id).length > 5 && (
-                      <p className="text-sm text-muted-foreground text-center">
+                      <p className="text-sm text-muted-foreground text-center py-1">
                         + {users.filter(user => user.id !== project.createdBy?.id).length - 5} more members
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {project.createdBy && users.some(user => user.id === project.createdBy?.id)
                       ? "No additional team members found for this project."
                       : "No team members found for this project."}
@@ -521,36 +594,36 @@ export default function ProjectPage() {
           </div>
         </TabsContent>
         <TabsContent value="analytics">
-          <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Progress Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Progress</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Project Progress</CardTitle>
                 <CardDescription>
                   Overall completion status of tasks
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Completion Rate</span>
                     <span className="text-sm text-muted-foreground">
                       {project._count?.tasks ?
-                        Math.round((tasks.filter(t => t.status?.isCompletedStatus).length / project._count.tasks) * 100) : 0}%
+                        Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100) : 0}%
                     </span>
                   </div>
-                  <div className="h-4 bg-muted rounded-full overflow-hidden mt-2">
+                  <div className="h-3 sm:h-4 bg-muted rounded-full overflow-hidden mt-2">
                     <div
                       className="h-full bg-primary"
                       style={{
                         width: project._count?.tasks ?
-                          `${Math.round((tasks.filter(t => t.status?.isCompletedStatus).length / project._count.tasks) * 100)}%` : "0%"
+                          `${Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100)}%` : "0%"
                       }}
                     />
                   </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-sm text-muted-foreground">
-                      {tasks.filter(t => t.status?.isCompletedStatus).length} / {project._count?.tasks || 0} tasks completed
+                  <div className="flex items-center justify-between mt-2 sm:mt-3">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      {tasks.filter(t => t.completed).length} / {project._count?.tasks || 0} tasks completed
                     </span>
                   </div>
                 </div>
@@ -558,47 +631,47 @@ export default function ProjectPage() {
             </Card>
 
             {/* Timeline Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Timeline</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Project Timeline</CardTitle>
                 <CardDescription>
                   Start and end dates for the project
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-primary" />
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Start Date</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {formatDate(project.startDate)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">End Date</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {formatDate(project.endDate)}
                       </p>
                     </div>
                   </div>
 
                   {project.dueDate && (
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Calendar className="h-5 w-5 text-primary" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
                       <div>
                         <p className="text-sm font-medium">Due Date</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {formatDate(project.dueDate)}
                         </p>
                       </div>
@@ -609,34 +682,34 @@ export default function ProjectPage() {
             </Card>
 
             {/* Time Tracking Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Time Tracking</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Time Tracking</CardTitle>
                 <CardDescription>
                   Estimated vs actual time spent
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Clock className="h-5 w-5 text-primary" />
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Estimated Time</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {project.estimatedTime || 0} hours
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Clock className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Time Spent</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {project.totalTimeSpent || 0} hours
                       </p>
                     </div>
@@ -646,7 +719,7 @@ export default function ProjectPage() {
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Progress</span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           {Math.min(Math.round((project.totalTimeSpent / project.estimatedTime) * 100), 100)}%
                         </span>
                       </div>
@@ -665,15 +738,15 @@ export default function ProjectPage() {
             </Card>
 
             {/* Task Distribution Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Task Distribution</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Task Distribution</CardTitle>
                 <CardDescription>
                   Tasks by status and priority
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
+              <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+                <div className="space-y-5 sm:space-y-6">
                   {/* Tasks by Status */}
                   <div>
                     <h4 className="text-sm font-medium mb-2">Tasks by Status</h4>
@@ -686,14 +759,14 @@ export default function ProjectPage() {
                         return (
                           <div key={status.id} className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                                 <div
-                                  className="w-3 h-3 rounded-full"
+                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: status.color }}
                                 />
-                                <span className="text-sm">{status.name}</span>
+                                <span className="text-xs sm:text-sm truncate">{status.name}</span>
                               </div>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap ml-1">
                                 {statusTasks.length} tasks ({percentage}%)
                               </span>
                             </div>
@@ -729,14 +802,14 @@ export default function ProjectPage() {
                         return (
                           <div key={priority} className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                                 <div
-                                  className="w-3 h-3 rounded-full"
+                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: priorityColor }}
                                 />
-                                <span className="text-sm capitalize">{priority}</span>
+                                <span className="text-xs sm:text-sm capitalize">{priority}</span>
                               </div>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap ml-1">
                                 {priorityTasks.length} tasks ({percentage}%)
                               </span>
                             </div>

@@ -131,6 +131,55 @@ export default function TasksPage() {
     }
   }
 
+  const toggleTaskCompletion = async (id: string) => {
+    try {
+      // Find the task to get its current completion state
+      const task = allTasks.find(t => t.id === id)
+      if (!task) return
+
+      // Optimistic update
+      mutate(
+        prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            tasks: prev.tasks.map(t =>
+              t.id === id ? { ...t, completed: !t.completed } : t
+            )
+          };
+        },
+        false
+      )
+
+      // Call the API to toggle completion
+      const response = await fetch(`/api/tasks/${id}/toggle-completion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update task completion")
+      }
+
+      // Show success message
+      toast({
+        title: `Task marked as ${!task.completed ? "completed" : "incomplete"}`,
+        description: "Task status updated successfully",
+      })
+
+      // Refresh data
+      mutate()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update task completion status",
+        variant: "destructive",
+      })
+      // Refresh to revert optimistic update
+      mutate()
+    }
+  }
+
   // Show loading state when loading data
   if (isLoading) {
     return (
@@ -296,7 +345,11 @@ export default function TasksPage() {
       </div>
 
       {/* Task list */}
-      <TaskList tasks={tasks} onDelete={deleteTask} />
+      <TaskList
+        tasks={tasks}
+        onDelete={deleteTask}
+        onToggleCompletion={toggleTaskCompletion}
+      />
 
       {/* Pagination */}
       {filteredTasks.length > itemsPerPage && (

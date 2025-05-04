@@ -57,7 +57,8 @@ export function AssignMembersPopup({
         throw new Error("Could not determine project ID")
       }
 
-      const response = await fetch(`/api/projects/${projectId}/team`)
+      // Use the team-management API endpoint with projectId as a query parameter
+      const response = await fetch(`/api/team-management?projectId=${projectId}`)
 
       if (!response.ok) {
         throw new Error("Failed to fetch team members")
@@ -106,7 +107,8 @@ export function AssignMembersPopup({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <div className="h-7 w-7 rounded-full border-2 border-dashed border-black bg-background cursor-pointer hover:bg-muted transition-colors hover:border-primary flex items-center justify-center ml-1">
+        {/* This div is now hidden and only used as a trigger for the popover */}
+        <div className="sr-only">
           <Plus className="h-4 w-4 text-black" />
         </div>
       </PopoverTrigger>

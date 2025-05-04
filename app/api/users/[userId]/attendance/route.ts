@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const isOwnProfile = session.user.id === userId;
     const isAdmin = session.user.role === 'admin';
     const isManager = session.user.role === 'manager';
-    
+
     if (!isOwnProfile && !isAdmin && !isManager) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to view this user\'s attendance' },
@@ -51,18 +51,18 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Build where clause with proper date range handling
     const where: any = { userId };
-    
+
     // Handle date filtering properly
     if (startDate || endDate) {
       where.checkInTime = {};
-      
+
       if (startDate) {
         // Starting from beginning of the start date
         const parsedStartDate = new Date(startDate);
         parsedStartDate.setHours(0, 0, 0, 0);
         where.checkInTime.gte = parsedStartDate;
       }
-      
+
       if (endDate) {
         // Include the full end date by setting time to end of day
         const parsedEndDate = new Date(endDate);
@@ -114,56 +114,55 @@ export async function GET(req: NextRequest, { params }: Params) {
         totalHours: true,
         checkInTime: true,
         checkOutTime: true,
-        adjustedById: true,
-        adjustmentReason: true
+        autoCheckout: true
       }
     });
 
     // Track unique days and cap hours per day
     const dailyHours = new Map();
-    
+
     // Process records to calculate accurate statistics
     allRecords.forEach(record => {
       if (record.totalHours) {
         // Cap hours per record to consistent maximum
         const cappedHours = Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);
-        
+
         // Get the date as string for grouping by day
         const dateKey = format(new Date(record.checkInTime), 'yyyy-MM-dd');
-        
+
         // Update daily totals
         if (!dailyHours.has(dateKey)) {
           dailyHours.set(dateKey, 0);
         }
-        
+
         dailyHours.set(dateKey, dailyHours.get(dateKey) + cappedHours);
       }
     });
-    
+
     // Calculate total hours with daily caps
     const totalHours = Array.from(dailyHours.values()).reduce((sum, dayHours) => {
       // Cap total hours per day
       return sum + Math.min(dayHours, MAX_WORKING_HOURS_PER_DAY);
     }, 0);
-    
+
     // Find first and last records for the report
     let firstCheckIn = null;
     let lastCheckIn = null;
     let lastCheckOut = null;
-    
+
     if (allRecords.length > 0) {
       // Sort records by check-in date (earliest first) to find first check-in
       const sortedByEarliest = [...allRecords].sort(
         (a, b) => new Date(a.checkInTime).getTime() - new Date(b.checkInTime).getTime()
       );
       firstCheckIn = sortedByEarliest[0].checkInTime;
-      
+
       // Sort records by check-in date (latest first) to find most recent check-in
       const sortedByLatest = [...allRecords].sort(
         (a, b) => new Date(b.checkInTime).getTime() - new Date(a.checkInTime).getTime()
       );
       lastCheckIn = sortedByLatest[0].checkInTime;
-      
+
       // Find the most recent checkout
       const checkoutsOnly = allRecords.filter(r => r.checkOutTime);
       if (checkoutsOnly.length > 0) {
@@ -182,7 +181,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       firstCheckIn,
       lastCheckIn,
       lastCheckOut,
-      adjustedCount: allRecords.filter(r => r.adjustedById).length
+      autoCheckoutCount: allRecords.filter(r => r.autoCheckout).length
     };
 
     // Return compiled data

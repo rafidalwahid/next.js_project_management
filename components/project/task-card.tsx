@@ -98,12 +98,15 @@ export function TaskCard({
     }
   };
 
+  // Determine if task is completed based on completed field
+  const isCompleted = task.completed;
+
   return (
     <div
       className={cn(
-        "bg-background p-3 rounded-md shadow-sm border-l-4 flex flex-col gap-2",
-        "transition-all duration-200 hover:shadow-md",
-        task.completed ? "opacity-70" : "",
+        "bg-background p-2 xs:p-3 rounded-md shadow-sm border-l-4 flex flex-col gap-1.5 xs:gap-2",
+        "transition-all duration-200 hover:shadow-md touch-manipulation",
+        isCompleted ? "opacity-70" : "",
         isDragging ? "shadow-lg ring-2 ring-primary ring-opacity-50" : ""
       )}
       style={{
@@ -111,23 +114,23 @@ export function TaskCard({
       }}
     >
       {/* Header with title and actions */}
-      <div className="flex justify-between items-start gap-1 sm:gap-2">
-        <div className="flex items-start gap-1 sm:gap-2 min-w-0 flex-1">
+      <div className="flex justify-between items-start gap-1 xs:gap-2">
+        <div className="flex items-start gap-1 xs:gap-2 min-w-0 flex-1">
           <Checkbox
-            checked={task.completed}
+            checked={isCompleted}
             onCheckedChange={() => onToggleComplete(task.id)}
-            className="mt-1 flex-shrink-0"
-            aria-label={`Mark task "${task.title}" as ${task.completed ? "incomplete" : "complete"}`}
+            className="mt-0.5 xs:mt-1 flex-shrink-0 h-4 w-4"
+            aria-label={`Mark task "${task.title}" as ${isCompleted ? "incomplete" : "complete"}`}
           />
           <div className="min-w-0 flex-1">
             <h3 className={cn(
-              "font-medium text-sm leading-tight break-words",
-              task.completed ? "line-through text-muted-foreground" : ""
+              "font-medium text-xs xs:text-sm leading-tight break-words",
+              isCompleted ? "line-through text-muted-foreground" : ""
             )}>
               {task.title}
             </h3>
             {task.description && (
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">
+              <p className="text-xs text-muted-foreground mt-0.5 xs:mt-1 line-clamp-2 break-words">
                 {task.description}
               </p>
             )}
@@ -143,23 +146,23 @@ export function TaskCard({
       </div>
 
       {/* Task metadata */}
-      <div className="flex flex-wrap gap-1.5 mt-1">
+      <div className="flex flex-wrap gap-1 xs:gap-1.5 mt-0.5 xs:mt-1">
         {task.priority && (
-          <Badge variant="outline" className={cn("text-xs py-0 h-5", getPriorityColor(task.priority))}>
+          <Badge variant="outline" className={cn("text-[10px] xs:text-xs py-0 h-4 xs:h-5", getPriorityColor(task.priority))}>
             {task.priority}
           </Badge>
         )}
 
         {task.dueDate && (
-          <Badge variant="outline" className="flex items-center gap-1 text-xs py-0 h-5">
-            <Calendar className="h-3 w-3" />
+          <Badge variant="outline" className="flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs py-0 h-4 xs:h-5">
+            <Calendar className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
             <span className="whitespace-nowrap">{getDueDateStatus(task.dueDate)}</span>
           </Badge>
         )}
       </div>
 
       {/* Footer with assignees */}
-      <div className="flex justify-end mt-auto pt-2">
+      <div className="flex justify-end mt-auto pt-1 xs:pt-2">
         <AssigneeAvatars
           assignees={task.assignees || []}
           maxDisplay={3}
@@ -182,6 +185,9 @@ function TaskCardMenu({
   onDelete?: (taskId: string) => void;
   onToggleComplete: (taskId: string) => void;
 }) {
+  // Determine if task is completed based on completed field
+  const isCompleted = task.completed;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -198,7 +204,7 @@ function TaskCardMenu({
         )}
         <DropdownMenuItem onClick={() => onToggleComplete(task.id)}>
           <Check className="mr-2 h-4 w-4" />
-          Mark as {task.completed ? "Incomplete" : "Complete"}
+          Mark as {isCompleted ? "Incomplete" : "Complete"}
         </DropdownMenuItem>
         {onDelete && (
           <>
@@ -231,38 +237,60 @@ export function AssigneeAvatars({
 }: AssigneeAvatarsProps) {
   const [isAssignPopupOpen, setIsAssignPopupOpen] = useState(false);
 
+  // Function to get user initials for avatar fallback
+  const getUserInitials = (name?: string | null) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map(part => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <div className="flex items-center">
-      <div className="flex -space-x-2">
+      <div className="flex -space-x-2 overflow-hidden">
         {assignees.slice(0, maxDisplay).map((assignee) => (
           <Avatar
             key={assignee.id}
-            className="h-7 w-7 border border-black"
+            className="h-6 w-6 xs:h-7 xs:w-7 border border-black"
           >
-            <AvatarImage
-              src={assignee.user.image || undefined}
-              alt={assignee.user.name || "Team member"}
-            />
-            <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-              {assignee.user.name?.substring(0, 2) || assignee.user.email.substring(0, 2)}
-            </AvatarFallback>
+            {assignee.user.image ? (
+              <AvatarImage
+                src={assignee.user.image}
+                alt={assignee.user.name || "Team member"}
+              />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary text-[10px] xs:text-xs">
+                {getUserInitials(assignee.user.name)}
+              </AvatarFallback>
+            )}
           </Avatar>
         ))}
 
         {assignees.length > maxDisplay && (
-          <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs border border-black">
+          <div className="flex items-center justify-center h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black bg-muted text-[10px] xs:text-xs font-medium">
             +{assignees.length - maxDisplay}
           </div>
         )}
       </div>
 
-      {/* Use the AssignMembersPopup component directly */}
+      {/* Use the AssignMembersPopup component with a click handler */}
       <AssignMembersPopup
         open={isAssignPopupOpen}
         onOpenChange={setIsAssignPopupOpen}
         selectedUserIds={assignees.map(a => a.user.id)}
         onAssign={onUpdateAssignees}
       />
+
+      {/* Add a button to open the popup */}
+      <div
+        className="h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black border-dashed bg-background cursor-pointer hover:bg-muted transition-colors hover:border-primary flex items-center justify-center ml-1"
+        onClick={() => setIsAssignPopupOpen(true)}
+      >
+        <Plus className="h-3 w-3 xs:h-4 xs:w-4 text-black" />
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { cache } from "react";
 
 /**
  * Get team members for a project with pagination
+ * @deprecated Use teamManagementApi.getTeamMembers instead
  */
 export const getTeamMembers = cache(async (
   projectId?: string,
@@ -10,6 +11,7 @@ export const getTeamMembers = cache(async (
   limit = 10,
   search?: string
 ) => {
+  console.warn("getTeamMembers is deprecated. Use teamManagementApi.getTeamMembers instead.");
   try {
     const skip = (page - 1) * limit;
 
@@ -105,8 +107,10 @@ export const getTeamMembers = cache(async (
 
 /**
  * Get a team member by ID
+ * @deprecated Use teamManagementApi.getTeamMember instead
  */
 export const getTeamMember = cache(async (id: string) => {
+  console.warn("getTeamMember is deprecated. Use teamManagementApi.getTeamMember instead.");
   try {
     const teamMember = await prisma.teamMember.findUnique({
       where: { id },
@@ -155,12 +159,14 @@ export const getTeamMember = cache(async (id: string) => {
 
 /**
  * Get team members for a user
+ * @deprecated Use teamManagementApi.getUserTeamMemberships instead
  */
 export const getUserTeamMemberships = cache(async (
   userId: string,
   page = 1,
   limit = 10
 ) => {
+  console.warn("getUserTeamMemberships is deprecated. Use teamManagementApi.getUserTeamMemberships instead.");
   try {
     const skip = (page - 1) * limit;
 
@@ -241,11 +247,13 @@ export const getUserTeamMemberships = cache(async (
 
 /**
  * Check if a user is a member of a project
+ * @deprecated Use teamManagementApi.checkProjectMembership instead
  */
 export const isUserProjectMember = cache(async (
   userId: string,
   projectId: string
 ) => {
+  console.warn("isUserProjectMember is deprecated. Use teamManagementApi.checkProjectMembership instead.");
   try {
     const teamMember = await prisma.teamMember.findUnique({
       where: {

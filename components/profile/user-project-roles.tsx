@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { fetchProfileData } from "@/lib/utils/profile-utils"
+import { useUserTeamMemberships } from "@/hooks/use-team-management"
 
 interface ProjectMembership {
   id: string
@@ -24,6 +25,10 @@ export function UserProjectRoles({ userId, teamMemberships }: UserProjectRolesPr
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Use the new hook to fetch team memberships
+  const { teamMemberships: fetchedMemberships, isLoading: isFetchingMemberships, isError: fetchError } =
+    useUserTeamMemberships(userId, 1, 100);
+
   useEffect(() => {
     // If teamMemberships are provided as a prop, use them directly
     if (teamMemberships && teamMemberships.length > 0) {
@@ -32,47 +37,23 @@ export function UserProjectRoles({ userId, teamMemberships }: UserProjectRolesPr
       return;
     }
 
-    // Otherwise fetch them from the API
-    const fetchProjects = async () => {
-      if (!userId) return;
-
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        // Directly fetch team memberships from the database
-        const response = await fetch(`/api/team/user/${userId}`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch team memberships: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('Team memberships data:', data);
-
-        // Format the data for display
-        if (data && Array.isArray(data.teamMemberships)) {
-          const formattedMemberships = data.teamMemberships.map(membership => ({
-            id: membership.id,
-            projectId: membership.project.id,
-            projectTitle: membership.project.title
-          }));
-          setProjects(formattedMemberships);
-        } else {
-          console.warn("Unexpected response format:", data);
-          setProjects([]);
-        }
-      } catch (err) {
-        console.error("Error fetching project data:", err);
+    // Otherwise use the data from the hook
+    if (!isFetchingMemberships) {
+      if (fetchError) {
         setError("Failed to fetch project memberships");
         setProjects([]);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // Format the data for display
+        const formattedMemberships = fetchedMemberships.map(membership => ({
+          id: membership.id,
+          projectId: membership.project.id,
+          projectTitle: membership.project.title
+        }));
+        setProjects(formattedMemberships);
       }
-    };
-
-    fetchProjects();
-  }, [userId, teamMemberships]);
+      setIsLoading(false);
+    }
+  }, [userId, teamMemberships, fetchedMemberships, isFetchingMemberships, fetchError]);
 
   return (
     <div className="space-y-4">

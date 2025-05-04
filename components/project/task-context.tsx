@@ -140,10 +140,19 @@ export function TaskProvider({
   // Fetch users
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/team`);
+      const response = await fetch(`/api/team-management?projectId=${projectId}`);
       if (!response.ok) throw new Error("Failed to fetch team members");
       const data = await response.json();
-      setUsers(data.users || []);
+
+      // Extract user data from team members
+      if (data.teamMembers && Array.isArray(data.teamMembers)) {
+        const users = data.teamMembers
+          .map((tm: any) => tm.user)
+          .filter((user: any) => user && user.id);
+        setUsers(users);
+      } else {
+        setUsers([]);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -327,24 +336,42 @@ export function TaskProvider({
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Optimistic update
-    setTasks(prev => prev.map(t =>
-      t.id === taskId ? { ...t, completed: !t.completed } : t
-    ));
+    // Optimistic update - just toggle the completed field
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        // Toggle completed state
+        const newCompleted = !t.completed;
+        return {
+          ...t,
+          completed: newCompleted
+        };
+      }
+      return t;
+    }));
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed: !task.completed })
+      // Use the toggle-completion endpoint
+      const response = await fetch(`/api/tasks/${taskId}/toggle-completion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       });
 
-      if (!response.ok) throw new Error("Failed to update task completion");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update task");
+      }
+
+      // Get the updated task
+      const data = await response.json();
+      const isCompleted = data.task?.completed || false;
 
       toast({
-        title: `Task marked as ${!task.completed ? "completed" : "incomplete"}`,
+        title: `Task marked as ${isCompleted ? "completed" : "incomplete"}`,
         description: "Task status updated successfully",
       });
+
+      // Refresh tasks to ensure UI is in sync with server
+      await fetchTasks();
     } catch (error) {
       console.error("Error toggling task completion:", error);
       toast({

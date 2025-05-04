@@ -146,7 +146,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch(`/api/projects/${projectId}/team`)
+        const response = await fetch(`/api/team-management?projectId=${projectId}`)
         if (!response.ok) throw new Error("Failed to fetch team members")
 
         const data = await response.json()

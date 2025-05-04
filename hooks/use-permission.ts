@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
 import { useAuthSession } from "./use-auth-session"
 
 /**
@@ -19,9 +19,9 @@ export function usePermission(permission: string) {
       return
     }
 
-    // Use the unified permission system to check permission
+    // Use the client permission service to check permission
     const userRole = session.user.role || "guest"
-    const result = UnifiedPermissionSystem.hasPermission(userRole, permission)
+    const result = ClientPermissionService.hasPermission(userRole, permission)
     setHasPermission(result)
   }, [session, permission])
 
@@ -69,9 +69,9 @@ export function useUserPermissions() {
       return
     }
 
-    // Get permissions based on user role using the unified permission system
+    // Get permissions based on user role using the client permission service
     const userRole = session.user.role || "guest"
-    const rolePermissions = UnifiedPermissionSystem.getPermissionsForRole(userRole)
+    const rolePermissions = ClientPermissionService.getPermissionsForRole(userRole)
     setPermissions(rolePermissions)
     setIsLoading(false)
   }, [session, status])

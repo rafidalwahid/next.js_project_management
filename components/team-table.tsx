@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from "lucide-react"
-import { useTeamMembers } from "@/hooks/use-team"
+import { useTeamMembers, useRemoveTeamMember } from "@/hooks/use-team-management"
 import { Input } from "@/components/ui/input"
-import { teamApi } from "@/lib/api"
+import { teamManagementApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { Spinner } from "@/components/ui/spinner"
 import { RoleManagementDialog } from "@/components/team/role-management-dialog"
@@ -34,11 +34,14 @@ export function TeamTable({ projectId }: TeamTableProps) {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false)
   const [selectedTeamMember, setSelectedTeamMember] = useState<any>(null)
 
+  // Use the removeTeamMember hook
+  const { removeTeamMember, isRemoving, error: removeError } = useRemoveTeamMember()
+
   // Handle member removal
   const handleRemoveMember = async (memberId: string) => {
     if (confirm("Are you sure you want to remove this team member?")) {
       try {
-        await teamApi.removeTeamMember(memberId)
+        await removeTeamMember(memberId)
         toast({
           title: "Team member removed",
           description: "The team member has been removed from the project",

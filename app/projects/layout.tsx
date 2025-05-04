@@ -1,6 +1,7 @@
 "use client"
 
 import { AuthGuard } from "@/components/auth-guard"
+import { DashboardLayout } from "@/components/dashboard-layout"
 
 export default function ProjectsLayout({
   children,
@@ -9,7 +10,9 @@ export default function ProjectsLayout({
 }) {
   return (
     <AuthGuard>
-      {children}
+      <DashboardLayout>
+        {children}
+      </DashboardLayout>
     </AuthGuard>
   )
 }

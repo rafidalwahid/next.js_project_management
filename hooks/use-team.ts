@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react"
 import useSWR from "swr"
-import { teamApi } from "@/lib/api"
+import { teamApi, teamManagementApi } from "@/lib/api"
+
+/**
+ * @deprecated Use hooks from use-team-management.ts instead
+ */
 
 /**
  * Hook to fetch team members with pagination
+ * @deprecated Use useTeamMembers from use-team-management.ts instead
  */
 export function useTeamMembers(projectId?: string, page = 1, limit = 10, search?: string) {
   const queryParams = new URLSearchParams()
@@ -37,6 +42,7 @@ export function useTeamMembers(projectId?: string, page = 1, limit = 10, search?
 
 /**
  * Hook to fetch a single team member
+ * @deprecated Use useTeamMember from use-team-management.ts instead
  */
 export function useTeamMember(id?: string) {
   const { data, error, mutate, isLoading } = useSWR(
@@ -54,6 +60,7 @@ export function useTeamMember(id?: string) {
 
 /**
  * Hook to fetch team members for a user
+ * @deprecated Use useUserTeamMemberships from use-team-management.ts instead
  */
 export function useUserTeams(userId?: string, page = 1, limit = 10) {
   const { data, error, mutate, isLoading } = useSWR(
@@ -74,6 +81,7 @@ export function useUserTeams(userId?: string, page = 1, limit = 10) {
 
 /**
  * Hook to manage team member removal
+ * @deprecated Use useRemoveTeamMember from use-team-management.ts instead
  */
 export function useTeamMemberRemoval() {
   const [isRemoving, setIsRemoving] = useState(false)
@@ -103,6 +111,7 @@ export function useTeamMemberRemoval() {
 
 /**
  * Hook to check if current user is a member of a project
+ * @deprecated Use useProjectMembership from use-team-management.ts instead
  */
 export function useIsProjectMember(projectId?: string) {
   const { data, error, isLoading } = useSWR(

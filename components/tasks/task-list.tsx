@@ -38,6 +38,7 @@ export interface Task {
     color: string | null
   } | null
   dueDate: string | null
+  completed: boolean // Added completed field
   project?: {
     id: string
     title: string
@@ -55,6 +56,7 @@ export interface Task {
 interface TaskListProps {
   tasks: Task[]
   onDelete: (taskId: string) => void
+  onToggleCompletion?: (taskId: string) => void
 }
 
 // --- Helper Functions ---
@@ -100,7 +102,38 @@ const getStatusIcon = (statusName: string | undefined | null) => {
 
 // --- Column Definitions for React Table ---
 
-const columns = (onDelete: (taskId: string) => void): ColumnDef<Task>[] => [
+const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskId: string) => void): ColumnDef<Task>[] => [
+  {
+    id: "completed",
+    header: "",
+    cell: ({ row }) => {
+      const task = row.original;
+      return (
+        <div className="flex items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-8 w-8 p-0",
+              task.completed && "text-green-500"
+            )}
+            onClick={() => onToggleCompletion?.(task.id)}
+            disabled={!onToggleCompletion}
+          >
+            {task.completed ? (
+              <CircleCheck className="h-5 w-5" />
+            ) : (
+              <Circle className="h-5 w-5" />
+            )}
+            <span className="sr-only">
+              {task.completed ? "Mark as incomplete" : "Mark as complete"}
+            </span>
+          </Button>
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
   {
     accessorKey: "title",
     header: ({ column }) => (
@@ -113,22 +146,31 @@ const columns = (onDelete: (taskId: string) => void): ColumnDef<Task>[] => [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-         <Link
-           href={`/tasks/${row.original.id}`}
-           className="font-medium hover:text-primary hover:underline max-w-[200px] md:max-w-[300px] truncate"
-           title={row.original.title}
-         >
-           {row.original.title}
-         </Link>
-         {row.original.description && (
-           <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[200px] md:max-w-[300px]">
-             {row.original.description}
-           </p>
-         )}
-       </div>
-    ),
+    cell: ({ row }) => {
+      const task = row.original;
+      return (
+        <div className="flex flex-col">
+          <Link
+            href={`/tasks/${task.id}`}
+            className={cn(
+              "font-medium hover:text-primary hover:underline max-w-[200px] md:max-w-[300px] truncate",
+              task.completed && "line-through text-muted-foreground"
+            )}
+            title={task.title}
+          >
+            {task.title}
+          </Link>
+          {task.description && (
+            <p className={cn(
+              "text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[200px] md:max-w-[300px]",
+              task.completed && "line-through"
+            )}>
+              {task.description}
+            </p>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",
@@ -339,12 +381,12 @@ const columns = (onDelete: (taskId: string) => void): ColumnDef<Task>[] => [
 
 // --- Main Component ---
 
-export function TaskList({ tasks, onDelete }: TaskListProps) {
+export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
   const table = useReactTable({
     data: tasks,
-    columns: React.useMemo(() => columns(onDelete), [onDelete]),
+    columns: React.useMemo(() => columns(onDelete, onToggleCompletion), [onDelete, onToggleCompletion]),
     state: {
       sorting,
     },
@@ -353,7 +395,7 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
     getSortedRowModel: getSortedRowModel(),
   })
 
-  const columnCount = React.useMemo(() => columns(onDelete).length, [onDelete])
+  const columnCount = React.useMemo(() => columns(onDelete, onToggleCompletion).length, [onDelete, onToggleCompletion])
 
   return (
     <div className="rounded-md border shadow-sm overflow-hidden">
@@ -370,7 +412,8 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                       "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
                       header.id === 'project.title' && "hidden lg:table-cell",
                       header.id === 'dueDate' && "hidden md:table-cell",
-                      header.id === 'assignees' && "hidden sm:table-cell"
+                      header.id === 'assignees' && "hidden sm:table-cell",
+                      header.id === 'completed' && "w-10"
                     )}
                   >
                     {header.isPlaceholder
@@ -399,7 +442,8 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                         "px-3 py-2.5 text-sm",
                         cell.column.id === 'project.title' && "hidden lg:table-cell",
                         cell.column.id === 'dueDate' && "hidden md:table-cell",
-                        cell.column.id === 'assignees' && "hidden sm:table-cell"
+                        cell.column.id === 'assignees' && "hidden sm:table-cell",
+                        cell.column.id === 'completed' && "w-10"
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -425,14 +469,37 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
             {table.getRowModel().rows.map((row) => {
               const task = row.original;
               return (
-                <div key={task.id} className="p-4 space-y-3">
+                <div key={task.id} className={cn("p-4 space-y-3", task.completed && "opacity-70")}>
                   <div className="flex items-start justify-between">
-                    <Link
-                      href={`/tasks/${task.id}`}
-                      className="font-medium hover:text-primary hover:underline"
-                    >
-                      {task.title}
-                    </Link>
+                    <div className="flex items-start gap-2">
+                      {onToggleCompletion && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "h-8 w-8 p-0 flex-shrink-0 mt-0.5",
+                            task.completed && "text-green-500"
+                          )}
+                          onClick={() => onToggleCompletion(task.id)}
+                          aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                        >
+                          {task.completed ? (
+                            <CircleCheck className="h-5 w-5" />
+                          ) : (
+                            <Circle className="h-5 w-5" />
+                          )}
+                        </Button>
+                      )}
+                      <Link
+                        href={`/tasks/${task.id}`}
+                        className={cn(
+                          "font-medium hover:text-primary hover:underline",
+                          task.completed && "line-through text-muted-foreground"
+                        )}
+                      >
+                        {task.title}
+                      </Link>
+                    </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -464,7 +531,10 @@ export function TaskList({ tasks, onDelete }: TaskListProps) {
                   </div>
 
                   {task.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-1">
+                    <p className={cn(
+                      "text-xs text-muted-foreground line-clamp-1",
+                      task.completed && "line-through"
+                    )}>
                       {task.description}
                     </p>
                   )}

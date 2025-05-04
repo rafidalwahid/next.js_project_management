@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/services/permission-service";
-import prisma from "@/lib/prisma";
+import { PermissionService } from "@/lib/permissions/permission-service";
 
 // GET /api/roles - Get all roles
 export async function GET(req: NextRequest) {
@@ -62,30 +61,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if role already exists
-    const existingRole = await prisma.role.findUnique({
-      where: { name },
-    });
-
-    if (existingRole) {
-      return NextResponse.json(
-        { error: 'Role already exists' },
-        { status: 409 }
-      );
-    }
-
-    // Create the role
-    // Note: In the simplified system, we don't actually create roles in the database
-    // This is just a placeholder for backward compatibility
-    const role = {
-      id: name,
-      name,
-      description: description || '',
-      color: 'bg-gray-500'
-    };
-
-    // Return the created role
-    return NextResponse.json(role, { status: 201 });
+    // In the centralized permission system, roles are defined in code
+    // This endpoint is kept for backward compatibility but doesn't actually create roles
+    return NextResponse.json(
+      {
+        error: 'Creating roles dynamically is not supported in the centralized permission system',
+        message: 'Roles are now defined in code in lib/permissions/unified-permission-system.ts'
+      },
+      { status: 400 }
+    );
   } catch (error: any) {
     console.error('Error creating role:', error);
     return NextResponse.json(
@@ -126,35 +110,15 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Check if role exists
-    const role = await prisma.role.findUnique({
-      where: { name },
-    });
-
-    if (!role) {
-      return NextResponse.json(
-        { error: 'Role not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if it's a system role
-    if (role.isSystem) {
-      return NextResponse.json(
-        { error: 'Cannot delete system roles' },
-        { status: 403 }
-      );
-    }
-
-    // Delete the role
-    await prisma.role.delete({
-      where: { id: role.id },
-    });
-
-    // Return success
-    return NextResponse.json({
-      message: `Role '${name}' deleted successfully`,
-    });
+    // In the centralized permission system, roles are defined in code
+    // This endpoint is kept for backward compatibility but doesn't actually delete roles
+    return NextResponse.json(
+      {
+        error: 'Deleting roles dynamically is not supported in the centralized permission system',
+        message: 'Roles are now defined in code in lib/permissions/unified-permission-system.ts'
+      },
+      { status: 400 }
+    );
   } catch (error: any) {
     console.error('Error deleting role:', error);
     return NextResponse.json(

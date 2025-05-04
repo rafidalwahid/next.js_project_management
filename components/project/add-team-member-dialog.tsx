@@ -58,9 +58,9 @@ export function AddTeamMemberDialog({
   useEffect(() => {
     if (users.length > 0) {
       const filtered = users
-        .filter(user => 
+        .filter(user =>
           !existingTeamMemberIds.includes(user.id) &&
-          (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
            user.email.toLowerCase().includes(searchQuery.toLowerCase()))
         )
       setFilteredUsers(filtered)
@@ -72,7 +72,7 @@ export function AddTeamMemberDialog({
       setIsLoading(true)
       const response = await fetch(`/api/users?limit=100`)
       if (!response.ok) throw new Error("Failed to fetch users")
-      
+
       const data = await response.json()
       setUsers(data.users || [])
     } catch (error) {
@@ -90,12 +90,12 @@ export function AddTeamMemberDialog({
   const addUserToTeam = async (userId: string) => {
     try {
       setIsAdding(true)
-      const response = await fetch(`/api/projects/${projectId}/team`, {
+      const response = await fetch(`/api/team-management`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, projectId }),
       })
 
       if (!response.ok) {
@@ -109,7 +109,7 @@ export function AddTeamMemberDialog({
       })
 
       onSuccess()
-      
+
       // Don't close the dialog so user can add more members
     } catch (error: any) {
       console.error("Error adding team member:", error)
