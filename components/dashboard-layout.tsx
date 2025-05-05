@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
+import { TopCornerAttendance } from "@/components/attendance/top-corner-attendance"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -54,20 +55,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen flex flex-col">
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 w-full md:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-14 items-center px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-3 h-8 w-8 rounded-md"
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-          <span className="font-semibold">
-            <span className="md:hidden">PM</span>
-            <span className="hidden md:inline">Project Management</span>
-          </span>
+        <div className="flex h-14 items-center justify-between px-2 sm:px-4">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2 h-8 w-8 rounded-md"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-4 w-4" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+            <span className="font-semibold">
+              <span className="md:hidden">PM</span>
+              <span className="hidden md:inline">Project Management</span>
+            </span>
+          </div>
+          <div className="flex-shrink-0">
+            <TopCornerAttendance />
+          </div>
         </div>
       </header>
 
@@ -217,7 +223,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
           >
             <div className="flex-1 p-4 md:p-6 space-y-6">
-              <Breadcrumbs />
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex-grow min-w-0">
+                  <Breadcrumbs />
+                </div>
+                <div className="hidden md:block flex-shrink-0">
+                  <TopCornerAttendance />
+                </div>
+              </div>
               {children}
             </div>
           </main>
@@ -225,7 +238,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           /* Main Content - Server-side rendering */
           <main className="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ml-[240px]">
             <div className="flex-1 p-4 md:p-6 space-y-6">
-              <Breadcrumbs />
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex-grow min-w-0">
+                  <Breadcrumbs />
+                </div>
+                <div className="hidden md:block flex-shrink-0">
+                  <TopCornerAttendance />
+                </div>
+              </div>
               {children}
             </div>
           </main>

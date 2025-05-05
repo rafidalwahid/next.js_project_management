@@ -18,6 +18,8 @@ import {
   Users
 } from "lucide-react"
 import { useDashboardStats } from "@/hooks/use-dashboard-stats"
+import { AttendanceWidget } from "@/components/attendance/attendance-widget"
+import { AttendanceSummary } from "@/components/dashboard/attendance-summary"
 
 export function RoleDashboard() {
   const { data: session } = useSession()
@@ -637,23 +639,26 @@ function UserDashboard({ stats }: { stats: any }) {
         </TabsContent>
 
         <TabsContent value="attendance">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Attendance</CardTitle>
-              <CardDescription>
-                View your attendance history and check in/out
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">Attendance Dashboard</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Your attendance records would be displayed here
-                </p>
+          <div className="space-y-6">
+            <div className="grid gap-6 grid-cols-1">
+              {/* Full Attendance Widget */}
+              <div className="col-span-1">
+                <AttendanceWidget />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Today's Overview */}
+              <AttendanceSummary period="today" title="Today's Overview" />
+
+              {/* This Week */}
+              <AttendanceSummary period="week" title="This Week" />
+
+              {/* This Month */}
+              <AttendanceSummary period="month" title="This Month" className="sm:col-span-2 lg:col-span-1" />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
