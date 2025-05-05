@@ -41,11 +41,56 @@ For example:
 
 ### Server-side
 
+#### Basic Permission Check
+
 ```typescript
 import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 // Check if a user has a specific permission
 const hasPermission = UnifiedPermissionSystem.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
+```
+
+#### API Middleware
+
+The API middleware provides functions for checking permissions in API routes:
+
+```typescript
+import { withAuth, withPermission, withResourcePermission, withOwnerOrAdmin } from "@/lib/api-middleware";
+
+// Basic authentication middleware
+export const GET = withAuth(async (req, context, session) => {
+  // Handler implementation
+});
+
+// Permission-based middleware
+export const POST = withPermission(
+  PERMISSIONS.PROJECT_CREATION,
+  async (req, context, session) => {
+    // Handler implementation
+  }
+);
+
+// Resource-specific permission middleware
+export const PATCH = withResourcePermission(
+  "projectId",
+  checkProjectPermission,
+  async (req, context, session, projectId) => {
+    // Handler implementation
+  },
+  "update"
+);
+
+// Owner or admin middleware
+export const DELETE = withOwnerOrAdmin(
+  "resourceId",
+  async (resourceId) => {
+    // Fetch the resource and return { userId: "owner123" } or null
+    return await getResourceById(resourceId);
+  },
+  async (req, context, session, resourceId) => {
+    // Handler implementation
+  }
+);
 ```
 
 ### Client-side
@@ -69,7 +114,7 @@ function MyComponent() {
 
 ```typescript
 import { PermissionGuard } from "@/components/permission-guard";
-import { PERMISSIONS } from "@/lib/permissions/permission-system";
+import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 function MyComponent() {
   return (
@@ -80,6 +125,16 @@ function MyComponent() {
 }
 ```
 
+## Resource-Specific Permission Checkers
+
+Resource-specific permission checkers are functions that check if a user has permission to perform an action on a specific resource:
+
+- `checkProjectPermission` in `lib/permissions/project-permissions.ts`
+- `checkTaskPermission` in `lib/permissions/task-permissions.ts`
+- `checkTeamPermission` in `lib/permissions/team-permissions.ts`
+
+These functions return an object with `hasPermission`, `error`, and the resource itself.
+
 ## Adding New Permissions
 
 To add a new permission:
@@ -87,6 +142,14 @@ To add a new permission:
 1. Add the permission to the `PERMISSIONS` object in `lib/permissions/unified-permission-system.ts`
 2. Update the `PERMISSION_MATRIX` to assign the permission to the appropriate roles
 3. Use the permission in your code
+
+## Benefits of the Unified Permission System
+
+1. **Consistency**: All permission checks use the same underlying system
+2. **Reusability**: Common permission checking patterns are encapsulated in reusable functions
+3. **Maintainability**: Permission logic is centralized and easier to update
+4. **Security**: Reduced risk of missing permission checks
+5. **Error Handling**: Consistent error responses across the application
 
 ## Migrating from the Old System
 

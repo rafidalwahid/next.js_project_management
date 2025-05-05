@@ -8,9 +8,11 @@ A comprehensive project management application built with Next.js, Prisma, and M
 - Project management with team collaboration
 - Task management with Kanban and list views
 - Nested subtasks with ordering capabilities
+- Task comments and file attachments
 - Field attendance tracking with geolocation
 - Attendance analytics and reporting
 - Activity logging and reporting
+- Responsive design for all devices
 
 ## Tech Stack
 
@@ -52,6 +54,12 @@ DATABASE_URL="mysql://root:@localhost:3306/projectpro"
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key-for-jwt"
 NEXTAUTH_URL="http://localhost:3000"
+
+# OAuth Providers (optional)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+FACEBOOK_CLIENT_ID="your-facebook-client-id"
+FACEBOOK_CLIENT_SECRET="your-facebook-client-secret"
 ```
 
 4. **Start MySQL**
@@ -235,7 +243,20 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Subtask Ordering**: When creating or updating subtasks, ensure the order field is properly set to maintain the correct sequence.
 - **Attendance Geolocation**: The attendance system collects geolocation data, which requires proper user consent and privacy considerations.
 
-## API Routes
+## Key Features
+
+### Task Detail View
+
+The task detail view provides a comprehensive interface for managing individual tasks:
+
+- **Task Information**: View and edit task title, description, status, priority, and dates
+- **Subtasks Management**: Create, edit, and delete nested subtasks with proper ordering
+- **Comments System**: Discuss tasks with team members through threaded comments
+- **File Attachments**: Upload and manage files related to the task
+- **Time Tracking**: Track estimated and actual time spent on tasks
+- **Responsive Design**: Fully responsive interface that works on all devices
+
+### API Routes
 
 - `/api/auth/*` - Authentication endpoints (NextAuth.js)
 - `/api/projects` - Project management

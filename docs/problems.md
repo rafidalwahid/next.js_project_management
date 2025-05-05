@@ -25,9 +25,9 @@
 
 ## 4. UI/UX Issues
 
-- ~~**Inconsistent Mobile Responsiveness**: Some components like the attendance admin dashboard have mobile-specific views, while others don't adapt well to smaller screens.~~ Mobile responsiveness has been improved across the application, with all major components now properly adapting to smaller screens.
+- ~~**Inconsistent Mobile Responsiveness**: Some components like the attendance admin dashboard have mobile-specific views, while others don't adapt well to smaller screens.~~ Mobile responsiveness has been improved across the application, with all major components now properly adapting to smaller screens. The task detail view and edit task dialog are now fully responsive.
 - ~~**Complex Admin Interface**: The attendance admin dashboard has too many tabs and features crammed into one page, making it difficult to navigate.~~ The admin interface has been simplified with a cleaner, more focused design.
-- ~~**Inconsistent Design Language**: The UI components don't follow a consistent design language - some use shadcn UI components, others use custom styling.~~ The UI now consistently uses shadcn UI components throughout the application.
+- ~~**Inconsistent Design Language**: The UI components don't follow a consistent design language - some use shadcn UI components, others use custom styling.~~ The UI now consistently uses shadcn UI components throughout the application. Custom date pickers have been replaced with native HTML date inputs for better compatibility and usability.
 - ~~**Poor Loading States**: Loading states are inconsistently implemented across the application, with some components showing skeletons and others showing spinners or nothing at all.~~ Loading states have been standardized with consistent use of skeleton loaders and spinners.
 - ~~**Confusing Navigation**: The sidebar navigation has both expandable and non-expandable items, creating an inconsistent user experience.~~ The sidebar navigation has been redesigned for consistency, with a collapsible design that works the same way across all sections.
 
@@ -41,7 +41,7 @@
 
 ## 6. Project Management Functionality Issues
 
-- ~~**Overcomplicated Task Structure**: The task system with nested subtasks and ordering is complex but doesn't provide clear visualization in the UI.~~ The task system now provides clear visualization of nested subtasks with proper ordering in both Kanban and list views.
+- ~~**Overcomplicated Task Structure**: The task system with nested subtasks and ordering is complex but doesn't provide clear visualization in the UI.~~ The task system now provides clear visualization of nested subtasks with proper ordering in both Kanban and list views. The task detail view offers comprehensive management of subtasks, comments, and attachments.
 - ~~**Inconsistent Status Implementation**: Projects have a separate ProjectStatus model, but tasks use a direct statusId reference, creating inconsistency.~~ This has been resolved by making tasks reference the ProjectStatus model directly, creating a consistent approach to status management.
 - **Limited Team Collaboration Features**: Despite having team members associated with projects, there are limited features for team collaboration.
 - **Incomplete Document Management**: The document model exists but isn't fully integrated with the rest of the application.
