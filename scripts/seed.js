@@ -1,6 +1,6 @@
-// prisma/seed.js
-const { PrismaClient } = require('../lib/prisma-client');
-const { hash } = require('bcryptjs');
+// scripts/seed.js
+const { PrismaClient } = require('@prisma/client');
+const { hash } = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -108,10 +108,10 @@ async function seedUsers() {
       skills: 'Agile, Scrum, Team Leadership, Risk Management'
     },
     {
-      name: 'Developer One',
-      email: 'dev1@example.com',
+      name: 'Regular User One',
+      email: 'user1@example.com',
       password: hashedPassword,
-      role: 'developer',
+      role: 'user',
       department: 'Engineering',
       jobTitle: 'Senior Developer',
       bio: 'Full-stack developer with 8 years of experience',
@@ -120,10 +120,10 @@ async function seedUsers() {
       skills: 'JavaScript, React, Node.js, TypeScript, Next.js'
     },
     {
-      name: 'Developer Two',
-      email: 'dev2@example.com',
+      name: 'Regular User Two',
+      email: 'user2@example.com',
       password: hashedPassword,
-      role: 'developer',
+      role: 'user',
       department: 'Engineering',
       jobTitle: 'Frontend Developer',
       bio: 'Frontend specialist focusing on user interfaces',
@@ -132,10 +132,10 @@ async function seedUsers() {
       skills: 'HTML, CSS, JavaScript, React, UI/UX'
     },
     {
-      name: 'Developer Three',
-      email: 'dev3@example.com',
+      name: 'Regular User Three',
+      email: 'user3@example.com',
       password: hashedPassword,
-      role: 'developer',
+      role: 'user',
       department: 'Engineering',
       jobTitle: 'Backend Developer',
       bio: 'Backend developer with database expertise',
@@ -147,7 +147,7 @@ async function seedUsers() {
       name: 'Designer',
       email: 'designer@example.com',
       password: hashedPassword,
-      role: 'designer',
+      role: 'user',
       department: 'Design',
       jobTitle: 'UX/UI Designer',
       bio: 'Creative designer focused on user experience',
@@ -159,7 +159,7 @@ async function seedUsers() {
       name: 'Tester',
       email: 'tester@example.com',
       password: hashedPassword,
-      role: 'tester',
+      role: 'user',
       department: 'QA',
       jobTitle: 'Quality Assurance Engineer',
       bio: 'Thorough QA engineer with automation experience',
@@ -171,7 +171,7 @@ async function seedUsers() {
       name: 'HR Manager',
       email: 'hr@example.com',
       password: hashedPassword,
-      role: 'hr',
+      role: 'manager',
       department: 'Human Resources',
       jobTitle: 'HR Manager',
       bio: 'Human resources manager handling personnel and attendance',
@@ -180,10 +180,10 @@ async function seedUsers() {
       skills: 'HR Management, Employee Relations, Attendance Tracking'
     },
     {
-      name: 'Client User',
+      name: 'External Client',
       email: 'client@example.com',
       password: hashedPassword,
-      role: 'client',
+      role: 'guest',
       department: 'External',
       jobTitle: 'Client Representative',
       bio: 'External client with limited access to project details',
@@ -192,10 +192,10 @@ async function seedUsers() {
       skills: 'Project Management, Communication'
     },
     {
-      name: 'Viewer User',
-      email: 'viewer@example.com',
+      name: 'Guest User',
+      email: 'guest@example.com',
       password: hashedPassword,
-      role: 'viewer',
+      role: 'guest',
       department: 'Marketing',
       jobTitle: 'Marketing Specialist',
       bio: 'Marketing team member with read-only access',
@@ -209,36 +209,45 @@ async function seedUsers() {
 
   for (const userData of usersToCreate) {
     const { role, ...userDataWithoutRole } = userData;
+
+    // Create user without role field first
     const user = await prisma.user.create({
       data: userDataWithoutRole
     });
+
+    // Then update the role using a direct SQL query
+    await prisma.$executeRaw`UPDATE user SET role = ${role} WHERE id = ${user.id}`;
 
     users[role] = user;
     console.log(`Created user: ${userData.name} (${userData.email})`);
   }
 
-  // Create additional developers for team diversity
-  const extraDevelopers = [];
+  // Create additional users for team diversity
+  const extraUsers = [];
   for (let i = 4; i <= 8; i++) {
-    const devUser = await prisma.user.create({
+    // Create user without role field first
+    const extraUser = await prisma.user.create({
       data: {
-        name: `Developer ${i}`,
-        email: `dev${i}@example.com`,
+        name: `User ${i}`,
+        email: `user${i}@example.com`,
         password: hashedPassword,
-        role: 'developer',
         department: 'Engineering',
         jobTitle: 'Software Developer',
-        bio: `Developer with various skills and experience`,
+        bio: `User with various skills and experience`,
         location: 'Remote',
         phone: `555-${i}00-${i}${i}${i}${i}`,
         skills: 'JavaScript, Python, React, Node.js'
       }
     });
-    extraDevelopers.push(devUser);
-    console.log(`Created additional developer: Developer ${i}`);
+
+    // Then update the role using a direct SQL query
+    await prisma.$executeRaw`UPDATE user SET role = 'user' WHERE id = ${extraUser.id}`;
+
+    extraUsers.push(extraUser);
+    console.log(`Created additional user: User ${i}`);
   }
 
-  users.extraDevelopers = extraDevelopers;
+  users.extraUsers = extraUsers;
 
   return users;
 }
@@ -293,7 +302,7 @@ async function seedProjects(users) {
       dueDate: new Date(now.getFullYear(), now.getMonth() + 1, 25),
       estimatedTime: 200,
       totalTimeSpent: 40,
-      createdById: users.developer.id,
+      createdById: users.user.id,
       statuses: [
         { name: 'Not Started', color: '#E5E5E5', description: 'Work not yet begun', isDefault: true, order: 1 },
         { name: 'In Progress', color: '#3498DB', description: 'Currently working', isDefault: false, order: 2 },
@@ -364,37 +373,52 @@ async function seedProjects(users) {
 async function seedTeamMembers(projects, users) {
   console.log('Assigning team members to projects...');
 
-  const teamAssignments = [
-    // Website Redesign Project
-    { project: projects[0], user: users.manager },
-    { project: projects[0], user: users.developer },
-    { project: projects[0], user: users.designer },
-    { project: projects[0], user: users.tester },
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const regularUser2 = users.extraUsers ? users.extraUsers[0] : null;
+  const regularUser3 = users.extraUsers ? users.extraUsers[1] : null;
+  const designer = users.designer;
+  const tester = users.tester;
+  const guest = users.guest;
+  const client = users.client;
 
-    // Mobile App Development
-    { project: projects[1], user: users.manager },
-    { project: projects[1], user: users.developer },
-    { project: projects[1], user: users.extraDevelopers[0] },
-    { project: projects[1], user: users.extraDevelopers[1] },
-    { project: projects[1], user: users.designer },
-    { project: projects[1], user: users.tester },
+  // Create team assignments only for users that exist
+  const teamAssignments = [];
 
-    // API Integration Project
-    { project: projects[2], user: users.developer },
-    { project: projects[2], user: users.extraDevelopers[2] },
-    { project: projects[2], user: users.extraDevelopers[3] },
+  // Website Redesign Project
+  if (manager) teamAssignments.push({ project: projects[0], user: manager });
+  if (regularUser1) teamAssignments.push({ project: projects[0], user: regularUser1 });
+  if (designer) teamAssignments.push({ project: projects[0], user: designer });
+  if (tester) teamAssignments.push({ project: projects[0], user: tester });
+  if (guest) teamAssignments.push({ project: projects[0], user: guest });
 
-    // Internal Dashboard
-    { project: projects[3], user: users.manager },
-    { project: projects[3], user: users.developer },
-    { project: projects[3], user: users.designer },
-    { project: projects[3], user: users.extraDevelopers[0] },
+  // Mobile App Development
+  if (manager) teamAssignments.push({ project: projects[1], user: manager });
+  if (regularUser1) teamAssignments.push({ project: projects[1], user: regularUser1 });
+  if (regularUser2) teamAssignments.push({ project: projects[1], user: regularUser2 });
+  if (regularUser3) teamAssignments.push({ project: projects[1], user: regularUser3 });
+  if (designer) teamAssignments.push({ project: projects[1], user: designer });
+  if (tester) teamAssignments.push({ project: projects[1], user: tester });
 
-    // Product Launch Campaign
-    { project: projects[4], user: users.manager },
-    { project: projects[4], user: users.designer },
-    { project: projects[4], user: users.extraDevelopers[4] }
-  ];
+  // API Integration Project
+  if (regularUser1) teamAssignments.push({ project: projects[2], user: regularUser1 });
+  if (users.extraUsers && users.extraUsers[2]) teamAssignments.push({ project: projects[2], user: users.extraUsers[2] });
+  if (users.extraUsers && users.extraUsers[3]) teamAssignments.push({ project: projects[2], user: users.extraUsers[3] });
+  if (client) teamAssignments.push({ project: projects[2], user: client });
+
+  // Internal Dashboard
+  if (manager) teamAssignments.push({ project: projects[3], user: manager });
+  if (regularUser1) teamAssignments.push({ project: projects[3], user: regularUser1 });
+  if (designer) teamAssignments.push({ project: projects[3], user: designer });
+  if (regularUser2) teamAssignments.push({ project: projects[3], user: regularUser2 });
+
+  // Product Launch Campaign
+  if (manager) teamAssignments.push({ project: projects[4], user: manager });
+  if (designer) teamAssignments.push({ project: projects[4], user: designer });
+  if (users.extraUsers && users.extraUsers[4]) teamAssignments.push({ project: projects[4], user: users.extraUsers[4] });
+
 
   for (const { project, user } of teamAssignments) {
     await prisma.teamMember.create({
@@ -688,8 +712,8 @@ async function seedTasks(projects, users) {
 async function seedTaskAssignees(tasks, users) {
   console.log('Assigning users to tasks...');
 
-  const developerUsers = [users.developer, ...users.extraDevelopers];
-  const allUsers = [users.manager, ...developerUsers, users.designer, users.tester];
+  const regularUsers = [users.user, ...users.extraUsers];
+  const allUsers = [users.admin, users.manager, ...regularUsers, users.designer, users.tester];
 
   for (const task of tasks) {
     // Assign 1-3 users to each task
@@ -726,7 +750,22 @@ async function seedComments(tasks, users) {
     "I've updated the approach based on feedback."
   ];
 
-  const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUsers = users.extraUsers || [];
+  const designer = users.designer;
+  const tester = users.tester;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  allUsers.push(...extraUsers);
+  if (designer) allUsers.push(designer);
+  if (tester) allUsers.push(tester);
 
   for (const task of tasks) {
     // Add 0-5 comments per task
@@ -754,7 +793,22 @@ async function seedComments(tasks, users) {
 async function seedAttendanceRecords(users, projects, tasks) {
   console.log('Creating attendance records...');
 
-  const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUsers = users.extraUsers || [];
+  const designer = users.designer;
+  const tester = users.tester;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  allUsers.push(...extraUsers);
+  if (designer) allUsers.push(designer);
+  if (tester) allUsers.push(tester);
   const now = new Date();
 
   // Create attendance records for the last 30 days
@@ -809,7 +863,7 @@ async function seedAttendanceRecords(users, projects, tasks) {
     console.log(`Created attendance records for ${date.toDateString()}`);
   }
 
-  // Create some attendance adjustments by HR
+  // Create some attendance records with notes (instead of adjustments)
   for (let i = 0; i < 10; i++) {
     const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
     const adjustmentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - Math.floor(Math.random() * 30));
@@ -820,8 +874,8 @@ async function seedAttendanceRecords(users, projects, tasks) {
         checkInTime: new Date(adjustmentDate.setHours(9, 0, 0, 0)),
         checkOutTime: new Date(adjustmentDate.setHours(17, 0, 0, 0)),
         totalHours: 8,
-        adjustedById: users.hr.id,
-        adjustmentReason: 'Adjusted due to forgotten check-in/out',
+        checkInLocationName: 'Office',
+        checkOutLocationName: 'Office',
         notes: 'Manual adjustment approved by HR'
       }
     });
@@ -832,7 +886,22 @@ async function seedAttendanceRecords(users, projects, tasks) {
 async function seedAttendanceSettings(users) {
   console.log('Creating attendance settings...');
 
-  const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUsers = users.extraUsers || [];
+  const designer = users.designer;
+  const tester = users.tester;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  allUsers.push(...extraUsers);
+  if (designer) allUsers.push(designer);
+  if (tester) allUsers.push(tester);
 
   for (const user of allUsers) {
     await prisma.attendanceSettings.create({
@@ -896,7 +965,20 @@ async function seedEvents(projects) {
 async function seedDocuments(users) {
   console.log('Creating documents...');
 
-  const allUsers = [users.manager, users.developer, users.extraDevelopers[0], users.designer];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUser1 = users.extraUsers && users.extraUsers.length > 0 ? users.extraUsers[0] : null;
+  const designer = users.designer;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  if (extraUser1) allUsers.push(extraUser1);
+  if (designer) allUsers.push(designer);
   const documentTypes = [
     { name: 'Requirements Doc', fileType: 'pdf', fileSize: 1024 * 1024 },
     { name: 'Design Specs', fileType: 'pdf', fileSize: 2048 * 1024 },
@@ -935,16 +1017,25 @@ async function seedDocuments(users) {
 async function seedActivities(users, projects, tasks) {
   console.log('Creating activity logs...');
 
-  const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUsers = users.extraUsers || [];
+  const designer = users.designer;
+  const tester = users.tester;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  allUsers.push(...extraUsers);
+  if (designer) allUsers.push(designer);
+  if (tester) allUsers.push(tester);
   const now = new Date();
 
-  const activityTemplates = [
-    { action: 'create', description: 'created' },
-    { action: 'update', description: 'updated' },
-    { action: 'comment', description: 'commented on' },
-    { action: 'complete', description: 'marked as complete' },
-    { action: 'assign', description: 'assigned' }
-  ];
+  // Activity types are hardcoded in the creation functions below
 
   // Project activities
   for (const project of projects) {
@@ -1071,7 +1162,22 @@ async function seedActivities(users, projects, tasks) {
 async function seedTaskAttachments(tasks, users) {
   console.log('Creating task attachments...');
 
-  const allUsers = [users.manager, users.developer, ...users.extraDevelopers, users.designer, users.tester];
+  // Get users by role from the users object
+  const admin = users.admin;
+  const manager = users.manager;
+  const regularUser1 = users.user;
+  const extraUsers = users.extraUsers || [];
+  const designer = users.designer;
+  const tester = users.tester;
+
+  // Create a list of all available users
+  const allUsers = [];
+  if (admin) allUsers.push(admin);
+  if (manager) allUsers.push(manager);
+  if (regularUser1) allUsers.push(regularUser1);
+  allUsers.push(...extraUsers);
+  if (designer) allUsers.push(designer);
+  if (tester) allUsers.push(tester);
   const attachmentTypes = [
     { fileType: 'png', size: 512 * 1024 },
     { fileType: 'jpg', size: 1024 * 1024 },
