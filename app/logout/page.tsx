@@ -2,8 +2,8 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { signOut } from "next-auth/react"
 import { Spinner } from "@/components/ui/spinner"
+import { checkOutAndLogout } from "@/lib/logout-utils"
 
 export default function LogoutPage() {
   const router = useRouter()
@@ -11,8 +11,8 @@ export default function LogoutPage() {
   useEffect(() => {
     const performLogout = async () => {
       try {
-        await signOut({ redirect: false })
-        router.push("/login")
+        // This will check out the user if needed, then log them out
+        await checkOutAndLogout('/login')
       } catch (error) {
         console.error("Error during logout:", error)
         // Force redirect to login even if there's an error

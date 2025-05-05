@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { formatDistanceToNow } from "date-fns"
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
+import { checkOutAndLogout } from "@/lib/logout-utils"
 import {
   Tooltip,
   TooltipContent,
@@ -275,7 +276,7 @@ export function TopCornerAttendance() {
                       {formatDistanceToNow(new Date(currentAttendance.checkInTime), { addSuffix: true })}
                     </span>
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-2 space-y-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -283,6 +284,14 @@ export function TopCornerAttendance() {
                       className="text-xs w-full"
                     >
                       View Details
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => checkOutAndLogout()}
+                      className="text-xs w-full text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      Check Out & Logout
                     </Button>
                   </div>
                 </div>

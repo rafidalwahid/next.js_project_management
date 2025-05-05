@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogOut, User } from "lucide-react"
 import Link from "next/link"
-import { signOut, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import { checkOutAndLogout } from "@/lib/logout-utils"
 
 interface UserNavProps {
   compact?: boolean
@@ -87,7 +88,7 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
-          onClick={() => signOut()}
+          onClick={() => checkOutAndLogout()}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
