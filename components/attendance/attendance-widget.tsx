@@ -50,7 +50,8 @@ export function AttendanceWidget() {
       const data = await response.json()
 
       if (response.ok) {
-        setCurrentAttendance(data.attendance)
+        // Use currentAttendance from the new API response format, falling back to attendance for backward compatibility
+        setCurrentAttendance(data.currentAttendance || data.attendance)
         setError(null)
       } else {
         setError(data.error || "Failed to load attendance data")

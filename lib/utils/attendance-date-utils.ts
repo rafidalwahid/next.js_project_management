@@ -120,6 +120,75 @@ export function calculateWorkHours(checkInTime: Date, checkOutTime: Date): numbe
 }
 
 /**
+ * Calculates total work hours with business rules applied
+ * @param checkInTime Check-in time
+ * @param checkOutTime Check-out time
+ * @param options Optional configuration
+ * @returns Validated total hours (decimal) with 2 decimal precision
+ */
+export function calculateTotalHours(
+  checkInTime: Date,
+  checkOutTime: Date,
+  options: {
+    maxHoursPerDay?: number;
+    applyWorkdayBounds?: boolean;
+    isAutoCheckout?: boolean;
+  } = {}
+): number {
+  // Set default options
+  const {
+    maxHoursPerDay = WORK_DAY.MAX_HOURS_PER_DAY,
+    applyWorkdayBounds = true,
+    isAutoCheckout = false
+  } = options;
+
+  // Ensure we're working with Date objects
+  const startTime = new Date(checkInTime);
+  const endTime = new Date(checkOutTime);
+
+  // Basic validation
+  if (startTime >= endTime) {
+    return 0; // Invalid time range
+  }
+
+  let effectiveEndTime = new Date(endTime);
+
+  // If applying workday bounds and this is an auto-checkout
+  if (applyWorkdayBounds && isAutoCheckout) {
+    // For auto-checkout, if the check-in was before the workday start,
+    // use workday start as the effective check-in time
+    const workdayStart = getWorkdayStart(startTime);
+    const workdayEnd = getWorkdayEnd(startTime);
+
+    // If checkout time is after workday end, cap it at workday end
+    if (endTime > workdayEnd) {
+      effectiveEndTime = workdayEnd;
+    }
+
+    // If the duration exceeds the standard workday hours, cap it
+    const standardWorkdayMs = WORK_DAY.HOURS_PER_DAY * 60 * 60 * 1000;
+    const actualDurationMs = effectiveEndTime.getTime() - startTime.getTime();
+
+    if (actualDurationMs > standardWorkdayMs) {
+      // For auto-checkout, default to standard workday hours
+      return WORK_DAY.HOURS_PER_DAY;
+    }
+  }
+
+  // Calculate duration in milliseconds
+  const durationMs = effectiveEndTime.getTime() - startTime.getTime();
+
+  // Convert to hours (decimal)
+  const hours = durationMs / (1000 * 60 * 60);
+
+  // Apply maximum hours constraint
+  const cappedHours = Math.min(hours, maxHoursPerDay);
+
+  // Return with 2 decimal precision
+  return Math.round(cappedHours * 100) / 100;
+}
+
+/**
  * Calculates work duration as percentage of standard workday
  * @param checkInTime Check-in time
  * @param checkOutTime Check-out time
@@ -152,4 +221,32 @@ export function safeParseISO(dateString: string): Date {
     console.error(`Error parsing date: ${dateString}`, error);
     return new Date();
   }
+}
+
+/**
+ * Determines if a given time is within standard work hours
+ * @param date The date to check
+ * @returns Boolean indicating if the time is within work hours
+ */
+export function isWithinWorkHours(date: Date): boolean {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  // Convert to total minutes for easier comparison
+  const timeInMinutes = (hours * 60) + minutes;
+  const startInMinutes = (WORK_DAY.START_HOUR * 60) + WORK_DAY.START_MINUTE;
+  const endInMinutes = (WORK_DAY.END_HOUR * 60) + WORK_DAY.END_MINUTE;
+
+  return timeInMinutes >= startInMinutes && timeInMinutes < endInMinutes;
+}
+
+/**
+ * Determines if a given day is a work day based on default work days
+ * @param date The date to check
+ * @returns Boolean indicating if the date is a work day
+ */
+export function isWorkDay(date: Date): boolean {
+  const day = date.getDay();
+  // Check if the day is not in the weekend days array
+  return !WORK_DAY.WEEKEND_DAYS.includes(day);
 }

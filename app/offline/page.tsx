@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { WifiOff, RefreshCw, Home, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 
-export default function OfflinePage() {
+function OfflineContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isOnline, setIsOnline] = useState(
@@ -135,5 +135,31 @@ export default function OfflinePage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+// Wrap the component with Suspense to handle useSearchParams
+export default function OfflinePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center p-4 bg-muted/20">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <WifiOff className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-xl">You're Offline</CardTitle>
+            <CardDescription>
+              Your device is currently offline. Some features may be limited.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p>Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <OfflineContent />
+    </Suspense>
   )
 }

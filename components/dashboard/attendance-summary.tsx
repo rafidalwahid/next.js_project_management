@@ -1,9 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns"
+import { format, startOfWeek, endOfWeek, formatDistanceToNow, differenceInSeconds } from "date-fns"
+import { calculateTotalHours } from "@/lib/utils/attendance-date-utils"
+import { WORK_DAY } from "@/lib/constants/attendance"
 
 interface AttendanceSummaryProps {
   period: "today" | "week" | "month"
@@ -19,12 +21,78 @@ interface AttendanceData {
   attendanceRate?: number
   currentStatus?: "checked-in" | "checked-out" | "none"
   currentSessionStart?: string
+  hasActiveSession?: boolean
 }
 
 export function AttendanceSummary({ period, title, subtitle, className }: AttendanceSummaryProps) {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<AttendanceData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [elapsedTime, setElapsedTime] = useState(0)
+
+  // Store raw data for timer updates
+  const rawDataRef = useRef<{
+    completedHours: number;
+    activeSessionStart?: Date;
+    hasActiveSession: boolean;
+  }>({
+    completedHours: 0,
+    hasActiveSession: false
+  })
+
+  // Timer for updating active session duration
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Function to update elapsed time for active sessions
+  const updateElapsedTime = () => {
+    if (!rawDataRef.current.hasActiveSession || !rawDataRef.current.activeSessionStart) return
+
+    const now = new Date()
+    const sessionStart = new Date(rawDataRef.current.activeSessionStart)
+
+    // Calculate elapsed hours with business rules
+    const elapsedHours = calculateTotalHours(
+      sessionStart,
+      now,
+      { maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY }
+    )
+
+    // Update total hours (completed hours + current session)
+    const totalHours = rawDataRef.current.completedHours + elapsedHours
+
+    // Update the data state with new total hours
+    setData(prevData => {
+      if (!prevData) return null
+      return {
+        ...prevData,
+        totalHours: parseFloat(totalHours.toFixed(2))
+      }
+    })
+  }
+
+  // Set up timer for active sessions
+  useEffect(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+
+    // Only set up timer for today's view with active session
+    if (period === "today" && rawDataRef.current.hasActiveSession) {
+      timerRef.current = setInterval(updateElapsedTime, 30000) // Update every 30 seconds
+
+      // Initial update
+      updateElapsedTime()
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [period, rawDataRef.current.hasActiveSession])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,15 +118,31 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
         }
 
         if (period === "today") {
-          const attendance = result.attendance
+          // Use the new API response format
+          const attendance = result.currentAttendance || result.attendance
+          const totalHoursToday = result.totalHoursToday !== undefined ? result.totalHoursToday : (attendance?.totalHours || 0)
+          const hasActiveSession = result.hasActiveSession || (attendance && !attendance.checkOutTime)
+
           processedData = {
             daysWorked: attendance ? 1 : 0,
-            totalHours: attendance?.totalHours || 0,
-            avgHoursPerDay: attendance?.totalHours || 0,
+            totalHours: totalHoursToday,
+            avgHoursPerDay: totalHoursToday,
             currentStatus: attendance ?
               (attendance.checkOutTime ? "checked-out" : "checked-in") :
               "none",
-            currentSessionStart: attendance?.checkInTime
+            currentSessionStart: attendance?.checkInTime,
+            hasActiveSession
+          }
+
+          // Store raw data for timer updates
+          rawDataRef.current = {
+            completedHours: totalHoursToday - (hasActiveSession ? calculateTotalHours(
+              new Date(attendance.checkInTime),
+              new Date(),
+              { maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY }
+            ) : 0),
+            activeSessionStart: hasActiveSession ? new Date(attendance.checkInTime) : undefined,
+            hasActiveSession
           }
 
           // Handle case when attendance is null
@@ -68,7 +152,13 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
               totalHours: 0,
               avgHoursPerDay: 0,
               currentStatus: "none",
-              currentSessionStart: undefined
+              currentSessionStart: undefined,
+              hasActiveSession: false
+            }
+
+            rawDataRef.current = {
+              completedHours: 0,
+              hasActiveSession: false
             }
           }
         } else {
@@ -176,10 +266,16 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
             {period === "today" && data?.currentStatus === "checked-in" && (
               <div className="flex justify-between items-center flex-wrap gap-1">
                 <span className="text-xs font-medium">Current Session:</span>
-                <span className="text-xs">
-                  {data?.currentSessionStart
-                    ? formatDistanceToNow(new Date(data.currentSessionStart), { addSuffix: true })
-                    : "N/A"}
+                <span className="text-xs flex items-center">
+                  {data?.currentSessionStart ? (
+                    <>
+                      {formatDistanceToNow(new Date(data.currentSessionStart), { addSuffix: true })}
+                      <span className="ml-1 relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    </>
+                  ) : "N/A"}
                 </span>
               </div>
             )}
@@ -188,7 +284,12 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
               <span className="text-xs font-medium">
                 {period === "today" ? "Hours Today:" : "Total Hours:"}
               </span>
-              <span className="text-xs">{data?.totalHours.toFixed(2)} hrs</span>
+              <span className="text-xs flex items-center">
+                {data?.totalHours.toFixed(2)} hrs
+                {period === "today" && data?.hasActiveSession && (
+                  <span className="ml-1 text-xs text-green-600">(updating)</span>
+                )}
+              </span>
             </div>
 
             {period !== "today" && (

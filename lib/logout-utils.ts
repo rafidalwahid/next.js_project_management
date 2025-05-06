@@ -9,49 +9,95 @@ import { toast } from "@/components/ui/use-toast"
  */
 export async function checkOutAndLogout(callbackUrl: string = '/login') {
   try {
+    // Check if we're online before attempting to fetch
+    if (!navigator.onLine) {
+      console.log("Offline: Skipping auto-checkout and proceeding with logout");
+      await signOut({ callbackUrl });
+      return;
+    }
+
     // First, check if the user is currently checked in
-    const response = await fetch('/api/attendance/current')
-    const data = await response.json()
+    const response = await fetch('/api/attendance/current', {
+      // Add cache control to ensure we get fresh data
+      cache: 'no-cache',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+
+    if (!response.ok) {
+      console.error("Error fetching current attendance:", await response.text());
+      await signOut({ callbackUrl });
+      return;
+    }
+
+    const data = await response.json();
 
     // If the user is checked in (has an active attendance record without checkout time)
-    if (response.ok && data.attendance && !data.attendance.checkOutTime) {
+    if (data.attendance && !data.attendance.checkOutTime) {
       try {
-        // Get current position if available
-        let position: GeolocationPosition | null = null
-        try {
-          position = await getCurrentPosition()
-        } catch (error) {
-          console.error("Error getting position for auto-checkout:", error)
-          // Continue without position data
-        }
+        // Get current position if available, with timeout to prevent hanging
+        let position: GeolocationPosition | null = null;
+        const positionPromise = getCurrentPosition().catch(err => {
+          console.warn("Could not get position for checkout:", err);
+          return null;
+        });
 
-        // Prepare check-out data
+        // Set a timeout for position acquisition to avoid hanging the logout process
+        const timeoutPromise = new Promise<null>((resolve) => {
+          setTimeout(() => resolve(null), 3000); // 3 second timeout
+        });
+
+        // Race between position acquisition and timeout
+        position = await Promise.race([positionPromise, timeoutPromise]);
+
+        // Prepare check-out data with notes indicating this was from logout
         const checkOutData = {
           attendanceId: data.attendance.id,
-          latitude: position?.coords.latitude,
-          longitude: position?.coords.longitude,
-          timestamp: new Date().toISOString(),
-        }
+          latitude: position?.coords?.latitude,
+          longitude: position?.coords?.longitude,
+          notes: "Auto checkout during logout",
+        };
 
-        // Call the check-out API
-        const checkoutResponse = await fetch('/api/attendance/check-out', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(checkOutData),
-        })
+        // Call the check-out API with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-        if (checkoutResponse.ok) {
-          toast({
-            title: "Checked Out",
-            description: "You've been automatically checked out as part of the logout process.",
-          })
-        } else {
-          console.error("Failed to auto-checkout during logout")
+        try {
+          const checkoutResponse = await fetch('/api/attendance/check-out', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(checkOutData),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (checkoutResponse.ok) {
+            const checkoutData = await checkoutResponse.json();
+            toast({
+              title: "Checked Out",
+              description: checkoutData.wasAutoCheckout
+                ? "You've been automatically checked out for a previous session."
+                : "You've been checked out as part of the logout process.",
+            });
+          } else {
+            const errorText = await checkoutResponse.text();
+            console.error("Failed to auto-checkout during logout:", errorText);
+          }
+        } catch (fetchError) {
+          if (fetchError.name === 'AbortError') {
+            console.warn("Auto-checkout request timed out");
+          } else {
+            console.error("Error during checkout API call:", fetchError);
+          }
+          // Continue with logout regardless
         }
       } catch (error) {
-        console.error("Error during auto-checkout:", error)
+        console.error("Error during auto-checkout:", error);
         // Continue with logout even if checkout fails
       }
     }
@@ -68,20 +114,48 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
 /**
  * Get current position with geolocation API
  */
+/**
+ * Get current position with geolocation API and improved error handling
+ * @returns Promise resolving to GeolocationPosition or rejecting with error
+ */
 function getCurrentPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported by your browser"))
-      return
+      reject(new Error("Geolocation is not supported by your browser"));
+      return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => resolve(position),
       (error) => {
-        console.error("Geolocation error:", error)
-        reject(error)
+        // Provide more helpful error messages based on error code
+        let errorMessage = "Unable to retrieve your location.";
+
+        switch (error.code) {
+          case 1: // PERMISSION_DENIED
+            errorMessage = "Location permission denied. Please check your browser settings.";
+            break;
+          case 2: // POSITION_UNAVAILABLE
+            errorMessage = "Your location is currently unavailable. Try again later.";
+            break;
+          case 3: // TIMEOUT
+            errorMessage = "Location request timed out. Check your connection.";
+            break;
+        }
+
+        const enhancedError = new Error(errorMessage);
+        enhancedError.name = "GeolocationError";
+        // @ts-ignore - Add the original error code for reference
+        enhancedError.code = error.code;
+
+        console.error("Geolocation error:", errorMessage, error);
+        reject(enhancedError);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    )
-  })
+      {
+        enableHighAccuracy: false, // Use lower accuracy for faster response during logout
+        timeout: 3000,            // Shorter timeout for logout context
+        maximumAge: 60000         // Accept positions up to 1 minute old
+      }
+    );
+  });
 }

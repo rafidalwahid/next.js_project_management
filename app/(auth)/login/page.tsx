@@ -1,6 +1,32 @@
 import { GalleryVerticalEnd } from "lucide-react"
+import { Suspense } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { LoginForm } from "@/components/login-form"
+
+// Loading fallback for the login form
+function LoginFormSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">Welcome back</CardTitle>
+        <CardDescription>
+          Login with social accounts or credentials
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 rounded bg-muted"></div>
+          <div className="h-10 rounded bg-muted"></div>
+          <div className="h-5 w-full rounded bg-muted"></div>
+          <div className="h-10 rounded bg-muted"></div>
+          <div className="h-10 rounded bg-muted"></div>
+          <div className="h-10 rounded bg-muted"></div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function LoginPage() {
   return (
@@ -12,7 +38,9 @@ export default function LoginPage() {
           </div>
           Project Management
         </a>
-        <LoginForm />
+        <Suspense fallback={<LoginFormSkeleton />}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   )

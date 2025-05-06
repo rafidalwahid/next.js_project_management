@@ -7,18 +7,19 @@ import { authOptions } from "@/lib/auth-options";
  * @deprecated This API endpoint is deprecated. Use /api/team-management/membership?projectId={projectId} instead.
  */
 
-interface Params {
-  params: {
-    projectId: string;
-  } | Promise<{ projectId: string }>;
-}
+type Params = {
+  projectId: string;
+};
 
 /**
  * GET /api/projects/[projectId]/membership
  * Check if the current user is a member of the project
  * @deprecated Use /api/team-management/membership?projectId={projectId} instead
  */
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
   console.warn("This API endpoint is deprecated. Use /api/team-management/membership?projectId={projectId} instead.");
   try {
     const session = await getServerSession(authOptions);
@@ -29,8 +30,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
       );
     }
 
-    // In Next.js, params might be a promise that needs to be awaited
-    const { projectId } = await params;
+    // Get the projectId from params
+    const { projectId } = params;
 
     // Check if the project exists
     const project = await prisma.project.findUnique({
