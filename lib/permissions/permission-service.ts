@@ -1,6 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { UnifiedPermissionSystem, PERMISSIONS, ROLES } from "@/lib/permissions/unified-permission-system";
 
 /**
  * Centralized Permission Service
@@ -16,8 +16,37 @@ export class PermissionService {
    * @param permission The permission to check
    * @returns True if the user has the permission, false otherwise
    */
-  static hasPermission(role: string, permission: string): boolean {
-    return UnifiedPermissionSystem.hasPermission(role, permission);
+  static async hasPermission(role: string, permission: string): Promise<boolean> {
+    try {
+      // Admin role always has all permissions
+      if (role === ROLES.ADMIN) {
+        return true;
+      }
+
+      // Try to get the permission from the database
+      const rolePermission = await prisma.rolePermission.findFirst({
+        where: {
+          role: {
+            name: role
+          },
+          permission: {
+            name: permission
+          }
+        }
+      });
+
+      // If found in the database, the role has the permission
+      if (rolePermission) {
+        return true;
+      }
+
+      // Fall back to the hardcoded matrix if not found in the database
+      return UnifiedPermissionSystem.hasPermission(role, permission);
+    } catch (error) {
+      console.error(`Error checking permission ${permission} for role ${role}:`, error);
+      // Fall back to the hardcoded matrix if there's an error
+      return UnifiedPermissionSystem.hasPermission(role, permission);
+    }
   }
 
   /**
@@ -39,8 +68,8 @@ export class PermissionService {
         return false;
       }
 
-      // Use the unified permission system to check if the role has the permission
-      return this.hasPermission(user.role, permission);
+      // Use the database-backed permission system to check if the role has the permission
+      return await this.hasPermission(user.role, permission);
     } catch (error) {
       console.error(`Error checking permission ${permission} for user ${userId}:`, error);
       return false;
@@ -53,8 +82,39 @@ export class PermissionService {
    * @param role The user's role
    * @returns An array of permission strings
    */
-  static getPermissionsForRole(role: string): string[] {
-    return UnifiedPermissionSystem.getPermissionsForRole(role);
+  static async getPermissionsForRole(role: string): Promise<string[]> {
+    try {
+      // Admin role always has all permissions
+      if (role === ROLES.ADMIN) {
+        // Get all permissions from the database
+        const allPermissions = await prisma.permission.findMany();
+        return allPermissions.map(p => p.name);
+      }
+
+      // Try to get the permissions from the database
+      const rolePermissions = await prisma.rolePermission.findMany({
+        where: {
+          role: {
+            name: role
+          }
+        },
+        include: {
+          permission: true
+        }
+      });
+
+      // If found in the database, return the permissions
+      if (rolePermissions.length > 0) {
+        return rolePermissions.map(rp => rp.permission.name);
+      }
+
+      // Fall back to the hardcoded matrix if not found in the database
+      return UnifiedPermissionSystem.getPermissionsForRole(role);
+    } catch (error) {
+      console.error(`Error getting permissions for role ${role}:`, error);
+      // Fall back to the hardcoded matrix if there's an error
+      return UnifiedPermissionSystem.getPermissionsForRole(role);
+    }
   }
 
   /**
@@ -75,8 +135,8 @@ export class PermissionService {
         return [];
       }
 
-      // Use the unified permission system to get permissions for the role
-      return this.getPermissionsForRole(user.role);
+      // Use the database-backed permission system to get permissions for the role
+      return await this.getPermissionsForRole(user.role);
     } catch (error) {
       console.error(`Error getting permissions for user ${userId}:`, error);
       return [];
@@ -130,8 +190,30 @@ export class PermissionService {
    *
    * @returns An array of permission objects with id, name, description, and category
    */
-  static getAllPermissions(): { id: string; name: string; description: string; category?: string }[] {
-    return UnifiedPermissionSystem.getAllPermissions();
+  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+    try {
+      // Try to get all permissions from the database
+      const dbPermissions = await prisma.permission.findMany();
+
+      if (dbPermissions.length > 0) {
+        return dbPermissions.map(p => ({
+          id: p.name,
+          name: p.name
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' '),
+          description: p.description || `Permission to ${p.name.replace(/_/g, ' ')}`,
+          category: p.category
+        }));
+      }
+
+      // Fall back to the hardcoded permissions if not found in the database
+      return UnifiedPermissionSystem.getAllPermissions();
+    } catch (error) {
+      console.error('Error getting all permissions:', error);
+      // Fall back to the hardcoded permissions if there's an error
+      return UnifiedPermissionSystem.getAllPermissions();
+    }
   }
 
   /**
@@ -139,8 +221,27 @@ export class PermissionService {
    *
    * @returns An array of role objects with id, name, description, and color
    */
-  static getAllRoles(): { id: string; name: string; description: string; color: string }[] {
-    return UnifiedPermissionSystem.getAllRoles();
+  static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
+    try {
+      // Try to get all roles from the database
+      const dbRoles = await prisma.role.findMany();
+
+      if (dbRoles.length > 0) {
+        return dbRoles.map(r => ({
+          id: r.name,
+          name: r.name.charAt(0).toUpperCase() + r.name.slice(1),
+          description: r.description || '',
+          color: r.color || 'bg-gray-500'
+        }));
+      }
+
+      // Fall back to the hardcoded roles if not found in the database
+      return UnifiedPermissionSystem.getAllRoles();
+    } catch (error) {
+      console.error('Error getting all roles:', error);
+      // Fall back to the hardcoded roles if there's an error
+      return UnifiedPermissionSystem.getAllRoles();
+    }
   }
 
   /**
@@ -149,8 +250,31 @@ export class PermissionService {
    * @param permission The permission to check
    * @returns An array of role strings
    */
-  static getRolesWithPermission(permission: string): string[] {
-    return UnifiedPermissionSystem.getRolesWithPermission(permission);
+  static async getRolesWithPermission(permission: string): Promise<string[]> {
+    try {
+      // Try to get all roles with this permission from the database
+      const rolePermissions = await prisma.rolePermission.findMany({
+        where: {
+          permission: {
+            name: permission
+          }
+        },
+        include: {
+          role: true
+        }
+      });
+
+      if (rolePermissions.length > 0) {
+        return rolePermissions.map(rp => rp.role.name);
+      }
+
+      // Fall back to the hardcoded matrix if not found in the database
+      return UnifiedPermissionSystem.getRolesWithPermission(permission);
+    } catch (error) {
+      console.error(`Error getting roles with permission ${permission}:`, error);
+      // Fall back to the hardcoded matrix if there's an error
+      return UnifiedPermissionSystem.getRolesWithPermission(permission);
+    }
   }
 
   /**
@@ -171,6 +295,80 @@ export class PermissionService {
       return true;
     } catch (error) {
       console.error(`Error updating role for user ${userId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Update permissions for a role
+   *
+   * @param roleName The name of the role to update
+   * @param permissions Array of permission names to assign to the role
+   * @returns A promise that resolves to true if the update was successful, false otherwise
+   */
+  static async updateRolePermissions(roleName: string, permissions: string[]): Promise<boolean> {
+    try {
+      // Get the role from the database
+      const role = await prisma.role.findUnique({
+        where: { name: roleName }
+      });
+
+      if (!role) {
+        console.error(`Role ${roleName} not found in database`);
+        return false;
+      }
+
+      // Delete all existing permissions for this role
+      await prisma.rolePermission.deleteMany({
+        where: { roleId: role.id }
+      });
+
+      // Get all permissions from the database
+      const dbPermissions = await prisma.permission.findMany({
+        where: {
+          name: {
+            in: permissions
+          }
+        }
+      });
+
+      // Create new role-permission relationships
+      for (const permission of dbPermissions) {
+        await prisma.rolePermission.create({
+          data: {
+            roleId: role.id,
+            permissionId: permission.id
+          }
+        });
+      }
+
+      return true;
+    } catch (error) {
+      console.error(`Error updating permissions for role ${roleName}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Update all role permissions at once
+   *
+   * @param permissionMatrix Object mapping role names to arrays of permission names
+   * @returns A promise that resolves to true if the update was successful, false otherwise
+   */
+  static async updateAllRolePermissions(permissionMatrix: Record<string, string[]>): Promise<boolean> {
+    try {
+      // Update each role's permissions
+      for (const [roleName, permissions] of Object.entries(permissionMatrix)) {
+        const success = await this.updateRolePermissions(roleName, permissions);
+        if (!success) {
+          console.error(`Failed to update permissions for role ${roleName}`);
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating all role permissions:', error);
       return false;
     }
   }

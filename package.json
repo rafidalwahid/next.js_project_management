@@ -8,10 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "setup-db": "node scripts/setup-db.js",
-    "seed": "node scripts/seed.js",
-    "seed-users": "node scripts/seed-users.js",
-    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed-users",
-    "prisma:seed": "node prisma/seed.js",
+    "seed": "node scripts/seed-unified.js",
+    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed",
     "prisma:generate": "npx prisma generate",
     "postinstall": "npx prisma generate"
   },

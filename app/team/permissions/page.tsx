@@ -38,13 +38,13 @@ import {
   UnifiedPermissionSystem
 } from "@/lib/permissions/unified-permission-system"
 
-// Get roles with metadata from the unified permission system
+// Default role data (will be replaced with data from API)
 const ROLE_DATA = UnifiedPermissionSystem.getAllRoles().map(role => ({
   ...role,
   count: role.id === "user" ? 2 : 1 // Default counts for display
 }));
 
-// Get permissions with metadata from the unified permission system
+// Default permission data (will be replaced with data from API)
 const PERMISSION_DATA = UnifiedPermissionSystem.getAllPermissions();
 
 // Permission badges for the roles table - key highlights for each role

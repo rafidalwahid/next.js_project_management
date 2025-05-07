@@ -17,15 +17,25 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
       );
     }
 
-    // Get the permission matrix
-    const permissionMatrix = PERMISSION_MATRIX;
+    // Get all roles
+    const roles = await PermissionService.getAllRoles();
+
+    // Create a permission matrix
+    const permissionMatrix: Record<string, string[]> = {};
+
+    // For each role, get its permissions
+    for (const role of roles) {
+      const permissions = await PermissionService.getPermissionsForRole(role.id);
+      permissionMatrix[role.id] = permissions;
+    }
 
     // Return the permission matrix
     return NextResponse.json(permissionMatrix);
@@ -51,7 +61,8 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
