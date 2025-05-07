@@ -40,12 +40,19 @@ export class EdgePermissionService {
       try {
         // This will only work in environments where fetch is available
         // In true edge environments, we'll catch and fall back to the hardcoded matrix
-        const response = await fetch('/api/permissions/matrix', {
+        // Use absolute URL for middleware compatibility
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            // Add authorization header if available in the environment
+            ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
+          }
         });
 
-        if (response.ok) {
+        // Only try to parse JSON if the response is OK and content-type is application/json
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
           const matrix = await response.json();
           permissionMatrixCache = matrix;
           cacheTimestamp = Date.now();
@@ -54,6 +61,9 @@ export class EdgePermissionService {
           if (rolePermissions.includes(permission)) {
             return true;
           }
+        } else {
+          // If we get a non-JSON response (like HTML from a redirect), fall back to hardcoded matrix
+          console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
         }
       } catch (fetchError) {
         // Silently fail and fall back to hardcoded matrix
@@ -92,12 +102,18 @@ export class EdgePermissionService {
           }
 
           // Try to fetch from API
-          const response = await fetch('/api/permissions/matrix', {
+          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+          const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+              'Content-Type': 'application/json',
+              // Add authorization header if available in the environment
+              ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
+            }
           });
 
-          if (response.ok) {
+          // Only try to parse JSON if the response is OK and content-type is application/json
+          if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
             const matrix = await response.json();
             permissionMatrixCache = matrix;
             cacheTimestamp = Date.now();
@@ -108,6 +124,9 @@ export class EdgePermissionService {
               perms.forEach((p: string) => allPermissions.add(p));
             });
             return Array.from(allPermissions);
+          } else {
+            // If we get a non-JSON response, fall back to hardcoded matrix
+            console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
           }
         } catch (fetchError) {
           // Silently fail and fall back to hardcoded matrix
@@ -122,17 +141,26 @@ export class EdgePermissionService {
 
       // If cache is expired or not available, try to fetch from API
       try {
-        const response = await fetch('/api/permissions/matrix', {
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            // Add authorization header if available in the environment
+            ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
+          }
         });
 
-        if (response.ok) {
+        // Only try to parse JSON if the response is OK and content-type is application/json
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
           const matrix = await response.json();
           permissionMatrixCache = matrix;
           cacheTimestamp = Date.now();
 
           return matrix[role] || [];
+        } else {
+          // If we get a non-JSON response, fall back to hardcoded matrix
+          console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
         }
       } catch (fetchError) {
         // Silently fail and fall back to hardcoded matrix

@@ -10,21 +10,29 @@ import { ROLES } from "@/lib/permissions/unified-permission-system";
  */
 export async function GET(req: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // Check for middleware authorization header
+    const authHeader = req.headers.get('authorization');
+    const isMiddlewareRequest = authHeader &&
+      authHeader.startsWith('Bearer ') &&
+      authHeader.split(' ')[1] === process.env.NEXTAUTH_SECRET;
+
+    // Check authentication for non-middleware requests
+    if (!isMiddlewareRequest) {
+      const session = await getServerSession(authOptions);
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
     // Build the permission matrix from the database
     const matrix: Record<string, string[]> = {};
-    
+
     // Get all roles
     const roles = await prisma.role.findMany();
-    
+
     // Get all role-permission relationships
     const rolePermissions = await prisma.rolePermission.findMany({
       include: {
@@ -32,26 +40,26 @@ export async function GET(req: NextRequest) {
         permission: true
       }
     });
-    
+
     // Initialize matrix with empty arrays for each role
     roles.forEach(role => {
       matrix[role.name] = [];
     });
-    
+
     // Add default roles if they don't exist in the database
     Object.values(ROLES).forEach(role => {
       if (!matrix[role]) {
         matrix[role] = [];
       }
     });
-    
+
     // Populate the matrix with permissions
     rolePermissions.forEach(rp => {
       if (matrix[rp.role.name]) {
         matrix[rp.role.name].push(rp.permission.name);
       }
     });
-    
+
     // Return the matrix
     return NextResponse.json(matrix);
   } catch (error: any) {

@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   '/api/auth',
   '/api/register',
   '/api/auth-status',
+  '/api/permissions/matrix', // Allow access to permission matrix for middleware
   '/_next',
   '/favicon.ico',
   '/images',
