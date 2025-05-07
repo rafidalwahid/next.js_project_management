@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { getUsers, createUser } from '@/lib/queries/user-queries';
+import { PermissionService } from "@/lib/permissions/permission-service";
+import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
 
 // GET /api/users - Get all users with pagination and filtering
 export async function GET(req: NextRequest) {
@@ -20,7 +22,7 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
     const limit = searchParams.get('take') ? parseInt(searchParams.get('take')!) : 10;
-    const skip = searchParams.get('skip') 
+    const skip = searchParams.get('skip')
       ? parseInt(searchParams.get('skip')!)
       : (page - 1) * limit;
     const orderBy = searchParams.get('orderBy') || 'createdAt';
@@ -37,12 +39,15 @@ export async function GET(req: NextRequest) {
     const where: any = {};
 
     // For regular users, only return team members they work with
-    // Managers and admins can see all users
+    // Get user role and check permissions
     const userRole = session.user.role;
+    const hasTeamViewPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
 
-    // If not admin/manager and no specific project is requested,
-    // limit to users who are in the same projects as the current user
-    if (userRole !== 'admin' && userRole !== 'manager' && !projectId) {
+    // If user has TEAM_VIEW permission, they can see all users
+    // If not and no specific project is requested, limit to users in the same projects
+    if (!hasTeamViewPermission && !projectId) {
+      console.log(`User ${session.user.id} does not have TEAM_VIEW permission. Limiting to project members.`);
+
       // Get projects the user is part of
       const userProjects = await prisma.teamMember.findMany({
         where: {
@@ -63,6 +68,8 @@ export async function GET(req: NextRequest) {
           },
         },
       };
+    } else if (hasTeamViewPermission) {
+      console.log(`User ${session.user.id} has TEAM_VIEW permission. Showing all users.`);
     }
 
     if (role && role !== 'all') {

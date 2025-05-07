@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Filter, Plus, Search, LayoutGrid, List } from "lucide-react"
+import { Filter, Plus, Search, LayoutGrid, List, Info } from "lucide-react"
 import { useUsers } from "@/hooks/use-users"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
@@ -35,12 +35,12 @@ export default function TeamPage() {
   const itemsPerPage = 12
 
   // Use the enhanced useUsers hook with server-side pagination and filtering
-  const { 
-    users, 
-    pagination, 
-    isLoading, 
-    isError, 
-    mutate 
+  const {
+    users,
+    pagination,
+    isLoading,
+    isError,
+    mutate
   } = useUsers({
     search: searchQuery,
     role: roleFilter,
@@ -53,7 +53,7 @@ export default function TeamPage() {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-  
+
   const { toast } = useToast()
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -212,7 +212,7 @@ export default function TeamPage() {
             <div>
               <CardTitle>Team Directory</CardTitle>
               <CardDescription>
-                View and manage all team members in your organization.
+                View and manage team members in your organization.
               </CardDescription>
             </div>
             <div className="text-sm text-muted-foreground">
@@ -267,6 +267,12 @@ export default function TeamPage() {
           </div>
 
           <div className="mt-6">
+            {users.length === 0 && (
+              <div className="rounded-md bg-muted p-4 mb-4 text-center">
+                <p className="text-muted-foreground">No team members found</p>
+              </div>
+            )}
+
             {viewMode === "grid" ? (
               <UserGrid users={users} onDelete={confirmDelete} />
             ) : (
@@ -290,19 +296,19 @@ export default function TeamPage() {
           <DialogHeader>
             <DialogTitle>Confirm User Deletion</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. The user will be permanently removed from the system 
+              This action cannot be undone. The user will be permanently removed from the system
               along with their data, tasks, and team memberships.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:justify-end">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowDeleteDialog(false)}
             >
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
             >
               Delete User
