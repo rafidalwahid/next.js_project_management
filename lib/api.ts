@@ -12,15 +12,11 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     ...(options.headers || {})
   };
 
-  console.log(`API Request: ${options.method || 'GET'} ${url}`);
-
   try {
     const response = await fetch(url, options);
-    console.log(`API Response status: ${response.status} ${response.statusText}`);
 
     // Read the response text only once and store it
     const textResponse = await response.text();
-    console.log(`API Raw response: ${textResponse.substring(0, 200)}${textResponse.length > 200 ? '...' : ''}`);
 
     // Parse the data only if the response is successful
     let data;

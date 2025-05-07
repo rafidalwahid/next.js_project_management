@@ -6,31 +6,50 @@ import { unstable_cache } from 'next/cache';
 
 // Cache dashboard stats for 1 minute per user
 const getDashboardStats = unstable_cache(
-  async (userId: string) => {
+  async (userId: string, userRole: string) => {
     if (!userId) {
       throw new Error('User ID is required');
     }
 
-    // Get total projects count for the user
-    const totalProjects = await prisma.project.count({
-      where: {
+    let whereClause = {};
+
+    // Different filtering based on user role
+    if (userRole === 'admin') {
+      // Admin sees all projects
+      whereClause = {};
+    } else if (userRole === 'manager') {
+      // Manager sees projects they created or are a member of
+      whereClause = {
+        OR: [
+          { createdById: userId }, // Projects they created
+          {
+            teamMembers: {
+              some: {
+                userId
+              }
+            }
+          }
+        ]
+      };
+    } else {
+      // Regular users only see projects they're a member of
+      whereClause = {
         teamMembers: {
           some: {
             userId
           }
         }
-      }
+      };
+    }
+
+    // Get total projects count
+    const totalProjects = await prisma.project.count({
+      where: whereClause
     });
 
     // Get projects with their task counts
     const recentProjects = await prisma.project.findMany({
-      where: {
-        teamMembers: {
-          some: {
-            userId
-          }
-        }
-      },
+      where: whereClause,
       include: {
         _count: {
           select: {
@@ -54,6 +73,12 @@ const getDashboardStats = unstable_cache(
               }
             }
           }
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       },
       orderBy: {
@@ -66,13 +91,10 @@ const getDashboardStats = unstable_cache(
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
+    // For growth calculation, use the same filter as above
     const projectsLastMonth = await prisma.project.count({
       where: {
-        teamMembers: {
-          some: {
-            userId
-          }
-        },
+        ...whereClause,
         createdAt: {
           lt: new Date()
         }
@@ -81,11 +103,7 @@ const getDashboardStats = unstable_cache(
 
     const projectsThisMonth = await prisma.project.count({
       where: {
-        teamMembers: {
-          some: {
-            userId
-          }
-        },
+        ...whereClause,
         createdAt: {
           gte: lastMonth
         }
@@ -96,12 +114,59 @@ const getDashboardStats = unstable_cache(
       ? ((projectsThisMonth - projectsLastMonth) / projectsLastMonth) * 100
       : 0;
 
+    // For admin only: Get system-wide stats
+    let systemStats = null;
+    if (userRole === 'admin') {
+      try {
+        // Get total users count
+        const totalUsers = await prisma.user.count();
+
+        // Get users by role
+        const adminCount = await prisma.user.count({ where: { role: 'admin' } });
+        const managerCount = await prisma.user.count({ where: { role: 'manager' } });
+        const userCount = await prisma.user.count({ where: { role: 'user' } });
+
+        // Get total tasks across all projects
+        const totalSystemTasks = await prisma.task.count();
+        const completedSystemTasks = await prisma.task.count({ where: { completed: true } });
+
+        systemStats = {
+          totalUsers,
+          usersByRole: {
+            admin: adminCount,
+            manager: managerCount,
+            user: userCount
+          },
+          totalTasks: totalSystemTasks,
+          completedTasks: completedSystemTasks,
+          completionRate: totalSystemTasks > 0
+            ? Math.round((completedSystemTasks / totalSystemTasks) * 100)
+            : 0
+        };
+      } catch (error) {
+        console.error('Error fetching system stats:', error);
+        // Provide fallback stats if there's an error
+        systemStats = {
+          totalUsers: 0,
+          usersByRole: {
+            admin: 0,
+            manager: 0,
+            user: 0
+          },
+          totalTasks: 0,
+          completedTasks: 0,
+          completionRate: 0
+        };
+      }
+    }
+
     return {
       totalProjects,
       recentProjects: recentProjects.map(project => ({
         id: project.id,
         title: project.title,
         description: project.description,
+        createdBy: project.createdBy,
         teamCount: project._count.teamMembers,
         taskCount: project._count.tasks,
         completedTaskCount: project.tasks.filter(t => t.completed).length,
@@ -110,10 +175,11 @@ const getDashboardStats = unstable_cache(
           : 0,
         team: project.teamMembers.map(member => member.user)
       })),
-      projectGrowth: Math.round(growthRate)
+      projectGrowth: Math.round(growthRate),
+      systemStats // Will be null for non-admin users
     };
   },
-  ['dashboard-stats'],
+  [(userId, userRole) => `dashboard-stats-${userId}-${userRole}`],
   { revalidate: 60 } // Cache for 1 minute
 );
 
@@ -125,9 +191,36 @@ export async function GET() {
     }
 
     const userId = session.user.id;
-    const stats = await getDashboardStats(userId);
 
-    return NextResponse.json({ stats });
+    try {
+      // Check if user exists
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, role: true }
+      });
+
+      if (!user) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      }
+
+      // Get stats based on user role
+      const stats = await getDashboardStats(userId, user.role);
+
+      return NextResponse.json({ stats });
+    } catch (dbError) {
+      console.error('Database error in dashboard stats:', dbError);
+
+      // Return a minimal response with empty stats to prevent UI from breaking
+      return NextResponse.json({
+        stats: {
+          totalProjects: 0,
+          recentProjects: [],
+          projectGrowth: 0,
+          systemStats: null
+        },
+        error: 'Database error occurred'
+      }, { status: 200 });
+    }
   } catch (error) {
     console.error('Dashboard stats error:', error);
     return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });

@@ -1,17 +1,24 @@
 import useSWR from 'swr';
 import { fetchAPI } from '@/lib/api';
+import { DashboardStats } from '@/types/dashboard';
+
+interface DashboardResponse {
+  stats: DashboardStats;
+  error?: string;
+}
 
 export function useDashboardStats() {
-  const { data, error, isLoading } = useSWR('/api/dashboard/stats', fetchAPI, {
-    revalidateOnFocus: false,
-    revalidateIfStale: false,
-    dedupingInterval: 60000, // 1 minute
+  const { data, error, isLoading, mutate } = useSWR<DashboardResponse>('/api/dashboard/stats', fetchAPI, {
+    revalidateOnFocus: true,
+    revalidateIfStale: true,
+    revalidateOnMount: true,
     // Provide fallback data to avoid loading state
     fallbackData: {
       stats: {
         totalProjects: 0,
         projectGrowth: 0,
-        recentProjects: []
+        recentProjects: [],
+        systemStats: null
       }
     }
   });
@@ -19,6 +26,7 @@ export function useDashboardStats() {
   return {
     stats: data?.stats,
     isLoading,
-    isError: error
+    isError: error,
+    refetch: () => mutate() // Keep refetch function for manual refreshes
   };
 }

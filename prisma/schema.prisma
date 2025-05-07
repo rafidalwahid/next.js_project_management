@@ -8,36 +8,35 @@ datasource db {
 }
 
 model User {
-  id                    String              @id @default(cuid())
-  name                  String?
-  email                 String              @unique
-  emailVerified         DateTime?
-  image                 String?
-  password              String?
-  role                  String              @default("user")
-  active                Boolean             @default(true)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  lastLogin             DateTime?
-  bio                   String?             @db.Text
-  department            String?
-  jobTitle              String?
-  location              String?
-  phone                 String?
-  skills                String?             @db.Text
-  accounts              Account[]
-  activities            Activity[]
-
-  attendanceRecords     Attendance[]
-  attendanceSettings    AttendanceSettings?
-  correctionRequests    AttendanceCorrectionRequest[]
-  comments              Comment[]
-  documents             Document[]
-  projects              Project[]
-  sessions              Session[]
-  taskAssignments       TaskAssignee[]
-  taskAttachments       TaskAttachment[]
-  teams                 TeamMember[]
+  id                 String                        @id @default(cuid())
+  name               String?
+  email              String                        @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               String                        @default("user")
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  lastLogin          DateTime?
+  bio                String?                       @db.Text
+  department         String?
+  jobTitle           String?
+  location           String?
+  phone              String?
+  skills             String?                       @db.Text
+  active             Boolean                       @default(true)
+  accounts           Account[]
+  activities         Activity[]
+  attendanceRecords  Attendance[]
+  correctionRequests AttendanceCorrectionRequest[]
+  attendanceSettings AttendanceSettings?
+  comments           Comment[]
+  documents          Document[]
+  projects           Project[]
+  sessions           Session[]
+  taskAssignments    TaskAssignee[]
+  taskAttachments    TaskAttachment[]
+  teams              TeamMember[]
 
   @@map("user")
 }
@@ -82,10 +81,6 @@ model VerificationToken {
   @@map("verificationtoken")
 }
 
-// Role and permission models have been removed in favor of a simplified role system
-// The User model still has a 'role' field with values like 'admin', 'manager', 'user'
-// Permissions are now managed through code in lib/permissions/permission-system.ts
-
 model Project {
   id             String          @id @default(cuid())
   title          String
@@ -116,11 +111,11 @@ model ProjectStatus {
   color             String?
   description       String?
   isDefault         Boolean  @default(false)
-  isCompletedStatus Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   order             Int      @default(0)
   projectId         String
+  isCompletedStatus Boolean  @default(false)
   project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks             Task[]
 
@@ -140,12 +135,12 @@ model Task {
   order         Int              @default(0)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  completed     Boolean          @default(false)
   endDate       DateTime?
   estimatedTime Float?
   startDate     DateTime?
   statusId      String?
   timeSpent     Float?
+  completed     Boolean          @default(false)
   activities    Activity[]
   attendances   Attendance[]
   comments      Comment[]
@@ -229,16 +224,15 @@ model Attendance {
   projectId            String?
   taskId               String?
   autoCheckout         Boolean                       @default(false)
+  project              Project?                      @relation(fields: [projectId], references: [id])
+  task                 Task?                         @relation(fields: [taskId], references: [id])
+  user                 User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   correctionRequests   AttendanceCorrectionRequest[]
-  project              Project?  @relation(fields: [projectId], references: [id])
-  task                 Task?     @relation(fields: [taskId], references: [id])
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([projectId])
   @@index([taskId])
   @@index([checkInTime])
-
   @@map("attendance")
 }
 
@@ -297,22 +291,22 @@ model Document {
 }
 
 model AttendanceCorrectionRequest {
-  id                   String     @id @default(cuid())
-  attendanceId         String
-  userId               String
-  originalCheckInTime  DateTime
-  originalCheckOutTime DateTime?
-  requestedCheckInTime DateTime
+  id                    String     @id @default(cuid())
+  attendanceId          String
+  userId                String
+  originalCheckInTime   DateTime
+  originalCheckOutTime  DateTime?
+  requestedCheckInTime  DateTime
   requestedCheckOutTime DateTime?
-  reason               String     @db.Text
-  status               String     @default("pending") // pending, approved, rejected
-  reviewedBy           String?
-  reviewedAt           DateTime?
-  reviewNotes          String?    @db.Text
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  attendance           Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
-  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason                String     @db.Text
+  status                String     @default("pending")
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?    @db.Text
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  attendance            Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([attendanceId])
   @@index([userId])
