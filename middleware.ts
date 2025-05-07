@@ -80,7 +80,9 @@ export async function middleware(request: NextRequest) {
       }
 
       // Check if the user has the required permission
-      if (!EdgePermissionService.hasPermission(userRole, requiredPermission)) {
+      const hasPermission = await EdgePermissionService.hasPermission(userRole, requiredPermission);
+
+      if (!hasPermission) {
         // For API routes, return a JSON error
         if (pathname.startsWith('/api/')) {
           return NextResponse.json(

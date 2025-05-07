@@ -64,7 +64,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       const isProjectCreator = project.createdById === session.user.id;
       const isAdmin = session.user.role === "admin";
       const isManager = session.user.role === "manager";
-      const hasTeamViewPermission = PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
+      const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
 
       // Log permission check details for debugging
       console.log("Team permission check:", {
@@ -89,8 +89,9 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
 
       // If requesting team memberships for another user, check if the current user has permission
       if (userId !== session.user.id) {
-        const hasPermission = PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT) ||
-                             PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
+        const hasUserManagementPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+        const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
+        const hasPermission = hasUserManagementPermission || hasTeamViewPermission;
 
         if (!hasPermission) {
           return NextResponse.json(
@@ -248,7 +249,7 @@ export const POST = withPermission(
       const isAdmin = session.user.role === "admin";
       const isManager = session.user.role === "manager";
       const isProjectCreator = project.createdById === session.user.id;
-      const hasTeamAddPermission = PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_ADD);
+      const hasTeamAddPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_ADD);
 
       if (!isTeamMember && !isAdmin && !isManager && !isProjectCreator && !hasTeamAddPermission) {
         return NextResponse.json(

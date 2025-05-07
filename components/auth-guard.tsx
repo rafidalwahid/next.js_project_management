@@ -1,11 +1,11 @@
 "use client"
 
 import { useRouter, usePathname } from "next/navigation"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { useAuthSession } from "@/hooks/use-auth-session"
 import { toast } from "sonner"
-import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -21,6 +21,9 @@ export function AuthGuard({
   const { session, status, checkSession } = useAuthSession()
   const router = useRouter()
   const pathname = usePathname()
+  const [permissionChecked, setPermissionChecked] = useState(false)
+  const [hasPermission, setHasPermission] = useState(false)
+  const [isCheckingPermission, setIsCheckingPermission] = useState(false)
 
   // Use ref to track if we've checked the session already
   const sessionChecked = useRef(false)
@@ -29,6 +32,45 @@ export function AuthGuard({
   const isPublicPath = pathname.includes("/login") ||
                        pathname.includes("/register") ||
                        pathname === "/"
+
+  // Check permission with the server
+  const checkPermissionWithServer = async (permission: string, role: string) => {
+    setIsCheckingPermission(true)
+    try {
+      const response = await fetch(`/api/users/check-permission?permission=${encodeURIComponent(permission)}`)
+      const data = await response.json()
+      setHasPermission(data.hasPermission)
+      setPermissionChecked(true)
+      setIsCheckingPermission(false)
+
+      if (!data.hasPermission) {
+        toast.error("Access denied", {
+          description: "You don't have permission to access this page",
+          duration: 5000,
+        })
+        router.push("/dashboard")
+      }
+
+      return data.hasPermission
+    } catch (error) {
+      console.error("Error checking permission:", error)
+      // Fall back to client-side check on error
+      const clientCheck = ClientPermissionService.hasPermission(role, permission)
+      setHasPermission(clientCheck)
+      setPermissionChecked(true)
+      setIsCheckingPermission(false)
+
+      if (!clientCheck) {
+        toast.error("Access denied", {
+          description: "You don't have permission to access this page",
+          duration: 5000,
+        })
+        router.push("/dashboard")
+      }
+
+      return clientCheck
+    }
+  }
 
   useEffect(() => {
     // Do nothing while authentication status is loading
@@ -72,19 +114,25 @@ export function AuthGuard({
       status === "authenticated" &&
       requiredPermission &&
       session?.user?.role &&
-      !UnifiedPermissionSystem.hasPermission(session.user.role, requiredPermission)
+      !permissionChecked &&
+      !isCheckingPermission
     ) {
-      toast.error("Access denied", {
-        description: "You don't have permission to access this page",
-        duration: 5000,
-      })
-      router.push("/dashboard")
-      return
-    }
-  }, [status, router, pathname, session, allowedRoles, requiredPermission, checkSession, isPublicPath])
+      // First do a quick client-side check
+      const quickCheck = ClientPermissionService.hasPermission(session.user.role, requiredPermission)
 
-  // Show minimal loading state while checking authentication
-  if (status === "loading") {
+      // If quick check passes, we can allow access immediately
+      if (quickCheck) {
+        setHasPermission(true)
+        setPermissionChecked(true)
+      } else {
+        // Otherwise, verify with the server
+        checkPermissionWithServer(requiredPermission, session.user.role)
+      }
+    }
+  }, [status, router, pathname, session, allowedRoles, requiredPermission, checkSession, isPublicPath, permissionChecked, isCheckingPermission])
+
+  // Show minimal loading state while checking authentication or permissions
+  if (status === "loading" || (requiredPermission && !permissionChecked && isCheckingPermission)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Spinner size="md" />
@@ -96,7 +144,7 @@ export function AuthGuard({
   if (
     status === "authenticated" &&
     (!allowedRoles || allowedRoles.length === 0 || (session?.user?.role && allowedRoles.includes(session.user.role))) &&
-    (!requiredPermission || (session?.user?.role && UnifiedPermissionSystem.hasPermission(session.user.role, requiredPermission)))
+    (!requiredPermission || permissionChecked && hasPermission)
   ) {
     return <>{children}</>
   }

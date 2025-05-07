@@ -68,16 +68,32 @@ export default function RoleManagementPage() {
   const [selectedRole, setSelectedRole] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  // Check if user is admin
+  // Check if user has permission to manage roles
   useEffect(() => {
-    if (session?.user?.role !== "admin") {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access this page",
-        variant: "destructive"
-      })
-      router.push("/dashboard")
-    }
+    if (!session) return
+
+    // Check if user has the required permission
+    const checkPermission = async () => {
+      try {
+        const response = await fetch(`/api/users/check-permission?permission=manage_roles`);
+        const data = await response.json();
+
+        if (!data.hasPermission) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to access this page",
+            variant: "destructive"
+          });
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error checking permission:", error);
+        // If there's an error checking permission, redirect to be safe
+        router.push("/dashboard");
+      }
+    };
+
+    checkPermission();
   }, [session, router, toast])
 
   // Fetch users
@@ -111,7 +127,8 @@ export default function RoleManagementPage() {
       }
     }
 
-    if (session?.user?.role === "admin") {
+    // Only fetch users if session exists
+    if (session) {
       fetchUsers()
     }
   }, [session, toast])
@@ -189,9 +206,8 @@ export default function RoleManagementPage() {
     }
   }
 
-  if (session?.user?.role !== "admin") {
-    return null // Don't render anything if not admin
-  }
+  // We'll use the useEffect hook to handle permission checking and redirection
+  // No need for an early return here as the useEffect will handle unauthorized access
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Clock, ChevronDown, ChevronRight, ClipboardCheck, BarChart2, Home, Users, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,44 +23,72 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
 
   const { data: session } = useSession()
   const userRole = session?.user?.role || "user"
+  const [userPermissions, setUserPermissions] = useState<string[]>([])
+
+  // Fetch user permissions
+  useEffect(() => {
+    if (!session?.user?.id) return
+
+    // First use client-side permission service for quick initial permissions
+    const initialPermissions = ClientPermissionService.getPermissionsForRole(userRole)
+    setUserPermissions(initialPermissions)
+
+    // Then fetch from API for complete permissions
+    fetch('/api/users/permissions')
+      .then(res => res.json())
+      .then(data => {
+        if (data.permissions && Array.isArray(data.permissions)) {
+          setUserPermissions(data.permissions)
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching permissions:', err)
+      })
+  }, [session, userRole])
 
   const subItems = [
     {
       title: "Dashboard",
       href: "/attendance/dashboard",
       icon: Home,
-      roles: ["user", "manager", "admin"],
+      permission: "view_dashboard", // Basic permission everyone has
     },
     {
       title: "History",
       href: "/attendance/history",
       icon: ClipboardCheck,
-      roles: ["user", "manager", "admin"],
+      permission: "view_attendance", // Basic permission everyone has
     },
     {
       title: "Statistics",
       href: "/attendance/statistics",
       icon: BarChart2,
-      roles: ["user", "manager", "admin"],
+      permission: "view_attendance", // Basic permission everyone has
     },
     {
       title: "Settings",
       href: "/attendance/settings",
       icon: Settings,
-      roles: ["user", "manager", "admin"],
+      permission: "edit_profile", // Basic permission everyone has
     },
     {
       title: "Admin",
       href: "/attendance/admin",
       icon: Users,
-      roles: ["manager", "admin"],
+      permission: "attendance_management", // Admin-only permission
     }
   ]
 
-  // Filter items based on user role
-  const filteredSubItems = subItems.filter(item =>
-    item.roles.includes(userRole)
-  )
+  // Filter items based on user permissions
+  const filteredSubItems = subItems.filter(item => {
+    // For basic navigation items that everyone should see, include them even if permissions aren't loaded yet
+    if (["view_dashboard", "view_attendance", "edit_profile"].includes(item.permission)) {
+      return true
+    }
+
+    // For restricted items, check permissions
+    return userPermissions.includes(item.permission)
+  })
 
   const isActive = pathname.startsWith("/attendance")
 

@@ -50,19 +50,32 @@ export default function AttendanceAdminPage() {
   const [requestsLoading, setRequestsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState("all")
 
-  // Check if user has admin or manager role
+  // Check if user has attendance management permission
   useEffect(() => {
     if (!session) return
 
-    const userRole = session.user.role
-    if (userRole !== "admin" && userRole !== "manager") {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access the admin dashboard",
-        variant: "destructive"
-      })
-      router.push("/dashboard")
-    }
+    // Check if user has the required permission
+    const checkPermission = async () => {
+      try {
+        const response = await fetch(`/api/users/check-permission?permission=attendance_management`);
+        const data = await response.json();
+
+        if (!data.hasPermission) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to access the admin dashboard",
+            variant: "destructive"
+          });
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error checking permission:", error);
+        // If there's an error checking permission, redirect to be safe
+        router.push("/dashboard");
+      }
+    };
+
+    checkPermission();
   }, [session, router, toast])
 
   // Fetch attendance records

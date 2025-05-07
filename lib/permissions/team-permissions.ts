@@ -70,13 +70,13 @@ export async function checkTeamMemberPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check TEAM_VIEW permission or direct involvement
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
-                    isProjectCreator || !!userTeamMember || isSelf;
+    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
+    hasPermission = hasViewPermission || isProjectCreator || !!userTeamMember || isSelf;
   }
   else if (action === 'update') {
     // For update actions, check TEAM_MANAGEMENT permission or project creator status
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
-                    isProjectCreator;
+    const hasManagementPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT);
+    hasPermission = hasManagementPermission || isProjectCreator;
 
     // Special case: can't update project creator's membership
     if (teamMember.project.createdById === teamMember.userId) {
@@ -89,8 +89,8 @@ export async function checkTeamMemberPermission(
   }
   else if (action === 'delete') {
     // For delete actions, check TEAM_REMOVE permission or project creator status or self
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_REMOVE) ||
-                    isProjectCreator || isSelf;
+    const hasRemovePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_REMOVE);
+    hasPermission = hasRemovePermission || isProjectCreator || isSelf;
 
     // Special case: can't remove project creator
     if (teamMember.project.createdById === teamMember.userId) {
@@ -180,18 +180,18 @@ export async function checkProjectTeamPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check TEAM_VIEW permission or direct involvement
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW) ||
-                    isProjectCreator || isTeamMember;
+    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
+    hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
   }
   else if (action === 'add') {
     // For add actions, check TEAM_ADD permission or project creator status
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_ADD) ||
-                    isProjectCreator;
+    const hasAddPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_ADD);
+    hasPermission = hasAddPermission || isProjectCreator;
   }
   else if (action === 'manage') {
     // For manage actions, check TEAM_MANAGEMENT permission or project creator status
-    hasPermission = PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT) ||
-                    isProjectCreator;
+    const hasManagementPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT);
+    hasPermission = hasManagementPermission || isProjectCreator;
   }
 
   return {

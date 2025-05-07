@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
 
     // If requesting permissions for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+      const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+      if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' permissions' },
           { status: 403 }
@@ -64,7 +65,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -110,7 +112,8 @@ export async function POST(req: NextRequest) {
     }
 
     // If the user already has a role with this permission, we don't need to do anything
-    if (PermissionService.hasPermission(user.role, permissionName)) {
+    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    if (userHasPermission) {
       return NextResponse.json({
         message: `User already has permission '${permissionName}'`,
       });
@@ -146,7 +149,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -183,7 +187,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    if (!PermissionService.hasPermission(user.role, permissionName)) {
+    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    if (!userHasPermission) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });
@@ -219,7 +224,8 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    if (!PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -255,7 +261,8 @@ export async function PUT(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    if (!PermissionService.hasPermission(user.role, permissionName)) {
+    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    if (!userHasPermission) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });

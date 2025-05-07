@@ -29,7 +29,7 @@ export function withAuth(
 
       // Check authorization if a permission is required
       if (requiredPermission) {
-        const hasPermission = PermissionService.hasPermission(
+        const hasPermission = await PermissionService.hasPermission(
           session.user.role,
           requiredPermission
         );
@@ -68,7 +68,7 @@ export function withPermission(
   return withAuth(async (req: NextRequest, context: any, session: Session) => {
     try {
       // Check if the user has the required permission
-      const hasPermission = PermissionService.hasPermission(
+      const hasPermission = await PermissionService.hasPermission(
         session.user.role,
         permission
       );
@@ -196,7 +196,7 @@ export function withOwnerOrAdmin(
       }
 
       // Check if the user is the owner or an admin
-      const { hasPermission, error } = PermissionService.checkOwnerOrAdmin(
+      const { hasPermission, error } = await PermissionService.checkOwnerOrAdmin(
         session,
         resource.userId,
         adminOnly

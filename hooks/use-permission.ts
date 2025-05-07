@@ -6,26 +6,51 @@ import { useAuthSession } from "./use-auth-session"
 
 /**
  * Hook to check if the current user has a specific permission
- * Uses the unified permission system for consistent permission checking
+ * Uses both client-side and server-side permission checks for optimal performance
  */
 export function usePermission(permission: string) {
   const { session } = useAuthSession()
   const [hasPermission, setHasPermission] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // If no session, user doesn't have permission
     if (!session?.user?.id) {
       setHasPermission(false)
+      setIsLoading(false)
       return
     }
 
-    // Use the client permission service to check permission
+    // Use the client permission service for a quick initial check
     const userRole = session.user.role || "guest"
-    const result = ClientPermissionService.hasPermission(userRole, permission)
-    setHasPermission(result)
+    const quickResult = ClientPermissionService.hasPermission(userRole, permission)
+
+    // If the quick check passes, we can return true immediately
+    if (quickResult) {
+      setHasPermission(true)
+      setIsLoading(false)
+      return
+    }
+
+    // If quick check fails, verify with the API
+    // This handles the case where permissions might be in the database but not in the hardcoded matrix
+    setIsLoading(true)
+
+    fetch(`/api/users/check-permission?permission=${encodeURIComponent(permission)}`)
+      .then(res => res.json())
+      .then(data => {
+        setHasPermission(data.hasPermission)
+        setIsLoading(false)
+      })
+      .catch(err => {
+        console.error("Error checking permission:", err)
+        // Fall back to the client-side check on error
+        setHasPermission(quickResult)
+        setIsLoading(false)
+      })
   }, [session, permission])
 
-  return hasPermission
+  return { hasPermission, isLoading }
 }
 
 /**
@@ -52,7 +77,7 @@ export function useRole(role: string) {
 
 /**
  * Hook to get all permissions for the current user
- * Uses the unified permission system for consistent permission retrieval
+ * Uses both client-side and server-side permission checks for optimal performance
  */
 export function useUserPermissions() {
   const { session, status } = useAuthSession()
@@ -69,11 +94,27 @@ export function useUserPermissions() {
       return
     }
 
-    // Get permissions based on user role using the client permission service
+    // Get initial permissions from client-side service for quick response
     const userRole = session.user.role || "guest"
-    const rolePermissions = ClientPermissionService.getPermissionsForRole(userRole)
-    setPermissions(rolePermissions)
-    setIsLoading(false)
+    const quickPermissions = ClientPermissionService.getPermissionsForRole(userRole)
+
+    // Set initial permissions
+    setPermissions(quickPermissions)
+
+    // Then fetch the complete list from the server
+    fetch('/api/users/permissions')
+      .then(res => res.json())
+      .then(data => {
+        if (data.permissions && Array.isArray(data.permissions)) {
+          setPermissions(data.permissions)
+        }
+        setIsLoading(false)
+      })
+      .catch(err => {
+        console.error("Error fetching permissions:", err)
+        // Keep the client-side permissions on error
+        setIsLoading(false)
+      })
   }, [session, status])
 
   return { permissions, isLoading }

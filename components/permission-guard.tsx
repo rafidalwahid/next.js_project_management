@@ -1,8 +1,8 @@
 "use client"
 
 import { ReactNode } from "react"
-import { PermissionService } from "@/lib/permissions/permission-service"
-import { useAuthSession } from "@/hooks/use-auth-session"
+import { useHasPermission } from "@/hooks/use-has-permission"
+import { Spinner } from "@/components/ui/spinner"
 
 interface PermissionGuardProps {
   permission: string
@@ -14,27 +14,27 @@ interface PermissionGuardProps {
 
 /**
  * Component that only renders its children if the user has the specified permission
- * Uses the permission service for consistent permission checking
+ * Uses the useHasPermission hook for permission checking
  */
 export function PermissionGuard({
   permission,
   children,
   fallback = null,
-  showLoading = false,
+  showLoading = true,
   loadingComponent = null
 }: PermissionGuardProps) {
-  const { session, status } = useAuthSession()
-  const userRole = session?.user?.role || "guest"
+  const { hasPermission, isLoading } = useHasPermission(permission)
 
-  // Show loading state if requested and authentication is still loading
-  if (showLoading && status === "loading") {
-    return <>{loadingComponent || <div>Loading...</div>}</>
+  // Show loading state if requested and still checking permissions
+  if (isLoading && showLoading) {
+    return <>{loadingComponent || <div className="flex justify-center py-4"><Spinner size="sm" /></div>}</>
   }
 
-  // Check permission using the permission service
-  if (!PermissionService.hasPermission(userRole, permission)) {
-    return <>{fallback}</>
+  // If permission check is complete and user has permission, render children
+  if (hasPermission) {
+    return <>{children}</>
   }
 
-  return <>{children}</>
+  // Otherwise, render fallback
+  return <>{fallback}</>
 }

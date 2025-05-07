@@ -31,19 +31,26 @@ export function RoleDashboard() {
     systemStats: null
   }
 
-  // Determine which dashboard view to show based on user role
+  // Determine which dashboard view to show based on user permissions
   const getDashboardView = () => {
-    // Show loading skeleton while role or stats are being fetched
-    if (roleLoading || statsLoading) {
+    // Show loading skeleton while permissions or stats are being fetched
+    if (roleLoading || statsLoading || permissionsLoading) {
       return <DashboardSkeleton />
     }
 
-    // Once role is loaded, show the appropriate dashboard
-    if (userRole === "admin") {
+    // Check for specific permissions to determine which dashboard to show
+    const hasSystemSettings = userPermissions.includes('system_settings');
+    const hasProjectManagement = userPermissions.includes('project_management');
+
+    // Show appropriate dashboard based on permissions
+    if (hasSystemSettings) {
+      // Admin-level permissions
       return <AdminDashboard stats={dashboardStats} />
-    } else if (userRole === "manager") {
+    } else if (hasProjectManagement) {
+      // Manager-level permissions
       return <ManagerDashboard stats={dashboardStats} />
     } else {
+      // Regular user permissions
       return <UserDashboard stats={dashboardStats} />
     }
   }
