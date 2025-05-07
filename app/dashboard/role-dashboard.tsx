@@ -19,14 +19,14 @@ import {
   Users
 } from "lucide-react"
 import { useDashboardStats } from "@/hooks/use-dashboard-stats"
+import { useUserTasks } from "@/hooks/use-user-tasks"
 import { AttendanceWidget } from "@/components/attendance/attendance-widget"
 import { AttendanceSummary } from "@/components/dashboard/attendance-summary"
 import { DashboardStats, ProjectSummary, SystemStats, TaskSummary } from "@/types/dashboard"
 import {
   calculateTaskStats,
   calculateTeamMembers,
-  calculateProjectStatusDistribution,
-  extractTasksFromProjects
+  calculateProjectStatusDistribution
 } from "@/utils/dashboard-utils"
 
 // StatsCard component definition
@@ -807,15 +807,8 @@ function UserDashboard({ stats }: { stats: DashboardStats }) {
   // Use utility functions for calculations
   const { totalTasks, completedTasks, pendingTasks, completionRate } = calculateTaskStats(recentProjects)
 
-  // Extract tasks from projects (simulated for this implementation)
-  // This will be replaced with real API data in the future
-  const myTasks: TaskSummary[] = extractTasksFromProjects(recentProjects)
-
-  // Get upcoming tasks (not completed, sorted by due date)
-  const upcomingTasks = myTasks
-    .filter(task => !task.completed)
-    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-    .slice(0, 5);
+  // Fetch real task data from the API
+  const { tasks: myTasks, upcomingTasks, isLoading: tasksLoading } = useUserTasks()
 
   return (
     <div className="space-y-4">
@@ -891,7 +884,13 @@ function UserDashboard({ stats }: { stats: DashboardStats }) {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {upcomingTasks.length === 0 ? (
+                {tasksLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                  </div>
+                ) : upcomingTasks.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground">
                     No upcoming tasks
                   </div>
@@ -908,7 +907,7 @@ function UserDashboard({ stats }: { stats: DashboardStats }) {
                           <div className="flex items-center text-xs text-muted-foreground">
                             <span>{task.projectTitle}</span>
                             <span className="mx-1">•</span>
-                            <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
+                            <span>Due {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}</span>
                           </div>
                         </div>
                       </div>
@@ -941,7 +940,15 @@ function UserDashboard({ stats }: { stats: DashboardStats }) {
               </div>
             </CardHeader>
             <CardContent>
-              {myTasks.length === 0 ? (
+              {tasksLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : myTasks.length === 0 ? (
                 <div className="text-center py-12">
                   <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">No Tasks</h3>
@@ -976,7 +983,7 @@ function UserDashboard({ stats }: { stats: DashboardStats }) {
                             {task.projectTitle}
                           </div>
                           <div className="w-28 text-right">
-                            {new Date(task.dueDate).toLocaleDateString()}
+                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
                           </div>
                           <div className="w-20 text-right">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${

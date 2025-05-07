@@ -52,6 +52,11 @@ export interface TaskSummary {
   projectTitle: string;
   projectId: string;
   completed: boolean;
-  dueDate: string;
+  dueDate: string | null;
   priority: 'low' | 'medium' | 'high';
+  status?: {
+    id: string;
+    name: string;
+    color: string;
+  } | null;
 }

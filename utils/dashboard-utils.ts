@@ -27,7 +27,7 @@ export function calculateTeamMembers(projects: ProjectSummary[]) {
       if (member?.id) teamMembersSet.add(member.id);
     });
   });
-  
+
   return {
     teamMembersCount: teamMembersSet.size,
     uniqueMembers: Array.from(teamMembersSet)
@@ -45,44 +45,5 @@ export function calculateProjectStatusDistribution(projects: ProjectSummary[]): 
   };
 }
 
-/**
- * Extract simulated tasks from projects
- * Note: This is a temporary function until real task data is available
- */
-export function extractTasksFromProjects(projects: ProjectSummary[]) {
-  const allTasks = [];
-  
-  projects.forEach(project => {
-    // For each project, create simulated tasks based on task counts
-    const completedTaskCount = project.completedTaskCount || 0;
-    const pendingTaskCount = (project.taskCount || 0) - completedTaskCount;
-    
-    // Add completed tasks
-    for (let i = 0; i < completedTaskCount; i++) {
-      allTasks.push({
-        id: `${project.id}-completed-${i}`,
-        title: `Task ${i + 1}`,
-        projectTitle: project.title,
-        projectId: project.id,
-        completed: true,
-        dueDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        priority: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high'
-      });
-    }
-    
-    // Add pending tasks
-    for (let i = 0; i < pendingTaskCount; i++) {
-      allTasks.push({
-        id: `${project.id}-pending-${i}`,
-        title: `Task ${completedTaskCount + i + 1}`,
-        projectTitle: project.title,
-        projectId: project.id,
-        completed: false,
-        dueDate: new Date(Date.now() + Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString(),
-        priority: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high'
-      });
-    }
-  });
-  
-  return allTasks;
-}
+// The extractTasksFromProjects function has been removed
+// Real task data is now fetched from the API using the useUserTasks hook
