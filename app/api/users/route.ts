@@ -3,8 +3,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { getUsers, createUser } from '@/lib/queries/user-queries';
-import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/users - Get all users with pagination and filtering
 export async function GET(req: NextRequest) {
@@ -41,12 +40,12 @@ export async function GET(req: NextRequest) {
     // For regular users, only return team members they work with
     // Get user role and check permissions
     const userRole = session.user.role;
-    const hasTeamViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
+    const hasTeamViewPermission = await PermissionService.hasPermission(userRole, "team_view");
 
-    // If user has TEAM_VIEW permission, they can see all users
+    // If user has team_view permission, they can see all users
     // If not and no specific project is requested, limit to users in the same projects
     if (!hasTeamViewPermission && !projectId) {
-      console.log(`User ${session.user.id} does not have TEAM_VIEW permission. Limiting to project members.`);
+      console.log(`User ${session.user.id} does not have team_view permission. Limiting to project members.`);
 
       // Get projects the user is part of
       const userProjects = await prisma.teamMember.findMany({

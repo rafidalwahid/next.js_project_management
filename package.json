@@ -9,7 +9,9 @@
     "lint": "next lint",
     "setup-db": "node scripts/setup-db.js",
     "seed": "node scripts/seed-unified.js",
-    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed",
+    "seed-permissions": "node scripts/seed-permissions.js",
+    "cleanup-permissions": "node scripts/cleanup-old-permissions.js",
+    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed && npm run seed-permissions",
     "prisma:generate": "npx prisma generate",
     "postinstall": "npx prisma generate"
   },

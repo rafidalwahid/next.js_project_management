@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { z } from "zod";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 interface Params {
   params: {
@@ -183,11 +184,14 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if user is the comment author or has admin role
+    // Check if user is the comment author or has task management permission
     const isCommentAuthor = comment.userId === session.user.id;
-    const isAdmin = session.user.role === "admin";
+    const hasTaskManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "task_management"
+    );
 
-    if (!isCommentAuthor && !isAdmin) {
+    if (!isCommentAuthor && !hasTaskManagementPermission) {
       return NextResponse.json(
         { error: "You don't have permission to delete this comment" },
         { status: 403 }

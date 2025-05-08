@@ -1,7 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
-import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 /**
  * Check if a user has permission to access a task
@@ -24,7 +23,7 @@ export async function checkTaskPermission(
   if (action === 'create') {
     const hasPermission = await PermissionService.hasPermission(
       session.user.role,
-      PERMISSIONS.TASK_CREATION
+      "task_creation"
     );
 
     return {
@@ -77,18 +76,18 @@ export async function checkTaskPermission(
 
   // Check permissions based on action
   if (action === 'view') {
-    // For view actions, check VIEW_PROJECTS permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS);
+    // For view actions, check view_projects permission or direct involvement
+    const hasViewPermission = await PermissionService.hasPermission(userRole, "view_projects");
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember || isTaskAssignee;
   }
   else if (action === 'update') {
-    // For update actions, check TASK_MANAGEMENT permission or direct involvement
-    const hasManagePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TASK_MANAGEMENT);
+    // For update actions, check task_management permission or direct involvement
+    const hasManagePermission = await PermissionService.hasPermission(userRole, "task_management");
     hasPermission = hasManagePermission || isProjectCreator || isTaskAssignee;
   }
   else if (action === 'delete') {
-    // For delete actions, check TASK_DELETION permission or project creator status
-    const hasDeletePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TASK_DELETION);
+    // For delete actions, check task_deletion permission or project creator status
+    const hasDeletePermission = await PermissionService.hasPermission(userRole, "task_deletion");
     hasPermission = hasDeletePermission || isProjectCreator;
 
     // Special case for subtasks - check if user has permission on the parent task

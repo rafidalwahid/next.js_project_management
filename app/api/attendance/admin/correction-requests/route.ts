@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // Validation schema for correction request updates
 const updateCorrectionRequestSchema = z.object({
@@ -23,10 +24,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Check if user is admin or manager
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
+    // Check if user has attendance management permission
+    const hasAttendanceManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "attendance_management"
+    );
+
+    if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: Admin or manager role required" },
+        { error: "Forbidden: You do not have permission to access correction requests" },
         { status: 403 }
       );
     }
@@ -122,10 +128,15 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Check if user is admin or manager
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
+    // Check if user has attendance management permission
+    const hasAttendanceManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "attendance_management"
+    );
+
+    if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: Admin or manager role required" },
+        { error: "Forbidden: You do not have permission to update correction requests" },
         { status: 403 }
       );
     }

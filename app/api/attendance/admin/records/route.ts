@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,10 +15,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Check if user is admin or manager
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
+    // Check if user has attendance management permission
+    const hasAttendanceManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "attendance_management"
+    );
+
+    if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: Admin or manager role required" },
+        { error: "Forbidden: You do not have permission to access attendance records" },
         { status: 403 }
       );
     }

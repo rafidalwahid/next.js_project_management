@@ -1,7 +1,7 @@
-// scripts/seed-permissions.js
+// scripts/seed-permissions.ts
 // Script to seed the database with roles and permissions
 
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Define all available permissions
@@ -10,30 +10,30 @@ const PERMISSIONS = {
   USER_MANAGEMENT: "user_management",
   MANAGE_ROLES: "manage_roles",
   MANAGE_PERMISSIONS: "manage_permissions",
-
+  
   // Project management
   PROJECT_CREATION: "project_creation",
   PROJECT_MANAGEMENT: "project_management",
   PROJECT_DELETION: "project_deletion",
-
+  
   // Team management
   TEAM_MANAGEMENT: "team_management",
   TEAM_ADD: "team_add",
   TEAM_REMOVE: "team_remove",
   TEAM_VIEW: "team_view",
-
+  
   // Task management
   TASK_CREATION: "task_creation",
   TASK_ASSIGNMENT: "task_assignment",
   TASK_MANAGEMENT: "task_management",
   TASK_DELETION: "task_deletion",
-
+  
   // General permissions
   VIEW_PROJECTS: "view_projects",
   EDIT_PROFILE: "edit_profile",
   SYSTEM_SETTINGS: "system_settings",
   VIEW_DASHBOARD: "view_dashboard",
-
+  
   // Attendance
   ATTENDANCE_MANAGEMENT: "attendance_management",
   VIEW_TEAM_ATTENDANCE: "view_team_attendance",
@@ -69,29 +69,29 @@ const ROLE_PERMISSIONS = {
   manager: [
     // User management (limited)
     PERMISSIONS.USER_MANAGEMENT,
-
+    
     // Project management
     PERMISSIONS.PROJECT_CREATION,
     PERMISSIONS.PROJECT_MANAGEMENT,
     PERMISSIONS.PROJECT_DELETION,
-
+    
     // Team management
     PERMISSIONS.TEAM_MANAGEMENT,
     PERMISSIONS.TEAM_ADD,
     PERMISSIONS.TEAM_REMOVE,
     PERMISSIONS.TEAM_VIEW,
-
+    
     // Task management
     PERMISSIONS.TASK_CREATION,
     PERMISSIONS.TASK_ASSIGNMENT,
     PERMISSIONS.TASK_MANAGEMENT,
     PERMISSIONS.TASK_DELETION,
-
+    
     // General permissions
     PERMISSIONS.VIEW_PROJECTS,
     PERMISSIONS.EDIT_PROFILE,
     PERMISSIONS.VIEW_DASHBOARD,
-
+    
     // Attendance
     PERMISSIONS.ATTENDANCE_MANAGEMENT,
     PERMISSIONS.VIEW_TEAM_ATTENDANCE,
@@ -100,7 +100,7 @@ const ROLE_PERMISSIONS = {
     // Task management (limited)
     PERMISSIONS.TASK_CREATION,
     PERMISSIONS.TASK_MANAGEMENT,
-
+    
     // General permissions
     PERMISSIONS.VIEW_PROJECTS,
     PERMISSIONS.EDIT_PROFILE,
@@ -115,7 +115,7 @@ const ROLE_PERMISSIONS = {
 };
 
 // Function to categorize permissions
-function categorizePermission(permission) {
+function categorizePermission(permission: string): string {
   if (permission.includes('USER') || permission.includes('ROLE')) {
     return 'User Management';
   } else if (permission.includes('PROJECT')) {
@@ -142,10 +142,10 @@ async function seedPermissions() {
     for (const [key, value] of Object.entries(PERMISSIONS)) {
       const category = categorizePermission(key);
       const description = `Permission to ${value.replace(/_/g, ' ')}`;
-
+      
       await prisma.permission.upsert({
         where: { name: value },
-        update: {
+        update: { 
           description,
           category
         },
@@ -163,7 +163,7 @@ async function seedPermissions() {
     for (const [key, value] of Object.entries(SYSTEM_ROLES)) {
       await prisma.role.upsert({
         where: { name: key },
-        update: {
+        update: { 
           description: value.description,
           color: value.color
         },
@@ -230,4 +230,7 @@ seedPermissions()
   .catch(e => {
     console.error(e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

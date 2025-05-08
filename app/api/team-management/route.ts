@@ -4,8 +4,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { withAuth, withPermission } from "@/lib/api-middleware";
-import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 import { logActivity } from "@/lib/activity-logger";
 
 // Validation schema for creating team members
@@ -62,9 +61,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       // Check if user has permission to view this project's team
       const isTeamMember = project.teamMembers.length > 0;
       const isProjectCreator = project.createdById === session.user.id;
-      const isAdmin = session.user.role === "admin";
-      const isManager = session.user.role === "manager";
-      const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
+      const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, "team_view");
 
       // Log permission check details for debugging
       console.log("Team permission check:", {
@@ -76,7 +73,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
         hasTeamViewPermission
       });
 
-      if (!isTeamMember && !isProjectCreator && !isAdmin && !isManager && !hasTeamViewPermission) {
+      if (!isTeamMember && !isProjectCreator && !hasTeamViewPermission) {
         return NextResponse.json(
           { error: "You don't have permission to view this project's team" },
           { status: 403 }
@@ -89,8 +86,8 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
 
       // If requesting team memberships for another user, check if the current user has permission
       if (userId !== session.user.id) {
-        const hasUserManagementPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
-        const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_VIEW);
+        const hasUserManagementPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+        const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, "team_view");
         const hasPermission = hasUserManagementPermission || hasTeamViewPermission;
 
         if (!hasPermission) {
@@ -197,7 +194,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
  * Add a team member to a project
  */
 export const POST = withPermission(
-  PERMISSIONS.TEAM_ADD,
+  "team_add",
   async (req: NextRequest, context: any, session: any) => {
     try {
       // Parse request body
@@ -246,12 +243,10 @@ export const POST = withPermission(
 
       // Check if user has permission to add team members to this project
       const isTeamMember = project.teamMembers.length > 0;
-      const isAdmin = session.user.role === "admin";
-      const isManager = session.user.role === "manager";
       const isProjectCreator = project.createdById === session.user.id;
-      const hasTeamAddPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.TEAM_ADD);
+      const hasTeamAddPermission = await PermissionService.hasPermission(session.user.role, "team_add");
 
-      if (!isTeamMember && !isAdmin && !isManager && !isProjectCreator && !hasTeamAddPermission) {
+      if (!isTeamMember && !isProjectCreator && !hasTeamAddPermission) {
         return NextResponse.json(
           { error: "You don't have permission to add team members to this project" },
           { status: 403 }

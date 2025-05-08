@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 /**
  * @deprecated This API endpoint is deprecated. Use /api/team-management/membership?projectId={projectId} instead.
@@ -46,8 +47,13 @@ export async function GET(
       );
     }
 
-    // Check if the user is an admin (admins have access to all projects)
-    if (session.user.role === 'admin') {
+    // Check if the user has permission to view all projects
+    const hasViewAllProjectsPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "view_projects"
+    );
+
+    if (hasViewAllProjectsPermission) {
       return NextResponse.json({
         isMember: true
       });

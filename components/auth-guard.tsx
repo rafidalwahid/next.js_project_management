@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useAuthSession } from "@/hooks/use-auth-session"
 import { toast } from "sonner"
 import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
+import { useHasPermission } from "@/hooks/use-permission"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -55,7 +56,7 @@ export function AuthGuard({
     } catch (error) {
       console.error("Error checking permission:", error)
       // Fall back to client-side check on error
-      const clientCheck = ClientPermissionService.hasPermission(role, permission)
+      const clientCheck = ClientPermissionService.hasPermissionSync(role, permission)
       setHasPermission(clientCheck)
       setPermissionChecked(true)
       setIsCheckingPermission(false)
@@ -93,7 +94,8 @@ export function AuthGuard({
       })
     }
 
-    // Check role-based access if roles are specified
+    // Role-based access is deprecated - we should use permission-based checks instead
+    // This is kept for backward compatibility
     if (
       status === "authenticated" &&
       allowedRoles &&
@@ -118,7 +120,7 @@ export function AuthGuard({
       !isCheckingPermission
     ) {
       // First do a quick client-side check
-      const quickCheck = ClientPermissionService.hasPermission(session.user.role, requiredPermission)
+      const quickCheck = ClientPermissionService.hasPermissionSync(session.user.role, requiredPermission)
 
       // If quick check passes, we can allow access immediately
       if (quickCheck) {

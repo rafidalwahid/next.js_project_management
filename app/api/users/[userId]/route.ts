@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { getUserById, updateUser } from '@/lib/queries/user-queries';
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 interface Params {
   params: {
@@ -27,12 +28,14 @@ export async function GET(req: NextRequest, { params }: Params) {
     const isProfile = req.nextUrl.searchParams.get('profile') === 'true';
 
     // Check if user has permission to view this user
-    // Users can view their own profile, admins can view any profile
+    // Users can view their own profile, users with user_management permission can view any profile
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
-    const isManager = session.user.role === 'manager';
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
 
-    if (!isOwnProfile && !isAdmin && !isManager) {
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to view this user' },
         { status: 403 }
@@ -442,11 +445,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to update this user
-    // Users can update their own profile, admins can update any profile
+    // Users can update their own profile, users with user_management permission can update any profile
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
 
-    if (!isOwnProfile && !isAdmin) {
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to update this user' },
         { status: 403 }
@@ -456,10 +462,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Parse request body
     const body = await req.json();
 
-    // If trying to change role, only admins can do that
-    if (body.role && !isAdmin) {
+    // If trying to change role, only users with manage_roles permission can do that
+    const hasManageRolesPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "manage_roles"
+    );
+
+    if (body.role && !hasManageRolesPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: Only admins can change user roles' },
+        { error: 'Forbidden: You do not have permission to change user roles' },
         { status: 403 }
       );
     }
@@ -499,10 +510,15 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     // Extract userId from params, ensuring it's properly awaited
     const { userId } = await Promise.resolve(params);
 
-    // Only admins can delete users
-    if (session.user.role !== 'admin') {
+    // Only users with user_management permission can delete users
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
+
+    if (!hasUserManagementPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: Only admins can delete users' },
+        { error: 'Forbidden: You do not have permission to delete users' },
         { status: 403 }
       );
     }

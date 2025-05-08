@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { withAuth } from "@/lib/api-middleware";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 /**
  * GET /api/team-management/membership?projectId={projectId}
@@ -45,12 +46,15 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       select: { id: true },
     });
 
-    // Check if user is an admin (admins have access to all projects)
-    const isAdmin = session.user.role === "admin";
+    // Check if user has permission to view all projects
+    const hasViewAllProjectsPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "view_projects"
+    );
 
     // Return membership status
     return NextResponse.json({
-      isMember: !!teamMember || isAdmin,
+      isMember: !!teamMember || hasViewAllProjectsPermission,
     });
   } catch (error) {
     console.error("Error checking project membership:", error);

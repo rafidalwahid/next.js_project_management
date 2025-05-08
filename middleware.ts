@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { PERMISSIONS } from '@/lib/permissions/permission-constants'
 import { EdgePermissionService } from '@/lib/permissions/edge-permission-service'
 
 // Public paths that don't require authentication
@@ -12,36 +11,40 @@ const PUBLIC_PATHS = [
   '/api/register',
   '/api/auth-status',
   '/api/permissions/matrix', // Allow access to permission matrix for middleware
+  '/api/roles/check-permission', // Allow access to permission checks
   '/_next',
   '/favicon.ico',
   '/images',
-  '/fonts'
+  '/fonts',
+  '/api/trpc', // Allow access to tRPC if used
+  '/api/health', // Allow health checks
+  '/api/webhooks' // Allow webhooks
 ]
 
 // Permission-protected paths mapping
 const PROTECTED_PATHS = {
   // Admin-only paths
-  '/team/permissions': PERMISSIONS.MANAGE_ROLES,
-  '/team/roles': PERMISSIONS.MANAGE_ROLES,
-  '/api/roles': PERMISSIONS.MANAGE_ROLES,
-  '/api/permissions': PERMISSIONS.MANAGE_ROLES,
+  '/team/permissions': "manage_roles",
+  '/team/roles': "manage_roles",
+  '/api/roles': "manage_roles",
+  '/api/permissions': "manage_roles",
 
   // User management paths
-  '/team/new': PERMISSIONS.USER_MANAGEMENT,
-  '/api/users': PERMISSIONS.USER_MANAGEMENT,
+  '/team/new': "user_management",
+  '/api/users': "user_management",
 
   // Project management paths
-  '/projects/new': PERMISSIONS.PROJECT_CREATION,
+  '/projects/new': "project_creation",
 
   // Attendance management paths
-  '/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
-  '/api/attendance/admin': PERMISSIONS.ATTENDANCE_MANAGEMENT,
-  '/api/attendance/admin/records': PERMISSIONS.ATTENDANCE_MANAGEMENT,
-  '/api/attendance/admin/correction-requests': PERMISSIONS.ATTENDANCE_MANAGEMENT,
+  '/attendance/admin': "attendance_management",
+  '/api/attendance/admin': "attendance_management",
+  '/api/attendance/admin/records': "attendance_management",
+  '/api/attendance/admin/correction-requests': "attendance_management",
 
   // System settings paths
-  '/settings': PERMISSIONS.SYSTEM_SETTINGS,
-  '/api/settings': PERMISSIONS.SYSTEM_SETTINGS,
+  '/settings': "system_settings",
+  '/api/settings': "system_settings",
 }
 
 export async function middleware(request: NextRequest) {
@@ -80,8 +83,8 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Check if the user has the required permission
-      const hasPermission = await EdgePermissionService.hasPermission(userRole, requiredPermission);
+      // Check if the user has the required permission using the edge-compatible service
+      const hasPermission = EdgePermissionService.hasPermission(userRole, requiredPermission);
 
       if (!hasPermission) {
         // For API routes, return a JSON error
@@ -111,7 +114,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public assets (images, fonts, etc.)
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|images|fonts).*)',
   ],
 }

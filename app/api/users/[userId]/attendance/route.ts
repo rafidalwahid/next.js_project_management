@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { format } from "date-fns";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 interface Params {
   params: {
@@ -29,12 +30,14 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { userId } = await params;
 
     // Check if user has permission to view this user's attendance
-    // Users can view their own attendance, admins can view any user's attendance
+    // Users can view their own attendance, users with view_team_attendance permission can view any user's attendance
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
-    const isManager = session.user.role === 'manager';
+    const hasViewTeamAttendancePermission = await PermissionService.hasPermission(
+      session.user.role,
+      "view_team_attendance"
+    );
 
-    if (!isOwnProfile && !isAdmin && !isManager) {
+    if (!isOwnProfile && !hasViewTeamAttendancePermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to view this user\'s attendance' },
         { status: 403 }

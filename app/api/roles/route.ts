@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/roles - Get all roles
 export async function GET(req: NextRequest) {
@@ -61,15 +61,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // In the centralized permission system, roles are defined in code
-    // This endpoint is kept for backward compatibility but doesn't actually create roles
-    return NextResponse.json(
-      {
-        error: 'Creating roles dynamically is not supported in the centralized permission system',
-        message: 'Roles are now defined in code in lib/permissions/unified-permission-system.ts'
-      },
-      { status: 400 }
-    );
+    // Create the role using the PermissionService
+    try {
+      const role = await PermissionService.createRole(name, description || `${name} role`);
+      return NextResponse.json({
+        message: 'Role created successfully',
+        role
+      });
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: 'Failed to create role', details: error.message },
+        { status: 400 }
+      );
+    }
   } catch (error: any) {
     console.error('Error creating role:', error);
     return NextResponse.json(
@@ -110,15 +114,34 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // In the centralized permission system, roles are defined in code
-    // This endpoint is kept for backward compatibility but doesn't actually delete roles
-    return NextResponse.json(
-      {
-        error: 'Deleting roles dynamically is not supported in the centralized permission system',
-        message: 'Roles are now defined in code in lib/permissions/unified-permission-system.ts'
-      },
-      { status: 400 }
-    );
+    // Delete the role using the PermissionService
+    try {
+      // Don't allow deleting built-in roles
+      if (['admin', 'manager', 'user', 'guest'].includes(name)) {
+        return NextResponse.json(
+          { error: 'Cannot delete built-in roles' },
+          { status: 400 }
+        );
+      }
+
+      const success = await PermissionService.deleteRole(name);
+
+      if (!success) {
+        return NextResponse.json(
+          { error: 'Failed to delete role' },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json({
+        message: 'Role deleted successfully'
+      });
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: 'Failed to delete role', details: error.message },
+        { status: 400 }
+      );
+    }
   } catch (error: any) {
     console.error('Error deleting role:', error);
     return NextResponse.json(

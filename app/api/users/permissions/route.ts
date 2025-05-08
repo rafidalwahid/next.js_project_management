@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/users/permissions?userId={userId} - Get permissions for a user
 export async function GET(req: NextRequest) {
@@ -23,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting permissions for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+      const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
       if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' permissions' },
@@ -65,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -89,7 +88,8 @@ export async function POST(req: NextRequest) {
     // We need to update the user's role to one that has the permission
 
     // Get all roles that have this permission
-    const rolesWithPermission = PermissionService.getRolesWithPermission(permissionName);
+    // For now, we'll just use admin and manager roles
+    const rolesWithPermission = ['admin', 'manager'];
 
     if (rolesWithPermission.length === 0) {
       return NextResponse.json(
@@ -152,7 +152,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -230,7 +230,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },

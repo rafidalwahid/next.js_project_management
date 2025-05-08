@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 /**
  * Middleware for API routes to handle authentication and authorization
@@ -158,19 +158,19 @@ export function withResourcePermission(
 }
 
 /**
- * Middleware for checking if a user is the owner of a resource or has admin privileges
+ * Middleware for checking if a user is the owner of a resource or has required permission
  *
  * @param resourceIdParam The name of the parameter containing the resource ID
  * @param resourceFetcher Function that fetches the resource and returns the user ID associated with it
  * @param handler The API route handler function
- * @param adminOnly Whether only admins should have access regardless of ownership
- * @returns A new handler function with ownership checks
+ * @param requiredPermission The permission required to access the resource if not the owner
+ * @returns A new handler function with ownership and permission checks
  */
-export function withOwnerOrAdmin(
+export function withOwnerOrPermission(
   resourceIdParam: string,
   resourceFetcher: (resourceId: string) => Promise<{ userId: string } | null>,
   handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
-  adminOnly: boolean = false
+  requiredPermission: string
 ) {
   return withAuth(async (req: NextRequest, context: any, session: Session) => {
     try {
@@ -195,16 +195,23 @@ export function withOwnerOrAdmin(
         );
       }
 
-      // Check if the user is the owner or an admin
-      const { hasPermission, error } = await PermissionService.checkOwnerOrAdmin(
-        session,
-        resource.userId,
-        adminOnly
+      // Check if the user is the owner
+      const isOwner = session.user.id === resource.userId;
+
+      if (isOwner) {
+        // Owner always has access
+        return handler(req, context, session, resourceId);
+      }
+
+      // If not the owner, check for the required permission
+      const hasPermission = await PermissionService.hasPermission(
+        session.user.role,
+        requiredPermission
       );
 
       if (!hasPermission) {
         return NextResponse.json(
-          { error: error || "Forbidden: Insufficient permissions" },
+          { error: `Forbidden: You need ${requiredPermission} permission to access this resource` },
           { status: 403 }
         );
       }
@@ -212,11 +219,28 @@ export function withOwnerOrAdmin(
       // Call the original handler with the resource ID
       return handler(req, context, session, resourceId);
     } catch (error) {
-      console.error("API owner/admin permission middleware error:", error);
+      console.error("API owner/permission middleware error:", error);
       return NextResponse.json(
         { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
         { status: 500 }
       );
     }
   });
+}
+
+/**
+ * Legacy middleware for checking if a user is the owner of a resource or has admin privileges
+ * @deprecated Use withOwnerOrPermission instead
+ */
+export function withOwnerOrAdmin(
+  resourceIdParam: string,
+  resourceFetcher: (resourceId: string) => Promise<{ userId: string } | null>,
+  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  adminOnly: boolean = false
+) {
+  // Map adminOnly to the appropriate permission
+  const requiredPermission = adminOnly ? "user_management" : "view_projects";
+
+  // Use the new withOwnerOrPermission function
+  return withOwnerOrPermission(resourceIdParam, resourceFetcher, handler, requiredPermission);
 }

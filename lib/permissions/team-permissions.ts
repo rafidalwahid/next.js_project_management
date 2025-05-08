@@ -1,7 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
-import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 import { logActivity } from "@/lib/activity-logger";
 
 /**
@@ -69,13 +68,13 @@ export async function checkTeamMemberPermission(
 
   // Determine permission based on action
   if (action === 'view') {
-    // For view actions, check TEAM_VIEW permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
+    // For view actions, check team_view permission or direct involvement
+    const hasViewPermission = await PermissionService.hasPermission(userRole, "team_view");
     hasPermission = hasViewPermission || isProjectCreator || !!userTeamMember || isSelf;
   }
   else if (action === 'update') {
-    // For update actions, check TEAM_MANAGEMENT permission or project creator status
-    const hasManagementPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT);
+    // For update actions, check team_management permission or project creator status
+    const hasManagementPermission = await PermissionService.hasPermission(userRole, "team_management");
     hasPermission = hasManagementPermission || isProjectCreator;
 
     // Special case: can't update project creator's membership
@@ -88,8 +87,8 @@ export async function checkTeamMemberPermission(
     }
   }
   else if (action === 'delete') {
-    // For delete actions, check TEAM_REMOVE permission or project creator status or self
-    const hasRemovePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_REMOVE);
+    // For delete actions, check team_remove permission or project creator status or self
+    const hasRemovePermission = await PermissionService.hasPermission(userRole, "team_remove");
     hasPermission = hasRemovePermission || isProjectCreator || isSelf;
 
     // Special case: can't remove project creator
@@ -179,18 +178,18 @@ export async function checkProjectTeamPermission(
 
   // Determine permission based on action
   if (action === 'view') {
-    // For view actions, check TEAM_VIEW permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_VIEW);
+    // For view actions, check team_view permission or direct involvement
+    const hasViewPermission = await PermissionService.hasPermission(userRole, "team_view");
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
   }
   else if (action === 'add') {
-    // For add actions, check TEAM_ADD permission or project creator status
-    const hasAddPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_ADD);
+    // For add actions, check team_add permission or project creator status
+    const hasAddPermission = await PermissionService.hasPermission(userRole, "team_add");
     hasPermission = hasAddPermission || isProjectCreator;
   }
   else if (action === 'manage') {
-    // For manage actions, check TEAM_MANAGEMENT permission or project creator status
-    const hasManagementPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.TEAM_MANAGEMENT);
+    // For manage actions, check team_management permission or project creator status
+    const hasManagementPermission = await PermissionService.hasPermission(userRole, "team_management");
     hasPermission = hasManagementPermission || isProjectCreator;
   }
 

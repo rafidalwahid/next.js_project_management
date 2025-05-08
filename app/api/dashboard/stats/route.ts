@@ -3,22 +3,27 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { unstable_cache } from 'next/cache';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 // Cache dashboard stats for 1 minute per user
 const getDashboardStats = unstable_cache(
-  async (userId: string, userRole: string) => {
+  async (userId: string, userRole: string, userPermissions: string[]) => {
     if (!userId) {
       throw new Error('User ID is required');
     }
 
     let whereClause = {};
 
-    // Different filtering based on user role
-    if (userRole === 'admin') {
-      // Admin sees all projects
+    // Different filtering based on user permissions
+    const hasSystemSettings = userPermissions.includes('system_settings');
+    const hasProjectManagement = userPermissions.includes('project_management');
+    const hasViewAllProjects = userPermissions.includes('view_all_projects');
+
+    if (hasSystemSettings || hasViewAllProjects) {
+      // Users with system_settings or view_all_projects permission see all projects
       whereClause = {};
-    } else if (userRole === 'manager') {
-      // Manager sees projects they created or are a member of
+    } else if (hasProjectManagement) {
+      // Users with project_management permission see projects they created or are a member of
       whereClause = {
         OR: [
           { createdById: userId }, // Projects they created
@@ -114,9 +119,9 @@ const getDashboardStats = unstable_cache(
       ? ((projectsThisMonth - projectsLastMonth) / projectsLastMonth) * 100
       : 0;
 
-    // For admin only: Get system-wide stats
+    // Get system-wide stats for users with system_settings permission
     let systemStats = null;
-    if (userRole === 'admin') {
+    if (userPermissions.includes('system_settings')) {
       try {
         // Get total users count
         const totalUsers = await prisma.user.count();
@@ -179,7 +184,7 @@ const getDashboardStats = unstable_cache(
       systemStats // Will be null for non-admin users
     };
   },
-  [(userId, userRole) => `dashboard-stats-${userId}-${userRole}`],
+  [(userId, userRole, userPermissions) => `dashboard-stats-${userId}-${userRole}-${userPermissions.join(',')}`],
   { revalidate: 60 } // Cache for 1 minute
 );
 
@@ -203,8 +208,11 @@ export async function GET() {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      // Get stats based on user role
-      const stats = await getDashboardStats(userId, user.role);
+      // Get user permissions from the database
+      const userPermissions = await PermissionService.getPermissionsForRole(user.role);
+
+      // Get stats based on user role and permissions
+      const stats = await getDashboardStats(userId, user.role, userPermissions);
 
       return NextResponse.json({ stats });
     } catch (dbError) {

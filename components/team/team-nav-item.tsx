@@ -11,8 +11,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { PERMISSIONS } from "@/lib/permissions/permission-constants"
 import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
+import { useHasPermission } from "@/hooks/use-permission"
 
 interface TeamNavItemProps {
   collapsed?: boolean
@@ -31,7 +31,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       title: "Team Members",
       href: "/team",
       icon: UsersRound,
-      permission: PERMISSIONS.TEAM_VIEW,
+      permission: "team_view",
       // This is a core functionality that all users should have access to
       alwaysShow: true
     },
@@ -39,7 +39,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       title: "My Profile",
       href: userId ? `/profile/${userId}` : "/profile",
       icon: UserCircle,
-      permission: PERMISSIONS.EDIT_PROFILE,
+      permission: "edit_profile",
       // This is a core functionality that all users should have access to
       alwaysShow: true
     },
@@ -47,36 +47,37 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       title: "Team Attendance",
       href: "/team/attendance",
       icon: ClipboardCheck,
-      permission: PERMISSIONS.VIEW_TEAM_ATTENDANCE,
+      permission: "view_team_attendance",
       alwaysShow: false
     },
     {
       title: "Add Member",
       href: "/team/new",
       icon: UserPlus,
-      permission: PERMISSIONS.TEAM_ADD,
+      permission: "team_add",
       alwaysShow: false
     },
     {
       title: "Role Management",
       href: "/team/roles",
       icon: ShieldCheck,
-      permission: PERMISSIONS.MANAGE_ROLES,
+      permission: "manage_roles",
       alwaysShow: false
     },
     {
       title: "Permissions",
       href: "/team/permissions",
       icon: ShieldCheck,
-      permission: PERMISSIONS.MANAGE_PERMISSIONS,
+      permission: "manage_permissions",
       alwaysShow: false
     },
   ]
 
   // Filter items based on user permissions
-  const filteredSubItems = subItems.filter(item =>
-    item.alwaysShow || ClientPermissionService.hasPermissionSync(userRole, item.permission)
-  )
+  const filteredSubItems = subItems.filter(item => {
+    if (item.alwaysShow) return true;
+    return ClientPermissionService.hasPermissionSync(userRole, item.permission);
+  })
 
   const isActive = pathname.startsWith("/team") || pathname.startsWith("/profile")
 

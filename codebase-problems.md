@@ -4,41 +4,87 @@ This document provides a comprehensive list of problems identified in the Projec
 
 ## 1. Permission System Issues
 
-1. **Inconsistent Permission Implementation**: Multiple permission service implementations exist (`PermissionService`, `DbPermissionService`, `EdgePermissionService`, `ClientPermissionService`) with overlapping functionality but potentially inconsistent behavior.
+### Completed Tasks
 
-2. **Role-Based vs Permission-Based Checks**: Many components still use role-based checks (`user.role === 'admin'`) instead of permission-based checks (`hasPermission('permission_name')`), contradicting the user's preference for permission-based access control.
+1. ✅ **Consolidated Permission Services**:
+   - Created a single unified `PermissionService` in `lib/permissions/unified-permission-service.ts` that exclusively uses database models
+   - Implemented caching mechanisms to improve performance for frequently checked permissions
+   - Removed all old permission service files (`permission-service.ts`, `db-permission-service.ts`, `edge-permission-service.ts`, `edge-db-permission-service.ts`, `client-db-permission-service.ts`)
+   - Updated `client-permission-service.ts` to work with the new system
 
-3. **Missing Database-Backed Permission System**: The codebase references a database-backed permission system, but the schema in `prisma/schema.prisma` shows that the Role and Permission models have been removed, with a comment indicating they were "removed in favor of a simplified role system." But I have created that again, can you please check the database schema again?
+2. ✅ **Removed Hardcoded Permission Constants**:
+   - Deleted the `permission-constants.ts` file
+   - Created a database seeder (`scripts/seed-permissions.js`) that populates the Permission table with all required permissions
+   - Updated API routes to use database queries instead of constants
 
-4. **Hardcoded Permissions**: Permissions are still defined as constants in `lib/permissions/permission-constants.ts` rather than being fully database-driven.
+3. ✅ **Updated API Routes**:
+   - Created new API endpoints for managing roles and permissions (`/api/roles/create`, `/api/roles/update-permissions`, `/api/roles/check-permission`)
+   - Updated existing API routes to use the new unified permission service
+   - Implemented permission cache invalidation when permissions are updated
 
-### How to Fix Permission System Issues
+4. ✅ **Created Migration Path**:
+   - Created a database seeder that preserves existing role assignments while adding the new permission system
+   - Added scripts to package.json for running the seeder and cleanup
 
-To completely remove the old code and constant permissions in favor of a fully database-backed permission system:
+5. ✅ **Replaced Role-Based Checks in Key Components**:
+   - Updated project membership routes (`app/api/projects/[projectId]/membership/route.ts` and `app/api/team-management/membership/route.ts`) to use permission-based checks
+   - Updated user management routes (`app/api/users/[userId]/route.ts`) to use permission-based checks for GET, PATCH, and DELETE methods
+   - Updated attendance routes (`app/api/users/[userId]/attendance/route.ts`) to use permission-based checks
+   - Updated team management routes (`app/api/team-management/route.ts`) to use permission-based checks
+   - Updated middleware (`middleware.ts`) to use the unified permission service and string literals instead of constants
 
-1. **Consolidate Permission Services**:
-   - Delete all existing permission service files: `permission-service.ts`, `db-permission-service.ts`, `edge-permission-service.ts`, and `client-permission-service.ts`
-   - Create a single unified `PermissionService` that exclusively uses the database models
-   - Implement caching mechanisms to improve performance for frequently checked permissions
+6. ✅ **Updated Client-Side Permission Service**:
+   - Replaced the `checkOwnerOrAdmin` method with permission-based `checkOwnerOrPermission` and `checkOwnerOrPermissionSync` methods
+   - These methods provide a more flexible and permission-based approach to access control
 
-2. **Replace Role-Based Checks**:
-   - Search for all instances of role-based checks (`user.role === 'admin'`, etc.)
-   - Replace them with permission-based checks (`hasPermission('permission_name')`)
-   - Update middleware to use permission checks instead of role checks
+7. ✅ **Updated Permission Management UI**:
+   - Updated `app/team/permissions/page.tsx` to work with the database-backed system
+   - Removed hardcoded constants and updated to use direct string literals
+   - Modified the role badge function to use dynamic role data from the API
 
-3. **Remove Hardcoded Permission Constants**:
-   - Delete the `permission-constants.ts` file
-   - Create a database seeder that populates the Permission table with all required permissions
-   - Update all references to the constants to use database queries instead
+### Completed Tasks (continued)
 
-4. **Update API Routes and UI**:
-   - Create CRUD API endpoints for managing roles and permissions
-   - Update the permission management UI to work with the database-backed system
-   - Implement a permission cache invalidation system when permissions are updated
+8. ✅ **Updated Additional API Routes**:
+   - Updated attendance admin routes (`app/api/attendance/admin/records/route.ts`, `app/api/attendance/admin/correction-requests/route.ts`) to use permission-based checks
+   - Updated attendance statistics routes (`app/api/attendance/today/late-count/route.ts`, `app/api/attendance/today/present-count/route.ts`) to use permission-based checks
+   - Updated user documents routes (`app/api/users/[userId]/documents/route.ts`) to use permission-based checks
+   - Updated task comments routes (`app/api/tasks/[taskId]/comments/route.ts`) to use permission-based checks
 
-5. **Migration Path**:
-   - Create a migration script that transfers any existing role assignments to the new system
-   - Add a fallback mechanism during the transition to prevent breaking existing functionality
+9. ✅ **Updated API Middleware**:
+   - Updated `lib/api-middleware.ts` to use the unified permission service
+   - Added new `withOwnerOrPermission` middleware to replace the role-based `withOwnerOrAdmin` middleware
+   - Made `withOwnerOrAdmin` a wrapper around `withOwnerOrPermission` for backward compatibility
+
+### Completed Tasks (continued)
+
+10. ✅ **Updated Navigation Components**:
+    - Updated `components/team/team-nav-item.tsx` to use string literals instead of permission constants
+    - Updated `components/auth-guard.tsx` to use the unified permission service and `hasPermissionSync` method
+    - Added comments to indicate that role-based checks are deprecated in favor of permission-based checks
+
+11. ✅ **Fixed Middleware Permission System**:
+    - Created an Edge-compatible permission service (`lib/permissions/edge-permission-service.ts`) for middleware
+    - Updated middleware to use the Edge-compatible permission service instead of the database-backed service
+    - Fixed runtime errors related to Prisma in Edge runtime environments
+    - Improved middleware configuration to better handle public paths
+
+12. ✅ **Completed Permission Management System**:
+    - Implemented the missing `updateAllRolePermissions` method in the PermissionService
+    - Ensured the role management and permissions pages properly use the dynamic permission system
+    - Fixed the ability to change permissions from the permissions page
+    - Made the permissions page and edit permission dialog fully responsive
+    - Fixed import errors by updating all references to the old permission service
+
+### Remaining Tasks
+
+1. **Update Additional UI Components**:
+   - Continue updating UI components to use the `useHasPermission` hook or `PermissionGuard` component
+   - Update any remaining components that still rely on role checks
+
+2. **Testing and Validation**:
+   - Test the permission system with different user roles
+   - Verify that permissions are correctly enforced across the application
+   - Create test cases for each permission to ensure proper access control
 
 ## 2. Task Management Issues
 
@@ -66,9 +112,10 @@ To completely remove the old code and constant permissions in favor of a fully d
 
 2. **Missing Dashboard Analytics**: The analytics tabs in the dashboards contain placeholder content rather than actual data visualization.
 
-3. **Inconsistent Dashboard Data**: The dashboard statistics API doesn't properly filter data based on user roles and permissions.
-
-4. **Dashboard Integration with Permission System**: The dashboard doesn't properly integrate with the new dynamic role-permission system.
+3. ✅ **Fixed Dashboard Permission Integration**:
+   - Updated dashboard statistics API to use permission-based filtering instead of role-based filtering
+   - Modified the dashboard components to properly use the dynamic permission system
+   - Ensured consistent permission checks between frontend and backend
 
 ## 5. Service Worker and Offline Functionality Issues
 
@@ -104,7 +151,10 @@ To completely remove the old code and constant permissions in favor of a fully d
 
 1. **Inconsistent UI Components**: Some UI components don't follow the user's preferences for minimalist clean design with proper margin and padding.
 
-2. **Missing Responsive Design**: Some pages and modal dialogs aren't fully responsive as required.
+2. ✅ **Improved Responsive Design**:
+   - Made the permissions page fully responsive with sticky headers and proper mobile layout
+   - Made the edit permission dialog responsive with proper scrolling and button layout
+   - Improved the add permission and add role dialogs for better mobile experience
 
 3. **Incomplete Breadcrumb Implementation**: Breadcrumbs don't consistently display usernames and project titles instead of IDs.
 

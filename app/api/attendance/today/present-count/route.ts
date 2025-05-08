@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/prisma';
 import { getDayBoundaries } from '@/lib/utils/attendance-date-utils';
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 export async function GET() {
   try {
@@ -15,10 +16,15 @@ export async function GET() {
       );
     }
 
-    // Check if user is admin or manager
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
+    // Check if user has attendance management permission
+    const hasAttendanceManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "attendance_management"
+    );
+
+    if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: Admin or manager role required" },
+        { error: "Forbidden: You do not have permission to access attendance statistics" },
         { status: 403 }
       );
     }

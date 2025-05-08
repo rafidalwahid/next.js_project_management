@@ -69,11 +69,8 @@ export function RoleDashboard() {
             </>
           ) : (
             <Badge key={userRole} variant="outline" className="capitalize">
-              {userRole === "admin" ? (
-                <ShieldAlert className="mr-1 h-3 w-3" />
-              ) : userRole === "manager" ? (
-                <ShieldCheck className="mr-1 h-3 w-3" />
-              ) : null}
+              {/* Use a generic icon for all roles */}
+              <ShieldCheck className="mr-1 h-3 w-3" />
               {userRole}
             </Badge>
           )}

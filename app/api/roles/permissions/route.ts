@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -17,7 +16,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "manage_roles");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -61,7 +60,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.MANAGE_ROLES);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "manage_roles");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },

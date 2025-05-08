@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/permission-service";
-import { PermissionService as OldPermissionService } from "@/lib/services/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/users/roles?userId={userId} - Get roles for a user
 export async function GET(req: NextRequest) {
@@ -24,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting roles for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+      const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
       if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' roles' },
@@ -66,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -87,7 +85,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Update the user's role
-    const success = await OldPermissionService.updateUserRole(userId, roleName);
+    const success = await prisma.user.update({
+      where: { id: userId },
+      data: { role: roleName }
+    }).then(() => true).catch(() => false);
 
     if (!success) {
       return NextResponse.json(
@@ -122,7 +123,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -145,7 +146,10 @@ export async function DELETE(req: NextRequest) {
 
     // We can't remove a role, only update it to a different role
     // For backward compatibility, we'll set the role to 'user' when removing a role
-    const success = await OldPermissionService.updateUserRole(userId, 'user');
+    const success = await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'user' }
+    }).then(() => true).catch(() => false);
 
     if (!success) {
       return NextResponse.json(

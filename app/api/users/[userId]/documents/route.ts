@@ -6,6 +6,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 interface Params {
   params: {
@@ -29,11 +30,14 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to view this user's documents
-    // Users can view their own documents, admins can view any user's documents
+    // Users can view their own documents, users with user_management permission can view any user's documents
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
-    
-    if (!isOwnProfile && !isAdmin) {
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
+
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to view this user\'s documents' },
         { status: 403 }
@@ -72,11 +76,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { userId } = await Promise.resolve(params);
 
     // Check if user has permission to upload documents for this user
-    // Users can upload documents to their own profile, admins can upload to any profile
+    // Users can upload documents to their own profile, users with user_management permission can upload to any profile
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
-    
-    if (!isOwnProfile && !isAdmin) {
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
+
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to upload documents for this user' },
         { status: 403 }
@@ -110,7 +117,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const originalName = file.name;
     const extension = originalName.split(".").pop() || "";
     const filename = `${uuidv4()}.${extension}`;
-    
+
     // Create directory if it doesn't exist
     const uploadDir = join(process.cwd(), "public/uploads/documents");
     if (!existsSync(uploadDir)) {
@@ -168,11 +175,14 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     }
 
     // Check if user has permission to delete this document
-    // Users can delete their own documents, admins can delete any document
+    // Users can delete their own documents, users with user_management permission can delete any document
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
-    
-    if (!isOwnProfile && !isAdmin) {
+    const hasUserManagementPermission = await PermissionService.hasPermission(
+      session.user.role,
+      "user_management"
+    );
+
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to delete this document' },
         { status: 403 }

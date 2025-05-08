@@ -1,7 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
-import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 /**
  * Check if a user has permission to access a project
@@ -51,23 +50,23 @@ export async function checkProjectPermission(
 
   // Check permissions based on action
   if (action === 'view') {
-    // For view actions, check VIEW_PROJECTS permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.VIEW_PROJECTS);
+    // For view actions, check view_projects permission or direct involvement
+    const hasViewPermission = await PermissionService.hasPermission(userRole, "view_projects");
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
   }
   else if (action === 'update') {
-    // For update actions, check PROJECT_MANAGEMENT permission or project creator status
-    const hasManagePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.PROJECT_MANAGEMENT);
+    // For update actions, check project_management permission or project creator status
+    const hasManagePermission = await PermissionService.hasPermission(userRole, "project_management");
     hasPermission = hasManagePermission || isProjectCreator;
   }
   else if (action === 'delete') {
-    // For delete actions, check PROJECT_DELETION permission or project creator status
-    const hasDeletePermission = await PermissionService.hasPermission(userRole, PERMISSIONS.PROJECT_DELETION);
+    // For delete actions, check project_deletion permission or project creator status
+    const hasDeletePermission = await PermissionService.hasPermission(userRole, "project_deletion");
     hasPermission = hasDeletePermission || isProjectCreator;
   }
   else if (action === 'create') {
-    // For create actions, check PROJECT_CREATION permission
-    hasPermission = await PermissionService.hasPermission(userRole, PERMISSIONS.PROJECT_CREATION);
+    // For create actions, check project_creation permission
+    hasPermission = await PermissionService.hasPermission(userRole, "project_creation");
   }
 
   return {
