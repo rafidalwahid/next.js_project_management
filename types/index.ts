@@ -1,14 +1,19 @@
-export interface Task {
-  id: string
-  title: string
-  description: string
-  projectId: string
-  dueDate: string
-  priority?: "low" | "medium" | "high"
-}
+/**
+ * Central export file for all type definitions
+ *
+ * This file re-exports all types from their respective domain files
+ * for easier imports throughout the application.
+ */
 
-export interface Column {
-  id: string
-  title: string
-  tasks: Task[]
-}
+// Re-export types from domain-specific files
+export * from './user';
+export * from './project';
+export * from './task';
+export * from './attendance';
+export * from './permission';
+export * from './document';
+export * from './activity';
+export * from './dashboard';
+
+// Re-export KanbanColumn as Column for backward compatibility
+export type Column = import('./task').KanbanColumn;

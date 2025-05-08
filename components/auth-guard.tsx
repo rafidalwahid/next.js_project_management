@@ -74,63 +74,92 @@ export function AuthGuard({
   }
 
   useEffect(() => {
-    // Do nothing while authentication status is loading
-    if (status === "loading") return
+    // Create an async function inside the effect
+    const checkAuth = async () => {
+      // Do nothing while authentication status is loading
+      if (status === "loading") return
 
-    // Redirect if user is not logged in and trying to access a protected route
-    if (status === "unauthenticated" && !isPublicPath) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
-      return
-    }
-
-    // If authenticated, verify the session is still valid
-    if (status === "authenticated" && !sessionChecked.current) {
-      // Only check the session once when the component mounts
-      // or when the pathname changes (navigation)
-      sessionChecked.current = true
-
-      checkSession().catch(() => {
-        // Session check failed, but we'll let the hook handle the redirect
-      })
-    }
-
-    // Role-based access is deprecated - we should use permission-based checks instead
-    // This is kept for backward compatibility
-    if (
-      status === "authenticated" &&
-      allowedRoles &&
-      allowedRoles.length > 0 &&
-      session?.user?.role &&
-      !allowedRoles.includes(session.user.role)
-    ) {
-      toast.error("Access denied", {
-        description: "You don't have permission to access this page",
-        duration: 5000,
-      })
-      router.push("/dashboard")
-      return
-    }
-
-    // Check permission-based access if a permission is specified
-    if (
-      status === "authenticated" &&
-      requiredPermission &&
-      session?.user?.id &&
-      !permissionChecked &&
-      !isCheckingPermission
-    ) {
-      // First do a quick client-side check
-      const quickCheck = ClientPermissionService.hasPermissionByIdSync(session.user.id, requiredPermission)
-
-      // If quick check passes, we can allow access immediately
-      if (quickCheck) {
-        setHasPermission(true)
-        setPermissionChecked(true)
-      } else {
-        // Otherwise, verify with the server
-        checkPermissionWithServer(requiredPermission, session.user.id)
+      // Redirect if user is not logged in and trying to access a protected route
+      if (status === "unauthenticated" && !isPublicPath) {
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`)
+        return
       }
-    }
+
+      // If authenticated, verify the session is still valid
+      if (status === "authenticated" && !sessionChecked.current) {
+        // Only check the session once when the component mounts
+        // or when the pathname changes (navigation)
+        sessionChecked.current = true
+
+        checkSession().catch(() => {
+          // Session check failed, but we'll let the hook handle the redirect
+        })
+      }
+
+      // Role-based access is deprecated - we should use permission-based checks instead
+      // Log a warning if allowedRoles is still being used
+      if (allowedRoles && allowedRoles.length > 0) {
+        console.warn(
+          'Using allowedRoles in AuthGuard is deprecated. Use requiredPermission instead. ' +
+          'For example, replace allowedRoles={["admin"]} with requiredPermission="user_management"'
+        );
+
+        // Still check for backward compatibility, but convert to permission check if possible
+        if (
+          status === "authenticated" &&
+          session?.user?.id &&
+          session?.user?.role &&
+          !allowedRoles.includes(session.user.role)
+        ) {
+          // Try to map common roles to permissions
+          let permissionToCheck = "";
+          if (allowedRoles.includes("admin")) {
+            permissionToCheck = "user_management";
+          } else if (allowedRoles.includes("manager")) {
+            permissionToCheck = "project_management";
+          }
+
+          // If we have a permission mapping, check it
+          if (permissionToCheck) {
+            const hasPermission = await checkPermissionWithServer(permissionToCheck, session.user.id);
+            if (hasPermission) {
+              // Allow access if they have the mapped permission
+              return;
+            }
+          }
+
+          toast.error("Access denied", {
+            description: "You don't have permission to access this page",
+            duration: 5000,
+          })
+          router.push("/dashboard")
+          return
+        }
+      }
+      // Check permission-based access if a permission is specified
+      if (
+        status === "authenticated" &&
+        requiredPermission &&
+        session?.user?.id &&
+        !permissionChecked &&
+        !isCheckingPermission
+      ) {
+        // First do a quick client-side check
+        const quickCheck = ClientPermissionService.hasPermissionByIdSync(session.user.id, requiredPermission)
+
+        // If quick check passes, we can allow access immediately
+        if (quickCheck) {
+          setHasPermission(true)
+          setPermissionChecked(true)
+        } else {
+          // Otherwise, verify with the server
+          await checkPermissionWithServer(requiredPermission, session.user.id)
+        }
+      }
+    };
+
+    // Call the async function
+    checkAuth();
   }, [status, router, pathname, session, allowedRoles, requiredPermission, checkSession, isPublicPath, permissionChecked, isCheckingPermission])
 
   // Show minimal loading state while checking authentication or permissions
@@ -142,11 +171,13 @@ export function AuthGuard({
     )
   }
 
-  // Show children if user is authenticated and has the required roles/permissions
+  // Show children if user is authenticated and has the required permissions
   if (
     status === "authenticated" &&
-    (!allowedRoles || allowedRoles.length === 0 || (session?.user?.role && allowedRoles.includes(session.user.role))) &&
-    (!requiredPermission || permissionChecked && hasPermission)
+    // Check permission first (preferred method)
+    (!requiredPermission || (permissionChecked && hasPermission)) &&
+    // Legacy role check (deprecated)
+    (!allowedRoles || allowedRoles.length === 0 || (session?.user?.role && allowedRoles.includes(session.user.role)))
   ) {
     return <>{children}</>
   }

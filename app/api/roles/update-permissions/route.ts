@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "manage_roles");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -75,9 +75,9 @@ export async function POST(req: NextRequest) {
     if (permissionRecords.length !== permissions.length) {
       const foundPermissions = permissionRecords.map(p => p.name);
       const missingPermissions = permissions.filter(p => !foundPermissions.includes(p));
-      
+
       return NextResponse.json(
-        { 
+        {
           error: 'Some permissions do not exist',
           missingPermissions
         },
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
     // Create role permissions
     const rolePermissions = await Promise.all(
-      permissionRecords.map(permission => 
+      permissionRecords.map(permission =>
         prisma.rolePermission.create({
           data: {
             roleId,

@@ -447,8 +447,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Check if user has permission to update this user
     // Users can update their own profile, users with user_management permission can update any profile
     const isOwnProfile = session.user.id === userId;
-    const hasUserManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "user_management"
     );
 
@@ -463,8 +463,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const body = await req.json();
 
     // If trying to change role, only users with manage_roles permission can do that
-    const hasManageRolesPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasManageRolesPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "manage_roles"
     );
 
@@ -511,8 +511,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const { userId } = await Promise.resolve(params);
 
     // Only users with user_management permission can delete users
-    const hasUserManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "user_management"
     );
 

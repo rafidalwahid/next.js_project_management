@@ -3,60 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { taskApi } from '@/lib/api';
-
-export interface TaskAssignee {
-  id: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-  };
-}
-
-export interface ProjectStatus {
-  id: string;
-  name: string;
-  color: string;
-  description?: string | null;
-  order: number;
-  isDefault: boolean;
-  projectId: string;
-  isCompletedStatus?: boolean;
-}
-
-export interface Task {
-  id: string;
-  title: string;
-  description?: string | null;
-  priority: string;
-  startDate?: string | null;
-  endDate?: string | null;
-  dueDate?: string | null;
-  timeSpent?: number | null;
-  estimatedTime?: number | null;
-  projectId: string;
-  statusId?: string | null;
-  parentId?: string | null;
-  order: number;
-  completed: boolean;
-  createdAt: string;
-  updatedAt: string;
-  assignees?: TaskAssignee[];
-  status?: ProjectStatus | null;
-  project?: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface TaskFilters {
-  search: string;
-  statusIds: string[];
-  assigneeIds: string[];
-  priority: string | null;
-  completed: boolean | null;
-}
+import { Task, TaskAssignee, TaskFilters } from '@/types/task';
+import { ProjectStatus } from '@/types/project';
 
 interface TaskContextType {
   tasks: Task[];

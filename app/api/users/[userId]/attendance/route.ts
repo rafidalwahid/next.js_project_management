@@ -32,8 +32,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     // Check if user has permission to view this user's attendance
     // Users can view their own attendance, users with view_team_attendance permission can view any user's attendance
     const isOwnProfile = session.user.id === userId;
-    const hasViewTeamAttendancePermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasViewTeamAttendancePermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "view_team_attendance"
     );
 

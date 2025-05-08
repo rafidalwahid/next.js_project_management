@@ -25,15 +25,28 @@ export default function TeamAttendancePage() {
   useEffect(() => {
     if (!session) return
 
-    const userRole = session.user.role
-    if (userRole !== "admin" && userRole !== "manager") {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to view team attendance",
-        variant: "destructive"
-      })
-      router.push("/dashboard")
-    }
+    // Check permission using API
+    const checkPermission = async () => {
+      try {
+        const response = await fetch(`/api/users/check-permission?permission=view_team_attendance`);
+        const data = await response.json();
+
+        if (!data.hasPermission) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to view team attendance",
+            variant: "destructive"
+          });
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error checking permission:", error);
+        // If there's an error checking permission, redirect to be safe
+        router.push("/dashboard");
+      }
+    };
+
+    checkPermission();
   }, [session, router, toast])
 
   // Update URL when project selection changes

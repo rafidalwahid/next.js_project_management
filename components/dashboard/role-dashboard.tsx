@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useUserRole, useUserPermissions } from "@/hooks/use-permission"
+import { useUserRole, useUserPermissions, useHasPermission } from "@/hooks/use-permission"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -34,28 +34,58 @@ export function RoleDashboard() {
     systemStats: null
   }
 
-  // Determine which dashboard view to show based on user permissions
+  // Check for specific permissions using our new hooks
+  // These permissions determine which dashboard components to show
+  const { hasPermission: hasSystemSettings, isLoading: systemSettingsLoading } =
+    useHasPermission("system_settings")
+  const { hasPermission: hasProjectManagement, isLoading: projectManagementLoading } =
+    useHasPermission("project_management")
+  const { hasPermission: hasUserManagement, isLoading: userManagementLoading } =
+    useHasPermission("user_management")
+  const { hasPermission: hasTeamView, isLoading: teamViewLoading } =
+    useHasPermission("team_view")
+  const { hasPermission: hasAttendanceManagement, isLoading: attendanceManagementLoading } =
+    useHasPermission("attendance_management")
+
+  // Determine which dashboard components to show based on user permissions
   const getDashboardView = () => {
     // Show loading skeleton while permissions or stats are being fetched
-    if (roleLoading || statsLoading || permissionsLoading) {
+    if (roleLoading || statsLoading || permissionsLoading ||
+        systemSettingsLoading || projectManagementLoading ||
+        userManagementLoading || teamViewLoading || attendanceManagementLoading) {
       return <DashboardSkeleton />
     }
 
-    // Check for specific permissions to determine which dashboard to show
-    const hasSystemSettings = userPermissions.includes('system_settings');
-    const hasProjectManagement = userPermissions.includes('project_management');
+    // Instead of showing a specific dashboard based on role,
+    // we'll determine which components to show based on permissions
 
-    // Show appropriate dashboard based on permissions
-    if (hasSystemSettings) {
-      // Admin-level permissions
+    // For backward compatibility, we'll still use the existing dashboard components
+    // but in the future, we should make this more modular
+
+    // If user has admin-level permissions, show admin dashboard
+    if (hasSystemSettings || hasUserManagement) {
       return <AdminDashboard stats={dashboardStats} />
-    } else if (hasProjectManagement) {
-      // Manager-level permissions
+    }
+    // If user has manager-level permissions, show manager dashboard
+    else if (hasProjectManagement || (hasTeamView && hasAttendanceManagement)) {
       return <ManagerDashboard stats={dashboardStats} />
-    } else {
-      // Regular user permissions
+    }
+    // Otherwise show user dashboard
+    else {
       return <UserDashboard stats={dashboardStats} />
     }
+
+    // A more modular approach would be to render individual components based on permissions:
+    // return (
+    //   <>
+    //     {hasSystemSettings && <SystemStatsComponent stats={dashboardStats.systemStats} />}
+    //     {hasProjectManagement && <ProjectManagementComponent projects={dashboardStats.recentProjects} />}
+    //     {hasUserManagement && <UserManagementComponent />}
+    //     {hasTeamView && <TeamViewComponent />}
+    //     {/* Always show personal tasks */}
+    //     <PersonalTasksComponent />
+    //   </>
+    // )
   }
 
   return (

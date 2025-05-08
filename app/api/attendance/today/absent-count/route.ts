@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/prisma';
 import { getDayBoundaries, isWeekendDay } from '@/lib/utils/attendance-date-utils';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 export async function GET() {
   try {
@@ -15,10 +16,15 @@ export async function GET() {
       );
     }
 
-    // Check if user is admin or manager
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
+    // Check if user has attendance management permission
+    const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "attendance_management"
+    );
+
+    if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: Admin or manager role required" },
+        { error: "Forbidden: You do not have permission to access attendance statistics" },
         { status: 403 }
       );
     }
@@ -33,11 +39,28 @@ export async function GET() {
     const { start, end } = getDayBoundaries(today);
 
     // First, get total active employees
+    // Get all roles that don't have attendance_management permission
+    const roles = await prisma.role.findMany({
+      include: {
+        permissions: {
+          include: {
+            permission: true
+          }
+        }
+      }
+    });
+
+    // Filter roles that don't have attendance management permission
+    const nonManagerRoles = roles
+      .filter(role => !role.permissions.some(rp => rp.permission.name === "attendance_management"))
+      .map(role => role.name);
+
+    // Count active users with non-manager roles
     const totalEmployees = await prisma.user.count({
       where: {
         active: true,
         role: {
-          not: 'admin', // Exclude admins from attendance requirements
+          in: nonManagerRoles, // Only include users with non-manager roles
         },
       },
     });

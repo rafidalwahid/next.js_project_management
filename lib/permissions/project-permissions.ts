@@ -36,11 +36,11 @@ export async function checkProjectPermission(
     return { hasPermission: false, project: null, error: "Project not found" };
   }
 
-  // Get user role
-  const userRole = session.user.role;
+  // Get user ID
+  const userId = session.user.id;
 
   // Check if user is the project creator
-  const isProjectCreator = project.createdById === session.user.id;
+  const isProjectCreator = project.createdById === userId;
 
   // Check if user is a team member of the project
   const isTeamMember = project.teamMembers.length > 0;
@@ -51,22 +51,22 @@ export async function checkProjectPermission(
   // Check permissions based on action
   if (action === 'view') {
     // For view actions, check view_projects permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, "view_projects");
+    const hasViewPermission = await PermissionService.hasPermissionById(userId, "view_projects");
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
   }
   else if (action === 'update') {
     // For update actions, check project_management permission or project creator status
-    const hasManagePermission = await PermissionService.hasPermission(userRole, "project_management");
+    const hasManagePermission = await PermissionService.hasPermissionById(userId, "project_management");
     hasPermission = hasManagePermission || isProjectCreator;
   }
   else if (action === 'delete') {
     // For delete actions, check project_deletion permission or project creator status
-    const hasDeletePermission = await PermissionService.hasPermission(userRole, "project_deletion");
+    const hasDeletePermission = await PermissionService.hasPermissionById(userId, "project_deletion");
     hasPermission = hasDeletePermission || isProjectCreator;
   }
   else if (action === 'create') {
     // For create actions, check project_creation permission
-    hasPermission = await PermissionService.hasPermission(userRole, "project_creation");
+    hasPermission = await PermissionService.hasPermissionById(userId, "project_creation");
   }
 
   return {

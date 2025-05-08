@@ -18,7 +18,9 @@ import { Spinner } from "@/components/ui/spinner"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { TaskCard } from "./task-card"
-import { useTaskContext, Task, ProjectStatus } from "./task-context"
+import { useTaskContext } from "./task-context"
+import { Task } from "@/types/task"
+import { ProjectStatus } from "@/types/project"
 import {
   DropdownMenu,
   DropdownMenuContent,

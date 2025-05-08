@@ -264,8 +264,9 @@ export class ClientPermissionService {
       return this.permissionListCache[cacheKey];
     }
 
-    // For roles without cache, return basic permissions based on role
-    return this.getBasicPermissionsForRole(role);
+    // Without cache, we can't determine permissions synchronously
+    // Return empty array and let the async version update the UI
+    return [];
   }
 
   /**
@@ -293,78 +294,19 @@ export class ClientPermissionService {
   }
 
   /**
-   * Get basic permissions for a role
-   * This is used as a fallback when the API is not available
-   *
-   * @param role The role name
-   * @returns An array of permission strings
+   * @deprecated This method is no longer used and will be removed in a future version
    */
   private static getBasicPermissionsForRole(role: string): string[] {
-    const basicPermissions = [
-      "view_projects",
-      "view_dashboard",
-      "edit_profile"
-    ];
-
-    // Manager role has most permissions
-    if (role === "manager") {
-      return [
-        ...basicPermissions,
-        "project_creation",
-        "project_management",
-        "task_creation",
-        "task_management",
-        "task_assignment",
-        "team_view",
-        "team_management",
-        "team_add",
-        "team_remove",
-        "attendance_management",
-        "view_team_attendance"
-      ];
-    }
-
-    // User role has basic permissions plus team view and task creation
-    if (role === "user") {
-      return [
-        ...basicPermissions,
-        "team_view",
-        "task_creation",
-        "task_management"
-      ];
-    }
-
-    // Guest role has only view permissions
-    return ["view_projects", "view_dashboard"];
+    console.warn('getBasicPermissionsForRole is deprecated and should not be used');
+    return [];
   }
 
   /**
-   * Get all basic permissions
-   * This is used as a fallback when the API is not available
+   * @deprecated This method is no longer used and will be removed in a future version
    */
   private static getBasicPermissions(): Record<string, string> {
-    return {
-      USER_MANAGEMENT: "user_management",
-      MANAGE_ROLES: "manage_roles",
-      MANAGE_PERMISSIONS: "manage_permissions",
-      PROJECT_CREATION: "project_creation",
-      PROJECT_MANAGEMENT: "project_management",
-      PROJECT_DELETION: "project_deletion",
-      TEAM_MANAGEMENT: "team_management",
-      TEAM_ADD: "team_add",
-      TEAM_REMOVE: "team_remove",
-      TEAM_VIEW: "team_view",
-      TASK_CREATION: "task_creation",
-      TASK_ASSIGNMENT: "task_assignment",
-      TASK_MANAGEMENT: "task_management",
-      TASK_DELETION: "task_deletion",
-      VIEW_PROJECTS: "view_projects",
-      EDIT_PROFILE: "edit_profile",
-      SYSTEM_SETTINGS: "system_settings",
-      VIEW_DASHBOARD: "view_dashboard",
-      ATTENDANCE_MANAGEMENT: "attendance_management",
-      VIEW_TEAM_ATTENDANCE: "view_team_attendance"
-    };
+    console.warn('getBasicPermissions is deprecated and should not be used');
+    return {};
   }
 
   /**

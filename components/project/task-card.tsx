@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { Task, TaskAssignee } from "./task-context"
+import { Task, TaskAssignee } from "@/types/task"
 import { AssignMembersPopup } from "./assign-members-popup"
 import {
   DropdownMenu,
