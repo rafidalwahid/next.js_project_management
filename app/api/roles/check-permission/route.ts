@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth-options";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
 // GET /api/roles/check-permission?role={role}&permission={permission} - Check if a role has a permission
+// NOTE: This is a legacy endpoint that uses role-based permission checks.
+// For new code, prefer using /api/users/check-permission with userId parameter instead.
 export async function GET(req: NextRequest) {
   try {
     // Check authentication

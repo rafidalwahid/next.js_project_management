@@ -24,11 +24,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { userId } = params;
 
     // Check if user has permission to update this user
-    // Users can update their own last login, admins can update any user's last login
+    // Users can update their own last login, users with user_management permission can update any user's last login
     const isOwnProfile = session.user.id === userId;
-    const isAdmin = session.user.role === 'admin';
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "user_management"
+    );
 
-    if (!isOwnProfile && !isAdmin) {
+    if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to update this user' },
         { status: 403 }

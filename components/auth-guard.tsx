@@ -35,10 +35,10 @@ export function AuthGuard({
                        pathname === "/"
 
   // Check permission with the server
-  const checkPermissionWithServer = async (permission: string, role: string) => {
+  const checkPermissionWithServer = async (permission: string, userId: string) => {
     setIsCheckingPermission(true)
     try {
-      const response = await fetch(`/api/users/check-permission?permission=${encodeURIComponent(permission)}`)
+      const response = await fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`)
       const data = await response.json()
       setHasPermission(data.hasPermission)
       setPermissionChecked(true)
@@ -56,7 +56,7 @@ export function AuthGuard({
     } catch (error) {
       console.error("Error checking permission:", error)
       // Fall back to client-side check on error
-      const clientCheck = ClientPermissionService.hasPermissionSync(role, permission)
+      const clientCheck = ClientPermissionService.hasPermissionByIdSync(userId, permission)
       setHasPermission(clientCheck)
       setPermissionChecked(true)
       setIsCheckingPermission(false)
@@ -115,12 +115,12 @@ export function AuthGuard({
     if (
       status === "authenticated" &&
       requiredPermission &&
-      session?.user?.role &&
+      session?.user?.id &&
       !permissionChecked &&
       !isCheckingPermission
     ) {
       // First do a quick client-side check
-      const quickCheck = ClientPermissionService.hasPermissionSync(session.user.role, requiredPermission)
+      const quickCheck = ClientPermissionService.hasPermissionByIdSync(session.user.id, requiredPermission)
 
       // If quick check passes, we can allow access immediately
       if (quickCheck) {
@@ -128,7 +128,7 @@ export function AuthGuard({
         setPermissionChecked(true)
       } else {
         // Otherwise, verify with the server
-        checkPermissionWithServer(requiredPermission, session.user.role)
+        checkPermissionWithServer(requiredPermission, session.user.id)
       }
     }
   }, [status, router, pathname, session, allowedRoles, requiredPermission, checkSession, isPublicPath, permissionChecked, isCheckingPermission])

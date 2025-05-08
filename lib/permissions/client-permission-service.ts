@@ -29,19 +29,15 @@ export class ClientPermissionService {
   /**
    * Check if a user has a specific permission based on their role
    *
+   * @deprecated Use hasPermissionById instead for better security and flexibility
    * @param role The user's role
    * @param permission The permission to check
    * @returns A promise that resolves to true if the user has the permission, false otherwise
    */
   static async hasPermission(role: string, permission: string): Promise<boolean> {
     try {
-      // Admin role always has all permissions
-      if (role === "admin") {
-        return true;
-      }
-
       // Check cache first
-      const cacheKey = `${role}:${permission}`;
+      const cacheKey = `role:${role}:${permission}`;
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
@@ -73,21 +69,59 @@ export class ClientPermissionService {
   }
 
   /**
+   * Check if a user has a specific permission based on their user ID
+   * This is the preferred method for checking permissions
+   *
+   * @param userId The user's ID
+   * @param permission The permission to check
+   * @returns A promise that resolves to true if the user has the permission, false otherwise
+   */
+  static async hasPermissionById(userId: string, permission: string): Promise<boolean> {
+    try {
+      // Check cache first
+      const cacheKey = `user:${userId}:${permission}`;
+      const now = Date.now();
+
+      // If cache is valid and has this permission check, return it
+      if (
+        now - this.cacheTimestamp < this.CACHE_TTL &&
+        cacheKey in this.permissionCache
+      ) {
+        return this.permissionCache[cacheKey];
+      }
+
+      // Fetch from API
+      const response = await fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to check permission: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Update cache
+      this.permissionCache[cacheKey] = data.hasPermission;
+      this.cacheTimestamp = now;
+
+      return data.hasPermission;
+    } catch (error) {
+      console.error(`Error checking permission ${permission} for user ${userId}:`, error);
+      return false;
+    }
+  }
+
+  /**
    * Synchronous version of hasPermission for immediate UI rendering
    * This is less accurate but provides a quick initial result
    *
+   * @deprecated Use hasPermissionByIdSync instead for better security and flexibility
    * @param role The user's role
    * @param permission The permission to check
    * @returns True if the user has the permission based on role, false otherwise
    */
   static hasPermissionSync(role: string, permission: string): boolean {
-    // Admin role always has all permissions
-    if (role === "admin") {
-      return true;
-    }
-
     // Check cache first
-    const cacheKey = `${role}:${permission}`;
+    const cacheKey = `role:${role}:${permission}`;
     const now = Date.now();
 
     // If cache is valid and has this permission check, return it
@@ -98,7 +132,33 @@ export class ClientPermissionService {
       return this.permissionCache[cacheKey];
     }
 
-    // For non-admin roles without cache, we need to check with the server
+    // For roles without cache, we need to check with the server
+    // Return false and let the async version update the UI
+    return false;
+  }
+
+  /**
+   * Synchronous version of hasPermissionById for immediate UI rendering
+   * This is less accurate but provides a quick initial result
+   *
+   * @param userId The user's ID
+   * @param permission The permission to check
+   * @returns True if the user has the permission based on cached data, false otherwise
+   */
+  static hasPermissionByIdSync(userId: string, permission: string): boolean {
+    // Check cache first
+    const cacheKey = `user:${userId}:${permission}`;
+    const now = Date.now();
+
+    // If cache is valid and has this permission check, return it
+    if (
+      now - this.cacheTimestamp < this.CACHE_TTL &&
+      cacheKey in this.permissionCache
+    ) {
+      return this.permissionCache[cacheKey];
+    }
+
+    // Without cache, we need to check with the server
     // Return false and let the async version update the UI
     return false;
   }
@@ -106,27 +166,22 @@ export class ClientPermissionService {
   /**
    * Get all permissions for a role
    *
+   * @deprecated Use getPermissionsForUser instead for better security and flexibility
    * @param role The role name
    * @returns A promise that resolves to an array of permission strings
    */
   static async getPermissionsForRole(role: string): Promise<string[]> {
     try {
-      // Admin role always has all permissions
-      if (role === "admin") {
-        // Get all permissions
-        const allPermissions = await this.getAllPermissions();
-        return allPermissions.map(p => p.id);
-      }
-
       // Check cache first
+      const cacheKey = `role_permissions:${role}`;
       const now = Date.now();
 
       // If cache is valid and has this role's permissions, return them
       if (
         now - this.cacheTimestamp < this.CACHE_TTL &&
-        role in this.permissionListCache
+        cacheKey in this.permissionListCache
       ) {
-        return this.permissionListCache[role];
+        return this.permissionListCache[cacheKey];
       }
 
       // Fetch from API
@@ -139,7 +194,7 @@ export class ClientPermissionService {
       const data = await response.json();
 
       // Update cache
-      this.permissionListCache[role] = data.permissions || [];
+      this.permissionListCache[cacheKey] = data.permissions || [];
       this.cacheTimestamp = now;
 
       return data.permissions || [];
@@ -150,30 +205,91 @@ export class ClientPermissionService {
   }
 
   /**
+   * Get all permissions for a user
+   *
+   * @param userId The user's ID
+   * @returns A promise that resolves to an array of permission strings
+   */
+  static async getPermissionsForUser(userId: string): Promise<string[]> {
+    try {
+      // Check cache first
+      const cacheKey = `user_permissions:${userId}`;
+      const now = Date.now();
+
+      // If cache is valid and has this user's permissions, return them
+      if (
+        now - this.cacheTimestamp < this.CACHE_TTL &&
+        cacheKey in this.permissionListCache
+      ) {
+        return this.permissionListCache[cacheKey];
+      }
+
+      // Fetch from API
+      const response = await fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to get permissions for user: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Update cache
+      this.permissionListCache[cacheKey] = data.permissions || [];
+      this.cacheTimestamp = now;
+
+      return data.permissions || [];
+    } catch (error) {
+      console.error(`Error getting permissions for user ${userId}:`, error);
+      return [];
+    }
+  }
+
+  /**
    * Synchronous version of getPermissionsForRole for immediate UI rendering
    *
+   * @deprecated Use getPermissionsForUserSync instead for better security and flexibility
    * @param role The role name
    * @returns An array of permission strings based on role
    */
   static getPermissionsForRoleSync(role: string): string[] {
-    // Admin role always has all permissions
-    if (role === "admin") {
-      return Object.values(this.getBasicPermissions());
-    }
-
     // Check cache first
+    const cacheKey = `role_permissions:${role}`;
     const now = Date.now();
 
     // If cache is valid and has this role's permissions, return them
     if (
       now - this.cacheTimestamp < this.CACHE_TTL &&
-      role in this.permissionListCache
+      cacheKey in this.permissionListCache
     ) {
-      return this.permissionListCache[role];
+      return this.permissionListCache[cacheKey];
     }
 
-    // For non-admin roles without cache, return basic permissions based on role
+    // For roles without cache, return basic permissions based on role
     return this.getBasicPermissionsForRole(role);
+  }
+
+  /**
+   * Synchronous version of getPermissionsForUser for immediate UI rendering
+   *
+   * @param userId The user's ID
+   * @returns An array of permission strings based on cached data or empty array
+   */
+  static getPermissionsForUserSync(userId: string): string[] {
+    // Check cache first
+    const cacheKey = `user_permissions:${userId}`;
+    const now = Date.now();
+
+    // If cache is valid and has this user's permissions, return them
+    if (
+      now - this.cacheTimestamp < this.CACHE_TTL &&
+      cacheKey in this.permissionListCache
+    ) {
+      return this.permissionListCache[cacheKey];
+    }
+
+    // Without cache, we can't determine permissions synchronously
+    // Return empty array and let the async version update the UI
+    return [];
   }
 
   /**
@@ -331,12 +447,84 @@ export class ClientPermissionService {
    * Check if a user is authorized to access their own resource or has required permissions
    *
    * @param userId The current user's ID
-   * @param userRole The current user's role
    * @param resourceUserId The user ID associated with the resource
    * @param requiredPermission The permission required to access the resource if not the owner
    * @returns An object with hasPermission and error properties
    */
   static async checkOwnerOrPermission(
+    userId: string | undefined,
+    resourceUserId: string,
+    requiredPermission: string
+  ): Promise<{ hasPermission: boolean; error?: string }> {
+    // If no user ID, no permission
+    if (!userId) {
+      return { hasPermission: false, error: "Unauthorized" };
+    }
+
+    // Check if user is the owner of the resource
+    const isOwner = userId === resourceUserId;
+
+    // If user is the owner, they have access
+    if (isOwner) {
+      return { hasPermission: true };
+    }
+
+    // Otherwise, check if they have the required permission
+    const hasPermission = await this.hasPermissionById(userId, requiredPermission);
+    return {
+      hasPermission,
+      error: hasPermission ? undefined : `Forbidden: ${requiredPermission} permission required`
+    };
+  }
+
+  /**
+   * Synchronous version of checkOwnerOrPermission for immediate UI rendering
+   * Less accurate but provides a quick initial result
+   *
+   * @param userId The current user's ID
+   * @param resourceUserId The user ID associated with the resource
+   * @param requiredPermission The permission required to access the resource if not the owner
+   * @returns An object with hasPermission and error properties
+   */
+  static checkOwnerOrPermissionSync(
+    userId: string | undefined,
+    resourceUserId: string,
+    requiredPermission: string
+  ): { hasPermission: boolean; error?: string } {
+    // If no user ID, no permission
+    if (!userId) {
+      return { hasPermission: false, error: "Unauthorized" };
+    }
+
+    // Check if user is the owner of the resource
+    const isOwner = userId === resourceUserId;
+
+    // If user is the owner, they have access
+    if (isOwner) {
+      return { hasPermission: true };
+    }
+
+    // Check if the user has the required permission using cached data
+    const hasPermission = this.hasPermissionByIdSync(userId, requiredPermission);
+
+    if (hasPermission) {
+      return { hasPermission: true };
+    }
+
+    // If we can't determine from cache, we need to check with the server
+    // Return false and let the async version update the UI
+    return {
+      hasPermission: false,
+      error: "Checking permissions..."
+    };
+  }
+
+  /**
+   * Legacy version of checkOwnerOrPermission that uses role
+   *
+   * @deprecated Use checkOwnerOrPermission instead
+   */
+  static async checkOwnerOrPermissionWithRole(
     userId: string | undefined,
     userRole: string | undefined,
     resourceUserId: string,
@@ -368,46 +556,6 @@ export class ClientPermissionService {
     return {
       hasPermission: false,
       error: "Forbidden: Insufficient permissions"
-    };
-  }
-
-  /**
-   * Synchronous version of checkOwnerOrPermission for immediate UI rendering
-   * Less accurate but provides a quick initial result
-   *
-   * @param userId The current user's ID
-   * @param userRole The current user's role
-   * @param resourceUserId The user ID associated with the resource
-   * @returns An object with hasPermission and error properties
-   */
-  static checkOwnerOrPermissionSync(
-    userId: string | undefined,
-    userRole: string | undefined,
-    resourceUserId: string
-  ): { hasPermission: boolean; error?: string } {
-    // If no user ID, no permission
-    if (!userId) {
-      return { hasPermission: false, error: "Unauthorized" };
-    }
-
-    // Check if user is the owner of the resource
-    const isOwner = userId === resourceUserId;
-
-    // If user is the owner, they have access
-    if (isOwner) {
-      return { hasPermission: true };
-    }
-
-    // For non-owners, admin role always has access
-    if (userRole === "admin") {
-      return { hasPermission: true };
-    }
-
-    // For other roles, we need to check with the server
-    // Return false and let the async version update the UI
-    return {
-      hasPermission: false,
-      error: "Checking permissions..."
     };
   }
 }

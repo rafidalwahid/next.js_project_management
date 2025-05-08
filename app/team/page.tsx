@@ -57,14 +57,28 @@ export default function TeamPage() {
   const { toast } = useToast()
   const router = useRouter()
   const { data: session, status } = useSession()
-  const userRole = session?.user?.role || "user"
+  const [canAddMembers, setCanAddMembers] = useState(false)
 
   useEffect(() => {
     // If user is not authenticated, redirect to login
     if (status === "unauthenticated") {
       router.push("/login")
+      return
     }
-  }, [status, router])
+
+    // Check if user has permission to add team members
+    if (session?.user?.id) {
+      fetch(`/api/users/check-permission?userId=${session.user.id}&permission=team_add`)
+        .then(res => res.json())
+        .then(data => {
+          setCanAddMembers(data.hasPermission)
+        })
+        .catch(err => {
+          console.error("Error checking permission:", err)
+          setCanAddMembers(false)
+        })
+    }
+  }, [status, router, session?.user?.id])
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -153,7 +167,7 @@ export default function TeamPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
         <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
         <div className="flex items-center gap-2">
-          {(userRole === "admin" || userRole === "manager") && (
+          {canAddMembers && (
             <Link href="/team/new">
               <Button className="bg-black hover:bg-black/90 text-white">
                 <Plus className="mr-2 h-4 w-4" />

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/api-middleware";
-import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
@@ -80,7 +79,7 @@ export const GET = withAuth(async (req: NextRequest, _, session) => {
       { status: 500 }
     );
   }
-}, PERMISSIONS.VIEW_PROJECTS);
+}, "view_projects");
 
 // Validation schema for creating a task
 // export const createTaskSchema = z.object({ ... }); // Remove schema definition
@@ -426,4 +425,4 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       { status: 500 }
     );
   }
-}, PERMISSIONS.TASK_CREATION);
+}, "task_creation");

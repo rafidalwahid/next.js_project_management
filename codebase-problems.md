@@ -4,6 +4,38 @@ This document provides a comprehensive list of problems identified in the Projec
 
 ## 1. Permission System Issues
 
+### Overview for Junior Developers
+
+The permission system in our application has undergone a major transformation from a static, hardcoded system to a dynamic, database-driven system. Here's what you need to understand:
+
+#### Old System (Before)
+- Roles (admin, manager, user) were hardcoded in the application code
+- Permissions were statically assigned to roles in code
+- To change which permissions a role had, you needed to modify the code
+- The permission matrix was defined in a file called `unified-permission-system.ts`
+- Code used direct role checks like `if (user.role === "admin")`
+
+#### New System (Now)
+- Roles are stored in the database and can be created/modified through the UI
+- Permissions are stored in the database and can be assigned to roles through the UI
+- You can change which permissions a role has without touching any code
+- The permission matrix is stored in the database, not in code
+- Code uses permission checks like `if (await hasPermissionById(userId, "user_management"))`
+
+#### Key Benefits
+1. **Flexibility**: Create custom roles with specific permission sets
+2. **Maintainability**: No code changes needed to adjust permissions
+3. **User Experience**: Manage everything through the UI
+4. **Security**: Permission checks are consistent and centralized
+
+#### How It Works
+1. Users have a role (stored in the User table)
+2. Roles have many permissions (through RolePermission join table)
+3. When checking if a user can do something, we:
+   - Look up their role
+   - Check if that role has the required permission
+   - Allow or deny the action accordingly
+
 ### Completed Tasks
 
 1. ✅ **Consolidated Permission Services**:
@@ -42,8 +74,6 @@ This document provides a comprehensive list of problems identified in the Projec
    - Removed hardcoded constants and updated to use direct string literals
    - Modified the role badge function to use dynamic role data from the API
 
-### Completed Tasks (continued)
-
 8. ✅ **Updated Additional API Routes**:
    - Updated attendance admin routes (`app/api/attendance/admin/records/route.ts`, `app/api/attendance/admin/correction-requests/route.ts`) to use permission-based checks
    - Updated attendance statistics routes (`app/api/attendance/today/late-count/route.ts`, `app/api/attendance/today/present-count/route.ts`) to use permission-based checks
@@ -54,8 +84,6 @@ This document provides a comprehensive list of problems identified in the Projec
    - Updated `lib/api-middleware.ts` to use the unified permission service
    - Added new `withOwnerOrPermission` middleware to replace the role-based `withOwnerOrAdmin` middleware
    - Made `withOwnerOrAdmin` a wrapper around `withOwnerOrPermission` for backward compatibility
-
-### Completed Tasks (continued)
 
 10. ✅ **Updated Navigation Components**:
     - Updated `components/team/team-nav-item.tsx` to use string literals instead of permission constants
@@ -75,14 +103,109 @@ This document provides a comprehensive list of problems identified in the Projec
     - Made the permissions page and edit permission dialog fully responsive
     - Fixed import errors by updating all references to the old permission service
 
+13. ✅ **Transitioned to User ID-Based Permission Checks**:
+    - Updated `PermissionService` to prioritize user ID-based permission checks with `hasPermissionById` method
+    - Deprecated role-based methods in favor of user ID-based methods
+    - Removed special case handling for "admin" role
+    - Added proper caching for user-based permissions
+
+14. ✅ **Enhanced Client Permission Service**:
+    - Added new user ID-based methods (`hasPermissionById`, `hasPermissionByIdSync`, `getPermissionsForUser`)
+    - Deprecated role-based methods with clear documentation
+    - Updated owner/permission check methods to use user IDs
+    - Improved caching for better performance
+
+15. ✅ **Enhanced Edge Permission Service**:
+    - Added token-based permission checks with `hasPermissionForToken` method
+    - Deprecated role-based methods with clear documentation
+    - Improved error handling and security
+
+16. ✅ **Updated UI Components to Use Permission-Based Checks**:
+    - Updated `RoleGuard` to use `PermissionGuard` internally
+    - Added `withPermission` HOC as an alternative to `withRole`
+    - Updated `AuthGuard` to prioritize permission-based checks
+    - Updated profile page to use permission-based checks for edit access
+    - Updated team page to use permission-based checks for adding members
+
+17. ✅ **Updated API Routes to Use User ID-Based Permission Checks**:
+    - Updated all API routes to use `hasPermissionById` instead of `hasPermission`
+    - Replaced role-based checks with permission-based checks in task routes
+    - Updated role management routes to use permission-based checks
+    - Improved security by removing direct role checks
+
+18. ✅ **Updated UI Components with Permission-Based Displays**:
+    - Updated profile components to display roles consistently
+    - Updated team components to use permission-based role selection
+    - Improved user experience with clearer permission-based UI
+
+19. ✅ **Updated Documentation**:
+    - Updated development guide to use permission-based examples
+    - Updated authentication documentation to show permission-based UI rendering
+    - Provided clear examples of both hook-based and component-based permission checks
+
+### How to Use the New Permission System (For Junior Developers)
+
+#### Checking Permissions in React Components
+```tsx
+// Use the useHasPermission hook
+function MyComponent() {
+  const { hasPermission } = useHasPermission('user_management');
+
+  if (hasPermission) {
+    return <div>User has permission to manage users</div>;
+  }
+  return null;
+}
+
+// Or use the PermissionGuard component
+function MyOtherComponent() {
+  return (
+    <PermissionGuard permission="user_management">
+      <div>Only shown to users with user_management permission</div>
+    </PermissionGuard>
+  );
+}
+```
+
+#### Checking Permissions in API Routes
+```typescript
+// In an API route
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Check if user has permission
+  const hasPermission = await PermissionService.hasPermissionById(
+    session.user.id,
+    "user_management"
+  );
+
+  if (!hasPermission) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  // Continue with the API logic...
+}
+```
+
+#### Managing Permissions Through the UI
+1. Navigate to `/team/permissions`
+2. You'll see a matrix of roles and permissions
+3. Check/uncheck boxes to grant/revoke permissions for each role
+4. Changes are saved automatically
+
+#### Creating New Roles
+1. Navigate to `/team/roles`
+2. Click "Add New Role"
+3. Enter a name and description
+4. The new role will appear in the permissions matrix
+
 ### Remaining Tasks
 
-1. **Update Additional UI Components**:
-   - Continue updating UI components to use the `useHasPermission` hook or `PermissionGuard` component
-   - Update any remaining components that still rely on role checks
-
-2. **Testing and Validation**:
-   - Test the permission system with different user roles
+1. **Testing and Validation**:
+   - Test the permission system with different user roles and permissions
    - Verify that permissions are correctly enforced across the application
    - Create test cases for each permission to ensure proper access control
 

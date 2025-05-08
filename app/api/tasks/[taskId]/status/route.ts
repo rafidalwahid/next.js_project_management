@@ -41,10 +41,13 @@ export async function PATCH(
     }
 
     // Check if user has permission to update the task
-    const isTeamMember = task.project.teamMembers.length > 0;
-    const isAdmin = session.user.role === "admin";
+    const isTeamMember = task.project.teamMembers.some(tm => tm.userId === session.user.id);
+    const hasTaskManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "task_management"
+    );
 
-    if (!isTeamMember && !isAdmin) {
+    if (!isTeamMember && !hasTaskManagementPermission) {
       return NextResponse.json(
         { error: "You don't have permission to update this task" },
         { status: 403 }

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { ROLES } from "@/lib/permissions/permission-constants";
 
 /**
  * API endpoint to get the complete permission matrix
@@ -46,8 +45,9 @@ export async function GET(req: NextRequest) {
       matrix[role.name] = [];
     });
 
-    // Add default roles if they don't exist in the database
-    Object.values(ROLES).forEach(role => {
+    // Ensure we have standard roles in the matrix
+    const standardRoles = ['admin', 'manager', 'user', 'guest'];
+    standardRoles.forEach(role => {
       if (!matrix[role]) {
         matrix[role] = [];
       }

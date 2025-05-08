@@ -11,8 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
-import { useHasPermission } from "@/hooks/use-permission"
+
 
 interface TeamNavItemProps {
   collapsed?: boolean
@@ -76,7 +75,23 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
   // Filter items based on user permissions
   const filteredSubItems = subItems.filter(item => {
     if (item.alwaysShow) return true;
-    return ClientPermissionService.hasPermissionSync(userRole, item.permission);
+
+    // Use the basic permissions for admin role directly
+    const hasPermission = userRole === "admin" ? true :
+      (userRole === "manager" ? ["team_view", "team_add", "team_management", "user_management"].includes(item.permission) :
+      ["team_view"].includes(item.permission));
+
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Permission check for ${item.title}: ${item.permission} = ${hasPermission}`);
+    }
+
+    // Always show these items for admin users regardless of permission check
+    if (userRole === "admin" && ["Add Member", "Role Management", "Permissions"].includes(item.title)) {
+      return true;
+    }
+
+    return hasPermission;
   })
 
   const isActive = pathname.startsWith("/team") || pathname.startsWith("/profile")

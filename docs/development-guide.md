@@ -19,11 +19,12 @@ interface User {
   id: string;
   name: string | null;
   email: string;
-  role: 'admin' | 'manager' | 'user' | 'guest';
+  role: string;
 }
 
-function isAdmin(user: User): boolean {
-  return user.role === 'admin';
+// Prefer permission-based checks over role-based checks
+async function canManageUsers(userId: string): Promise<boolean> {
+  return await PermissionService.hasPermissionById(userId, 'user_management');
 }
 ```
 
@@ -52,15 +53,15 @@ interface ButtonProps {
 /**
  * Button component with different variants
  */
-export function Button({ 
-  children, 
-  variant = 'primary', 
-  disabled = false, 
-  onClick 
+export function Button({
+  children,
+  variant = 'primary',
+  disabled = false,
+  onClick
 }: ButtonProps) {
   return (
-    <button 
-      className={`btn btn-${variant}`} 
+    <button
+      className={`btn btn-${variant}`}
       disabled={disabled}
       onClick={onClick}
     >
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
     // Parse and validate request body
     const body = await req.json();
     const validatedData = taskSchema.parse(body);
-    
+
     // Create task
     const task = await prisma.task.create({
       data: {
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
         createdById: session.user.id,
       },
     });
-    
+
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -7,7 +7,7 @@ import { ClientPermissionService } from "@/lib/permissions/client-permission-ser
 /**
  * Hook to check if the current user has a specific permission
  * Uses both client-side and server-side permission checks for optimal performance
- * 
+ *
  * @param permission The permission to check
  * @param redirectTo Optional path to redirect to if user doesn't have permission
  * @returns An object with hasPermission, isLoading, and error properties
@@ -27,8 +27,8 @@ export function useHasPermission(permission: string, redirectTo?: string) {
     }
 
     // Use the client permission service for a quick initial check
-    const userRole = session.user.role || "guest"
-    const quickResult = ClientPermissionService.hasPermission(userRole, permission)
+    const userId = session.user.id
+    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission)
 
     // If the quick check passes, we can return true immediately
     if (quickResult) {
@@ -38,15 +38,15 @@ export function useHasPermission(permission: string, redirectTo?: string) {
     }
 
     // If quick check fails, verify with the API
-    // This handles the case where permissions might be in the database but not in the hardcoded matrix
+    // This handles the case where permissions might be in the database but not in the client cache
     setIsLoading(true)
 
-    fetch(`/api/users/check-permission?permission=${encodeURIComponent(permission)}`)
+    fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`)
       .then(res => res.json())
       .then(data => {
         setHasPermission(data.hasPermission)
         setIsLoading(false)
-        
+
         // Handle redirection if needed
         if (redirectTo && !data.hasPermission) {
           window.location.href = redirectTo

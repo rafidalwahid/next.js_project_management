@@ -24,13 +24,13 @@ const PUBLIC_PATHS = [
 // Permission-protected paths mapping
 const PROTECTED_PATHS = {
   // Admin-only paths
-  '/team/permissions': "manage_roles",
+  '/team/permissions': "manage_permissions", // Changed from manage_roles to manage_permissions
   '/team/roles': "manage_roles",
   '/api/roles': "manage_roles",
-  '/api/permissions': "manage_roles",
+  '/api/permissions': "manage_permissions", // Changed from manage_roles to manage_permissions
 
   // User management paths
-  '/team/new': "user_management",
+  '/team/new': "team_add", // Changed from user_management to team_add
   '/api/users': "user_management",
 
   // Project management paths
@@ -67,8 +67,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(pathname)}`, request.url))
   }
 
-  // Role-based access control for specific paths
-  const userRole = token.role as string || 'guest'
+  // Permission-based access control for specific paths
   const userId = token.sub as string
 
   // Check if the path is protected by a specific permission
@@ -83,8 +82,8 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Check if the user has the required permission using the edge-compatible service
-      const hasPermission = EdgePermissionService.hasPermission(userRole, requiredPermission);
+      // Check if the user has the required permission using the token-based method
+      const hasPermission = EdgePermissionService.hasPermissionForToken(token, requiredPermission);
 
       if (!hasPermission) {
         // For API routes, return a JSON error

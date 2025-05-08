@@ -424,48 +424,7 @@ export const taskApi = {
   },
 };
 
-/**
- * Team API functions
- *
- * @deprecated The old team API endpoints are deprecated. Use the new teamManagementApi instead.
- */
-export const teamApi = {
-  // Generic fetcher for SWR
-  fetcher: async (url: string) => {
-    console.warn('teamApi.fetcher is deprecated. Use teamManagementApi instead.');
-    return fetchAPI(url);
-  },
 
-  getTeamMembers: async (projectId?: string, page = 1, limit = 10, search?: string) => {
-    console.warn('teamApi.getTeamMembers is deprecated. Use teamManagementApi.getTeamMembers instead.');
-    return teamManagementApi.getTeamMembers(projectId, page, limit, search);
-  },
-
-  getTeamMember: async (id: string) => {
-    console.warn('teamApi.getTeamMember is deprecated. Use teamManagementApi.getTeamMember instead.');
-    return teamManagementApi.getTeamMember(id);
-  },
-
-  getUserTeamMemberships: async (userId: string) => {
-    console.warn('teamApi.getUserTeamMemberships is deprecated. Use teamManagementApi.getUserTeamMemberships instead.');
-    return teamManagementApi.getUserTeamMemberships(userId);
-  },
-
-  addTeamMember: async (teamMember: any) => {
-    console.warn('teamApi.addTeamMember is deprecated. Use teamManagementApi.addTeamMember instead.');
-    return teamManagementApi.addTeamMember(teamMember);
-  },
-
-  removeTeamMember: async (id: string) => {
-    console.warn('teamApi.removeTeamMember is deprecated. Use teamManagementApi.removeTeamMember instead.');
-    return teamManagementApi.removeTeamMember(id);
-  },
-
-  checkProjectMembership: async (projectId: string) => {
-    console.warn('teamApi.checkProjectMembership is deprecated. Use teamManagementApi.checkProjectMembership instead.');
-    return teamManagementApi.checkProjectMembership(projectId);
-  },
-};
 
 /**
  * Team Management API functions

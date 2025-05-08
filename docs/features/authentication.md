@@ -75,18 +75,22 @@ export const authOptions: NextAuthOptions = {
 };
 ```
 
-## Role-Based Access Control
+## Permission-Based Access Control
 
-The system implements role-based access control (RBAC) to restrict access to features based on user roles.
+The system implements a dynamic, database-driven permission system that allows for fine-grained access control.
 
-### User Roles
+### User Roles and Permissions
 
-The system defines the following roles:
+Instead of hardcoded roles with fixed permissions, the system uses a flexible approach:
 
-- **Admin**: Full access to all features
-- **Manager**: Can manage projects, tasks, and team members
-- **User**: Can manage tasks and view projects
-- **Guest**: Can only view projects and tasks
+1. **Roles** are stored in the database and can be created/modified through the UI
+2. **Permissions** are stored in the database and assigned to roles through the UI
+3. **Users** are assigned a role, which determines their permissions
+
+This approach allows administrators to:
+- Create custom roles with specific permission sets
+- Modify permissions for existing roles without changing code
+- Assign appropriate roles to users based on their responsibilities
 
 ### Role Assignment
 
@@ -106,16 +110,16 @@ model User {
 
 Roles can be assigned during user creation or updated later by administrators.
 
-### Role-Based UI
+### Permission-Based UI
 
-The UI adapts based on the user's role:
+The UI adapts based on the user's permissions:
 
 ```tsx
-// Example of role-based UI rendering
+// Example of permission-based UI rendering
 function ProjectActions({ project }) {
-  const { user } = useAuth();
+  const { hasPermission } = useHasPermission('project_management');
 
-  if (user.role === 'admin' || user.role === 'manager') {
+  if (hasPermission) {
     return (
       <div>
         <Button onClick={handleEdit}>Edit Project</Button>
@@ -125,6 +129,18 @@ function ProjectActions({ project }) {
   }
 
   return null;
+}
+
+// Alternatively, use the PermissionGuard component
+function ProjectActionsWithGuard({ project }) {
+  return (
+    <PermissionGuard permission="project_management">
+      <div>
+        <Button onClick={handleEdit}>Edit Project</Button>
+        <Button onClick={handleDelete}>Delete Project</Button>
+      </div>
+    </PermissionGuard>
+  );
 }
 ```
 
@@ -204,6 +220,10 @@ await prisma.rolePermission.createMany({
 
 Permissions are checked using the database-backed permission service:
 
+#### Server-Side Permission Checks
+
+In API routes and server components, use the `PermissionService` to check permissions:
+
 ```typescript
 // Example permission check in API route
 export async function POST(req: NextRequest) {
@@ -226,16 +246,24 @@ export async function POST(req: NextRequest) {
 }
 ```
 
+#### Client-Side Permission Checks
+
+For client components, you have several options:
+
+##### 1. Using the useHasPermission Hook
+
 ```tsx
-// Example permission check in UI component
+// Example using the useHasPermission hook
+import { useHasPermission } from "@/hooks/use-permissions";
+
 function ProjectActions({ project }) {
-  const { permissions, isLoading } = useUserPermissions();
+  const { hasPermission, isLoading } = useHasPermission('project_management');
 
   if (isLoading) {
     return <Skeleton />;
   }
 
-  if (permissions.includes('project_management')) {
+  if (hasPermission) {
     return (
       <div>
         <Button onClick={handleEdit}>Edit Project</Button>
@@ -248,14 +276,91 @@ function ProjectActions({ project }) {
 }
 ```
 
+##### 2. Using the PermissionGuard Component
+
+```tsx
+// Example using the PermissionGuard component
+import { PermissionGuard } from "@/components/permission-guard";
+
+function ProjectActions({ project }) {
+  return (
+    <PermissionGuard
+      permission="project_management"
+      fallback={<p>You don't have permission to manage this project</p>}
+      showLoading={true}
+    >
+      <div>
+        <Button onClick={handleEdit}>Edit Project</Button>
+        <Button onClick={handleDelete}>Delete Project</Button>
+      </div>
+    </PermissionGuard>
+  );
+}
+```
+
+##### 3. Using the withPermission Higher-Order Component
+
+```tsx
+// Example using the withPermission HOC
+import { withPermission } from "@/lib/hoc/with-permission";
+
+function ProjectActionsComponent({ project }) {
+  return (
+    <div>
+      <Button onClick={handleEdit}>Edit Project</Button>
+      <Button onClick={handleDelete}>Delete Project</Button>
+    </div>
+  );
+}
+
+// Wrap the component with the withPermission HOC
+const ProjectActions = withPermission(
+  ProjectActionsComponent,
+  "project_management",
+  <p>You don't have permission to manage this project</p>
+);
+```
+
 ### Permission Management UI
 
-The system provides a user interface for managing roles and permissions:
+The system provides a comprehensive user interface for managing roles and permissions at `/team/permissions`:
 
-1. **Role Management**: Create, edit, and delete roles
-2. **Permission Assignment**: Assign permissions to roles
-3. **User Role Assignment**: Assign roles to users
-4. **Permission Matrix**: View and edit the permission matrix
+#### Role Management
+- Create new roles with custom names and descriptions
+- View existing roles and their assigned permissions
+- Assign users to roles through the user management interface
+
+#### Permission Management
+- Create new permissions with names, descriptions, and categories
+- View existing permissions organized by category
+- Assign permissions to roles using the permission matrix
+
+#### Permission Matrix
+The permission matrix provides a visual way to manage which permissions are assigned to which roles:
+- Rows represent individual permissions
+- Columns represent roles
+- Checkmarks indicate that a role has a specific permission
+- Click on a cell to toggle a permission for a role
+
+#### Best Practices
+1. **Create Specific Roles**: Create roles that match your organization's structure
+2. **Assign Minimal Permissions**: Give roles only the permissions they need
+3. **Use Categories**: Organize permissions into logical categories
+4. **Document Roles**: Add clear descriptions to roles and permissions
+5. **Audit Regularly**: Review role assignments and permissions periodically
+
+```typescript
+// Example of programmatically updating role permissions
+await prisma.rolePermission.deleteMany({
+  where: { roleId: roleId }
+});
+
+await prisma.rolePermission.createMany({
+  data: permissions.map(permissionId => ({
+    roleId,
+    permissionId
+  }))
+});
 ```
 
 ## Session Management

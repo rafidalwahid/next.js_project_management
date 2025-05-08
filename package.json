@@ -1,17 +1,17 @@
 {
-  "name": "my-v0-project",
+  "name": "project_management",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && next build",
+    "build": "npx prisma generate && node scripts/update-edge-permissions.js && next build",
     "start": "next start",
     "lint": "next lint",
     "setup-db": "node scripts/setup-db.js",
-    "seed": "node scripts/seed-unified.js",
+    "seed": "node scripts/seed.js",
     "seed-permissions": "node scripts/seed-permissions.js",
-    "cleanup-permissions": "node scripts/cleanup-old-permissions.js",
-    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed && npm run seed-permissions",
+    "update-edge-permissions": "node scripts/update-edge-permissions.js",
+    "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed && npm run seed-permissions && npm run update-edge-permissions",
     "prisma:generate": "npx prisma generate",
     "postinstall": "npx prisma generate"
   },

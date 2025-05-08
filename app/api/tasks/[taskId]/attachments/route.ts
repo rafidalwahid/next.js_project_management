@@ -110,7 +110,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const originalName = file.name;
     const extension = originalName.split(".").pop() || "";
     const filename = `${uuidv4()}.${extension}`;
-    
+
     // Create directory if it doesn't exist
     const uploadDir = join(process.cwd(), "public/uploads/task-attachments");
     if (!existsSync(uploadDir)) {
@@ -209,11 +209,14 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    // Check if user is the attachment uploader or has admin role
+    // Check if user is the attachment uploader or has task management permission
     const isAttachmentUploader = attachment.userId === session.user.id;
-    const isAdmin = session.user.role === "admin";
+    const hasTaskManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "task_management"
+    );
 
-    if (!isAttachmentUploader && !isAdmin) {
+    if (!isAttachmentUploader && !hasTaskManagementPermission) {
       return NextResponse.json(
         { error: "You don't have permission to delete this attachment" },
         { status: 403 }

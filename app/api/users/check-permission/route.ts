@@ -29,9 +29,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Get userId from query params or use current user's ID
+    const userId = url.searchParams.get('userId') || session.user.id;
+
     // Check if the user has the permission using the database-backed service
-    const hasPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasPermission = await PermissionService.hasPermissionById(
+      userId,
       permission
     );
 

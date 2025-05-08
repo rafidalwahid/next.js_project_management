@@ -30,8 +30,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     // Check if user has permission to view this user
     // Users can view their own profile, users with user_management permission can view any profile
     const isOwnProfile = session.user.id === userId;
-    const hasUserManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "user_management"
     );
 

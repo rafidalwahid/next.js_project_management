@@ -22,8 +22,8 @@ export function usePermission(permission: string) {
     }
 
     // Use the client permission service for a quick initial check
-    const userRole = session.user.role || "guest"
-    const quickResult = ClientPermissionService.hasPermissionSync(userRole, permission)
+    const userId = session.user.id
+    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission)
 
     // If the quick check passes, we can return true immediately
     if (quickResult) {
@@ -33,10 +33,10 @@ export function usePermission(permission: string) {
     }
 
     // If quick check fails, verify with the API
-    // This handles the case where permissions might be in the database but not in the hardcoded matrix
+    // This handles the case where permissions might be in the database but not in the client cache
     setIsLoading(true)
 
-    fetch(`/api/users/check-permission?permission=${encodeURIComponent(permission)}`)
+    fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`)
       .then(res => res.json())
       .then(data => {
         setHasPermission(data.hasPermission)
@@ -53,26 +53,46 @@ export function usePermission(permission: string) {
   return { hasPermission, isLoading }
 }
 
+
+
 /**
- * Hook to check if the current user has a specific role
+ * Hook to get all permissions for a specific user
+ * Uses both client-side and server-side permission checks for optimal performance
  */
-export function useRole(role: string) {
-  const { session } = useAuthSession()
-  const [hasRole, setHasRole] = useState(false)
+export function useUserPermissionsByUserId(userId: string) {
+  const [permissions, setPermissions] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // If no session, user doesn't have the role
-    if (!session?.user?.id) {
-      setHasRole(false)
+    if (!userId) {
+      setPermissions([])
+      setIsLoading(false)
       return
     }
 
-    // Check if user has the role
-    const userRole = session.user.role || "guest"
-    setHasRole(userRole === role)
-  }, [session, role])
+    // Get initial permissions from client-side service for quick response
+    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId)
 
-  return hasRole
+    // Set initial permissions
+    setPermissions(quickPermissions)
+
+    // Then fetch the complete list from the server
+    fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.permissions && Array.isArray(data.permissions)) {
+          setPermissions(data.permissions)
+        }
+        setIsLoading(false)
+      })
+      .catch(err => {
+        console.error("Error fetching permissions:", err)
+        // Keep the client-side permissions on error
+        setIsLoading(false)
+      })
+  }, [userId])
+
+  return { permissions, isLoading }
 }
 
 /**
@@ -95,14 +115,14 @@ export function useUserPermissions() {
     }
 
     // Get initial permissions from client-side service for quick response
-    const userRole = session.user.role || "guest"
-    const quickPermissions = ClientPermissionService.getPermissionsForRoleSync(userRole)
+    const userId = session.user.id
+    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId)
 
     // Set initial permissions
     setPermissions(quickPermissions)
 
     // Then fetch the complete list from the server
-    fetch('/api/users/permissions')
+    fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.permissions && Array.isArray(data.permissions)) {
@@ -120,30 +140,4 @@ export function useUserPermissions() {
   return { permissions, isLoading }
 }
 
-/**
- * Hook to get the user's role
- * Provides the current user's role with loading state
- */
-export function useUserRole() {
-  const { session, status } = useAuthSession()
-  const [role, setRole] = useState<string>("guest")
-  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    setIsLoading(status === 'loading')
-
-    // If no session, user is a guest
-    if (!session?.user?.id) {
-      setRole("guest")
-      setIsLoading(false)
-      return
-    }
-
-    // Get role from session
-    const userRole = session.user.role || "guest"
-    setRole(userRole)
-    setIsLoading(false)
-  }, [session, status])
-
-  return { role, isLoading }
-}

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting roles for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+      const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
       if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' roles' },
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -123,7 +123,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },

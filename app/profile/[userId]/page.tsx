@@ -18,8 +18,29 @@ export default function UserProfilePage() {
   // Check if this is the current user's profile
   const isOwnProfile = session?.user?.id === userId
 
-  // Determine if the current user can edit this profile
-  const canEdit = isOwnProfile || session?.user?.role === "admin"
+  // State for permission check
+  const [canEdit, setCanEdit] = useState(isOwnProfile)
+
+  // Check if the current user can edit this profile
+  useEffect(() => {
+    if (isOwnProfile) {
+      setCanEdit(true)
+      return
+    }
+
+    if (session?.user?.id) {
+      // Check if user has permission to edit other profiles
+      fetch(`/api/users/check-permission?userId=${session.user.id}&permission=user_management`)
+        .then(res => res.json())
+        .then(data => {
+          setCanEdit(data.hasPermission)
+        })
+        .catch(err => {
+          console.error("Error checking permission:", err)
+          setCanEdit(false)
+        })
+    }
+  }, [isOwnProfile, session?.user?.id])
 
   // Use the user profile hook to fetch profile data
   const {

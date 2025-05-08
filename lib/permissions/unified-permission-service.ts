@@ -33,19 +33,15 @@ export class PermissionService {
   /**
    * Check if a user has a specific permission based on their role
    *
+   * @deprecated Use hasPermissionById instead for better security and flexibility
    * @param role The user's role
    * @param permission The permission to check
    * @returns A promise that resolves to true if the user has the permission, false otherwise
    */
   static async hasPermission(role: string, permission: string): Promise<boolean> {
     try {
-      // Admin role always has all permissions
-      if (role === "admin") {
-        return true;
-      }
-
       // Check cache first
-      const cacheKey = `${role}:${permission}`;
+      const cacheKey = `role:${role}:${permission}`;
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
@@ -92,6 +88,7 @@ export class PermissionService {
 
   /**
    * Check if a user has a specific permission based on their user ID
+   * This is the preferred method for checking permissions
    *
    * @param userId The user's ID
    * @param permission The permission to check
@@ -99,18 +96,60 @@ export class PermissionService {
    */
   static async hasPermissionById(userId: string, permission: string): Promise<boolean> {
     try {
-      // Get the user to check their role
+      // Check cache first
+      const cacheKey = `user:${userId}:${permission}`;
+      const now = Date.now();
+
+      // If cache is valid and has this permission check, return it
+      if (
+        now - this.cacheTimestamp < this.CACHE_TTL &&
+        cacheKey in this.permissionCache
+      ) {
+        return this.permissionCache[cacheKey];
+      }
+
+      // Get the user with their role
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { role: true }
+        select: {
+          role: true,
+          id: true
+        }
       });
 
       if (!user) {
+        this.permissionCache[cacheKey] = false;
         return false;
       }
 
-      // Use the database-backed permission system to check if the role has the permission
-      return await this.hasPermission(user.role, permission);
+      // Get the role from the database with its permissions
+      const roleRecord = await prisma.role.findUnique({
+        where: { name: user.role },
+        include: {
+          permissions: {
+            include: {
+              permission: true
+            }
+          }
+        }
+      });
+
+      if (!roleRecord) {
+        // Role doesn't exist in the database
+        this.permissionCache[cacheKey] = false;
+        return false;
+      }
+
+      // Check if the role has the permission
+      const hasPermission = roleRecord.permissions.some(
+        rp => rp.permission.name === permission
+      );
+
+      // Update cache
+      this.permissionCache[cacheKey] = hasPermission;
+      this.cacheTimestamp = now;
+
+      return hasPermission;
     } catch (error) {
       console.error(`Error checking permission ${permission} for user ${userId}:`, error);
       return false;
@@ -125,22 +164,16 @@ export class PermissionService {
    */
   static async getPermissionsForRole(role: string): Promise<string[]> {
     try {
-      // Admin role always has all permissions
-      if (role === "admin") {
-        // Get all permissions from the database
-        const allPermissions = await prisma.permission.findMany();
-        return allPermissions.map(p => p.name);
-      }
-
       // Check cache first
+      const cacheKey = `role_permissions:${role}`;
       const now = Date.now();
 
       // If cache is valid and has this role's permissions, return them
       if (
         now - this.cacheTimestamp < this.CACHE_TTL &&
-        role in this.permissionListCache
+        cacheKey in this.permissionListCache
       ) {
-        return this.permissionListCache[role];
+        return this.permissionListCache[cacheKey];
       }
 
       // Get the role from the database
@@ -157,7 +190,7 @@ export class PermissionService {
 
       if (!roleRecord) {
         // Role doesn't exist in the database
-        this.permissionListCache[role] = [];
+        this.permissionListCache[cacheKey] = [];
         return [];
       }
 
@@ -165,7 +198,7 @@ export class PermissionService {
       const permissions = roleRecord.permissions.map(rp => rp.permission.name);
 
       // Update cache
-      this.permissionListCache[role] = permissions;
+      this.permissionListCache[cacheKey] = permissions;
       this.cacheTimestamp = now;
 
       return permissions;
@@ -304,9 +337,6 @@ export class PermissionService {
 
         // Skip if the role is not in the permissions object
         if (!permissions[roleName]) continue;
-
-        // Don't allow modifying admin role permissions
-        if (roleName === 'admin') continue;
 
         // Get the permissions for this role
         const rolePermissions = permissions[roleName];

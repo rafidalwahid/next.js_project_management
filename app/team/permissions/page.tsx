@@ -122,58 +122,8 @@ export default function RolePermissionsPage() {
   const [activeTab, setActiveTab] = useState("roles")
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
-  // Default permission matrix
-  const DEFAULT_PERMISSION_MATRIX: Record<string, string[]> = {
-    admin: [
-      "user_management",
-      "manage_roles",
-      "manage_permissions",
-      "project_creation",
-      "project_management",
-      "project_deletion",
-      "team_management",
-      "team_add",
-      "team_remove",
-      "team_view",
-      "task_creation",
-      "task_assignment",
-      "task_management",
-      "task_deletion",
-      "view_projects",
-      "edit_profile",
-      "system_settings",
-      "view_dashboard",
-      "attendance_management",
-      "view_team_attendance"
-    ],
-    manager: [
-      "project_creation",
-      "project_management",
-      "team_management",
-      "team_add",
-      "team_remove",
-      "team_view",
-      "task_creation",
-      "task_assignment",
-      "task_management",
-      "task_deletion",
-      "view_projects",
-      "edit_profile",
-      "view_dashboard",
-      "view_team_attendance"
-    ],
-    user: [
-      "task_creation",
-      "task_management",
-      "view_projects",
-      "edit_profile",
-      "view_dashboard",
-      "team_view"
-    ],
-    guest: [
-      "view_projects"
-    ]
-  }
+  // Empty permission matrix - will be populated from API
+  const DEFAULT_PERMISSION_MATRIX: Record<string, string[]> = {}
 
   const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>(DEFAULT_PERMISSION_MATRIX)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -248,6 +198,7 @@ export default function RolePermissionsPage() {
     name: "",
     description: ""
   })
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Fetch role permissions from API
   useEffect(() => {
@@ -453,36 +404,15 @@ export default function RolePermissionsPage() {
     const role = allRoles.find(r => r.id === roleId)
     if (!role) return null
 
-    switch (roleId) {
-      case "admin":
-        return (
-          <Badge className="bg-purple-500 hover:bg-purple-600">
-            <ShieldCheck className="h-3 w-3 mr-1" />
-            {role.name}
-          </Badge>
-        )
-      case "manager":
-        return (
-          <Badge className="bg-green-500 hover:bg-green-600">
-            <Shield className="h-3 w-3 mr-1" />
-            {role.name}
-          </Badge>
-        )
-      case "user":
-        return (
-          <Badge className="bg-blue-500 hover:bg-blue-600">
-            <Shield className="h-3 w-3 mr-1" />
-            {role.name}
-          </Badge>
-        )
-      default:
-        return (
-          <Badge variant="outline">
-            <Shield className="h-3 w-3 mr-1" />
-            {role.name}
-          </Badge>
-        )
-    }
+    // Use the role's color if available, or default to a standard color
+    const colorClass = role.color || "bg-blue-500 hover:bg-blue-600"
+
+    return (
+      <Badge className={colorClass}>
+        <Shield className="h-3 w-3 mr-1" />
+        {role.name}
+      </Badge>
+    )
   }
 
   // We'll use the useEffect hook to handle permission checking and redirection
@@ -569,10 +499,22 @@ export default function RolePermissionsPage() {
         <TabsContent value="permissions" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Role Permissions Matrix</CardTitle>
-              <CardDescription>
-                Detailed breakdown of permissions by role
-              </CardDescription>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <CardTitle>Role Permissions Matrix</CardTitle>
+                  <CardDescription>
+                    Detailed breakdown of permissions by role
+                  </CardDescription>
+                </div>
+                <div className="w-full md:w-64">
+                  <Input
+                    placeholder="Search permissions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border overflow-x-auto max-h-[70vh] w-full">
@@ -588,34 +530,66 @@ export default function RolePermissionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {allPermissions.map((permission) => (
-                      <TableRow key={permission.id}>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[180px] md:max-w-none">{permission.name}</span>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                </TooltipTrigger>
-                                <TooltipContent side="right">
-                                  <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </TableCell>
-                        {allRoles.map((role) => (
-                          <TableCell key={role.id} className="text-center">
-                            {rolePermissions[role.id]?.includes(permission.id) ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
-                            ) : (
-                              <XCircle className="h-5 w-5 text-red-500 mx-auto" />
-                            )}
+                    {/* Filter permissions based on search query */}
+                    {(() => {
+                      // Filter permissions based on search query
+                      const filteredPermissions = searchQuery
+                        ? allPermissions.filter(p =>
+                            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+                          )
+                        : allPermissions;
+
+                      // Get unique categories from filtered permissions
+                      const categories = Array.from(new Set(filteredPermissions.map(p => p.category || 'General'))).sort();
+
+                      return categories.map(category => (
+                      <React.Fragment key={category}>
+                        {/* Category header */}
+                        <TableRow className="bg-muted/50">
+                          <TableCell
+                            colSpan={allRoles.length + 1}
+                            className="font-bold sticky left-0 bg-muted/50 z-10"
+                          >
+                            {category}
                           </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
+                        </TableRow>
+
+                        {/* Permissions in this category */}
+                        {filteredPermissions
+                          .filter(p => (p.category || 'General') === category)
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((permission) => (
+                            <TableRow key={permission.id}>
+                              <TableCell className="font-medium sticky left-0 bg-background z-10">
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[180px] md:max-w-none">{permission.name}</span>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right">
+                                        <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                              {allRoles.map((role) => (
+                                <TableCell key={role.id} className="text-center">
+                                  {rolePermissions[role.id]?.includes(permission.id) ? (
+                                    <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
+                                  ) : (
+                                    <XCircle className="h-5 w-5 text-red-500 mx-auto" />
+                                  )}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))}
+                      </React.Fragment>
+                    ));
+                    })()}
                   </TableBody>
                 </Table>
               </div>
@@ -697,10 +671,22 @@ export default function RolePermissionsPage() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Edit Role Permissions</DialogTitle>
-            <DialogDescription>
-              Customize which permissions are granted to each role
-            </DialogDescription>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <DialogTitle>Edit Role Permissions</DialogTitle>
+                <DialogDescription>
+                  Customize which permissions are granted to each role
+                </DialogDescription>
+              </div>
+              <div className="w-full md:w-64">
+                <Input
+                  placeholder="Search permissions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </DialogHeader>
           <div className="py-4 flex-grow overflow-hidden">
             {loading ? (
@@ -722,42 +708,85 @@ export default function RolePermissionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {allPermissions.map((permission) => (
-                      <TableRow key={permission.id}>
-                        <TableCell className="font-medium sticky left-0 bg-background z-10">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[180px] md:max-w-none">{permission.name}</span>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                </TooltipTrigger>
-                                <TooltipContent side="right">
-                                  <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </TableCell>
-                        {allRoles.map((role) => (
-                          <TableCell key={role.id} className="text-center p-2 sm:p-4">
-                            <Button
-                              variant={rolePermissions[role.id]?.includes(permission.id) ? "default" : "outline"}
-                              size="icon"
-                              className={`h-8 w-8 ${rolePermissions[role.id]?.includes(permission.id) ? "bg-green-500 hover:bg-green-600" : ""}`}
-                              onClick={() => togglePermission(role.id, permission.id)}
-                              disabled={role.id === "admin"} // Admin always has all permissions
-                            >
-                              {rolePermissions[role.id]?.includes(permission.id) ? (
-                                <CheckCircle2 className="h-4 w-4" />
-                              ) : (
-                                <XCircle className="h-4 w-4" />
-                              )}
-                            </Button>
+                    {/* Filter permissions based on search query */}
+                    {(() => {
+                      // Filter permissions based on search query
+                      const filteredPermissions = searchQuery
+                        ? allPermissions.filter(p =>
+                            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+                          )
+                        : allPermissions;
+
+                      // Get unique categories from filtered permissions
+                      const categories = Array.from(new Set(filteredPermissions.map(p => p.category || 'General'))).sort();
+
+                      return categories.map(category => (
+                      <React.Fragment key={category}>
+                        {/* Category header */}
+                        <TableRow className="bg-muted/50">
+                          <TableCell
+                            colSpan={allRoles.length + 1}
+                            className="font-bold sticky left-0 bg-muted/50 z-10"
+                          >
+                            {category}
                           </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
+                        </TableRow>
+
+                        {/* Permissions in this category */}
+                        {filteredPermissions
+                          .filter(p => (p.category || 'General') === category)
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((permission) => (
+                            <TableRow key={permission.id}>
+                              <TableCell className="font-medium sticky left-0 bg-background z-10">
+                                <div className="flex items-center gap-2">
+                                  <span className="truncate max-w-[100px] xs:max-w-[120px] sm:max-w-[180px] md:max-w-none">{permission.name}</span>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right">
+                                        <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                              {allRoles.map((role) => {
+                                const hasPermission = rolePermissions[role.id]?.includes(permission.id);
+                                return (
+                                  <TableCell key={role.id} className="text-center p-2 sm:p-4">
+                                    <Button
+                                      variant={hasPermission ? "default" : "outline"}
+                                      size="icon"
+                                      className={`h-8 w-8 ${hasPermission ? "bg-green-500 hover:bg-green-600" : ""}`}
+                                      onClick={() => {
+                                        togglePermission(role.id, permission.id);
+                                        // Show toast for better feedback
+                                        toast({
+                                          title: hasPermission ? "Permission Removed" : "Permission Added",
+                                          description: `${hasPermission ? "Removed" : "Added"} "${permission.name}" ${hasPermission ? "from" : "to"} the ${role.name} role`,
+                                          variant: "default"
+                                        });
+                                      }}
+                                      disabled={role.id === "admin"} // Admin always has all permissions
+                                    >
+                                      {hasPermission ? (
+                                        <CheckCircle2 className="h-4 w-4" />
+                                      ) : (
+                                        <XCircle className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          ))}
+                      </React.Fragment>
+                    ));
+                    })()}
                   </TableBody>
                 </Table>
               </div>

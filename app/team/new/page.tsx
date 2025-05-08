@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { PermissionGuard } from "@/components/permission-guard"
 import Link from "next/link"
 import { BarChart3, Save, X, AlertCircle } from "lucide-react"
 import { SYSTEM_ROLES, getRoleOptions } from "@/lib/roles"
@@ -254,12 +255,10 @@ export default function NewTeamMemberPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">{SYSTEM_ROLES.user.name}</SelectItem>
-                      {session?.user?.role === "admin" && (
-                        <>
-                          <SelectItem value="manager">{SYSTEM_ROLES.manager.name}</SelectItem>
-                          <SelectItem value="admin">{SYSTEM_ROLES.admin.name}</SelectItem>
-                        </>
-                      )}
+                      <PermissionGuard permission="user_management">
+                        <SelectItem value="manager">{SYSTEM_ROLES.manager.name}</SelectItem>
+                        <SelectItem value="admin">{SYSTEM_ROLES.admin.name}</SelectItem>
+                      </PermissionGuard>
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-muted-foreground mt-1">

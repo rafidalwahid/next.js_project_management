@@ -41,8 +41,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // For now, allow any authenticated admin to access this endpoint
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to manage roles
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Admin access required' },
         { status: 403 }
@@ -95,8 +96,9 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // For now, allow any authenticated admin to access this endpoint
-    if (session.user.role !== 'admin') {
+    // Check if user has permission to manage roles
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Admin access required' },
         { status: 403 }

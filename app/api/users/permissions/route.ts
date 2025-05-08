@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // If requesting permissions for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+      const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
       if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' permissions' },
@@ -31,14 +31,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Get the user to check their role
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true }
-    });
-
-    // Get permissions based on the user's role
-    const permissions = user ? await PermissionService.getPermissionsForRole(user.role) : [];
+    // Get permissions directly for the user ID
+    const permissions = await PermissionService.getPermissionsForUser(userId);
 
     // Return the permissions
     return NextResponse.json({ permissions });
@@ -64,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -88,8 +82,20 @@ export async function POST(req: NextRequest) {
     // We need to update the user's role to one that has the permission
 
     // Get all roles that have this permission
-    // For now, we'll just use admin and manager roles
-    const rolesWithPermission = ['admin', 'manager'];
+    const roles = await prisma.role.findMany({
+      include: {
+        permissions: {
+          include: {
+            permission: true
+          }
+        }
+      }
+    });
+
+    // Filter roles that have the requested permission
+    const rolesWithPermission = roles
+      .filter(role => role.permissions.some(rp => rp.permission.name === permissionName))
+      .map(role => role.name);
 
     if (rolesWithPermission.length === 0) {
       return NextResponse.json(
@@ -111,8 +117,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If the user already has a role with this permission, we don't need to do anything
-    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    // If the user already has this permission, we don't need to do anything
+    const userHasPermission = await PermissionService.hasPermissionById(userId, permissionName);
     if (userHasPermission) {
       return NextResponse.json({
         message: `User already has permission '${permissionName}'`,
@@ -152,7 +158,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -190,18 +196,42 @@ export async function DELETE(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    const userHasPermission = await PermissionService.hasPermissionById(userId, permissionName);
     if (!userHasPermission) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });
     }
 
-    // Find a role that doesn't have this permission but has as many other permissions as possible
-    // For simplicity, we'll just downgrade to 'user' role
+    // Find a role that doesn't have this permission
+    const roles = await prisma.role.findMany({
+      include: {
+        permissions: {
+          include: {
+            permission: true
+          }
+        }
+      }
+    });
+
+    // Filter roles that don't have the requested permission
+    const rolesWithoutPermission = roles
+      .filter(role => !role.permissions.some(rp => rp.permission.name === permissionName))
+      .map(role => role.name);
+
+    // If no roles without this permission exist, we can't remove it
+    if (rolesWithoutPermission.length === 0) {
+      return NextResponse.json({
+        error: `Cannot remove permission '${permissionName}' as all roles have it`,
+        status: 400
+      });
+    }
+
+    // Use the first role that doesn't have this permission
+    const newRole = rolesWithoutPermission[0];
     const success = await prisma.user.update({
       where: { id: userId },
-      data: { role: 'user' }
+      data: { role: newRole }
     }).then(() => true).catch(() => false);
 
     // Return success
@@ -230,7 +260,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // Check if user has permission to manage permissions
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
@@ -267,18 +297,42 @@ export async function PUT(req: NextRequest) {
     }
 
     // If the user doesn't have this permission, we don't need to do anything
-    const userHasPermission = await PermissionService.hasPermission(user.role, permissionName);
+    const userHasPermission = await PermissionService.hasPermissionById(userId, permissionName);
     if (!userHasPermission) {
       return NextResponse.json({
         message: `User doesn't have permission '${permissionName}'`,
       });
     }
 
-    // Find a role that doesn't have this permission but has as many other permissions as possible
-    // For simplicity, we'll just downgrade to 'user' role
+    // Find a role that doesn't have this permission
+    const roles = await prisma.role.findMany({
+      include: {
+        permissions: {
+          include: {
+            permission: true
+          }
+        }
+      }
+    });
+
+    // Filter roles that don't have the requested permission
+    const rolesWithoutPermission = roles
+      .filter(role => !role.permissions.some(rp => rp.permission.name === permissionName))
+      .map(role => role.name);
+
+    // If no roles without this permission exist, we can't deny it
+    if (rolesWithoutPermission.length === 0) {
+      return NextResponse.json({
+        error: `Cannot deny permission '${permissionName}' as all roles have it`,
+        status: 400
+      });
+    }
+
+    // Use the first role that doesn't have this permission
+    const newRole = rolesWithoutPermission[0];
     const success = await prisma.user.update({
       where: { id: userId },
-      data: { role: 'user' }
+      data: { role: newRole }
     }).then(() => true).catch(() => false);
 
     // Return success

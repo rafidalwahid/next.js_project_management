@@ -126,7 +126,7 @@ export function UserProfileHeaderNew({
                 <p className="text-sm text-muted-foreground">{user.email}</p>
                 <div className="flex items-center space-x-2 mt-2">
                   <Badge variant="secondary" className="px-2 py-0.5">
-                    {user.role === "admin" ? "Manager" : user.role}
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </Badge>
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-2 py-0.5">
                     Active
@@ -143,7 +143,7 @@ export function UserProfileHeaderNew({
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Role</h3>
-                <p className="font-medium">{user.role === "admin" ? "Manager" : user.role}</p>
+                <p className="font-medium">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Created On</h3>
@@ -167,7 +167,7 @@ export function UserProfileHeaderNew({
               </div>
             </div>
           </div>
-          
+
           {/* User ID and Creation Date (small text) */}
           <div className="mt-8 text-xs text-muted-foreground">
             User ID: {user.id.substring(0, 4)}... • Created on {formattedCreatedDate}
@@ -212,4 +212,4 @@ export function UserProfileHeaderNew({
       </div>
     </div>
   )
-} 
+}

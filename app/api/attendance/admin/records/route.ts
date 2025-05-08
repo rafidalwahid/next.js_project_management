@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has attendance management permission
-    const hasAttendanceManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "attendance_management"
     );
 

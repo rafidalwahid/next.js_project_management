@@ -21,8 +21,8 @@ export async function checkTaskPermission(
 
   // For create action, we only need to check the permission
   if (action === 'create') {
-    const hasPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "task_creation"
     );
 
@@ -59,9 +59,6 @@ export async function checkTaskPermission(
     return { hasPermission: false, task: null, error: "Task not found" };
   }
 
-  // Get user role
-  const userRole = session.user.role;
-
   // Check if user is the project creator
   const isProjectCreator = task.project.createdById === session.user.id;
 
@@ -77,17 +74,26 @@ export async function checkTaskPermission(
   // Check permissions based on action
   if (action === 'view') {
     // For view actions, check view_projects permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermission(userRole, "view_projects");
+    const hasViewPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "view_projects"
+    );
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember || isTaskAssignee;
   }
   else if (action === 'update') {
     // For update actions, check task_management permission or direct involvement
-    const hasManagePermission = await PermissionService.hasPermission(userRole, "task_management");
+    const hasManagePermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "task_management"
+    );
     hasPermission = hasManagePermission || isProjectCreator || isTaskAssignee;
   }
   else if (action === 'delete') {
     // For delete actions, check task_deletion permission or project creator status
-    const hasDeletePermission = await PermissionService.hasPermission(userRole, "task_deletion");
+    const hasDeletePermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      "task_deletion"
+    );
     hasPermission = hasDeletePermission || isProjectCreator;
 
     // Special case for subtasks - check if user has permission on the parent task
