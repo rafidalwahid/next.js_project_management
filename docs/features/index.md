@@ -11,7 +11,8 @@ The system provides a robust authentication and authorization system with:
 - [Social login](./authentication.md#social-login) with Google and Facebook
 - [Email/password authentication](./authentication.md#email-password-authentication)
 - [Role-based access control](./authentication.md#role-based-access-control)
-- [Dynamic permission system](./authentication.md#dynamic-permission-system)
+- [Database-backed permission system](./authentication.md#database-backed-permission-system)
+- [Permission management UI](./authentication.md#permission-management-ui)
 
 [Learn more about Authentication & Authorization](./authentication.md)
 
@@ -47,8 +48,11 @@ Track attendance with:
 - [Check-in/check-out](./attendance.md#check-in-check-out)
 - [Geolocation tracking](./attendance.md#geolocation-tracking)
 - [Offline support](./attendance.md#offline-support)
+- [Background sync](./attendance.md#offline-support)
 - [Attendance analytics](./attendance.md#attendance-analytics)
 - [Auto-checkout](./attendance.md#auto-checkout)
+- [Attendance settings](./attendance.md#attendance-settings)
+- [Correction requests](./attendance.md#correction-requests)
 
 [Learn more about the Attendance System](./attendance.md)
 

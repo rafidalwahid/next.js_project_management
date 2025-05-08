@@ -7,7 +7,7 @@ A comprehensive enterprise project management application built with Next.js 15,
 - **User Authentication & Authorization**
   - Social login with Google and Facebook
   - Role-based access control (Admin, Manager, User, Guest)
-  - Dynamic permission system manageable through the UI
+  - Database-backed dynamic permission system manageable through the UI
   - Secure password handling and JWT authentication
 
 - **Project Management**
@@ -24,11 +24,12 @@ A comprehensive enterprise project management application built with Next.js 15,
   - Time tracking and estimation
 
 - **Attendance System**
-  - Field attendance tracking with geolocation
-  - Check-in/check-out functionality
-  - Offline support with background sync
-  - Attendance analytics and reporting
-  - Auto-checkout and overtime calculation
+  - Field attendance tracking with geolocation and location name display
+  - Check-in/check-out functionality with offline support
+  - Background sync for offline attendance actions
+  - Comprehensive attendance analytics and reporting
+  - Auto-checkout, overtime calculation, and correction requests
+  - Customizable work hours and attendance settings
 
 - **User Experience**
   - Responsive design for all devices
@@ -168,7 +169,17 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 #### User
 - **Fields**: id, name, email, password, role, bio, jobTitle, location, department, phone, skills
 - **Role Values**: "admin", "manager", "user", "guest"
-- **Relations**: Projects, Tasks, TeamMembers, Attendance, Documents, Comments
+- **Relations**: Projects, Tasks, TeamMembers, Attendance, Documents, Comments, Roles, Permissions
+
+#### Role
+- **Fields**: id, name, description, color
+- **Relations**: Permissions (many-to-many), Users
+- **Features**: Customizable roles with assigned permissions
+
+#### Permission
+- **Fields**: id, name, description, category
+- **Relations**: Roles (many-to-many)
+- **Features**: Granular access control for system features
 
 #### Project
 - **Fields**: id, title, description, startDate, endDate, dueDate, estimatedTime, totalTimeSpent
@@ -191,9 +202,9 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Features**: Geolocation tracking, offline support
 
 #### AttendanceSettings
-- **Fields**: id, userId, workHoursPerDay, workDays, reminderEnabled, autoCheckoutEnabled
+- **Fields**: id, userId, workHoursPerDay, workDays, reminderEnabled, reminderTime, autoCheckoutEnabled, autoCheckoutTime
 - **Relations**: User
-- **Features**: Customizable work hours, auto-checkout
+- **Features**: Customizable work hours, auto-checkout, reminders
 
 ### Authentication Models (NextAuth.js)
 
@@ -210,6 +221,8 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Activity**: System activity logs
 - **TaskAssignee**: Many-to-many relationship between tasks and users
 - **TaskAttachment**: Files attached to tasks
+- **RolePermission**: Many-to-many relationship between roles and permissions
+- **AttendanceCorrectionRequest**: Requests to correct attendance records
 
 ## Key Features
 
@@ -218,7 +231,8 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 - **Social Login**: Google and Facebook integration
 - **Email/Password**: Traditional authentication
 - **Role-Based Access**: Different permissions for admin, manager, user, and guest roles
-- **Dynamic Permissions**: Configurable through the admin interface
+- **Database-Backed Permissions**: Fully dynamic permission system stored in database
+- **Permission Management UI**: Create, edit, and assign permissions through the admin interface
 
 ### Project Management
 
@@ -237,10 +251,13 @@ The application uses a MySQL database with Prisma ORM for data modeling and acce
 
 ### Attendance System
 
-- **Check-in/Check-out**: Track work hours with geolocation
-- **Offline Support**: Continue using attendance features without internet
-- **Analytics**: Attendance reports and statistics
-- **Settings**: Customize work hours and auto-checkout
+- **Check-in/Check-out**: Track work hours with geolocation and location name display
+- **Offline Support**: Continue using attendance features without internet connection
+- **Background Sync**: Automatically synchronize offline attendance actions when back online
+- **Analytics**: Comprehensive attendance reports and statistics with filtering options
+- **Auto-checkout**: Configurable automatic checkout for users who forget to check out
+- **Correction Requests**: System for requesting and approving attendance corrections
+- **Settings**: Customize work hours, work days, reminders, and auto-checkout options
 
 ### User Profile
 
@@ -262,7 +279,8 @@ The application provides a comprehensive API for all functionality:
 - `/api/projects/*` - Project management
 - `/api/tasks/*` - Task management
 - `/api/users/*` - User management
-- `/api/attendance/*` - Attendance tracking
+- `/api/attendance/*` - Attendance tracking, settings, and correction requests
+- `/api/permissions/*` - Permission and role management
 - `/api/team-management/*` - Team management
 - `/api/activities/*` - Activity logging
 - `/api/dashboard/*` - Dashboard statistics

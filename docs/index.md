@@ -52,17 +52,19 @@ Welcome to the documentation for the Project Management System. This comprehensi
 
 ## About the Project
 
-The Project Management System is a comprehensive enterprise application built with Next.js 15, Prisma, and MySQL. It features project and task management, attendance tracking with geolocation, offline capabilities, and a dynamic permission system.
+The Project Management System is a comprehensive enterprise application built with Next.js 15, Prisma, and MySQL. It features project and task management, attendance tracking with geolocation, offline capabilities, and a fully database-backed dynamic permission system.
 
 Key capabilities include:
 
-- User authentication with social login options
-- Role-based access control with dynamic permissions
-- Project management with customizable workflows
+- User authentication with social login options (Google, Facebook)
+- Database-backed role-based access control with dynamic permissions
+- Project management with customizable workflows and statuses
 - Task management with Kanban and list views
-- Nested subtasks with ordering capabilities
-- Field attendance tracking with geolocation
-- Offline support with background sync
+- Nested subtasks with explicit ordering capabilities
+- Field attendance tracking with geolocation and location name display
+- Auto-checkout and attendance correction request system
+- Offline support with background sync for attendance actions
+- Role-based dashboard views for admin, manager, and user roles
 - Comprehensive analytics and reporting
 
 ## Quick Links

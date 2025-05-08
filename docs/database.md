@@ -29,7 +29,7 @@ model User {
   location              String?
   phone                 String?
   skills                String?             @db.Text
-  
+
   // Relations
   accounts              Account[]
   activities            Activity[]
@@ -43,6 +43,56 @@ model User {
   taskAssignments       TaskAssignee[]
   taskAttachments       TaskAttachment[]
   teams                 TeamMember[]
+}
+```
+
+#### Role
+
+```prisma
+model Role {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  color       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  permissions RolePermission[]
+}
+```
+
+#### Permission
+
+```prisma
+model Permission {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  category    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  roles       RolePermission[]
+}
+```
+
+#### RolePermission
+
+```prisma
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
 }
 ```
 
@@ -61,7 +111,7 @@ model Project {
   dueDate        DateTime?
   estimatedTime  Float?
   totalTimeSpent Float?
-  
+
   // Relations
   activities     Activity[]
   attendances    Attendance[]
@@ -93,7 +143,7 @@ model Task {
   startDate     DateTime?
   statusId      String?
   timeSpent     Float?
-  
+
   // Relations
   activities    Activity[]
   attendances   Attendance[]
@@ -120,7 +170,7 @@ model ProjectStatus {
   projectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks       Task[]
@@ -149,13 +199,58 @@ model Attendance {
   checkOutLocationName String?
   projectId           String?
   taskId              String?
+  autoCheckout        Boolean   @default(false)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  
+
   // Relations
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   project             Project?  @relation(fields: [projectId], references: [id])
   task                Task?     @relation(fields: [taskId], references: [id])
+  correctionRequests  AttendanceCorrectionRequest[]
+}
+```
+
+#### AttendanceSettings
+
+```prisma
+model AttendanceSettings {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  workHoursPerDay    Float    @default(8)
+  workDays           String   @default("1,2,3,4,5")
+  reminderEnabled    Boolean  @default(true)
+  reminderTime       String?
+  autoCheckoutEnabled Boolean  @default(false)
+  autoCheckoutTime   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+```
+
+#### AttendanceCorrectionRequest
+
+```prisma
+model AttendanceCorrectionRequest {
+  id                    String    @id @default(cuid())
+  attendanceId          String
+  userId                String
+  requestedCheckInTime  DateTime?
+  requestedCheckOutTime DateTime?
+  reason                String?   @db.Text
+  status                String    @default("pending") // pending, approved, rejected
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  attendance            Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 ```
 
@@ -175,10 +270,10 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-  
+
   // Relations
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([provider, providerAccountId])
 }
 
@@ -187,7 +282,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  
+
   // Relations
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -196,7 +291,7 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  
+
   @@unique([identifier, token])
 }
 ```
@@ -216,6 +311,7 @@ model VerificationToken {
 
 - **User ↔ Task**: Users can be assigned to multiple tasks, and tasks can have multiple assignees (via TaskAssignee)
 - **User ↔ Project**: Users can be members of multiple projects, and projects can have multiple team members (via TeamMember)
+- **Role ↔ Permission**: Roles can have multiple permissions, and permissions can be assigned to multiple roles (via RolePermission)
 
 ### One-to-One Relationships
 

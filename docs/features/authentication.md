@@ -114,7 +114,7 @@ The UI adapts based on the user's role:
 // Example of role-based UI rendering
 function ProjectActions({ project }) {
   const { user } = useAuth();
-  
+
   if (user.role === 'admin' || user.role === 'manager') {
     return (
       <div>
@@ -123,61 +123,86 @@ function ProjectActions({ project }) {
       </div>
     );
   }
-  
+
   return null;
 }
 ```
 
-## Dynamic Permission System
+## Database-Backed Permission System
 
-The system implements a dynamic permission system that allows administrators to create and manage roles and permissions through the UI.
+The system implements a fully database-backed permission system that allows administrators to create and manage roles and permissions through the UI.
 
-### Permission Model
+### Permission Models
 
-Permissions are defined as string identifiers that represent specific actions:
+Permissions are stored in the database using the following models:
 
+```typescript
+// Permission model in Prisma schema
+model Permission {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  category    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  roles       RolePermission[]
+}
+
+// Role model in Prisma schema
+model Role {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  color       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  permissions RolePermission[]
+}
+
+// RolePermission model in Prisma schema
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
 ```
-"project:create"
-"project:read"
-"project:update"
-"project:delete"
-"task:create"
-"task:read"
-"task:update"
-"task:delete"
-// etc.
-```
+
+### Permission Categories
+
+Permissions are organized into categories for easier management:
+
+- **User Management**: Permissions related to user accounts
+- **Project Management**: Permissions related to projects
+- **Task Management**: Permissions related to tasks
+- **Team Management**: Permissions related to teams
+- **Attendance**: Permissions related to attendance tracking
+- **System**: Permissions related to system settings
 
 ### Permission Assignment
 
-Permissions are assigned to roles, and roles are assigned to users:
+Permissions are assigned to roles through the database:
 
 ```typescript
-// Example permission service
-export class PermissionService {
-  static getPermissionsForRole(roleName: string): string[] {
-    switch (roleName) {
-      case 'admin':
-        return [
-          'user:read', 'user:create', 'user:update', 'user:delete',
-          'project:read', 'project:create', 'project:update', 'project:delete',
-          // More permissions...
-        ];
-      case 'manager':
-        return [
-          'user:read',
-          'project:read', 'project:create', 'project:update',
-          // More permissions...
-        ];
-      // Other roles...
-    }
-  }
-}
+// Example of assigning permissions to a role
+await prisma.rolePermission.createMany({
+  data: [
+    { roleId: managerRoleId, permissionId: viewProjectsPermissionId },
+    { roleId: managerRoleId, permissionId: createTasksPermissionId },
+    { roleId: managerRoleId, permissionId: editTasksPermissionId },
+    // More permissions...
+  ],
+});
 ```
 
 ### Permission Checking
 
-Permissions are checked in API routes and UI components:
+Permissions are checked using the database-backed permission service:
 
 ```typescript
 // Example permission check in API route
@@ -186,33 +211,51 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-  });
-  
-  const permissions = PermissionService.getPermissionsForRole(user.role);
-  
-  if (!permissions.includes('project:create')) {
+
+  // Check if user has the required permission
+  const hasPermission = await PermissionService.hasPermissionById(
+    session.user.id,
+    'project_creation'
+  );
+
+  if (!hasPermission) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  
+
   // Process the request...
 }
 ```
 
 ```tsx
 // Example permission check in UI component
-function CreateProjectButton() {
-  const { user } = useAuth();
-  const permissions = usePermissions(user.role);
-  
-  if (!permissions.includes('project:create')) {
-    return null;
+function ProjectActions({ project }) {
+  const { permissions, isLoading } = useUserPermissions();
+
+  if (isLoading) {
+    return <Skeleton />;
   }
-  
-  return <Button onClick={handleCreateProject}>Create Project</Button>;
+
+  if (permissions.includes('project_management')) {
+    return (
+      <div>
+        <Button onClick={handleEdit}>Edit Project</Button>
+        <Button onClick={handleDelete}>Delete Project</Button>
+      </div>
+    );
+  }
+
+  return null;
 }
+```
+
+### Permission Management UI
+
+The system provides a user interface for managing roles and permissions:
+
+1. **Role Management**: Create, edit, and delete roles
+2. **Permission Assignment**: Assign permissions to roles
+3. **User Role Assignment**: Assign roles to users
+4. **Permission Matrix**: View and edit the permission matrix
 ```
 
 ## Session Management
@@ -263,7 +306,7 @@ export async function GET(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Process the request...
 }
 ```
@@ -272,11 +315,11 @@ export async function GET(req: NextRequest) {
 // Example session usage in component
 function ProfilePage() {
   const { data: session } = useSession();
-  
+
   if (!session) {
     return <div>Please log in</div>;
   }
-  
+
   return <div>Welcome, {session.user.name}</div>;
 }
 ```
@@ -319,14 +362,14 @@ const limiter = rateLimit({
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   const result = await limiter.check(ip);
-  
+
   if (!result.success) {
     return NextResponse.json(
       { error: 'Too many requests' },
       { status: 429 }
     );
   }
-  
+
   // Process the request...
 }
 ```

@@ -78,9 +78,9 @@ export function AttendanceStats() {
               <div className="flex justify-between items-center border-b pb-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Hours</p>
-                  <p className="text-xl font-bold">
+                  <div className="text-xl font-bold">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats?.totalHours || 0}h`}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-muted/30 p-2 rounded-full">
                   <Clock className="h-5 w-5 text-primary" />
@@ -90,9 +90,9 @@ export function AttendanceStats() {
               <div className="flex justify-between items-center border-b pb-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Average Daily</p>
-                  <p className="text-xl font-bold">
+                  <div className="text-xl font-bold">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats?.averageHours || 0}h`}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-muted/30 p-2 rounded-full">
                   <Clock className="h-5 w-5 text-primary" />
@@ -102,9 +102,9 @@ export function AttendanceStats() {
               <div className="flex justify-between items-center border-b pb-3">
                 <div>
                   <p className="text-sm text-muted-foreground">On-Time Rate</p>
-                  <p className="text-xl font-bold">
+                  <div className="text-xl font-bold">
                     {loading ? <Skeleton className="h-7 w-16" /> : `${stats?.onTimeRate || 0}%`}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-muted/30 p-2 rounded-full">
                   <Clock className="h-5 w-5 text-primary" />
@@ -114,13 +114,13 @@ export function AttendanceStats() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Attendance Days</p>
-                  <p className="text-xl font-bold">
+                  <div className="text-xl font-bold">
                     {loading ? (
                       <Skeleton className="h-7 w-16" />
                     ) : (
                       `${stats?.attendanceDays || 0}/${stats?.totalWorkingDays || 0}`
                     )}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-muted/30 p-2 rounded-full">
                   <Calendar className="h-5 w-5 text-primary" />

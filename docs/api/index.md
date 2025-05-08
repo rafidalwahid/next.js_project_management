@@ -119,9 +119,14 @@ The API uses standard HTTP status codes:
 | `/api/attendance/:id` | PUT | Update an attendance record (check-out) |
 | `/api/attendance/current` | GET | Get current user's active attendance |
 | `/api/attendance/settings` | GET | Get attendance settings |
-| `/api/attendance/settings` | PUT | Update attendance settings |
+| `/api/attendance/settings` | PATCH | Update attendance settings |
 | `/api/attendance/corrections` | POST | Request an attendance correction |
 | `/api/attendance/corrections/:id` | PUT | Approve/reject a correction request |
+| `/api/attendance/admin/correction-requests` | GET | Get all correction requests (admin) |
+| `/api/attendance/admin/correction-requests/:id` | PATCH | Review a correction request (admin) |
+| `/api/attendance/check-out` | POST | Check out from attendance |
+| `/api/attendance/history` | GET | Get attendance history with filtering |
+| `/api/attendance/statistics` | GET | Get attendance statistics |
 
 [Learn more about Attendance API](./attendance-api.md)
 
@@ -149,6 +154,24 @@ The API uses standard HTTP status codes:
 | `/api/dashboard/recent-activities` | GET | Get recent activities |
 | `/api/dashboard/upcoming-tasks` | GET | Get upcoming tasks |
 | `/api/dashboard/project-progress` | GET | Get project progress data |
+
+### Permissions
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/permissions` | GET | Get all permissions |
+| `/api/permissions/:id` | GET | Get a permission by ID |
+| `/api/permissions` | POST | Create a new permission |
+| `/api/permissions/:id` | PUT | Update a permission |
+| `/api/permissions/:id` | DELETE | Delete a permission |
+| `/api/roles` | GET | Get all roles |
+| `/api/roles/:id` | GET | Get a role by ID |
+| `/api/roles` | POST | Create a new role |
+| `/api/roles/:id` | PUT | Update a role |
+| `/api/roles/:id` | DELETE | Delete a role |
+| `/api/roles/:id/permissions` | GET | Get permissions for a role |
+| `/api/roles/:id/permissions` | POST | Assign permissions to a role |
+| `/api/roles/:id/permissions/:permissionId` | DELETE | Remove a permission from a role |
 
 [Learn more about Dashboard API](./dashboard-api.md)
 
