@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 
 // GET /api/users/permissions?userId={userId} - Get permissions for a user
 export async function GET(req: NextRequest) {
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Get permissions based on the user's role
-    const permissions = user ? PermissionService.getPermissionsForRole(user.role) : [];
+    const permissions = user ? await PermissionService.getPermissionsForRole(user.role) : [];
 
     // Return the permissions
     return NextResponse.json({ permissions });
@@ -121,7 +121,10 @@ export async function POST(req: NextRequest) {
 
     // Otherwise, update the user's role to the first role that has this permission
     const newRole = rolesWithPermission[0];
-    const success = await PermissionService.updateUserRole(userId, newRole);
+    const success = await prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole }
+    }).then(() => true).catch(() => false);
 
     // Return success
     return NextResponse.json({
@@ -196,7 +199,10 @@ export async function DELETE(req: NextRequest) {
 
     // Find a role that doesn't have this permission but has as many other permissions as possible
     // For simplicity, we'll just downgrade to 'user' role
-    const success = await PermissionService.updateUserRole(userId, 'user');
+    const success = await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'user' }
+    }).then(() => true).catch(() => false);
 
     // Return success
     return NextResponse.json({
@@ -270,7 +276,10 @@ export async function PUT(req: NextRequest) {
 
     // Find a role that doesn't have this permission but has as many other permissions as possible
     // For simplicity, we'll just downgrade to 'user' role
-    const success = await PermissionService.updateUserRole(userId, 'user');
+    const success = await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'user' }
+    }).then(() => true).catch(() => false);
 
     // Return success
     return NextResponse.json({

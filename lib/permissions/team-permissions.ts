@@ -1,6 +1,6 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
-import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 import { PermissionService } from "@/lib/permissions/permission-service";
 import { logActivity } from "@/lib/activity-logger";
 

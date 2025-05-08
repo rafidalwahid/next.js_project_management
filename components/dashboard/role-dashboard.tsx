@@ -20,8 +20,11 @@ import { UserDashboard } from "./user-dashboard"
 export function RoleDashboard() {
   const { data: session } = useSession()
   const { role: userRole, isLoading: roleLoading } = useUserRole()
-  const { permissions: userPermissions, isLoading: permissionsLoading } = useUserPermissions()
+  const { permissions, isLoading: permissionsLoading } = useUserPermissions()
   const { stats, isLoading: statsLoading, refetch } = useDashboardStats()
+
+  // Ensure userPermissions is always an array
+  const userPermissions = Array.isArray(permissions) ? permissions : []
 
   // Ensure stats has the correct type
   const dashboardStats: DashboardStats = stats || {

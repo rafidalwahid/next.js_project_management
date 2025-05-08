@@ -1,4 +1,5 @@
-import { UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system";
+import { ROLES } from "@/lib/permissions/permission-constants";
+import { EdgeDbPermissionService } from "@/lib/permissions/edge-db-permission-service";
 
 // Cache for permission matrix
 let permissionMatrixCache: Record<string, string[]> | null = null;
@@ -24,58 +25,15 @@ export class EdgePermissionService {
   static async hasPermission(role: string, permission: string): Promise<boolean> {
     try {
       // Admin role always has all permissions
-      if (role === "admin") {
+      if (role === ROLES.ADMIN) {
         return true;
       }
 
-      // Try to use the cached permission matrix if available and not expired
-      if (permissionMatrixCache && (Date.now() - cacheTimestamp < CACHE_TTL)) {
-        const rolePermissions = permissionMatrixCache[role] || [];
-        if (rolePermissions.includes(permission)) {
-          return true;
-        }
-      }
-
-      // If cache is expired or not available, try to fetch from API
-      try {
-        // This will only work in environments where fetch is available
-        // In true edge environments, we'll catch and fall back to the hardcoded matrix
-        // Use absolute URL for middleware compatibility
-        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-        const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Add authorization header if available in the environment
-            ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
-          }
-        });
-
-        // Only try to parse JSON if the response is OK and content-type is application/json
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          const matrix = await response.json();
-          permissionMatrixCache = matrix;
-          cacheTimestamp = Date.now();
-
-          const rolePermissions = permissionMatrixCache[role] || [];
-          if (rolePermissions.includes(permission)) {
-            return true;
-          }
-        } else {
-          // If we get a non-JSON response (like HTML from a redirect), fall back to hardcoded matrix
-          console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
-        }
-      } catch (fetchError) {
-        // Silently fail and fall back to hardcoded matrix
-        console.error("Error fetching permission matrix:", fetchError);
-      }
-
-      // Fall back to the hardcoded matrix
-      return UnifiedPermissionSystem.hasPermission(role, permission);
+      // Use the database-backed edge permission service
+      return await EdgeDbPermissionService.hasPermission(role, permission);
     } catch (error) {
       console.error("Error in EdgePermissionService.hasPermission:", error);
-      // Fall back to the hardcoded matrix in case of any error
-      return UnifiedPermissionSystem.hasPermission(role, permission);
+      return false;
     }
   }
 
@@ -88,91 +46,17 @@ export class EdgePermissionService {
   static async getPermissionsForRole(role: string): Promise<string[]> {
     try {
       // Admin role always has all permissions
-      if (role === "admin") {
-        // Try to get all permissions from cache or API
-        try {
-          // Check if we have a cached matrix
-          if (permissionMatrixCache && (Date.now() - cacheTimestamp < CACHE_TTL)) {
-            // Collect all unique permissions from the cache
-            const allPermissions = new Set<string>();
-            Object.values(permissionMatrixCache).forEach(perms => {
-              perms.forEach(p => allPermissions.add(p));
-            });
-            return Array.from(allPermissions);
-          }
-
-          // Try to fetch from API
-          const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-          const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              // Add authorization header if available in the environment
-              ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
-            }
-          });
-
-          // Only try to parse JSON if the response is OK and content-type is application/json
-          if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-            const matrix = await response.json();
-            permissionMatrixCache = matrix;
-            cacheTimestamp = Date.now();
-
-            // Collect all unique permissions
-            const allPermissions = new Set<string>();
-            Object.values(matrix).forEach(perms => {
-              perms.forEach((p: string) => allPermissions.add(p));
-            });
-            return Array.from(allPermissions);
-          } else {
-            // If we get a non-JSON response, fall back to hardcoded matrix
-            console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
-          }
-        } catch (fetchError) {
-          // Silently fail and fall back to hardcoded matrix
-          console.error("Error fetching permission matrix:", fetchError);
-        }
+      if (role === ROLES.ADMIN) {
+        // Get all permissions from the edge permission service
+        const allPermissions = await EdgeDbPermissionService.getPermissionsForRole(ROLES.ADMIN);
+        return allPermissions;
       }
 
-      // Try to use the cached permission matrix if available and not expired
-      if (permissionMatrixCache && (Date.now() - cacheTimestamp < CACHE_TTL)) {
-        return permissionMatrixCache[role] || [];
-      }
-
-      // If cache is expired or not available, try to fetch from API
-      try {
-        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-        const response = await fetch(`${baseUrl}/api/permissions/matrix`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Add authorization header if available in the environment
-            ...(process.env.NEXTAUTH_SECRET ? { 'Authorization': `Bearer ${process.env.NEXTAUTH_SECRET}` } : {})
-          }
-        });
-
-        // Only try to parse JSON if the response is OK and content-type is application/json
-        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-          const matrix = await response.json();
-          permissionMatrixCache = matrix;
-          cacheTimestamp = Date.now();
-
-          return matrix[role] || [];
-        } else {
-          // If we get a non-JSON response, fall back to hardcoded matrix
-          console.warn("Non-JSON response from permission matrix API, falling back to hardcoded matrix");
-        }
-      } catch (fetchError) {
-        // Silently fail and fall back to hardcoded matrix
-        console.error("Error fetching permission matrix:", fetchError);
-      }
-
-      // Fall back to the hardcoded matrix
-      return UnifiedPermissionSystem.getPermissionsForRole(role);
+      // Use the database-backed edge permission service
+      return await EdgeDbPermissionService.getPermissionsForRole(role);
     } catch (error) {
       console.error("Error in EdgePermissionService.getPermissionsForRole:", error);
-      // Fall back to the hardcoded matrix in case of any error
-      return UnifiedPermissionSystem.getPermissionsForRole(role);
+      return [];
     }
   }
 
@@ -181,8 +65,31 @@ export class EdgePermissionService {
    *
    * @returns An array of permission objects with id, name, description, and category
    */
-  static getAllPermissions(): { id: string; name: string; description: string; category?: string }[] {
-    return UnifiedPermissionSystem.getAllPermissions();
+  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+    try {
+      // Use the cached permission matrix to get all permissions
+      const permissionMatrix = await EdgeDbPermissionService.getPermissionMatrix();
+
+      // Collect all unique permissions
+      const allPermissions = new Set<string>();
+      Object.values(permissionMatrix).forEach(perms => {
+        perms.forEach(p => allPermissions.add(p));
+      });
+
+      // Convert to the expected format
+      return Array.from(allPermissions).map(p => ({
+        id: p,
+        name: p
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' '),
+        description: `Permission to ${p.replace(/_/g, ' ')}`,
+        category: this.getCategoryForPermission(p)
+      }));
+    } catch (error) {
+      console.error("Error in EdgePermissionService.getAllPermissions:", error);
+      return [];
+    }
   }
 
   /**
@@ -190,18 +97,64 @@ export class EdgePermissionService {
    *
    * @returns An array of role objects with id, name, description, and color
    */
-  static getAllRoles(): { id: string; name: string; description: string; color: string }[] {
-    return UnifiedPermissionSystem.getAllRoles();
+  static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
+    try {
+      // Use the cached permission matrix to get all roles
+      const permissionMatrix = await EdgeDbPermissionService.getPermissionMatrix();
+
+      // Get all role names
+      const roleNames = Object.keys(permissionMatrix);
+
+      // Convert to the expected format
+      return roleNames.map(role => ({
+        id: role,
+        name: role.charAt(0).toUpperCase() + role.slice(1),
+        description: `${role.charAt(0).toUpperCase() + role.slice(1)} role`,
+        color: this.getColorForRole(role)
+      }));
+    } catch (error) {
+      console.error("Error in EdgePermissionService.getAllRoles:", error);
+      return [];
+    }
   }
 
   /**
-   * Get all roles that have a specific permission
-   *
-   * @param permission The permission to check
-   * @returns An array of role strings
+   * Helper method to get category for a permission
    */
-  static getRolesWithPermission(permission: string): string[] {
-    return UnifiedPermissionSystem.getRolesWithPermission(permission);
+  private static getCategoryForPermission(permission: string): string {
+    if (permission.includes('user') || permission.includes('role')) {
+      return 'User Management';
+    } else if (permission.includes('project')) {
+      return 'Project Management';
+    } else if (permission.includes('task')) {
+      return 'Task Management';
+    } else if (permission.includes('team')) {
+      return 'Team Management';
+    } else if (permission.includes('attendance')) {
+      return 'Attendance';
+    } else if (permission.includes('system')) {
+      return 'System';
+    } else {
+      return 'General';
+    }
+  }
+
+  /**
+   * Helper method to get color for a role
+   */
+  private static getColorForRole(role: string): string {
+    switch (role) {
+      case 'admin':
+        return 'bg-purple-500';
+      case 'manager':
+        return 'bg-blue-500';
+      case 'user':
+        return 'bg-green-500';
+      case 'guest':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-500';
+    }
   }
 
   /**

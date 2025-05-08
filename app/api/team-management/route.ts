@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { withAuth, withPermission } from "@/lib/api-middleware";
 import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 import { logActivity } from "@/lib/activity-logger";
 
 // Validation schema for creating team members

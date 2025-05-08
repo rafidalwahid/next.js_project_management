@@ -23,7 +23,7 @@ export function usePermission(permission: string) {
 
     // Use the client permission service for a quick initial check
     const userRole = session.user.role || "guest"
-    const quickResult = ClientPermissionService.hasPermission(userRole, permission)
+    const quickResult = ClientPermissionService.hasPermissionSync(userRole, permission)
 
     // If the quick check passes, we can return true immediately
     if (quickResult) {
@@ -96,7 +96,7 @@ export function useUserPermissions() {
 
     // Get initial permissions from client-side service for quick response
     const userRole = session.user.role || "guest"
-    const quickPermissions = ClientPermissionService.getPermissionsForRole(userRole)
+    const quickPermissions = ClientPermissionService.getPermissionsForRoleSync(userRole)
 
     // Set initial permissions
     setPermissions(quickPermissions)

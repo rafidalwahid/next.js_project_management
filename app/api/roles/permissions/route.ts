@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS, PERMISSION_MATRIX } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {

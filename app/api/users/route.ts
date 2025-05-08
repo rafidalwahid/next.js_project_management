@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { getUsers, createUser } from '@/lib/queries/user-queries';
 import { PermissionService } from "@/lib/permissions/permission-service";
-import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 
 // GET /api/users - Get all users with pagination and filtering
 export async function GET(req: NextRequest) {

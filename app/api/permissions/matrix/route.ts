@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { ROLES } from "@/lib/permissions/unified-permission-system";
+import { ROLES } from "@/lib/permissions/permission-constants";
 
 /**
  * API endpoint to get the complete permission matrix

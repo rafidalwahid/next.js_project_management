@@ -1,13 +1,15 @@
 // lib/permissions/client-permission-service.ts
-// Client-side version of the permission service that doesn't use Prisma
+// Client-side version of the permission service that uses API calls
 
-import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { ROLES } from "@/lib/permissions/permission-constants";
+import { ClientDbPermissionService } from "@/lib/permissions/client-db-permission-service";
 
 /**
  * Client-side Permission Service
  *
  * This service provides a unified way to check permissions in client components.
  * It does NOT use Prisma and is safe to use in client components.
+ * It uses the ClientDbPermissionService for database-backed permission checks.
  */
 export class ClientPermissionService {
   /**
@@ -17,51 +19,134 @@ export class ClientPermissionService {
    * @param permission The permission to check
    * @returns True if the user has the permission, false otherwise
    */
-  static hasPermission(role: string, permission: string): boolean {
-    return UnifiedPermissionSystem.hasPermission(role, permission);
+  static async hasPermission(role: string, permission: string): Promise<boolean> {
+    // Admin role always has all permissions
+    if (role === ROLES.ADMIN) {
+      return true;
+    }
+
+    // Use the database-backed client permission service
+    return await ClientDbPermissionService.hasPermission(role, permission);
+  }
+
+  /**
+   * Synchronous version of hasPermission for immediate UI rendering
+   * This is less accurate but provides a quick initial result
+   *
+   * @param role The user's role
+   * @param permission The permission to check
+   * @returns True if the user has the permission based on role, false otherwise
+   */
+  static hasPermissionSync(role: string, permission: string): boolean {
+    // Admin role always has all permissions
+    if (role === ROLES.ADMIN) {
+      return true;
+    }
+
+    // For non-admin roles, we need to check with the server
+    // Return false and let the async version update the UI
+    return false;
   }
 
   /**
    * Get all permissions for a user based on their role
    *
    * @param role The user's role
-   * @returns An array of permission strings
+   * @returns A promise that resolves to an array of permission strings
    */
-  static getPermissionsForRole(role: string): string[] {
-    return UnifiedPermissionSystem.getPermissionsForRole(role);
+  static async getPermissionsForRole(role: string): Promise<string[]> {
+    return await ClientDbPermissionService.getPermissionsForRole(role);
+  }
+
+  /**
+   * Synchronous version of getPermissionsForRole for immediate UI rendering
+   * This is less accurate but provides a quick initial result
+   *
+   * @param role The user's role
+   * @returns An array of basic permissions based on role
+   */
+  static getPermissionsForRoleSync(role: string): string[] {
+    // Basic permissions that all authenticated users have
+    const basicPermissions = [
+      "view_dashboard",
+      "view_projects",
+      "edit_profile",
+      "view_attendance",
+      "task_creation",
+      "task_management"
+    ];
+
+    // Admin role has all permissions
+    if (role === ROLES.ADMIN) {
+      return [
+        ...basicPermissions,
+        "user_management",
+        "manage_roles",
+        "manage_permissions",
+        "project_creation",
+        "project_management",
+        "project_deletion",
+        "team_management",
+        "team_add",
+        "team_remove",
+        "team_view",
+        "task_assignment",
+        "task_deletion",
+        "system_settings",
+        "attendance_management",
+        "view_team_attendance"
+      ];
+    }
+
+    // Manager role has project and team management permissions
+    if (role === ROLES.MANAGER) {
+      return [
+        ...basicPermissions,
+        "project_creation",
+        "project_management",
+        "team_management",
+        "team_add",
+        "team_remove",
+        "team_view",
+        "task_assignment",
+        "task_deletion",
+        "view_team_attendance"
+      ];
+    }
+
+    // User role has basic permissions plus team view
+    if (role === ROLES.USER) {
+      return [
+        ...basicPermissions,
+        "team_view"
+      ];
+    }
+
+    // Guest role has only view permissions
+    return ["view_projects"];
   }
 
   /**
    * Get all available permissions
    *
-   * @returns An array of permission objects with id, name, description, and category
+   * @returns A promise that resolves to an array of permission objects
    */
-  static getAllPermissions(): { id: string; name: string; description: string; category?: string }[] {
-    return UnifiedPermissionSystem.getAllPermissions();
+  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+    return await ClientDbPermissionService.getAllPermissions();
   }
 
   /**
    * Get all available roles
    *
-   * @returns An array of role objects with id, name, description, and color
+   * @returns A promise that resolves to an array of role objects
    */
-  static getAllRoles(): { id: string; name: string; description: string; color: string }[] {
-    return UnifiedPermissionSystem.getAllRoles();
-  }
-
-  /**
-   * Get all roles that have a specific permission
-   *
-   * @param permission The permission to check
-   * @returns An array of role strings
-   */
-  static getRolesWithPermission(permission: string): string[] {
-    return UnifiedPermissionSystem.getRolesWithPermission(permission);
+  static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
+    return await ClientDbPermissionService.getAllRoles();
   }
 
   /**
    * Check if a user is authorized to access their own resource or has admin privileges
-   * 
+   *
    * @param userId The current user's ID
    * @param userRole The current user's role
    * @param resourceUserId The user ID associated with the resource

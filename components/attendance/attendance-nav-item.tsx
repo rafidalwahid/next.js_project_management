@@ -29,11 +29,14 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
   useEffect(() => {
     if (!session?.user?.id) return
 
-    // First use client-side permission service for quick initial permissions
-    const initialPermissions = ClientPermissionService.getPermissionsForRole(userRole)
-    setUserPermissions(initialPermissions)
+    // Set default permissions for basic navigation
+    setUserPermissions([
+      "view_dashboard",
+      "view_attendance",
+      "edit_profile"
+    ])
 
-    // Then fetch from API for complete permissions
+    // Fetch from API for complete permissions
     fetch('/api/users/permissions')
       .then(res => res.json())
       .then(data => {

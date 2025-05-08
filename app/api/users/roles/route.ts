@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/services/permission-service";
-import { UnifiedPermissionSystem, PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PermissionService } from "@/lib/permissions/permission-service";
+import { PermissionService as OldPermissionService } from "@/lib/services/permission-service";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 
 // GET /api/users/roles?userId={userId} - Get roles for a user
 export async function GET(req: NextRequest) {
@@ -23,7 +24,8 @@ export async function GET(req: NextRequest) {
 
     // If requesting roles for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+      const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+      if (!hasPermission) {
         return NextResponse.json(
           { error: 'Forbidden: Insufficient permissions to view other users\' roles' },
           { status: 403 }
@@ -64,7 +66,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -84,7 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Update the user's role
-    const success = await PermissionService.updateUserRole(userId, roleName);
+    const success = await OldPermissionService.updateUserRole(userId, roleName);
 
     if (!success) {
       return NextResponse.json(
@@ -119,7 +122,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Check if user has permission to manage roles
-    if (!UnifiedPermissionSystem.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT)) {
+    const hasPermission = await PermissionService.hasPermission(session.user.role, PERMISSIONS.USER_MANAGEMENT);
+    if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -141,7 +145,7 @@ export async function DELETE(req: NextRequest) {
 
     // We can't remove a role, only update it to a different role
     // For backward compatibility, we'll set the role to 'user' when removing a role
-    const success = await PermissionService.updateUserRole(userId, 'user');
+    const success = await OldPermissionService.updateUserRole(userId, 'user');
 
     if (!success) {
       return NextResponse.json(

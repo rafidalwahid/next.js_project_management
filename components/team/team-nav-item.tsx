@@ -11,7 +11,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { PERMISSIONS, UnifiedPermissionSystem } from "@/lib/permissions/unified-permission-system"
+import { PERMISSIONS } from "@/lib/permissions/permission-constants"
+import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
 
 interface TeamNavItemProps {
   collapsed?: boolean
@@ -74,7 +75,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
 
   // Filter items based on user permissions
   const filteredSubItems = subItems.filter(item =>
-    item.alwaysShow || UnifiedPermissionSystem.hasPermission(userRole, item.permission)
+    item.alwaysShow || ClientPermissionService.hasPermissionSync(userRole, item.permission)
   )
 
   const isActive = pathname.startsWith("/team") || pathname.startsWith("/profile")

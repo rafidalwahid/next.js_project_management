@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/api-middleware";
-import { PERMISSIONS } from "@/lib/permissions/unified-permission-system";
+import { PERMISSIONS } from "@/lib/permissions/permission-constants";
 import { checkProjectPermission } from "@/lib/permissions/project-permissions";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";

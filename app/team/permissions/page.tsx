@@ -33,19 +33,26 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   PERMISSIONS,
   ROLES,
-  SYSTEM_ROLES,
-  PERMISSION_MATRIX,
-  UnifiedPermissionSystem
-} from "@/lib/permissions/unified-permission-system"
+  SYSTEM_ROLES
+} from "@/lib/permissions/permission-constants"
+import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
 
 // Default role data (will be replaced with data from API)
-const ROLE_DATA = UnifiedPermissionSystem.getAllRoles().map(role => ({
-  ...role,
-  count: role.id === "user" ? 2 : 1 // Default counts for display
+const ROLE_DATA = Object.entries(SYSTEM_ROLES).map(([id, role]) => ({
+  id,
+  name: role.name,
+  description: role.description,
+  color: role.color,
+  count: id === "user" ? 2 : 1 // Default counts for display
 }));
 
 // Default permission data (will be replaced with data from API)
-const PERMISSION_DATA = UnifiedPermissionSystem.getAllPermissions();
+const PERMISSION_DATA = Object.entries(PERMISSIONS).map(([key, value]) => ({
+  id: value,
+  name: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' '),
+  description: `Permission to ${value.replace(/_/g, ' ')}`,
+  category: 'General'
+}));
 
 // Permission badges for the roles table - key highlights for each role
 const PERMISSION_BADGES = {
@@ -77,7 +84,39 @@ export default function RolePermissionsPage() {
   const [activeTab, setActiveTab] = useState("roles")
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
-  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>(PERMISSION_MATRIX)
+  // Default permission matrix
+  const DEFAULT_PERMISSION_MATRIX: Record<string, string[]> = {
+    admin: Object.values(PERMISSIONS),
+    manager: [
+      PERMISSIONS.PROJECT_CREATION,
+      PERMISSIONS.PROJECT_MANAGEMENT,
+      PERMISSIONS.TEAM_MANAGEMENT,
+      PERMISSIONS.TEAM_ADD,
+      PERMISSIONS.TEAM_REMOVE,
+      PERMISSIONS.TEAM_VIEW,
+      PERMISSIONS.TASK_CREATION,
+      PERMISSIONS.TASK_ASSIGNMENT,
+      PERMISSIONS.TASK_MANAGEMENT,
+      PERMISSIONS.TASK_DELETION,
+      PERMISSIONS.VIEW_PROJECTS,
+      PERMISSIONS.EDIT_PROFILE,
+      PERMISSIONS.VIEW_DASHBOARD,
+      PERMISSIONS.VIEW_TEAM_ATTENDANCE,
+    ],
+    user: [
+      PERMISSIONS.TASK_CREATION,
+      PERMISSIONS.TASK_MANAGEMENT,
+      PERMISSIONS.VIEW_PROJECTS,
+      PERMISSIONS.EDIT_PROFILE,
+      PERMISSIONS.VIEW_DASHBOARD,
+      PERMISSIONS.TEAM_VIEW,
+    ],
+    guest: [
+      PERMISSIONS.VIEW_PROJECTS,
+    ],
+  }
+
+  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>(DEFAULT_PERMISSION_MATRIX)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
@@ -192,14 +231,14 @@ export default function RolePermissionsPage() {
           const permissionsResponse = await fetch("/api/roles/permissions")
           if (permissionsResponse.ok) {
             const permissionsData = await permissionsResponse.json()
-            setRolePermissions(Object.keys(permissionsData).length > 0 ? permissionsData : PERMISSION_MATRIX)
+            setRolePermissions(Object.keys(permissionsData).length > 0 ? permissionsData : DEFAULT_PERMISSION_MATRIX)
           } else {
             console.warn("Using default permission matrix due to API error")
-            setRolePermissions(PERMISSION_MATRIX)
+            setRolePermissions(DEFAULT_PERMISSION_MATRIX)
           }
         } catch (error) {
           console.warn("Using default permission matrix due to API error:", error)
-          setRolePermissions(PERMISSION_MATRIX)
+          setRolePermissions(DEFAULT_PERMISSION_MATRIX)
         }
       } catch (error) {
         console.error("Error in fetchData:", error)
@@ -211,7 +250,7 @@ export default function RolePermissionsPage() {
         // Set default values if API calls fail
         setAllRoles(ROLE_DATA)
         setAllPermissions(PERMISSION_DATA)
-        setRolePermissions(PERMISSION_MATRIX)
+        setRolePermissions(DEFAULT_PERMISSION_MATRIX)
       } finally {
         setLoading(false)
       }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { PERMISSIONS } from '@/lib/permissions/unified-permission-system'
+import { PERMISSIONS } from '@/lib/permissions/permission-constants'
 import { EdgePermissionService } from '@/lib/permissions/edge-permission-service'
 
 // Public paths that don't require authentication
