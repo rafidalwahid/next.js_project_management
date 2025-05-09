@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth-options";
 // GET: Fetch all statuses for a project
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: string } | Promise<{ projectId: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -54,7 +54,7 @@ export async function GET(
 // POST: Create a new status for a project
 export async function POST(
   req: NextRequest,
-  { params }: { params: { projectId: string } | Promise<{ projectId: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

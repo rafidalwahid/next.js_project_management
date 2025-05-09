@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
+import { ActivityWhereInput, PaginationParams, PaginationResult } from "@/types";
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,13 +24,13 @@ export async function GET(req: NextRequest) {
     const userId = url.searchParams.get("userId");
 
     // Build the where clause
-    const where: any = {};
-    
+    const where: ActivityWhereInput = {};
+
     // Filter by project if provided
     if (projectId) {
       where.projectId = projectId;
     }
-    
+
     // Filter by user if provided
     if (userId) {
       where.userId = userId;
@@ -72,14 +73,17 @@ export async function GET(req: NextRequest) {
       where,
     });
 
+    // Create pagination result
+    const pagination: PaginationResult = {
+      total: totalCount,
+      page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit),
+    };
+
     return NextResponse.json({
       activities,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages: Math.ceil(totalCount / limit),
-      }
+      pagination
     });
   } catch (error) {
     console.error("Get activities error:", error);

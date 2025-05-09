@@ -1,6 +1,7 @@
 /**
  * Utility functions for geolocation
  */
+import { GeoLocationResult, LocationNameResult } from '@/types/service';
 
 /**
  * Reverse geocode coordinates to get location name
@@ -21,7 +22,7 @@ export async function getLocationName(latitude: number, longitude: number): Prom
       throw new Error('Failed to fetch location data');
     }
 
-    const data = await response.json();
+    const data = await response.json() as LocationNameResult;
 
     // Format the address based on available data
     if (data.display_name) {

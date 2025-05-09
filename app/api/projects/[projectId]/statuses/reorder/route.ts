@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth-options";
 // POST: Reorder statuses
 export async function POST(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

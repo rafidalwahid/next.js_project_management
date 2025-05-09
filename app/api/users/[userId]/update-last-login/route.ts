@@ -21,7 +21,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = params;
+    const { userId } = await params;
 
     // Check if user has permission to update this user
     // Users can update their own last login, users with user_management permission can update any user's last login

@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth-options";
 // GET: Fetch a specific status
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: string; statusId: string } }
+  { params }: { params: Promise<{ projectId: string; statusId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId, statusId } = params;
+    const { projectId, statusId } = await params;
 
     // Check if project exists and user has access
     const project = await prisma.project.findUnique({
@@ -68,7 +68,7 @@ export async function GET(
 // PATCH: Update a status
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { projectId: string; statusId: string } }
+  { params }: { params: Promise<{ projectId: string; statusId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -77,7 +77,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId, statusId } = params;
+    const { projectId, statusId } = await params;
 
     // Check if project exists and user has access
     const project = await prisma.project.findUnique({
@@ -200,7 +200,7 @@ export async function PATCH(
 // DELETE: Delete a status
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { projectId: string; statusId: string } }
+  { params }: { params: Promise<{ projectId: string; statusId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -209,7 +209,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId, statusId } = params;
+    const { projectId, statusId } = await params;
 
     // Check if project exists and user has access
     const project = await prisma.project.findUnique({

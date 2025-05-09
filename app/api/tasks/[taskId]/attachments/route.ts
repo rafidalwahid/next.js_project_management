@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = params;
+    const { taskId } = await params;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'view');
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = params;
+    const { taskId } = await params;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
@@ -177,7 +177,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = params;
+    const { taskId } = await params;
     const { searchParams } = new URL(req.url);
     const attachmentId = searchParams.get('attachmentId');
 

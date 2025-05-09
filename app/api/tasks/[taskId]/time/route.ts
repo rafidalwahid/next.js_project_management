@@ -13,7 +13,7 @@ const updateTaskTimeSchema = z.object({
 // PATCH handler to update task time
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

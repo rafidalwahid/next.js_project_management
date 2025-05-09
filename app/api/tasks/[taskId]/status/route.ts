@@ -10,7 +10,7 @@ import { ProjectStatus } from "@/types/project";
 // PATCH: Update a task's status
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);

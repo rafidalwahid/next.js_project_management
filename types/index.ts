@@ -15,5 +15,10 @@ export * from './document';
 export * from './activity';
 export * from './dashboard';
 
+// Re-export types from infrastructure files
+export * from './api';
+export * from './prisma';
+export * from './service';
+
 // Re-export KanbanColumn as Column for backward compatibility
 export type Column = import('./task').KanbanColumn;

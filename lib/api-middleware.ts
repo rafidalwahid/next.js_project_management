@@ -3,6 +3,7 @@ import { Session } from "next-auth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { PermissionCheckFn } from "@/types/api";
 
 /**
  * Middleware for API routes to handle authentication and authorization

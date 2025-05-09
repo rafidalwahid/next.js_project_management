@@ -3,6 +3,12 @@
 
 import prisma from "@/lib/prisma";
 import { Session } from "next-auth";
+import {
+  PermissionCacheEntry,
+  PermissionListCacheEntry,
+  RoleCacheEntry,
+  UiPermission
+} from "@/types/service";
 
 /**
  * Unified Permission Service
@@ -15,7 +21,7 @@ export class PermissionService {
   // Cache for permission checks to reduce database queries
   private static permissionCache: Record<string, boolean> = {};
   private static permissionListCache: Record<string, string[]> = {};
-  private static roleCache: Record<string, any> = {};
+  private static roleCache: Record<string, UiPermission[] | RoleCacheEntry> = {};
   private static cacheTimestamp: number = 0;
   private static readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -282,7 +288,7 @@ export class PermissionService {
    *
    * @returns An array of permission objects with id, name, description, and category
    */
-  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+  static async getAllPermissions(): Promise<UiPermission[]> {
     try {
       // Check cache first
       const now = Date.now();

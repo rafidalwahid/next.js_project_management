@@ -1,26 +1,14 @@
 import prisma from '@/lib/prisma';
-
-/**
- * Interface for activity log parameters
- */
-interface ActivityLogParams {
-  userId: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  description?: string;
-  projectId?: string;
-  taskId?: string;
-}
+import { ActivityLogParams, ActivityWithRelations } from '@/types/api';
 
 /**
  * Log an activity to the database
  * @param params Activity log parameters
  * @returns The created activity log
  */
-export async function logActivity(params: ActivityLogParams) {
+export async function logActivity(params: ActivityLogParams): Promise<any | null> {
   const { userId, action, entityType, entityId, description, projectId, taskId } = params;
-  
+
   try {
     const activity = await prisma.activity.create({
       data: {
@@ -33,7 +21,7 @@ export async function logActivity(params: ActivityLogParams) {
         taskId,
       },
     });
-    
+
     return activity;
   } catch (error) {
     console.error('Failed to log activity:', error);
@@ -48,7 +36,7 @@ export async function logActivity(params: ActivityLogParams) {
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getUserActivities(userId: string, limit = 10) {
+export async function getUserActivities(userId: string, limit = 10): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {
@@ -73,7 +61,7 @@ export async function getUserActivities(userId: string, limit = 10) {
         },
       },
     });
-    
+
     return activities;
   } catch (error) {
     console.error('Failed to get user activities:', error);
@@ -87,7 +75,7 @@ export async function getUserActivities(userId: string, limit = 10) {
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getProjectActivities(projectId: string, limit = 20) {
+export async function getProjectActivities(projectId: string, limit = 20): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {
@@ -114,7 +102,7 @@ export async function getProjectActivities(projectId: string, limit = 20) {
         },
       },
     });
-    
+
     return activities;
   } catch (error) {
     console.error('Failed to get project activities:', error);
@@ -129,7 +117,7 @@ export async function getProjectActivities(projectId: string, limit = 20) {
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getEntityActivities(entityType: string, entityId: string, limit = 10) {
+export async function getEntityActivities(entityType: string, entityId: string, limit = 10): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {
@@ -163,7 +151,7 @@ export async function getEntityActivities(entityType: string, entityId: string, 
         },
       },
     });
-    
+
     return activities;
   } catch (error) {
     console.error(`Failed to get activities for ${entityType} ${entityId}:`, error);
