@@ -26,32 +26,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-
-// Export the Task interface
-export interface Task {
-  id: string
-  title: string
-  description: string | null
-  priority: string
-  status: { // Added nested status object based on schema
-    name: string
-    color: string | null
-  } | null
-  dueDate: string | null
-  completed: boolean // Added completed field
-  project?: {
-    id: string
-    title: string
-  } | null
-  assignees?: { // Keeping assignees for multiple assignees display
-    id: string
-    user: {
-      id: string
-      name: string | null
-      image: string | null
-    }
-  }[]
-}
+import { Task, TaskAssignee } from "@/types/task"
 
 interface TaskListProps {
   tasks: Task[]

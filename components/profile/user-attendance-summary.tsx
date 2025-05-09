@@ -8,27 +8,10 @@ import { format, formatDistance } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AttendanceWithRelations, AttendanceSummary } from "@/types/attendance"
 
-interface AttendanceRecord {
-  id: string
-  checkInTime: string
-  checkOutTime?: string
-  checkInLocationName?: string
-  checkOutLocationName?: string
-  totalHours?: number
-  project?: {
-    id: string
-    title: string
-  }
-  task?: {
-    id: string
-    title: string
-  }
-}
-
-interface AttendanceSummary {
-  totalRecords: number
-  totalHours: number
+// Extended summary interface with additional fields needed for this component
+interface ExtendedAttendanceSummary extends AttendanceSummary {
   averageHoursPerDay?: number
   firstCheckIn?: string | null
   lastCheckOut?: string | null
@@ -41,8 +24,8 @@ interface UserAttendanceSummaryProps {
 }
 
 export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
-  const [summary, setSummary] = useState<AttendanceSummary | null>(null)
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceWithRelations[]>([])
+  const [summary, setSummary] = useState<ExtendedAttendanceSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
@@ -82,6 +65,7 @@ export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
           setSummary({
             totalRecords: 0,
             totalHours: 0,
+            userCount: 0,
             averageHoursPerDay: 0
           })
         }
@@ -95,6 +79,7 @@ export function UserAttendanceSummary({ userId }: UserAttendanceSummaryProps) {
         setSummary({
           totalRecords: 0,
           totalHours: 0,
+          userCount: 0,
           averageHoursPerDay: 0
         })
       } finally {

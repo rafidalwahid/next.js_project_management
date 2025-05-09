@@ -33,73 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-interface Task {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  startDate?: string | null
-  endDate?: string | null
-  dueDate?: string | null
-  timeSpent?: number | null
-  estimatedTime?: number | null
-  projectId: string
-  statusId?: string | null
-  parentId?: string | null
-  order: number
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-  assignees?: {
-    id: string
-    user: {
-      id: string
-      name: string | null
-      email: string
-      image: string | null
-    }
-  }[]
-  status?: {
-    id: string
-    name: string
-    color: string
-  } | null
-}
-
-interface ProjectStatus {
-  id: string
-  name: string
-  color: string
-  description?: string | null
-  order: number
-  isDefault: boolean
-  projectId: string
-}
-
-interface Project {
-  id: string
-  title: string
-  description: string | null
-  startDate: string | null
-  endDate: string | null
-  dueDate: string | null
-  totalTimeSpent: number | null
-  estimatedTime: number | null
-  createdAt: string
-  updatedAt: string
-  statuses: ProjectStatus[]
-  createdBy?: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-  _count?: {
-    tasks: number
-    teamMembers: number
-  }
-}
+import { Project, ProjectStatus } from "@/types/project"
+import { Task } from "@/types/task"
 
 export default function ProjectPage() {
   const params = useParams()

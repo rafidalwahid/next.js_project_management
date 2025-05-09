@@ -11,44 +11,14 @@ import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { RoleBadge } from "@/components/ui/role-badge"
-
-interface AttendanceRecord {
-  id: string
-  userId: string
-  checkInTime: string
-  checkOutTime?: string
-  checkInLocationName?: string
-  checkOutLocationName?: string
-  totalHours?: number
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-    role: string
-  }
-  project?: {
-    id: string
-    title: string
-  }
-  task?: {
-    id: string
-    title: string
-  }
-}
-
-interface AttendanceSummary {
-  totalRecords: number
-  totalHours: number
-  userCount: number
-}
+import { AttendanceWithRelations, AttendanceSummary } from "@/types/attendance"
 
 interface TeamAttendanceProps {
   projectId: string
 }
 
 export function TeamAttendance({ projectId }: TeamAttendanceProps) {
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceWithRelations[]>([])
   const [summary, setSummary] = useState<AttendanceSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -124,7 +94,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
     let key;
 
     if (groupBy === "user") {
-      key = record.user.id;
+      key = record.user?.id || 'unknown';
     } else if (groupBy === "date") {
       key = format(new Date(record.checkInTime), "yyyy-MM-dd");
     } else if (groupBy === "location") {
@@ -137,7 +107,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
 
     groups[key].push(record);
     return groups;
-  }, {} as Record<string, AttendanceRecord[]>);
+  }, {} as Record<string, AttendanceWithRelations[]>);
 
   // Get user names for user grouping
   const getUserName = (userId: string) => {

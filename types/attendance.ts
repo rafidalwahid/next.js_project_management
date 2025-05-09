@@ -1,6 +1,6 @@
 /**
  * Attendance Management Types
- * 
+ *
  * This file contains all type definitions related to attendance tracking in the application.
  * Following Next.js 15 documentation standards for type definitions.
  */
@@ -143,6 +143,7 @@ export interface AttendanceGroup {
   totalHours: number;
   uniqueDaysCount: number;
   averageHoursPerDay: number;
+  checkInCount?: number;
 }
 
 /**

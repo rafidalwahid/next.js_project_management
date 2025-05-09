@@ -2,29 +2,11 @@ import prisma from '../prisma';
 import { Prisma, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { getTaskListIncludeObject } from "./task-queries"; // Assuming this is correctly imported
+import { CreateUserDTO, UpdateUserDTO } from '@/types/user';
 
-// User types for API operations
-export type UserCreateInput = {
-  name: string;
-  email: string;
-  password?: string;
-  image?: string;
-  role?: string;
-  bio?: string;
-  jobTitle?: string;
-  department?: string;
-  location?: string;
-  phone?: string;
-  skills?: string[];
-  socialLinks?: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
-    website?: string;
-  };
-};
-
-export type UserUpdateInput = Partial<UserCreateInput>;
+// Re-export types from types/user.ts for backward compatibility
+export type UserCreateInput = CreateUserDTO;
+export type UserUpdateInput = UpdateUserDTO;
 
 // Get all users with optional filters and pagination
 export async function getUsers(args: {

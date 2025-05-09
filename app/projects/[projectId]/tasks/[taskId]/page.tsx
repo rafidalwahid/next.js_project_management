@@ -27,59 +27,14 @@ import { TimeTracker } from "@/components/project/time-tracker"
 import { format } from "date-fns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Breadcrumbs } from "@/components/breadcrumbs"
-
-interface TaskAssignee {
-  id: string
-  taskId: string
-  userId: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface Task {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  startDate?: string | null
-  endDate?: string | null
-  dueDate?: string | null
-  timeSpent?: number | null
-  estimatedTime?: number | null
-  projectId: string
-  statusId?: string | null
-  parentId?: string | null
-  order: number
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-  assignees?: TaskAssignee[]
-  status?: {
-    id: string
-    name: string
-    color: string
-  } | null
-  project: {
-    id: string
-    title: string
-  }
-  parent?: {
-    id: string
-    title: string
-  } | null
-  subtasks?: Task[]
-}
+import { Task, TaskAssignee, TaskWithRelations } from "@/types/task"
 
 export default function TaskDetailPage() {
   const params = useParams()
   const router = useRouter()
   const projectId = params.projectId as string
   const taskId = params.taskId as string
-  const [task, setTask] = useState<Task | null>(null)
+  const [task, setTask] = useState<TaskWithRelations | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)

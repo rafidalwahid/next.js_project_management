@@ -1,16 +1,13 @@
 import { fetchAPI } from './api';
 import { signOut as nextAuthSignOut } from 'next-auth/react';
+import { RegistrationData } from '@/types/user';
 
 /**
  * Auth utility functions for authentication and user management
  * These functions are thin wrappers around NextAuth.js functionality
  */
 
-export interface RegisterCredentials {
-  name: string;
-  email: string;
-  password: string;
-}
+export type RegisterCredentials = Pick<RegistrationData, 'name' | 'email' | 'password'>;
 
 /**
  * Register a new user

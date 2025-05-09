@@ -12,6 +12,12 @@ import {
   isSameDay,
   addDays
 } from "date-fns";
+import {
+  AttendanceFilterOptions,
+  AttendanceHistoryResponse,
+  AttendanceGroup,
+  AttendanceWithRelations
+} from "@/types/attendance";
 
 // Constants - keep consistent with other attendance endpoints
 const MAX_WORKING_HOURS_PER_DAY = 12;
@@ -29,13 +35,17 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const url = new URL(req.url);
-    const period = url.searchParams.get("period");
-    const startDate = url.searchParams.get("startDate");
-    const endDate = url.searchParams.get("endDate");
-    const limit = parseInt(url.searchParams.get("limit") || "30");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const filterOptions: AttendanceFilterOptions = {
+      period: url.searchParams.get("period") as 'day' | 'week' | 'month' | 'custom' | undefined,
+      startDate: url.searchParams.get("startDate") || undefined,
+      endDate: url.searchParams.get("endDate") || undefined,
+      limit: parseInt(url.searchParams.get("limit") || "30"),
+      page: parseInt(url.searchParams.get("page") || "1"),
+      groupBy: url.searchParams.get("groupBy") as 'day' | 'week' | 'month' | undefined
+    };
+
+    const { period, startDate, endDate, limit, page, groupBy } = filterOptions;
     const skip = (page - 1) * limit;
-    const groupBy = url.searchParams.get("groupBy"); // 'day', 'week', 'month'
 
     // Build the where clause
     const where: any = {
@@ -86,7 +96,7 @@ export async function GET(req: NextRequest) {
     const totalCount = await prisma.attendance.count({ where });
 
     // Get attendance records
-    const attendanceRecords = await prisma.attendance.findMany({
+    const attendanceRecords: AttendanceWithRelations[] = await prisma.attendance.findMany({
       where,
       orderBy: {
         checkInTime: 'desc',
@@ -117,7 +127,7 @@ export async function GET(req: NextRequest) {
       : attendanceRecords;
 
     // Group records if requested
-    let groupedRecords = [];
+    let groupedRecords: AttendanceGroup[] = [];
     // Create a map to group records (declared outside the if block so it can be referenced in the response)
     const groupMap = new Map();
 
@@ -221,18 +231,40 @@ export async function GET(req: NextRequest) {
       groupedRecords = tempGroupedRecords.slice(skip, skip + limit);
     }
 
-    // Return the response with both individual and grouped records
-    return NextResponse.json({
-      attendanceRecords: !groupBy ? paginatedRecords : [], // Only include if not grouping
-      groupedRecords: groupBy ? groupedRecords : [],
-      totalGroups: groupBy ? groupMap.size : null,
-      groupBy: groupBy || null,
+    // Calculate summary statistics
+    const summary = {
+      totalHours: attendanceRecords.reduce((sum, record) =>
+        sum + (record.totalHours || 0), 0),
+      averageHoursPerDay: 0,
+      uniqueDaysCount: new Set(
+        attendanceRecords.map(record =>
+          format(new Date(record.checkInTime), 'yyyy-MM-dd'))
+      ).size
+    };
+
+    // Calculate average if we have unique days
+    if (summary.uniqueDaysCount > 0) {
+      summary.averageHoursPerDay = summary.totalHours / summary.uniqueDaysCount;
+    }
+
+    // Create properly typed response
+    const response: AttendanceHistoryResponse = {
+      records: !groupBy ? paginatedRecords : [], // Only include if not grouping
+      groupedRecords: groupBy ? groupedRecords : undefined,
       pagination: {
         total: totalCount,
         page,
         limit,
         totalPages: Math.ceil(totalCount / limit),
       },
+      summary
+    };
+
+    // Return the response with both individual and grouped records
+    return NextResponse.json({
+      ...response,
+      totalGroups: groupBy ? groupMap.size : null,
+      groupBy: groupBy || null,
       period,
       dateRange: {
         start: startDate,

@@ -1,20 +1,12 @@
 "use client"
 
-import { User } from "lucide-react"
+import { User as UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UserCard } from "@/components/team/user-card"
-
-interface User {
-  id: string
-  name: string | null
-  email: string
-  image?: string | null
-  role: string
-  createdAt?: string
-}
+import { UserSummary } from "@/types/user"
 
 interface UserGridProps {
-  users: User[]
+  users: UserSummary[]
   onDelete: (userId: string) => void
 }
 
@@ -24,7 +16,7 @@ export function UserGrid({ users, onDelete }: UserGridProps) {
       <div className="flex h-[300px] items-center justify-center rounded-md border border-dashed">
         <div className="text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-            <User className="h-6 w-6 text-muted-foreground" />
+            <UserIcon className="h-6 w-6 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-medium">No Users Found</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-md">

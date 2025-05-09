@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { MoreHorizontal, Edit, Trash, User, Mail, Shield, Calendar, ShieldCheck } from "lucide-react"
+import { MoreHorizontal, Edit, Trash, User as UserIcon, Mail, Shield, Calendar, ShieldCheck } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,14 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { formatDistanceToNow } from "date-fns"
+import { UserSummary } from "@/types/user"
 
 interface UserCardProps {
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image?: string | null
-    role: string
+  user: UserSummary & {
     createdAt?: string
   }
   onDelete: (userId: string) => void
@@ -98,7 +94,7 @@ export function UserCard({ user, onDelete }: UserCardProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={`/profile/${user.id}`} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
+                  <UserIcon className="mr-2 h-4 w-4" />
                   View Profile
                 </Link>
               </DropdownMenuItem>

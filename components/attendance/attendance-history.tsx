@@ -29,19 +29,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CorrectionRequestDialog } from "@/components/attendance/correction-request-dialog"
+import {
+  AttendanceWithRelations,
+  AttendanceGroup,
+  AttendanceHistoryResponse,
+  AttendanceFilterOptions
+} from "@/types/attendance"
 
 export function AttendanceHistory() {
   const { toast } = useToast()
   const isMobile = useIsMobile()
   const [loading, setLoading] = useState(true)
-  const [attendanceRecords, setAttendanceRecords] = useState<any[]>([])
-  const [groupedRecords, setGroupedRecords] = useState<any[]>([])
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceWithRelations[]>([])
+  const [groupedRecords, setGroupedRecords] = useState<AttendanceGroup[]>([])
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedRecord, setSelectedRecord] = useState<any>(null)
-  const [groupBy, setGroupBy] = useState<string | null>(null)
+  const [selectedRecord, setSelectedRecord] = useState<AttendanceWithRelations | null>(null)
+  const [groupBy, setGroupBy] = useState<'day' | 'week' | 'month' | null>(null)
 
   useEffect(() => {
     fetchAttendanceHistory()
@@ -55,39 +61,65 @@ export function AttendanceHistory() {
         url += `&groupBy=${groupBy}`
       }
 
+      // First, clear any previous data
+      if (groupBy) {
+        // When using groupBy, we'll primarily use groupedRecords
+        setGroupedRecords([])
+      } else {
+        // When not using groupBy, we'll primarily use attendanceRecords
+        setAttendanceRecords([])
+      }
+
       const response = await fetch(url)
-      const data = await response.json()
 
-      if (response.ok) {
-        setAttendanceRecords(data.attendanceRecords)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to load attendance history (${response.status})`)
+      }
 
-        // Debug the grouped records
-        console.log('Grouped records from API:', data.groupedRecords)
+      // Parse the response data
+      const data = await response.json() as AttendanceHistoryResponse
 
-        // Make sure we're getting the grouped records correctly
+      // Always set the regular records
+      if (Array.isArray(data.records)) {
+        setAttendanceRecords(data.records)
+      } else {
+        setAttendanceRecords([])
+      }
+
+      // Set grouped records if available and groupBy is active
+      if (groupBy) {
         if (data.groupedRecords && Array.isArray(data.groupedRecords)) {
-          setGroupedRecords(data.groupedRecords)
+          // Process the grouped records to ensure they have all required properties
+          const processedGroups = data.groupedRecords.map(group => ({
+            ...group,
+            // Ensure checkInCount exists, fallback to records.length
+            checkInCount: group.checkInCount || group.records.length
+          }))
+          setGroupedRecords(processedGroups)
         } else {
           setGroupedRecords([])
-          console.error('Invalid grouped records format:', data.groupedRecords)
         }
-
-        setTotalPages(data.pagination.totalPages)
-        setError(null)
       } else {
-        setError(data.error || "Failed to load attendance history")
-        toast({
-          title: "Error",
-          description: data.error || "Failed to load attendance history",
-          variant: "destructive",
-        })
+        // When not grouping, we don't need grouped records
+        setGroupedRecords([])
       }
-    } catch (err) {
+
+      // Set pagination info
+      if (data.pagination && typeof data.pagination.totalPages === 'number') {
+        setTotalPages(data.pagination.totalPages)
+      } else {
+        setTotalPages(1)
+      }
+
+      setError(null)
+    } catch (err: any) {
       console.error("Error fetching attendance history:", err)
-      setError("Failed to load attendance history")
+      const errorMessage = err.message || "Failed to load attendance history"
+      setError(errorMessage)
       toast({
         title: "Error",
-        description: "Failed to load attendance history",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -151,7 +183,7 @@ export function AttendanceHistory() {
     }
   }
 
-  const viewLocationDetails = (record: any) => {
+  const viewLocationDetails = (record: AttendanceWithRelations) => {
     setSelectedRecord(record)
   }
 
@@ -204,7 +236,7 @@ export function AttendanceHistory() {
             <div className="p-4 text-center text-muted-foreground">
               {error}
             </div>
-          ) : attendanceRecords.length === 0 && groupedRecords.length === 0 ? (
+          ) : attendanceRecords.length === 0 && (!groupedRecords || groupedRecords.length === 0) ? (
             <div className="p-4 text-center text-muted-foreground">
               No attendance records found
             </div>
@@ -213,7 +245,7 @@ export function AttendanceHistory() {
             <>
               {/* Mobile card view for grouped records */}
               <div className="block sm:hidden space-y-4">
-                {groupedRecords.map((group) => (
+                {groupedRecords?.map((group) => (
                   <div key={group.period} className="border rounded-lg overflow-hidden">
                     <div className="bg-muted/50 p-3 border-b">
                       <h3 className="font-medium">
@@ -232,7 +264,7 @@ export function AttendanceHistory() {
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="bg-muted/30 p-2 rounded">
                           <div className="text-xs text-muted-foreground">Check-ins</div>
-                          <div className="font-medium">{group.checkInCount}</div>
+                          <div className="font-medium">{group.checkInCount || group.records.length}</div>
                         </div>
                         <div className="bg-muted/30 p-2 rounded">
                           <div className="text-xs text-muted-foreground">Total Hours</div>
@@ -263,13 +295,13 @@ export function AttendanceHistory() {
                               )}
                             </DialogTitle>
                             <DialogDescription>
-                              {group.checkInCount} check-ins, {group.totalHours.toFixed(2)} total hours
+                              {group.checkInCount || group.records.length} check-ins, {group.totalHours.toFixed(2)} total hours
                             </DialogDescription>
                           </DialogHeader>
                           <div className="max-h-[60vh] overflow-auto">
                             {/* Mobile view of records in dialog */}
                             <div className="block sm:hidden space-y-3">
-                              {group.records.map((record: any) => (
+                              {group.records.map((record: AttendanceWithRelations) => (
                                 <div key={record.id} className="border rounded-lg p-3 space-y-2">
                                   <div className="flex justify-between items-center">
                                     <div className="font-medium">{safeFormat(record.checkInTime, "MMM d, yyyy")}</div>
@@ -315,7 +347,7 @@ export function AttendanceHistory() {
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {group.records.map((record: any) => (
+                                  {group.records.map((record: AttendanceWithRelations) => (
                                     <TableRow key={record.id}>
                                       <TableCell className="whitespace-nowrap">
                                         {safeFormat(record.checkInTime, "MMM d, yyyy")}
@@ -367,7 +399,7 @@ export function AttendanceHistory() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {groupedRecords.map((group) => (
+                    {groupedRecords?.map((group) => (
                       <TableRow key={group.period}>
                         <TableCell className="font-medium">
                           {groupBy === 'day' ? (
@@ -381,7 +413,7 @@ export function AttendanceHistory() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {group.checkInCount} check-ins
+                          {group.checkInCount || group.records.length} check-ins
                         </TableCell>
                         <TableCell>
                           {group.totalHours.toFixed(2)} hours
@@ -415,7 +447,7 @@ export function AttendanceHistory() {
                                   )}
                                 </DialogTitle>
                                 <DialogDescription>
-                                  {group.checkInCount} check-ins, {group.totalHours.toFixed(2)} total hours
+                                  {group.checkInCount || group.records.length} check-ins, {group.totalHours.toFixed(2)} total hours
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="max-h-[60vh] overflow-auto">
@@ -431,7 +463,7 @@ export function AttendanceHistory() {
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {group.records.map((record: any) => (
+                                      {group.records.map((record: AttendanceWithRelations) => (
                                         <TableRow key={record.id}>
                                           <TableCell className="whitespace-nowrap">
                                             {safeFormat(record.checkInTime, "MMM d, yyyy")}
@@ -477,7 +509,7 @@ export function AttendanceHistory() {
             <>
               {/* Mobile card view for individual records */}
               <div className="block sm:hidden space-y-3">
-                {attendanceRecords.map((record) => (
+                {attendanceRecords.map((record: AttendanceWithRelations) => (
                   <div key={record.id} className="border rounded-lg overflow-hidden">
                     <div className="bg-muted/50 p-3 border-b flex justify-between items-center">
                       <div className="font-medium">{safeFormat(record.checkInTime, "MMM d, yyyy")}</div>

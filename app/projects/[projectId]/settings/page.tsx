@@ -16,19 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns"
 import { CalendarIcon, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-interface Project {
-  id: string
-  title: string
-  description: string | null
-  startDate: string | null
-  endDate: string | null
-  dueDate: string | null
-  totalTimeSpent: number | null
-  estimatedTime: number | null
-  createdAt: string
-  updatedAt: string
-}
+import { Project } from "@/types/project"
 
 export default function ProjectSettingsPage() {
   const params = useParams()

@@ -10,20 +10,10 @@ import { useToast } from "@/components/ui/use-toast"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { Settings, Clock, Calendar, Bell, CheckCircle2 } from "lucide-react"
+import { AttendanceSettings, UpdateAttendanceSettingsDTO } from "@/types/attendance"
 
 interface AttendanceSettingsFormProps {
   userId?: string // Optional - if not provided, uses current user
-}
-
-interface AttendanceSettings {
-  id: string
-  userId: string
-  workHoursPerDay: number
-  workDays: string
-  reminderEnabled: boolean
-  reminderTime: string | null
-  autoCheckoutEnabled: boolean
-  autoCheckoutTime: string | null
 }
 
 const DAYS_OF_WEEK = [
@@ -64,7 +54,7 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
       }
 
       const data = await response.json()
-      setSettings(data)
+      setSettings(data.settings)
     } catch (error) {
       console.error('Error fetching attendance settings:', error)
       toast({
@@ -86,9 +76,13 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
       setIsSaving(true)
 
       // Convert selected days array back to comma-separated string
-      const updatedSettings = {
-        ...settings,
-        workDays: selectedDays.join(',')
+      const updatedSettings: UpdateAttendanceSettingsDTO = {
+        workHoursPerDay: settings.workHoursPerDay,
+        workDays: selectedDays.join(','),
+        reminderEnabled: settings.reminderEnabled,
+        reminderTime: settings.reminderTime,
+        autoCheckoutEnabled: settings.autoCheckoutEnabled,
+        autoCheckoutTime: settings.autoCheckoutTime
       }
 
       const response = await fetch('/api/attendance/settings', {
@@ -104,7 +98,7 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
       }
 
       const data = await response.json()
-      setSettings(data)
+      setSettings(data.settings)
 
       toast({
         title: "Success",

@@ -26,6 +26,13 @@ import {
   getSyncQueue,
   removeFromSyncQueue
 } from "@/lib/indexed-db"
+import {
+  Attendance,
+  AttendanceWithRelations,
+  AttendanceCheckInDTO,
+  AttendanceCheckOutDTO,
+  AttendanceResponse
+} from "@/types/attendance"
 
 export function AttendanceWidget() {
   const { data: session } = useSession()
@@ -35,7 +42,7 @@ export function AttendanceWidget() {
   const [loading, setLoading] = useState(true)
   const [checkingIn, setCheckingIn] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
-  const [currentAttendance, setCurrentAttendance] = useState<any>(null)
+  const [currentAttendance, setCurrentAttendance] = useState<AttendanceWithRelations | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const [syncSupported, setSyncSupported] = useState(false)
@@ -51,7 +58,8 @@ export function AttendanceWidget() {
 
       if (response.ok) {
         // Use currentAttendance from the new API response format, falling back to attendance for backward compatibility
-        setCurrentAttendance(data.currentAttendance || data.attendance)
+        const attendanceData: AttendanceWithRelations = data.currentAttendance || data.attendance
+        setCurrentAttendance(attendanceData)
         setError(null)
       } else {
         setError(data.error || "Failed to load attendance data")
@@ -264,10 +272,10 @@ export function AttendanceWidget() {
       const position = await getCurrentPosition()
 
       // Prepare check-in data
-      const checkInData = {
+      const checkInData: AttendanceCheckInDTO = {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        timestamp: new Date().toISOString(),
+        notes: undefined
       }
 
       if (isOnline) {
@@ -280,7 +288,7 @@ export function AttendanceWidget() {
           body: JSON.stringify(checkInData),
         })
 
-        const data = await response.json()
+        const data: AttendanceResponse = await response.json()
 
         if (response.ok) {
           setCurrentAttendance(data.attendance)
@@ -309,14 +317,17 @@ export function AttendanceWidget() {
         setPendingActions(queue)
 
         // Create temporary attendance record for UI
-        const tempAttendance = {
+        const tempAttendance: AttendanceWithRelations = {
           id: `temp-${Date.now()}`,
-          userId: session?.user?.id,
+          userId: session?.user?.id || '',
           checkInTime: new Date().toISOString(),
           checkInLatitude: position.coords.latitude,
           checkInLongitude: position.coords.longitude,
           checkInLocationName: 'Location will be updated when online',
           checkOutTime: null,
+          autoCheckout: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           pendingSync: true
         }
 
@@ -380,11 +391,11 @@ export function AttendanceWidget() {
       const position = await getCurrentPosition()
 
       // Prepare check-out data
-      const checkOutData = {
+      const checkOutData: AttendanceCheckOutDTO = {
         attendanceId: currentAttendance.id,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        timestamp: new Date().toISOString(),
+        notes: undefined
       }
 
       if (isOnline) {
@@ -397,7 +408,7 @@ export function AttendanceWidget() {
           body: JSON.stringify(checkOutData),
         })
 
-        const data = await response.json()
+        const data: AttendanceResponse = await response.json()
 
         if (response.ok) {
           setCurrentAttendance(data.attendance)
@@ -426,7 +437,7 @@ export function AttendanceWidget() {
         setPendingActions(queue)
 
         // Create temporary updated attendance record for UI
-        const tempAttendance = {
+        const tempAttendance: AttendanceWithRelations = {
           ...currentAttendance,
           checkOutTime: new Date().toISOString(),
           checkOutLatitude: position.coords.latitude,
@@ -434,7 +445,8 @@ export function AttendanceWidget() {
           checkOutLocationName: 'Location will be updated when online',
           pendingSync: true,
           // Estimate total hours
-          totalHours: (new Date().getTime() - new Date(currentAttendance.checkInTime).getTime()) / (1000 * 60 * 60)
+          totalHours: (new Date().getTime() - new Date(currentAttendance.checkInTime).getTime()) / (1000 * 60 * 60),
+          updatedAt: new Date().toISOString()
         }
 
         setCurrentAttendance(tempAttendance)

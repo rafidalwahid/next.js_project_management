@@ -40,36 +40,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Pagination } from "@/components/tasks/pagination"
-
-interface Project {
-  id: string;
-  title: string;
-  startDate?: string | null;
-  endDate?: string | null;
-  createdBy?: {
-    id: string;
-    name?: string | null;
-    email: string;
-    image?: string | null;
-  };
-  statuses?: {
-    id: string;
-    name: string;
-    color: string;
-    description?: string | null;
-    isDefault: boolean;
-  }[];
-  teamMembers?: {
-    id: string;
-    userId: string;
-    user: {
-      id: string;
-      name?: string | null;
-      email: string;
-      image?: string | null;
-    };
-  }[];
-}
+import { Project, TeamMember } from "@/types/project"
 
 export default function ProjectsPage() {
   const [page, setPage] = useState(1)

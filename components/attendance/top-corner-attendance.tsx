@@ -21,6 +21,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  AttendanceWithRelations,
+  AttendanceCheckInDTO,
+  AttendanceCheckOutDTO,
+  AttendanceResponse
+} from "@/types/attendance"
 
 export function TopCornerAttendance() {
   const { data: session } = useSession()
@@ -31,7 +37,7 @@ export function TopCornerAttendance() {
   const [loading, setLoading] = useState(true)
   const [checkingIn, setCheckingIn] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
-  const [currentAttendance, setCurrentAttendance] = useState<any>(null)
+  const [currentAttendance, setCurrentAttendance] = useState<AttendanceWithRelations | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
 
@@ -40,7 +46,7 @@ export function TopCornerAttendance() {
     try {
       setLoading(true)
       const response = await fetch('/api/attendance/current')
-      const data = await response.json()
+      const data: AttendanceResponse = await response.json()
 
       if (response.ok) {
         setCurrentAttendance(data.attendance)
@@ -101,10 +107,9 @@ export function TopCornerAttendance() {
       const position = await getCurrentPosition()
 
       // Prepare check-in data
-      const checkInData = {
+      const checkInData: AttendanceCheckInDTO = {
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        timestamp: new Date().toISOString(),
+        longitude: position.coords.longitude
       }
 
       // Online mode - send request directly
@@ -116,7 +121,7 @@ export function TopCornerAttendance() {
         body: JSON.stringify(checkInData),
       })
 
-      const data = await response.json()
+      const data: AttendanceResponse = await response.json()
 
       if (response.ok) {
         setCurrentAttendance(data.attendance)
@@ -165,11 +170,10 @@ export function TopCornerAttendance() {
       const position = await getCurrentPosition()
 
       // Prepare check-out data
-      const checkOutData = {
+      const checkOutData: AttendanceCheckOutDTO = {
         attendanceId: currentAttendance.id,
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        timestamp: new Date().toISOString(),
+        longitude: position.coords.longitude
       }
 
       // Online mode - send request directly
@@ -181,7 +185,7 @@ export function TopCornerAttendance() {
         body: JSON.stringify(checkOutData),
       })
 
-      const data = await response.json()
+      const data: AttendanceResponse = await response.json()
 
       if (response.ok) {
         setCurrentAttendance(data.attendance)

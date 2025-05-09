@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { Task } from "@/types/task";
+import { ProjectStatus } from "@/types/project";
 
 // PATCH: Update a task's status
 export async function PATCH(

@@ -1,15 +1,6 @@
 import useSWR from 'swr';
 import { fetchAPI, projectStatusApi } from '@/lib/api';
-
-export interface ProjectStatus {
-  id: string;
-  name: string;
-  color: string;
-  description: string | null;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { ProjectStatus } from '@/types/project';
 
 export function useProjectStatuses() {
   const { data, error, isLoading, mutate } = useSWR(

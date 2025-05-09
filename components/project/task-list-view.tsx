@@ -25,52 +25,8 @@ import { useToast } from "@/hooks/use-toast"
 import { QuickTaskDialog } from "@/components/project/quick-task-dialog"
 import { MoreHorizontal, ArrowUpDown, Clock, Calendar, Plus, UserPlus } from "lucide-react"
 import { AssignMembersPopup } from "@/components/project/assign-members-popup"
-
-interface Task {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  startDate?: string | null
-  endDate?: string | null
-  dueDate?: string | null
-  timeSpent?: number | null
-  estimatedTime?: number | null
-  projectId: string
-  statusId?: string | null
-  parentId?: string | null
-  order: number
-  createdAt: string
-  updatedAt: string
-  assignees?: TaskAssignee[]
-  status?: {
-    id: string
-    name: string
-    color: string
-    isCompletedStatus?: boolean
-  } | null
-}
-
-interface TaskAssignee {
-  id: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface ProjectStatus {
-  id: string
-  name: string
-  color: string
-  description?: string | null
-  order: number
-  isDefault: boolean
-  isCompletedStatus: boolean
-  projectId: string
-}
+import { ProjectStatus } from "@/types/project"
+import { Task, TaskAssignee } from "@/types/task"
 
 interface TaskListViewProps {
   projectId: string

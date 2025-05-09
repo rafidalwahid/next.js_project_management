@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { z } from "zod";
+import { AttendanceSettings, UpdateAttendanceSettingsDTO, AttendanceSettingsResponse } from "@/types/attendance";
 
 // Validation schema for attendance settings
 const updateSettingsSchema = z.object({
@@ -41,11 +42,17 @@ export async function GET(req: NextRequest) {
           autoCheckoutEnabled: false,
         },
       });
-      
-      return NextResponse.json(defaultSettings);
+
+      const response: AttendanceSettingsResponse = {
+        settings: defaultSettings as AttendanceSettings
+      };
+      return NextResponse.json(response);
     }
 
-    return NextResponse.json(settings);
+    const response: AttendanceSettingsResponse = {
+      settings: settings as AttendanceSettings
+    };
+    return NextResponse.json(response);
   } catch (error: any) {
     console.error("Error fetching attendance settings:", error);
     return NextResponse.json(
@@ -67,9 +74,9 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Parse and validate request body
-    const body = await req.json();
+    const body = await req.json() as UpdateAttendanceSettingsDTO;
     const validationResult = updateSettingsSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
       return NextResponse.json(
         { error: "Validation error", details: validationResult.error.format() },
@@ -77,14 +84,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { 
-      workHoursPerDay, 
-      workDays, 
-      reminderEnabled, 
-      reminderTime, 
-      autoCheckoutEnabled, 
-      autoCheckoutTime 
-    } = validationResult.data;
+    const {
+      workHoursPerDay,
+      workDays,
+      reminderEnabled,
+      reminderTime,
+      autoCheckoutEnabled,
+      autoCheckoutTime
+    } = validationResult.data as UpdateAttendanceSettingsDTO;
 
     // Update or create settings
     const settings = await prisma.attendanceSettings.upsert({
@@ -108,7 +115,10 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(settings);
+    const response: AttendanceSettingsResponse = {
+      settings: settings as AttendanceSettings
+    };
+    return NextResponse.json(response);
   } catch (error: any) {
     console.error("Error updating attendance settings:", error);
     return NextResponse.json(

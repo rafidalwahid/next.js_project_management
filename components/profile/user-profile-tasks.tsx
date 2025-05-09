@@ -14,18 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-interface Task {
-  id: string
-  title: string
-  status: string
-  priority: string
-  dueDate: string | null
-  project: {
-    id: string
-    title: string
-  }
-}
+import { Task } from "@/types/task"
 
 interface UserProfileTasksProps {
   tasks: Task[]

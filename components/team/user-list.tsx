@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Edit, Trash, User, MoreHorizontal, ShieldCheck } from "lucide-react"
+import { Edit, Trash, User as UserIcon, MoreHorizontal, ShieldCheck } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -16,17 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-interface User {
-  id: string
-  name: string | null
-  email: string
-  image?: string | null
-  role: string
-}
+import { UserSummary } from "@/types/user"
 
 interface UserListProps {
-  users: User[]
+  users: UserSummary[]
   onDelete: (userId: string) => void
 }
 
@@ -119,7 +112,7 @@ export function UserList({ users, onDelete }: UserListProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href={`/profile/${user.id}`} className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
+                        <UserIcon className="mr-2 h-4 w-4" />
                         View Profile
                       </Link>
                     </DropdownMenuItem>

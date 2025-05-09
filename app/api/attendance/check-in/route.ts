@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 import { getLocationName } from "@/lib/geo-utils";
+import { AttendanceCheckInDTO, AttendanceResponse } from "@/types/attendance";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { latitude, longitude, projectId, taskId, notes } = body;
+    const { latitude, longitude, projectId, taskId, notes }: AttendanceCheckInDTO = body;
 
     // Check if user already has an active attendance record (checked in but not checked out)
     const existingAttendance = await prisma.attendance.findFirst({
@@ -76,10 +77,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      message: "Check-in successful",
+    // Return response with proper type
+    const response: AttendanceResponse = {
       attendance
-    });
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Check-in error:", error);
     return NextResponse.json(

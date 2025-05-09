@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { format, startOfWeek, endOfWeek, formatDistanceToNow, differenceInSeconds } from "date-fns"
 import { calculateTotalHours } from "@/lib/utils/attendance-date-utils"
 import { WORK_DAY } from "@/lib/constants/attendance"
+import { AttendanceWithRelations, AttendanceStatistics } from "@/types/attendance"
 
 interface AttendanceSummaryProps {
   period: "today" | "week" | "month"
@@ -14,6 +15,7 @@ interface AttendanceSummaryProps {
   className?: string
 }
 
+// Dashboard-specific attendance data interface
 interface AttendanceData {
   daysWorked: number
   totalHours: number
@@ -119,7 +121,7 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
 
         if (period === "today") {
           // Use the new API response format
-          const attendance = result.currentAttendance || result.attendance
+          const attendance = (result.currentAttendance || result.attendance) as AttendanceWithRelations | null
           const totalHoursToday = result.totalHoursToday !== undefined ? result.totalHoursToday : (attendance?.totalHours || 0)
           const hasActiveSession = result.hasActiveSession || (attendance && !attendance.checkOutTime)
 
@@ -130,7 +132,7 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
             currentStatus: attendance ?
               (attendance.checkOutTime ? "checked-out" : "checked-in") :
               "none",
-            currentSessionStart: attendance?.checkInTime,
+            currentSessionStart: attendance?.checkInTime as string | undefined,
             hasActiveSession
           }
 
@@ -163,7 +165,7 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
           }
         } else {
           // For week or month
-          const records = result.attendanceRecords || []
+          const records = result.attendanceRecords || [] as AttendanceWithRelations[]
 
           if (records.length === 0) {
             processedData = {
@@ -177,11 +179,11 @@ export function AttendanceSummary({ period, title, subtitle, className }: Attend
               processedData.attendanceRate = 0
             }
           } else {
-            const uniqueDays = new Set(records.map((r: any) =>
+            const uniqueDays = new Set(records.map((r: AttendanceWithRelations) =>
               new Date(r.checkInTime).toDateString()
             )).size
 
-            const totalHours = records.reduce((sum: number, r: any) =>
+            const totalHours = records.reduce((sum: number, r: AttendanceWithRelations) =>
               sum + (r.totalHours || 0), 0)
 
             processedData = {

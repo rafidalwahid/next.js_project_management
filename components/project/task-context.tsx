@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { taskApi } from '@/lib/api';
 import { Task, TaskAssignee, TaskFilters } from '@/types/task';
 import { ProjectStatus } from '@/types/project';
+import { UserSummary } from '@/types/user';
 
 interface TaskContextType {
   tasks: Task[];
@@ -22,7 +23,7 @@ interface TaskContextType {
   updateTaskAssignees: (taskId: string, assigneeIds: string[]) => Promise<void>;
   createTask: (data: any) => Promise<void>;
   editTask: (taskId: string) => void;
-  users: any[];
+  users: UserSummary[];
 }
 
 const TaskContext = createContext<TaskContextType | null>(null);
@@ -38,7 +39,7 @@ export function TaskProvider({
   const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTasksLoading, setIsTasksLoading] = useState(true);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserSummary[]>([]);
   const [filters, setFilters] = useState<TaskFilters>({
     search: "",
     statusIds: [],

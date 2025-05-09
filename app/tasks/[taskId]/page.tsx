@@ -55,99 +55,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import React from "react"
-
-interface TaskAssignee {
-  id: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface Subtask {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  completed: boolean
-  dueDate?: string | null
-  assignees?: TaskAssignee[]
-  subtasks?: Subtask[]
-  parentId?: string | null
-  projectId: string
-}
-
-interface TaskComment {
-  id: string
-  content: string
-  createdAt: string
-  updatedAt: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface TaskAttachment {
-  id: string
-  filename: string
-  fileUrl: string
-  fileSize: number
-  fileType: string
-  createdAt: string
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-interface Task {
-  id: string
-  title: string
-  description?: string | null
-  priority: string
-  startDate?: string | null
-  endDate?: string | null
-  dueDate?: string | null
-  timeSpent?: number | null
-  estimatedTime?: number | null
-  projectId: string
-  statusId?: string | null
-  parentId?: string | null
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-  project: {
-    id: string
-    title: string
-  }
-  status?: {
-    id: string
-    name: string
-    color: string
-  } | null
-  parent?: {
-    id: string
-    title: string
-  } | null
-  assignees?: TaskAssignee[]
-  subtasks?: Subtask[]
-  activities?: any[]
-  comments?: TaskComment[]
-  attachments?: TaskAttachment[]
-}
+import { Task, TaskAssignee, TaskWithRelations, TaskComment, TaskAttachment } from "@/types/task"
 
 export default function TaskDetailPage() {
   const params = useParams()
   const router = useRouter()
   const taskId = params.taskId as string
-  const [task, setTask] = useState<Task | null>(null)
+  const [task, setTask] = useState<TaskWithRelations | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [newTask, setNewTask] = useState<any>({

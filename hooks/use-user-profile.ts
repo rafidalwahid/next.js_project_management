@@ -2,27 +2,12 @@ import useSWR from 'swr';
 import { useState } from 'react';
 import { userApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { UserWithProfile } from '@/types/user';
 
-export type UserProfile = {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-  bio?: string | null;
-  jobTitle?: string | null;
-  department?: string | null;
-  location?: string | null;
-  phone?: string | null;
-  skills?: string | null;
-  lastLogin?: string | null;
-  // Additional profile fields would be added here
-};
+export type UserProfile = UserWithProfile;
 
 export type UserProfileData = {
-  user: UserProfile;
+  user: UserWithProfile;
   projects: Array<{
     id: string;
     title: string;

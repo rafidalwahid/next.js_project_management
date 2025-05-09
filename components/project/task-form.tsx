@@ -37,15 +37,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command"
-
-interface ProjectStatus {
-  id: string
-  name: string
-  color: string
-  description?: string | null
-  order: number
-  isDefault: boolean
-}
+import { ProjectStatus } from "@/types/project"
 
 interface User {
   id: string

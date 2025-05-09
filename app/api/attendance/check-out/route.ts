@@ -15,6 +15,7 @@ import {
 } from "date-fns";
 import { WORK_DAY, API_ERROR_CODES, ACTION_TYPES } from "@/lib/constants/attendance";
 import { calculateTotalHours, getWorkdayEnd } from "@/lib/utils/attendance-date-utils";
+import { AttendanceCheckOutDTO, AttendanceResponse, Attendance } from "@/types/attendance";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { latitude, longitude, attendanceId, notes } = body;
+    const { latitude, longitude, attendanceId, notes }: AttendanceCheckOutDTO = body;
 
     // Find the active attendance record
     const attendance = attendanceId
@@ -160,9 +161,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Return response with proper type
+    const response: AttendanceResponse = {
+      attendance: updatedAttendance
+    };
+
     return NextResponse.json({
+      ...response,
       message: "Check-out successful",
-      attendance: updatedAttendance,
       wasAutoCheckout: isAutoCheckout,
       checkOutTime: checkOutTime.toISOString(),
       totalHours

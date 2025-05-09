@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { projectApi } from "@/lib/api"
+import { Project, ProjectWithRelations } from "@/types/project"
 
 export function ProjectTable() {
   const [page, setPage] = useState(1)
@@ -22,7 +23,7 @@ export function ProjectTable() {
   const { toast } = useToast()
 
   // Calculate project progress based on completed tasks vs total tasks
-  const calculateProgress = (project: any) => {
+  const calculateProgress = (project: ProjectWithRelations) => {
     if (!project._count) return 0
     const totalTasks = project._count.tasks || 0
     if (totalTasks === 0) return 0
@@ -57,7 +58,7 @@ export function ProjectTable() {
   }
 
   // Get status badge style based on status name
-  const getStatusBadge = (status: any) => {
+  const getStatusBadge = (status: ProjectStatus | undefined | null) => {
     if (!status) return "bg-gray-50 text-gray-700 border-gray-200"
 
     switch (status.name?.toLowerCase()) {

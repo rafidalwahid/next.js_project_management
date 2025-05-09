@@ -1,23 +1,10 @@
 import useSWR from 'swr';
 import { userApi } from '@/lib/api';
+import { UserSummary, UsersListResponse } from '@/types/user';
 
-type User = {
-  id: string;
-  name: string | null;
-  email: string;
-  image?: string | null;
-  role: string;
+// Extend UserSummary with createdAt for display purposes
+type UserWithCreatedAt = UserSummary & {
   createdAt?: string;
-};
-
-type UsersResponse = {
-  users: User[];
-  pagination?: {
-    page: number;
-    limit: number;
-    totalCount: number;
-    totalPages: number;
-  }
 };
 
 type UseUsersOptions = {
@@ -33,7 +20,7 @@ type UseUsersOptions = {
  */
 export function useUsers(options: UseUsersOptions = {}) {
   const { search = '', limit = 10, page = 1, role, projectId } = options;
-  
+
   // Build query string with all parameters
   const queryParams = new URLSearchParams();
   if (search) queryParams.set('search', search);
@@ -41,9 +28,9 @@ export function useUsers(options: UseUsersOptions = {}) {
   if (page) queryParams.set('skip', ((page - 1) * limit).toString());
   if (role && role !== 'all') queryParams.set('role', role);
   if (projectId) queryParams.set('projectId', projectId);
-  
+
   const queryString = queryParams.toString();
-  
+
   const { data, error, isLoading, mutate } = useSWR(
     `/api/users?${queryString}`,
     async () => {
@@ -54,7 +41,7 @@ export function useUsers(options: UseUsersOptions = {}) {
         role: role !== 'all' ? role : undefined,
         projectId
       });
-      return response as UsersResponse;
+      return response as UsersListResponse;
     }
   );
 
@@ -75,7 +62,7 @@ export function useProjectUsers(projectId: string, limit = 10) {
     projectId ? `/api/users?projectId=${projectId}&limit=${limit}` : null,
     async () => {
       const response = await userApi.getUsersInProject(projectId, limit);
-      return response as UsersResponse;
+      return response as UsersListResponse;
     }
   );
 
