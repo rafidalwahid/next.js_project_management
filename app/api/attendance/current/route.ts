@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
-import { calculateTotalHours } from "@/lib/utils/attendance-date-utils";
+import { calculateTotalHours } from "@/lib/utils/date";
 import { WORK_DAY } from "@/lib/constants/attendance";
 
 export async function GET(req: NextRequest) {

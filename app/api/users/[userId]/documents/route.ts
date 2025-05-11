@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
@@ -7,15 +7,13 @@ import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
-
-interface Params {
-  params: {
-    userId: string;
-  };
-}
+import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
 
 // GET /api/users/[userId]/documents - Get documents for a specific user
-export async function GET(req: NextRequest, { params }: Params) {
+export const GET: ApiRouteHandlerOneParam<'userId'> = async (
+  _req,
+  { params }
+) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -25,9 +23,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         { status: 401 }
       );
     }
-
-    // Extract userId from params, ensuring it's properly awaited
-    const { userId } = await Promise.resolve(params);
+    // Extract userId from params safely
+    const userId = await getParams(params).then(p => p.userId);
 
     // Check if user has permission to view this user's documents
     // Users can view their own documents, users with user_management permission can view any user's documents
@@ -61,7 +58,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST /api/users/[userId]/documents - Upload a document for a user
-export async function POST(req: NextRequest, { params }: Params) {
+export const POST: ApiRouteHandlerOneParam<'userId'> = async (
+  req,
+  { params }
+) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -71,15 +71,14 @@ export async function POST(req: NextRequest, { params }: Params) {
         { status: 401 }
       );
     }
-
-    // Extract userId from params, ensuring it's properly awaited
-    const { userId } = await Promise.resolve(params);
+    // Extract userId from params safely
+    const userId = await getParams(params).then(p => p.userId);
 
     // Check if user has permission to upload documents for this user
     // Users can upload documents to their own profile, users with user_management permission can upload to any profile
     const isOwnProfile = session.user.id === userId;
-    const hasUserManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "user_management"
     );
 
@@ -151,7 +150,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/users/[userId]/documents - Delete a document
-export async function DELETE(req: NextRequest, { params }: Params) {
+export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
+  req,
+  { params }
+) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -161,9 +163,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
         { status: 401 }
       );
     }
-
-    // Extract userId from params, ensuring it's properly awaited
-    const { userId } = await Promise.resolve(params);
+    // Extract userId from params safely
+    const userId = await getParams(params).then(p => p.userId);
     const { searchParams } = new URL(req.url);
     const documentId = searchParams.get('documentId');
 
@@ -177,8 +178,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     // Check if user has permission to delete this document
     // Users can delete their own documents, users with user_management permission can delete any document
     const isOwnProfile = session.user.id === userId;
-    const hasUserManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const hasUserManagementPermission = await PermissionService.hasPermissionById(
+      session.user.id,
       "user_management"
     );
 

@@ -6,13 +6,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SYSTEM_ROLES, getRoleDisplayName, SystemRole } from "@/lib/roles"
 
 interface RoleBadgeProps extends Omit<BadgeProps, "children"> {
-  role: string
+  role?: string
   showIcon?: boolean
   showTooltip?: boolean
+  type?: string // Added type property for compatibility
 }
 
 export function RoleBadge({
-  role,
+  role = "user",
   showIcon = true,
   showTooltip = true,
   className,
@@ -20,7 +21,10 @@ export function RoleBadge({
 }: RoleBadgeProps) {
   // Get the appropriate icon and style based on role
   const getIconAndVariant = () => {
-    switch (role) {
+    // Handle undefined role
+    const safeRole = role?.toLowerCase() || "user";
+
+    switch (safeRole) {
       case "admin":
         return {
           icon: <ShieldAlert className="mr-1 h-3 w-3" />,
@@ -57,7 +61,7 @@ export function RoleBadge({
       {...props}
     >
       {showIcon && icon}
-      {getRoleDisplayName(role as SystemRole)}
+      {getRoleDisplayName((role || "user") as SystemRole)}
     </Badge>
   )
 

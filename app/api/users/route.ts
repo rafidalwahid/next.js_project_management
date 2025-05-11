@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { getUsers, createUser } from '@/lib/queries/user-queries';
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { z } from "zod";
 
 // GET /api/users - Get all users with pagination and filtering
 export async function GET(req: NextRequest) {
@@ -126,35 +127,77 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/users - Create a new user
+// Define validation schema for registration
+const userSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.string().optional(),
+  image: z.string().optional(),
+  isRegistration: z.boolean().optional(),
+});
+
+// POST /api/users - Create a new user (admin) or register a new user (public)
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    // Parse request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
       );
     }
 
-    // Parse request body
-    const body = await req.json();
-    const { name, email, password, role, image } = body;
+    // Check if this is a registration request (public) or user creation (admin)
+    const isRegistration = body.isRegistration === true;
 
-    // Only admins can set roles other than 'user'
-    if (role && role !== 'user' && session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized: Only admins can create users with elevated roles' },
-        { status: 403 }
-      );
-    };
+    // For admin user creation, check authentication
+    if (!isRegistration) {
+      const session = await getServerSession(authOptions);
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
 
-    // Validate required fields
-    if (!name || !email) {
+      // Only admins can set roles other than 'user'
+      if (body.role && body.role !== 'user' && session.user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Unauthorized: Only admins can create users with elevated roles' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Validate request body
+    const validationResult = userSchema.safeParse(body);
+    if (!validationResult.success) {
+      console.log('Validation error:', validationResult.error.format());
       return NextResponse.json(
-        { error: 'Name and email are required' },
+        { error: "Validation error", details: validationResult.error.format() },
         { status: 400 }
+      );
+    }
+
+    const { name, email, password, role, image } = validationResult.data;
+
+    // For registration, force role to be 'user'
+    const userRole = isRegistration ? 'user' : role;
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 409 }
       );
     }
 
@@ -163,11 +206,11 @@ export async function POST(req: NextRequest) {
       name,
       email,
       password,
-      role,
+      role: userRole,
       image,
     });
 
-    return NextResponse.json(user, { status: 201 });
+    return NextResponse.json({ user }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating user:', error);
 

@@ -52,6 +52,8 @@ export interface AttendanceWithRelations extends Attendance {
     title: string;
   };
   correctionRequests?: AttendanceCorrectionRequest[];
+  // Flag for offline sync status
+  pendingSync?: boolean;
 }
 
 /**
@@ -218,6 +220,7 @@ export interface AttendanceFilterOptions {
  */
 export interface AttendanceResponse {
   attendance: AttendanceWithRelations;
+  error?: string;
 }
 
 /**

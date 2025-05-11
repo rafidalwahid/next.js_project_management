@@ -14,9 +14,12 @@ export type RegisterCredentials = Pick<RegistrationData, 'name' | 'email' | 'pas
  */
 export async function registerUser(credentials: RegisterCredentials) {
   try {
-    const response = await fetchAPI('/api/register', {
+    const response = await fetchAPI('/api/users', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({
+        ...credentials,
+        isRegistration: true
+      }),
     });
     return response;
   } catch (error) {

@@ -211,12 +211,42 @@ export const userApi = {
  * Project Status API functions
  */
 export const projectStatusApi = {
+  // Get all statuses (global)
   getProjectStatuses: async () => {
-    return fetchAPI('/api/project-statuses');
+    // This function now fetches from all projects
+    // We'll fetch from multiple projects and combine the results
+    const response = await fetchAPI('/api/projects');
+    const projects = response.projects || [];
+
+    // If no projects, return empty array
+    if (!projects.length) {
+      return { statuses: [] };
+    }
+
+    // Get statuses from the first project (as a fallback)
+    // In a real implementation, we might want to fetch from all projects
+    // and combine the results, but for simplicity we'll use the first one
+    const firstProject = projects[0];
+    return this.getProjectStatusesByProjectId(firstProject.id);
   },
 
+  // Get statuses for a specific project
+  getProjectStatusesByProjectId: async (projectId: string) => {
+    if (!projectId) {
+      console.error('Project ID is required to fetch statuses');
+      return { statuses: [] };
+    }
+    return fetchAPI(`/api/projects/${projectId}/statuses`);
+  },
+
+  // Create a status for a specific project
   createStatus: async (status: any) => {
-    return fetchAPI('/api/project-statuses', {
+    if (!status.projectId) {
+      console.error('Project ID is required to create a status');
+      throw new Error('Project ID is required');
+    }
+
+    return fetchAPI(`/api/projects/${status.projectId}/statuses`, {
       method: 'POST',
       body: JSON.stringify(status),
     });

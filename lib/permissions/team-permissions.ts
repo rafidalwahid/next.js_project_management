@@ -8,15 +8,19 @@ import { logActivity } from "@/lib/activity-logger";
  * @param teamMemberId The ID of the team member to check
  * @param session The user's session
  * @param action The action being performed (view, update, delete)
- * @returns An object with hasPermission and teamMember properties
+ * @returns An object with hasPermission, teamMember, and error properties
  */
 export async function checkTeamMemberPermission(
   teamMemberId: string,
   session: Session | null,
   action: 'view' | 'update' | 'delete' = 'view'
-) {
+): Promise<{
+  hasPermission: boolean;
+  teamMember: any | null;
+  error: string | null;
+}> {
   // If no session, no permission
-  if (!session || !session.user.id) {
+  if (!session || !session.user?.id) {
     return { hasPermission: false, teamMember: null, error: "Unauthorized" };
   }
 
@@ -134,15 +138,19 @@ export async function checkTeamMemberPermission(
  * @param projectId The ID of the project to check
  * @param session The user's session
  * @param action The action being performed (view, add, manage)
- * @returns An object with hasPermission and project properties
+ * @returns An object with hasPermission, project, and error properties
  */
 export async function checkProjectTeamPermission(
   projectId: string,
   session: Session | null,
   action: 'view' | 'add' | 'manage' = 'view'
-) {
+): Promise<{
+  hasPermission: boolean;
+  project: any | null;
+  error: string | null;
+}> {
   // If no session, no permission
-  if (!session || !session.user.id) {
+  if (!session || !session.user?.id) {
     return { hasPermission: false, project: null, error: "Unauthorized" };
   }
 

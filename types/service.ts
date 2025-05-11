@@ -62,9 +62,14 @@ export interface LocationNameResult {
   display_name: string;
   address: {
     road?: string;
+    street?: string;
     suburb?: string;
+    neighbourhood?: string;
     city?: string;
+    town?: string;
+    village?: string;
     state?: string;
+    province?: string;
     country?: string;
     postcode?: string;
   };

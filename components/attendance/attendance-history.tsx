@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { format, differenceInHours, differenceInMinutes } from "date-fns"
+import { format } from "date-fns"
+import { formatDate, calculateDuration } from "@/lib/utils/date"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -148,39 +149,11 @@ export function AttendanceHistory() {
     }
   }
 
-  const calculateDuration = (checkIn: string, checkOut: string | null) => {
-    if (!checkOut) return "In progress"
+  // We're now using the imported calculateDuration function from date-utils.ts
 
-    try {
-      const start = new Date(checkIn)
-      const end = new Date(checkOut)
-
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return "Invalid time"
-      }
-
-      const hours = differenceInHours(end, start)
-      const minutes = differenceInMinutes(end, start) % 60
-
-      return `${hours}h ${minutes}m`
-    } catch (error) {
-      console.error("Error calculating duration:", error)
-      return "Error"
-    }
-  }
-
-  // Safe date formatting function
+  // Safe date formatting function - using our formatDate function with custom format
   const safeFormat = (date: string | Date | null, formatString: string, fallback: string = "N/A") => {
-    if (!date) return fallback
-
-    try {
-      const dateObj = typeof date === 'string' ? new Date(date) : date
-      if (isNaN(dateObj.getTime())) return fallback
-      return format(dateObj, formatString)
-    } catch (error) {
-      console.error("Error formatting date:", error, date)
-      return fallback
-    }
+    return formatDate(date, formatString, fallback)
   }
 
   const viewLocationDetails = (record: AttendanceWithRelations) => {

@@ -23,18 +23,21 @@ interface CreateStatusModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onStatusCreated: (status: any) => void
+  projectId: string // Add projectId prop
 }
 
 export function CreateStatusModal({
   open,
   onOpenChange,
-  onStatusCreated
+  onStatusCreated,
+  projectId
 }: CreateStatusModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     color: "#22c55e", // Default green color
     description: "",
-    isDefault: false
+    isDefault: false,
+    projectId: projectId // Include projectId in form data
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +69,7 @@ export function CreateStatusModal({
     setError(null)
 
     try {
-      const response = await fetch("/api/project-statuses", {
+      const response = await fetch(`/api/projects/${projectId}/statuses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +113,8 @@ export function CreateStatusModal({
         name: "",
         color: "#22c55e",
         description: "",
-        isDefault: false
+        isDefault: false,
+        projectId: projectId
       })
     } catch (err: any) {
       console.error("Error creating status:", err)

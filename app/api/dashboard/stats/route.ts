@@ -184,7 +184,7 @@ const getDashboardStats = unstable_cache(
       systemStats // Will be null for non-admin users
     };
   },
-  [(userId, userRole, userPermissions) => `dashboard-stats-${userId}-${userRole}-${userPermissions.join(',')}`],
+  ['dashboard-stats'],
   { revalidate: 60 } // Cache for 1 minute
 );
 

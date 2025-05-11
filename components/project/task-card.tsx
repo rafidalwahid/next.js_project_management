@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
+import { safeFormat } from "@/lib/utils/date-utils"
 import { Calendar, MoreHorizontal, Pencil, Trash, Check, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -45,33 +46,24 @@ export function TaskCard({
     forceUpdate({});
   }, [task.dueDate, task.startDate, task.endDate]);
 
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return null;
-    return format(new Date(dateString), "MMM d, yyyy");
+  const formatDate = (dateString?: string | Date | null) => {
+    return safeFormat(dateString, "MMM d, yyyy", "Not set");
   };
 
   // Calculate days remaining or overdue
-  const getDueDateStatus = (dueDate?: string | null) => {
+  const getDueDateStatus = (dueDate?: string | Date | null) => {
     if (!dueDate) return null;
-
-    // Log the due date for debugging
-    console.log("Calculating due date status for:", dueDate);
 
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const due = new Date(dueDate);
+      // Use the date object if it's already a Date, otherwise create a new one
+      const due = dueDate instanceof Date ? new Date(dueDate) : new Date(dueDate);
       due.setHours(0, 0, 0, 0);
-
-      // Log the parsed date for debugging
-      console.log("Parsed due date:", due);
 
       const diffTime = due.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      // Log the calculated difference for debugging
-      console.log("Calculated difference in days:", diffDays);
 
       if (diffDays < 0) {
         return `${Math.abs(diffDays)} days overdue`;

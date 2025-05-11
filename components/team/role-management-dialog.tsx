@@ -75,7 +75,7 @@ export function RoleManagementDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <Alert variant="outline" className="mb-4">
+          <Alert variant="default" className="mb-4 border">
             <Info className="h-4 w-4" />
             <AlertTitle>System Role</AlertTitle>
             <AlertDescription>

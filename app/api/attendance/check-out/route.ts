@@ -14,7 +14,7 @@ import {
   setMinutes
 } from "date-fns";
 import { WORK_DAY, API_ERROR_CODES, ACTION_TYPES } from "@/lib/constants/attendance";
-import { calculateTotalHours, getWorkdayEnd } from "@/lib/utils/attendance-date-utils";
+import { calculateTotalHours, getWorkdayEnd } from "@/lib/utils/date";
 import { AttendanceCheckOutDTO, AttendanceResponse, Attendance } from "@/types/attendance";
 
 export async function POST(req: NextRequest) {
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
         checkOutLatitude: latitude || null,
         checkOutLongitude: longitude || null,
         checkOutLocationName: locationName,
-        checkOutIpAddress: req.headers.get("x-forwarded-for") || req.ip || null,
+        checkOutIpAddress: req.headers.get("x-forwarded-for") || null,
         checkOutDeviceInfo: req.headers.get("user-agent") || null,
         totalHours,
         notes: notes || attendance.notes, // Update notes if provided

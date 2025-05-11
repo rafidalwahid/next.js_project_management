@@ -1,21 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
-
-interface Params {
-  params: {
-    taskId: string;
-  };
-}
+import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
 
 // GET /api/tasks/[taskId]/attachments - Get attachments for a task
-export async function GET(req: NextRequest, { params }: Params) {
+export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
+  _req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -24,9 +23,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         { status: 401 }
       );
     }
-
-    const { taskId } = await params;
-
+    const taskId = await getParams(params).then(p => p.taskId);
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'view');
     if (!hasPermission) {
@@ -63,18 +60,18 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST /api/tasks/[taskId]/attachments - Upload an attachment to a task
-export async function POST(req: NextRequest, { params }: Params) {
+export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
+  req,
+  { params }
+) => {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await getServerSession(authOptions);    if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-
-    const { taskId } = await params;
-
+    const taskId = await getParams(params).then(p => p.taskId);
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
     if (!hasPermission) {
@@ -167,17 +164,18 @@ export async function POST(req: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/tasks/[taskId]/attachments?attachmentId=xxx - Delete an attachment
-export async function DELETE(req: NextRequest, { params }: Params) {
+export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
+  req,
+  { params }
+) => {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await getServerSession(authOptions);    if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-
-    const { taskId } = await params;
+    const taskId = await getParams(params).then(p => p.taskId);
     const { searchParams } = new URL(req.url);
     const attachmentId = searchParams.get('attachmentId');
 

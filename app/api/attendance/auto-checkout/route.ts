@@ -6,7 +6,7 @@ import { ACTION_TYPES } from "@/lib/constants/activity";
 import { WORK_DAY } from "@/lib/constants/attendance";
 import { API_ERROR_CODES } from "@/lib/constants/api";
 import { getLocationName } from "@/lib/utils/geo-utils";
-import { calculateTotalHours } from "@/lib/utils/time-utils";
+import { calculateTotalHours } from "@/lib/utils/date";
 
 /**
  * POST /api/attendance/auto-checkout
@@ -65,14 +65,14 @@ export async function POST(req: NextRequest) {
     // Get the auto-checkout time
     const now = new Date();
     let checkOutTime = now;
-    
+
     // If we have a specific auto-checkout time and we're not forcing checkout,
     // check if it's time to check out
     if (settings?.autoCheckoutTime && !forceCheckout) {
       const [hours, minutes] = settings.autoCheckoutTime.split(':').map(Number);
       const autoCheckoutTime = new Date();
       autoCheckoutTime.setHours(hours, minutes, 0, 0);
-      
+
       // If it's not yet time to auto-checkout, return early
       if (now < autoCheckoutTime) {
         return NextResponse.json({
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
           next_checkout: autoCheckoutTime.toISOString(),
         });
       }
-      
+
       // Use the configured auto-checkout time
       checkOutTime = autoCheckoutTime;
     }
@@ -90,7 +90,10 @@ export async function POST(req: NextRequest) {
     const totalHours = calculateTotalHours(
       new Date(attendance.checkInTime),
       checkOutTime,
-      WORK_DAY.MAX_HOURS_PER_DAY
+      {
+        maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY,
+        isAutoCheckout: true
+      }
     );
 
     // Get location name (if coordinates are available)
@@ -102,7 +105,7 @@ export async function POST(req: NextRequest) {
       data: {
         checkOutTime,
         checkOutLocationName: locationName,
-        checkOutIpAddress: req.headers.get("x-forwarded-for") || req.ip || null,
+        checkOutIpAddress: req.headers.get("x-forwarded-for") || null,
         checkOutDeviceInfo: req.headers.get("user-agent") || null,
         totalHours,
         autoCheckout: true, // Flag as auto-checkout

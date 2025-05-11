@@ -8,7 +8,7 @@ const PUBLIC_PATHS = [
   '/login',
   '/register',
   '/api/auth',
-  '/api/register',
+  '/api/users', // Allow access to user creation for registration
   '/api/auth-status',
   '/api/permissions/matrix', // Allow access to permission matrix for middleware
   '/api/roles/check-permission', // Allow access to permission checks

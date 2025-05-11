@@ -80,10 +80,11 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
   // Filter records based on search
   const filteredRecords = attendanceRecords.filter(record => {
     if (!searchQuery) return true;
+    if (!record.user) return false;
 
     const searchLower = searchQuery.toLowerCase();
     const nameMatch = record.user.name?.toLowerCase().includes(searchLower) || false;
-    const emailMatch = record.user.email.toLowerCase().includes(searchLower);
+    const emailMatch = record.user.email?.toLowerCase().includes(searchLower) || false;
     const locationMatch = record.checkInLocationName?.toLowerCase().includes(searchLower) || false;
 
     return nameMatch || emailMatch || locationMatch;
@@ -91,7 +92,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
 
   // Group records based on selection
   const groupedRecords = filteredRecords.reduce((groups, record) => {
-    let key;
+    let key: string = 'unknown';
 
     if (groupBy === "user") {
       key = record.user?.id || 'unknown';
@@ -111,8 +112,8 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
 
   // Get user names for user grouping
   const getUserName = (userId: string) => {
-    const record = attendanceRecords.find(r => r.user.id === userId);
-    return record?.user.name || record?.user.email || "Unknown User";
+    const record = attendanceRecords.find(r => r.user?.id === userId);
+    return record?.user?.name || record?.user?.email || "Unknown User";
   };
 
   return (
@@ -197,13 +198,13 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                   {groupBy === "user" && (
                     <>
                       <Avatar className="h-6 w-6 mr-2">
-                        <AvatarImage src={records[0].user.image || undefined} />
+                        <AvatarImage src={records[0].user?.image || undefined} />
                         <AvatarFallback>
-                          {(records[0].user.name || records[0].user.email).substring(0, 2)}
+                          {((records[0].user?.name || records[0].user?.email || "??").substring(0, 2))}
                         </AvatarFallback>
                       </Avatar>
                       {getUserName(key)}
-                      <RoleBadge role={records[0].user.role} className="ml-2" />
+                      <RoleBadge role={records[0].user?.role || "user"} className="ml-2" />
                     </>
                   )}
                   {groupBy === "date" && (
@@ -224,8 +225,8 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                   {records.map(record => (
                     <div key={record.id} className="flex justify-between items-center border-b pb-2 last:border-0">
                       <div>
-                        {groupBy !== "user" && (
-                          <div className="font-medium">{record.user.name || record.user.email}</div>
+                        {groupBy !== "user" && record.user && (
+                          <div className="font-medium">{record.user.name || record.user.email || "Unknown User"}</div>
                         )}
                         {groupBy !== "date" && (
                           <div className="text-sm text-muted-foreground">

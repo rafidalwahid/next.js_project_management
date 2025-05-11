@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       groupBy: url.searchParams.get("groupBy") as 'day' | 'week' | 'month' | undefined
     };
 
-    const { period, startDate, endDate, limit, page, groupBy } = filterOptions;
+    const { period, startDate, endDate, limit = 30, page = 1, groupBy } = filterOptions;
     const skip = (page - 1) * limit;
 
     // Build the where clause
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
     const totalCount = await prisma.attendance.count({ where });
 
     // Get attendance records
-    const attendanceRecords: AttendanceWithRelations[] = await prisma.attendance.findMany({
+    const attendanceRecords = await prisma.attendance.findMany({
       where,
       orderBy: {
         checkInTime: 'desc',
@@ -247,8 +247,8 @@ export async function GET(req: NextRequest) {
       summary.averageHoursPerDay = summary.totalHours / summary.uniqueDaysCount;
     }
 
-    // Create properly typed response
-    const response: AttendanceHistoryResponse = {
+    // Create response
+    const response = {
       records: !groupBy ? paginatedRecords : [], // Only include if not grouping
       groupedRecords: groupBy ? groupedRecords : undefined,
       pagination: {

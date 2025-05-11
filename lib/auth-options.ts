@@ -2,12 +2,12 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
-import { googleProvider, facebookProvider } from "@/providers";
+import { googleProvider } from "@/providers";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    googleProvider,
-    facebookProvider,
+    // Include Google provider only if it's configured
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [googleProvider] : []),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -57,7 +57,13 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google" || account?.provider === "facebook") {
+      // Make sure we have a valid user object with email
+      if (!user?.email) {
+        console.error("Invalid user object during sign in:", user);
+        return false;
+      }
+
+      if (account?.provider === "google") {
         try {
           // Check if user exists
           const existingUser = await prisma.user.findUnique({
@@ -69,7 +75,7 @@ export const authOptions: NextAuthOptions = {
             await prisma.user.create({
               data: {
                 email: user.email as string,
-                name: user.name,
+                name: user.name || user.email.split('@')[0], // Fallback name if none provided
                 image: user.image,
                 role: "user", // Default role
                 lastLogin: new Date()
@@ -90,31 +96,56 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account }) {
-      // Only update user data and lastLogin when the user first logs in
-      if (user && account) {
-        token.id = user.id;
-        token.role = user.role || "user"; // Default to user role for social logins
+      try {
+        // Only update user data and lastLogin when the user first logs in
+        if (user && account) {
+          // Make sure we have a valid user ID
+          if (!user.id) {
+            console.error("Invalid user ID in JWT callback:", user);
+            return token;
+          }
 
-        // Update lastLogin for credential logins
-        if (account.provider === "credentials") {
-          try {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { lastLogin: new Date() }
-            });
-          } catch (error) {
-            console.error("Error updating lastLogin in JWT callback:", error);
+          token.id = user.id;
+          token.role = user.role || "user"; // Default to user role for social logins
+
+          // Update lastLogin for credential logins
+          if (account.provider === "credentials") {
+            try {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { lastLogin: new Date() }
+              });
+            } catch (error) {
+              console.error("Error updating lastLogin in JWT callback:", error);
+              // Continue with token creation even if lastLogin update fails
+            }
           }
         }
+        return token;
+      } catch (error) {
+        console.error("Error in JWT callback:", error);
+        // Return the original token if there's an error
+        return token;
       }
-      return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+      try {
+        if (session.user && token) {
+          // Make sure token has the required properties
+          if (typeof token.id !== 'string') {
+            console.error("Invalid token ID in session callback:", token);
+            return session;
+          }
+
+          session.user.id = token.id;
+          session.user.role = (token.role as string) || "user";
+        }
+        return session;
+      } catch (error) {
+        console.error("Error in session callback:", error);
+        // Return the original session if there's an error
+        return session;
       }
-      return session;
     }
   },
   pages: {

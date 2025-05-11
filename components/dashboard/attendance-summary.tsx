@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format, startOfWeek, endOfWeek, formatDistanceToNow, differenceInSeconds } from "date-fns"
-import { calculateTotalHours } from "@/lib/utils/attendance-date-utils"
+import { calculateTotalHours } from "@/lib/utils/date"
 import { WORK_DAY } from "@/lib/constants/attendance"
 import { AttendanceWithRelations, AttendanceStatistics } from "@/types/attendance"
 

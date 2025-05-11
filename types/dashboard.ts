@@ -9,7 +9,7 @@
 import { ProjectMember, ProjectSummary, ProjectStatus } from './project';
 
 // Re-export for convenience
-export { ProjectMember, ProjectSummary };
+export type { ProjectMember, ProjectSummary };
 
 /**
  * System Statistics interface for admin dashboard

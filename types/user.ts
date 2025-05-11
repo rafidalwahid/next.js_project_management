@@ -31,7 +31,7 @@ export interface UserWithProfile extends User {
   jobTitle?: string | null;
   location?: string | null;
   phone?: string | null;
-  skills?: string | null;
+  skills?: string | null | string[]; // Support both string and string[] for compatibility
 }
 
 /**

@@ -405,13 +405,14 @@ export async function POST(req: NextRequest) {
     console.error("Error creating project:", error);
 
     // Check if it's a Prisma error
-    if (error.name === 'PrismaClientKnownRequestError' || error.name === 'PrismaClientValidationError') {
+    if (error instanceof Error &&
+        (error.name === 'PrismaClientKnownRequestError' || error.name === 'PrismaClientValidationError')) {
       return NextResponse.json(
         {
           error: "Database validation error",
           details: {
             message: error.message,
-            code: error.code,
+            code: (error as any).code,
           }
         },
         { status: 400 }
@@ -423,7 +424,7 @@ export async function POST(req: NextRequest) {
         error: "An error occurred while creating the project",
         details: {
           message: error instanceof Error ? error.message : String(error),
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
         }
       },
       { status: 500 }

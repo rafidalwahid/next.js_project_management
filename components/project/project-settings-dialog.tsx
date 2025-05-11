@@ -18,30 +18,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProjectStatusManager } from "@/components/project/project-status-manager"
+import { Project, ProjectStatus } from "@/types/project"
 
 interface ProjectSettingsDialogProps {
   projectId: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
-  project: {
-    id: string
-    title: string
-    description: string | null
-    startDate: string | null
-    endDate: string | null
-    dueDate: string | null
-    estimatedTime: number | null
-  }
-  statuses: {
-    id: string
-    name: string
-    color: string
-    description?: string | null
-    order: number
-    isDefault: boolean
-    projectId: string
-  }[]
+  project: Project
+  statuses: ProjectStatus[]
 }
 
 export function ProjectSettingsDialog({

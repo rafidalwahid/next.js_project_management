@@ -47,8 +47,8 @@ export default function RegisterPage() {
         email: formData.email,
         passwordLength: formData.password.length
       })
-      
-      const response = await fetch("/api/register", {
+
+      const response = await fetch("/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -56,14 +56,15 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          isRegistration: true
         })
       })
 
       // Check if response is OK before trying to parse JSON
       if (!response.ok) {
         const contentType = response.headers.get('content-type')
-        
+
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json()
           throw new Error(errorData.error || `Registration failed with status: ${response.status}`)
@@ -108,43 +109,43 @@ export default function RegisterPage() {
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input 
-                    id="name" 
-                    type="text" 
+                  <Input
+                    id="name"
+                    type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="name@example.com" 
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
+                  <Input
+                    id="password"
+                    type="password"
                     value={formData.password}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="confirmPassword">Confirm password</Label>
-                  <Input 
-                    id="confirmPassword" 
-                    type="password" 
+                  <Input
+                    id="confirmPassword"
+                    type="password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 {error && (

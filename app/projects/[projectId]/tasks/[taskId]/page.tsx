@@ -13,7 +13,8 @@ import {
   XCircle,
   MessageSquare,
   Paperclip,
-  Users
+  Users,
+  Plus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TaskForm } from "@/components/project/task-form"
 import { TimeTracker } from "@/components/project/time-tracker"
 import { format } from "date-fns"
+import { safeFormat } from "@/lib/utils/date-utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { Task, TaskAssignee, TaskWithRelations } from "@/types/task"
@@ -171,9 +173,8 @@ export default function TaskDetailPage() {
   }
 
   // Format date for display
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return null
-    return format(new Date(dateString), "MMM d, yyyy")
+  const formatDate = (dateString?: string | Date | null) => {
+    return safeFormat(dateString, "MMM d, yyyy", "Not set")
   }
 
   // Get priority badge color

@@ -293,21 +293,7 @@ export class ClientPermissionService {
     return [];
   }
 
-  /**
-   * @deprecated This method is no longer used and will be removed in a future version
-   */
-  private static getBasicPermissionsForRole(role: string): string[] {
-    console.warn('getBasicPermissionsForRole is deprecated and should not be used');
-    return [];
-  }
 
-  /**
-   * @deprecated This method is no longer used and will be removed in a future version
-   */
-  private static getBasicPermissions(): Record<string, string> {
-    console.warn('getBasicPermissions is deprecated and should not be used');
-    return {};
-  }
 
   /**
    * Get all available permissions

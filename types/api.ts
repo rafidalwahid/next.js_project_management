@@ -12,10 +12,10 @@ import { Session } from "next-auth";
  * Permission Check function type
  */
 export type PermissionCheckFn = (
-  session: Session,
   resourceId: string,
+  session: Session | null,
   action: string
-) => Promise<boolean>;
+) => Promise<{ hasPermission: boolean, error?: string }>;
 
 /**
  * Pagination parameters

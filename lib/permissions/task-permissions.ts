@@ -7,15 +7,19 @@ import { PermissionService } from "@/lib/permissions/unified-permission-service"
  * @param taskId The ID of the task to check
  * @param session The user's session
  * @param action The action being performed (view, update, delete, create)
- * @returns An object with hasPermission and task properties
+ * @returns An object with hasPermission, task, and error properties
  */
 export async function checkTaskPermission(
   taskId: string,
   session: Session | null,
-  action: 'view' | 'update' | 'delete' | 'create' = 'view'
-) {
+  action: string = 'view'
+): Promise<{
+  hasPermission: boolean;
+  task: any | null;
+  error: string | null;
+}> {
   // If no session, no permission
-  if (!session || !session.user.id) {
+  if (!session || !session.user?.id) {
     return { hasPermission: false, task: null, error: "Unauthorized" };
   }
 

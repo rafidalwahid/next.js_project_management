@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
+import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
 
 // GET: Fetch all statuses for a project
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
-) {
+export const GET: ApiRouteHandlerOneParam<'projectId'> = async (
+  _req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
 
@@ -16,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = await params;
+    const projectId = await getParams(params).then(p => p.projectId);
 
     // Check if project exists and user has access
     const project = await prisma.project.findUnique({
@@ -52,10 +53,10 @@ export async function GET(
 }
 
 // POST: Create a new status for a project
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
-) {
+export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
+  req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
 
@@ -63,7 +64,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = await params;
+    const projectId = await getParams(params).then(p => p.projectId);
 
     // Check if project exists and user has access
     const project = await prisma.project.findUnique({

@@ -1,16 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { z } from "zod";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
-
-interface Params {
-  params: {
-    taskId: string;
-  };
-}
+import { ApiRouteHandlerOneParam } from "@/lib/api-route-types";
 
 // Validation schema for creating a comment
 const createCommentSchema = z.object({
@@ -18,7 +13,10 @@ const createCommentSchema = z.object({
 });
 
 // GET /api/tasks/[taskId]/comments - Get comments for a task
-export async function GET(req: NextRequest, { params }: Params) {
+export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
+  _req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -28,7 +26,9 @@ export async function GET(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = await params;
+    const taskId = typeof params === 'object' && 'taskId' in params
+      ? params.taskId
+      : (await params).taskId;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'view');
@@ -66,7 +66,10 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST /api/tasks/[taskId]/comments - Add a comment to a task
-export async function POST(req: NextRequest, { params }: Params) {
+export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
+  req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -76,7 +79,9 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = await params;
+    const taskId = typeof params === 'object' && 'taskId' in params
+      ? params.taskId
+      : (await params).taskId;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
@@ -104,7 +109,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       data: {
         content,
         taskId,
-        userId: session.user.id,
+        userId: session.user?.id || "",
       },
       include: {
         user: {
@@ -125,7 +130,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         entityType: "task",
         entityId: taskId,
         description: `commented on task`,
-        userId: session.user.id,
+        userId: session.user?.id || "",
         taskId,
         projectId: (await prisma.task.findUnique({ where: { id: taskId } }))?.projectId,
       },
@@ -142,7 +147,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/tasks/[taskId]/comments?commentId=xxx - Delete a comment
-export async function DELETE(req: NextRequest, { params }: Params) {
+export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
+  req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -152,7 +160,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { taskId } = await params;
+    const taskId = typeof params === 'object' && 'taskId' in params
+      ? params.taskId
+      : (await params).taskId;
     const { searchParams } = new URL(req.url);
     const commentId = searchParams.get('commentId');
 
@@ -185,9 +195,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     }
 
     // Check if user is the comment author or has task management permission
-    const isCommentAuthor = comment.userId === session.user.id;
-    const hasTaskManagementPermission = await PermissionService.hasPermission(
-      session.user.role,
+    const isCommentAuthor = comment.userId === session.user?.id;
+    const hasTaskManagementPermission = await PermissionService.hasPermissionById(
+      session.user?.id || "",
       "task_management"
     );
 
@@ -210,7 +220,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
         entityType: "comment",
         entityId: commentId,
         description: `deleted a comment`,
-        userId: session.user.id,
+        userId: session.user?.id || "",
         taskId,
         projectId: (await prisma.task.findUnique({ where: { id: taskId } }))?.projectId,
       },

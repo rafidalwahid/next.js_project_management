@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 import prisma from "@/lib/prisma";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { PermissionCheckFn } from "@/types/api";
 
 /**
  * Check if a user has permission to access a project
@@ -75,3 +76,24 @@ export async function checkProjectPermission(
     error: hasPermission ? null : "You don't have permission to " + action + " this project"
   };
 }
+
+/**
+ * Wrapper for checkProjectPermission that matches the PermissionCheckFn signature
+ * for use with withResourcePermission middleware
+ */
+export const projectPermissionCheck: PermissionCheckFn = async (
+  resourceId: string,
+  session: Session | null,
+  action: string
+) => {
+  const result = await checkProjectPermission(
+    resourceId,
+    session,
+    action as 'view' | 'update' | 'delete' | 'create'
+  );
+
+  return {
+    hasPermission: result.hasPermission,
+    error: result.error || undefined
+  };
+};

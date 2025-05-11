@@ -23,19 +23,30 @@ export interface Project {
   createdAt: string | Date;
   updatedAt: string | Date;
   createdById: string;
+  // Include properties that are used in components but were missing
+  _count?: {
+    tasks: number;
+    teamMembers: number;
+    statuses?: number;
+  };
+  teamMembers?: TeamMember[];
+  createdBy?: UserSummary;
 }
 
 /**
  * Extended Project interface with related entities
  */
 export interface ProjectWithRelations extends Project {
-  createdBy?: UserSummary;
   statuses?: ProjectStatus[];
-  teamMembers?: TeamMember[];
-  _count?: {
-    tasks: number;
-    teamMembers: number;
-  };
+  tasks?: Array<{
+    id: string;
+    title: string;
+    completed: boolean;
+    statusId?: string | null;
+  }>;
+  // Virtual properties for UI
+  completedTasks?: number;
+  progress?: number;
 }
 
 /**

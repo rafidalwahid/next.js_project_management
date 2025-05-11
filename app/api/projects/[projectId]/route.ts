@@ -3,12 +3,12 @@ import { Session } from "next-auth";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { withResourcePermission } from "@/lib/api-middleware";
-import { checkProjectPermission } from "@/lib/permissions/project-permissions";
+import { projectPermissionCheck } from "@/lib/permissions/project-permissions";
 
 // GET handler to fetch a specific project
 export const GET = withResourcePermission(
   'projectId',
-  checkProjectPermission,
+  projectPermissionCheck,
   async (req: NextRequest, context: any, session: Session, projectId: string) => {
     try {
       // Get the project with related data
@@ -45,6 +45,14 @@ export const GET = withResourcePermission(
         },
       });
 
+    // Check if project exists
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      );
+    }
+
     // Format dates for the response
     const formattedProject = {
       ...project,
@@ -79,7 +87,7 @@ const updateProjectSchema = z.object({
 // PATCH handler to update a project
 export const PATCH = withResourcePermission(
   'projectId',
-  checkProjectPermission,
+  projectPermissionCheck,
   async (req: NextRequest, context: any, session: Session, projectId: string) => {
     try {
 
@@ -170,7 +178,7 @@ export const PATCH = withResourcePermission(
 // DELETE handler to delete a project
 export const DELETE = withResourcePermission(
   'projectId',
-  checkProjectPermission,
+  projectPermissionCheck,
   async (req: NextRequest, context: any, session: Session, projectId: string) => {
     try {
 

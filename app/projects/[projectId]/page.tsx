@@ -14,7 +14,7 @@ import { KanbanBoard } from "@/components/project/kanban-board"
 import { StatusListView } from "@/components/project/status-list-view"
 import { TaskProvider } from "@/components/project/task-context"
 import { TaskFilterNew } from "@/components/project/task-filter"
-import { TaskFilters } from "@/components/project/task-context"
+import { TaskFilters } from "@/types/task"
 import { ProjectSettingsDialog } from "@/components/project/project-settings-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TaskForm } from "@/components/project/task-form"
 import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
 import { format } from "date-fns"
+import { safeFormat } from "@/lib/utils/date-utils"
 import { CreateStatusDialogNew } from "@/components/project/create-status-dialog"
 import {
   AlertDialog,
@@ -272,9 +273,9 @@ export default function ProjectPage() {
     }
   }
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Not set"
-    return format(new Date(dateString), "MMM d, yyyy")
+  // Use the safeFormat function from date-utils.ts instead of local implementation
+  const formatDate = (dateString: string | Date | null | undefined) => {
+    return safeFormat(dateString, "MMM d, yyyy", "Not set")
   }
 
   if (isLoading) {
@@ -792,7 +793,17 @@ export default function ProjectPage() {
           project={project}
           statuses={statuses}
           onSuccess={async () => {
-            await fetchProject();
+            // Fetch project data again
+            try {
+              const response = await fetch(`/api/projects/${projectId}`);
+              if (response.ok) {
+                const data = await response.json();
+                setProject(data.project);
+                setStatuses(data.project.statuses || []);
+              }
+            } catch (error) {
+              console.error("Error refreshing project:", error);
+            }
             await fetchTasks();
           }}
         />

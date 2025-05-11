@@ -10,13 +10,11 @@ import { useHasPermission } from "@/hooks/use-permission"
 
 interface AuthGuardProps {
   children: React.ReactNode
-  allowedRoles?: string[]
   requiredPermission?: string
 }
 
 export function AuthGuard({
   children,
-  allowedRoles,
   requiredPermission
 }: AuthGuardProps) {
   const { session, status, checkSession } = useAuthSession()
@@ -96,46 +94,7 @@ export function AuthGuard({
         })
       }
 
-      // Role-based access is deprecated - we should use permission-based checks instead
-      // Log a warning if allowedRoles is still being used
-      if (allowedRoles && allowedRoles.length > 0) {
-        console.warn(
-          'Using allowedRoles in AuthGuard is deprecated. Use requiredPermission instead. ' +
-          'For example, replace allowedRoles={["admin"]} with requiredPermission="user_management"'
-        );
 
-        // Still check for backward compatibility, but convert to permission check if possible
-        if (
-          status === "authenticated" &&
-          session?.user?.id &&
-          session?.user?.role &&
-          !allowedRoles.includes(session.user.role)
-        ) {
-          // Try to map common roles to permissions
-          let permissionToCheck = "";
-          if (allowedRoles.includes("admin")) {
-            permissionToCheck = "user_management";
-          } else if (allowedRoles.includes("manager")) {
-            permissionToCheck = "project_management";
-          }
-
-          // If we have a permission mapping, check it
-          if (permissionToCheck) {
-            const hasPermission = await checkPermissionWithServer(permissionToCheck, session.user.id);
-            if (hasPermission) {
-              // Allow access if they have the mapped permission
-              return;
-            }
-          }
-
-          toast.error("Access denied", {
-            description: "You don't have permission to access this page",
-            duration: 5000,
-          })
-          router.push("/dashboard")
-          return
-        }
-      }
       // Check permission-based access if a permission is specified
       if (
         status === "authenticated" &&
@@ -160,7 +119,7 @@ export function AuthGuard({
 
     // Call the async function
     checkAuth();
-  }, [status, router, pathname, session, allowedRoles, requiredPermission, checkSession, isPublicPath, permissionChecked, isCheckingPermission])
+  }, [status, router, pathname, session, requiredPermission, checkSession, isPublicPath, permissionChecked, isCheckingPermission])
 
   // Show minimal loading state while checking authentication or permissions
   if (status === "loading" || (requiredPermission && !permissionChecked && isCheckingPermission)) {
@@ -174,10 +133,7 @@ export function AuthGuard({
   // Show children if user is authenticated and has the required permissions
   if (
     status === "authenticated" &&
-    // Check permission first (preferred method)
-    (!requiredPermission || (permissionChecked && hasPermission)) &&
-    // Legacy role check (deprecated)
-    (!allowedRoles || allowedRoles.length === 0 || (session?.user?.role && allowedRoles.includes(session.user.role)))
+    (!requiredPermission || (permissionChecked && hasPermission))
   ) {
     return <>{children}</>
   }

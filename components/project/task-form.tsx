@@ -144,8 +144,8 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         if (data.teamMembers && Array.isArray(data.teamMembers)) {
           // Extract user data from team members and filter out any null values
           const users = data.teamMembers
-            .map((tm: any) => tm.user)
-            .filter((user: any) => user && user.id);
+            .map((tm: { user: User }) => tm.user)
+            .filter((user: User | null) => user && user.id);
 
           console.log(`Fetched ${users.length} team members for task assignment`);
           setTeamMembers(users);
@@ -178,10 +178,10 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         const data = await response.json()
         // Filter out the current task if editing
         const filteredTasks = taskId
-          ? data.tasks.filter((t: any) => t.id !== taskId)
+          ? data.tasks.filter((t: { id: string; title: string }) => t.id !== taskId)
           : data.tasks
 
-        setParentTasks(filteredTasks.map((t: any) => ({ id: t.id, title: t.title })))
+        setParentTasks(filteredTasks.map((t: { id: string; title: string }) => ({ id: t.id, title: t.title })))
       } catch (error) {
         toast({
           title: "Error",
@@ -212,12 +212,12 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         console.log("Fetched task data:", task);
 
         // Extract assignee IDs from the task
-        const assigneeIds = task.assignees?.map((a: any) => a.userId) || [];
+        const assigneeIds = task.assignees?.map((a: { userId: string }) => a.userId) || [];
         console.log("Extracted assignee IDs:", assigneeIds);
 
         if (task) {
           // Format dates as YYYY-MM-DD for HTML date inputs
-          const formatDateForInput = (dateString: string | null) => {
+          const formatDateForInput = (dateString: string | null): string | null => {
             if (!dateString) return null;
             const date = new Date(dateString);
             return date.toISOString().split('T')[0];
@@ -254,7 +254,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
     }
   }, [taskId, form, toast])
 
-  const onSubmit = async (values: TaskFormValues) => {
+  const onSubmit = async (values: TaskFormValues): Promise<void> => {
     try {
       setIsLoading(true)
       console.log("Form submission started with values:", values);
@@ -266,7 +266,9 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
       const method = taskId ? "PATCH" : "POST"
 
       // Format data for submission
-      const payload = {
+      const payload: {
+        [key: string]: string | string[] | number | null | undefined;
+      } = {
         ...values,
         projectId: !taskId ? projectId : undefined,
         // Ensure these are properly formatted for the API
@@ -302,7 +304,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
       console.log("Response status:", response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({ error: "Failed to parse error response" }));
         console.error("Error response:", errorData);
         throw new Error(errorData.error || "Failed to save task");
       }
@@ -316,8 +318,10 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         const taskContextRefreshEvent = new CustomEvent('refreshTasks', {
           detail: { projectId }
         });
-        window.dispatchEvent(taskContextRefreshEvent);
-        console.log("Dispatched refreshTasks event");
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(taskContextRefreshEvent);
+          console.log("Dispatched refreshTasks event");
+        }
       } catch (refreshError) {
         console.warn("Could not refresh task context:", refreshError);
       }
@@ -332,7 +336,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error during form submission:", error);
       toast({
         title: "Error",

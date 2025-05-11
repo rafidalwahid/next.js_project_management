@@ -5,17 +5,14 @@ import { authOptions } from "@/lib/auth-options";
 import { format } from "date-fns";
 import { PermissionService } from "@/lib/permissions/unified-permission-service";
 
-interface Params {
-  params: {
-    userId: string;
-  };
-}
-
 // Constants - keep consistent with other attendance endpoints
 const MAX_WORKING_HOURS_PER_DAY = 12;
 
 // GET /api/users/[userId]/attendance - Get attendance records for a specific user
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: { userId: string } }
+) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -24,10 +21,8 @@ export async function GET(req: NextRequest, { params }: Params) {
         { error: 'Unauthorized' },
         { status: 401 }
       );
-    }
-
-    // In Next.js App Router, params might be a promise that needs to be awaited
-    const { userId } = await params;
+    }    // Extract userId from params
+    const { userId } = params;
 
     // Check if user has permission to view this user's attendance
     // Users can view their own attendance, users with view_team_attendance permission can view any user's attendance
@@ -128,10 +123,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     allRecords.forEach(record => {
       if (record.totalHours) {
         // Cap hours per record to consistent maximum
-        const cappedHours = Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);
-
-        // Get the date as string for grouping by day
-        const dateKey = format(new Date(record.checkInTime), 'yyyy-MM-dd');
+        const cappedHours = Math.min(record.totalHours, MAX_WORKING_HOURS_PER_DAY);        // Get the date as string for grouping by day
+        const dateKey = format(new Date(record.checkInTime!), 'yyyy-MM-dd');
 
         // Update daily totals
         if (!dailyHours.has(dateKey)) {
@@ -164,13 +157,11 @@ export async function GET(req: NextRequest, { params }: Params) {
       const sortedByLatest = [...allRecords].sort(
         (a, b) => new Date(b.checkInTime).getTime() - new Date(a.checkInTime).getTime()
       );
-      lastCheckIn = sortedByLatest[0].checkInTime;
-
-      // Find the most recent checkout
-      const checkoutsOnly = allRecords.filter(r => r.checkOutTime);
+      lastCheckIn = sortedByLatest[0].checkInTime;      // Find the most recent checkout
+      const checkoutsOnly = allRecords.filter(r => r.checkOutTime !== null);
       if (checkoutsOnly.length > 0) {
         lastCheckOut = checkoutsOnly.sort(
-          (a, b) => new Date(b.checkOutTime).getTime() - new Date(a.checkOutTime).getTime()
+          (a, b) => new Date(b.checkOutTime!).getTime() - new Date(a.checkOutTime!).getTime()
         )[0].checkOutTime;
       }
     }

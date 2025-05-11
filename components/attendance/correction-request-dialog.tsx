@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { format } from "date-fns"
+import { formatDateTimeForInput } from "@/lib/utils/date"
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,8 @@ import { Pencil, Clock } from "lucide-react"
 
 interface CorrectionRequestDialogProps {
   attendanceId: string
-  originalCheckInTime: string
-  originalCheckOutTime?: string | null
+  originalCheckInTime: string | Date
+  originalCheckOutTime?: string | Date | null
   onSuccess?: () => void
   trigger?: React.ReactNode
 }
@@ -37,27 +37,14 @@ export function CorrectionRequestDialog({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    checkInTime: formatDateForInput(originalCheckInTime),
+    checkInTime: formatDateTimeForInput(originalCheckInTime),
     checkOutTime: originalCheckOutTime
-      ? formatDateForInput(originalCheckOutTime)
+      ? formatDateTimeForInput(originalCheckOutTime)
       : "",
     reason: ""
   })
 
-  // Helper function to safely format dates for datetime-local input
-  function formatDateForInput(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return "";
-      }
-      return format(date, "yyyy-MM-dd'T'HH:mm");
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "";
-    }
-  }
+  // Using the imported formatDateTimeForInput function from date-utils.ts
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

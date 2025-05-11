@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
-
-interface Params {
-  params: {
-    userId: string;
-  };
-}
+import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
 
 // POST /api/users/[userId]/update-last-login - Update a user's last login time (for debugging)
-export async function POST(req: NextRequest, { params }: Params) {
+export const POST: ApiRouteHandlerOneParam<'userId'> = async (
+  _req,
+  { params }
+) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { userId } = await params;
+    const userId = await getParams(params).then(p => p.userId);
 
     // Check if user has permission to update this user
     // Users can update their own last login, users with user_management permission can update any user's last login

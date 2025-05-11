@@ -19,22 +19,22 @@ export interface Task {
   title: string;
   description?: string | null;
   priority: 'low' | 'medium' | 'high' | string;
-  dueDate?: string | Date | null;
+  dueDate?: string | Date;
   projectId: string;
   parentId?: string | null;
   order: number;
   createdAt: string | Date;
   updatedAt: string | Date;
-  endDate?: string | Date | null;
+  endDate?: string | Date;
   estimatedTime?: number | null;
-  startDate?: string | Date | null;
+  startDate?: string | Date;
   statusId?: string | null;
   timeSpent?: number | null;
   completed: boolean;
   // Optional properties that might be included in some contexts
   assignees?: TaskAssignee[];
   status?: ProjectStatus | null;
-  project?: {
+  project: {
     id: string;
     title: string;
   };
@@ -108,8 +108,10 @@ export interface Subtask {
   subtasks?: Subtask[];
   parentId?: string | null;
   projectId: string;
-  completed?: boolean;
-  dueDate?: string | null;
+  completed: boolean;
+  dueDate?: string | Date;
+  statusId?: string | null;
+  status?: ProjectStatus | null;
 }
 
 /**
@@ -155,8 +157,10 @@ export interface TaskComment extends CommentWithRelations {
  */
 export interface TaskAttachment {
   id: string;
-  name: string;           // Renamed from filename to match Document interface
-  filePath: string;       // Renamed from fileUrl to match Document interface
+  filename: string;       // Matches database schema
+  fileUrl: string;        // Matches database schema
+  name?: string;          // Alias for filename for compatibility
+  filePath?: string;      // Alias for fileUrl for compatibility
   fileSize: number;
   fileType: string;
   taskId: string;
@@ -165,6 +169,18 @@ export interface TaskAttachment {
   updatedAt: string | Date;
   description?: string | null;
   user: UserSummary;
+}
+
+// Helper function to normalize attachment properties
+export function normalizeAttachment(attachment: TaskAttachment): TaskAttachment {
+  return {
+    ...attachment,
+    // Ensure both property sets are available
+    name: attachment.name || attachment.filename,
+    filePath: attachment.filePath || attachment.fileUrl,
+    filename: attachment.filename || attachment.name || '',
+    fileUrl: attachment.fileUrl || attachment.filePath || ''
+  };
 }
 
 // Activity interface has been moved to activity.ts
@@ -229,8 +245,13 @@ export interface TaskFilters {
   search: string;
   statusIds: string[];
   assigneeIds: string[];
-  priority: string | null;
+  priority: 'low' | 'medium' | 'high' | string | null;
   completed: boolean | null;
+  status?: string;
+  assignee?: string;
+  dueDate?: string;
+  showCompleted?: boolean;
+  teamMember?: string;
 }
 
 /**

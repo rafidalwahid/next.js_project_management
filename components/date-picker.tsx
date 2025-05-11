@@ -12,15 +12,31 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 interface DatePickerProps {
   onSelect?: (date: Date | undefined) => void;
   defaultDate?: Date;
-  selected?: Date | null;
+  selected?: Date | null | string;
 }
 
 export function DatePicker({ onSelect, defaultDate, selected }: DatePickerProps) {
-  const [date, setDate] = React.useState<Date | undefined>(selected || defaultDate)
+  // Convert string date to Date object if needed
+  const parseSelectedDate = (): Date | undefined => {
+    if (!selected) return undefined;
+
+    if (typeof selected === 'string') {
+      try {
+        return new Date(selected);
+      } catch (e) {
+        console.error("Invalid date string:", selected);
+        return undefined;
+      }
+    }
+
+    return selected;
+  };
+
+  const [date, setDate] = React.useState<Date | undefined>(parseSelectedDate() || defaultDate);
 
   // Update date state when defaultDate or selected prop changes
   React.useEffect(() => {
-    setDate(selected || defaultDate)
+    setDate(parseSelectedDate() || defaultDate);
   }, [defaultDate, selected])
 
   return (

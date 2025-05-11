@@ -980,7 +980,12 @@ export default function TaskDetailPage() {
                       variant="outline"
                       size="sm"
                       className="h-8 px-2 sm:px-3"
-                      onClick={() => document.getElementById('file-upload')?.click()}
+                      onClick={() => {
+                        const fileUpload = document.getElementById('file-upload');
+                        if (fileUpload) {
+                          fileUpload.click();
+                        }
+                      }}
                       disabled={isUploadingAttachment}
                     >
                       <Upload className="h-3.5 w-3.5 mr-1 sm:mr-1.5" />
@@ -1114,7 +1119,12 @@ export default function TaskDetailPage() {
                         variant="outline"
                         size="sm"
                         className="mt-4"
-                        onClick={() => document.getElementById('file-upload')?.click()}
+                        onClick={() => {
+                          const fileUpload = document.getElementById('file-upload');
+                          if (fileUpload) {
+                            fileUpload.click();
+                          }
+                        }}
                       >
                         <Upload className="h-3.5 w-3.5 mr-1.5" />
                         Upload File
@@ -1239,11 +1249,13 @@ export default function TaskDetailPage() {
                   className="h-8 w-8 p-0 lg:hidden"
                   onClick={() => {
                     // Scroll to the details section on mobile
-                    window.scrollTo({
-                      top: document.querySelector('.task-details-card')?.getBoundingClientRect().top
-                        + window.scrollY - 80,
-                      behavior: 'smooth'
-                    });
+                    const detailsCard = document.querySelector('.task-details-card');
+                    if (detailsCard) {
+                      window.scrollTo({
+                        top: detailsCard.getBoundingClientRect().top + window.scrollY - 80,
+                        behavior: 'smooth'
+                      });
+                    }
                   }}
                 >
                   <ChevronDown className="h-4 w-4" />

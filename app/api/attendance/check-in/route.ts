@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         checkInLatitude: latitude || null,
         checkInLongitude: longitude || null,
         checkInLocationName: locationName,
-        checkInIpAddress: req.headers.get("x-forwarded-for") || req.ip || null,
+        checkInIpAddress: req.headers.get("x-forwarded-for") || null,
         checkInDeviceInfo: req.headers.get("user-agent") || null,
         projectId: projectId || null,
         taskId: taskId || null,

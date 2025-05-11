@@ -26,11 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useTaskContext, TaskFilters } from "./task-context"
+import { useTaskContext } from "./task-context"
+import { TaskFilters } from "@/types/task"
 
 export function TaskFilterNew() {
   const { statuses, users, filters, setFilters } = useTaskContext();
-  
+
   const [statusOpen, setStatusOpen] = useState(false);
   const [assigneeOpen, setAssigneeOpen] = useState(false);
 

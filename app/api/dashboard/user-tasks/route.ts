@@ -76,7 +76,7 @@ const getUserTasks = unstable_cache(
       } : null
     }));
   },
-  [(userId) => `user-tasks-${userId}`],
+  ['user-tasks'],
   { revalidate: 60 } // Cache for 1 minute
 );
 
@@ -96,9 +96,9 @@ export async function GET() {
       return NextResponse.json({ tasks });
     } catch (dbError) {
       console.error('Database error in user tasks:', dbError);
-      
+
       // Return a minimal response with empty tasks to prevent UI from breaking
-      return NextResponse.json({ 
+      return NextResponse.json({
         tasks: [],
         error: 'Database error occurred'
       }, { status: 200 });

@@ -4,12 +4,29 @@
  * This file handles the registration of the service worker and provides
  * utilities for working with background sync.
  */
+import { ServiceWorkerMessage } from '@/types/service-worker';
+
+// Import the ExtendedServiceWorkerRegistration interface
+declare global {
+  interface ExtendedServiceWorkerRegistration extends ServiceWorkerRegistration {
+    sync: {
+      register(tag: string): Promise<void>;
+      getTags(): Promise<string[]>;
+    };
+    periodicSync?: {
+      register(tag: string, options?: { minInterval: number }): Promise<void>;
+      getTags(): Promise<string[]>;
+      unregister(tag: string): Promise<void>;
+    };
+  }
+}
 
 // Check if service workers and background sync are supported
-export const isServiceWorkerSupported = () =>
-  'serviceWorker' in navigator;
+export const isServiceWorkerSupported = (): boolean =>
+  typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
 
-export const isBackgroundSyncSupported = () =>
+export const isBackgroundSyncSupported = (): boolean =>
+  typeof navigator !== 'undefined' &&
   'serviceWorker' in navigator &&
   'SyncManager' in window;
 
@@ -75,22 +92,26 @@ export async function requestBackgroundSyncPermission() {
 }
 
 // Register a background sync
-export async function registerBackgroundSync() {
+export async function registerBackgroundSync(): Promise<boolean> {
   if (!isBackgroundSyncSupported()) {
     console.log('Background Sync is not supported in this browser');
     return false;
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.ready as ExtendedServiceWorkerRegistration;
 
     // Register attendance sync
-    await registration.sync.register('attendance-sync');
-    console.log('Attendance background sync registered!');
+    if ('sync' in registration) {
+      await registration.sync.register('attendance-sync');
+      console.log('Attendance background sync registered!');
 
-    // Register auto-checkout sync
-    await registration.sync.register('auto-checkout-sync');
-    console.log('Auto-checkout background sync registered!');
+      // Register auto-checkout sync
+      await registration.sync.register('auto-checkout-sync');
+      console.log('Auto-checkout background sync registered!');
+    } else {
+      console.log('Sync API not available in this browser');
+    }
 
     return true;
   } catch (error) {
@@ -100,17 +121,22 @@ export async function registerBackgroundSync() {
 }
 
 // Register auto-checkout sync specifically
-export async function registerAutoCheckoutSync() {
+export async function registerAutoCheckoutSync(): Promise<boolean> {
   if (!isBackgroundSyncSupported()) {
     console.log('Background Sync is not supported in this browser');
     return false;
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready;
-    await registration.sync.register('auto-checkout-sync');
-    console.log('Auto-checkout sync registered!');
-    return true;
+    const registration = await navigator.serviceWorker.ready as ExtendedServiceWorkerRegistration;
+    if ('sync' in registration) {
+      await registration.sync.register('auto-checkout-sync');
+      console.log('Auto-checkout sync registered!');
+      return true;
+    } else {
+      console.log('Sync API not available in this browser');
+      return false;
+    }
   } catch (error) {
     console.error('Auto-checkout sync registration failed:', error);
     return false;
@@ -118,7 +144,9 @@ export async function registerAutoCheckoutSync() {
 }
 
 // Listen for messages from the service worker
-export function listenForServiceWorkerMessages(callback: (data: any) => void) {
+export function listenForServiceWorkerMessages(
+  callback: (data: ServiceWorkerMessage) => void
+): () => void {
   if (!isServiceWorkerSupported()) {
     return () => {}; // Return a no-op cleanup function
   }
@@ -127,9 +155,12 @@ export function listenForServiceWorkerMessages(callback: (data: any) => void) {
     if (event.data && (
       event.data.type === 'SYNC_SUCCESS' ||
       event.data.type === 'SYNC_COMPLETED' ||
-      event.data.type === 'AUTO_CHECKOUT_COMPLETED'
+      event.data.type === 'AUTO_CHECKOUT_COMPLETED' ||
+      event.data.type === 'SYNC_FAILURE' ||
+      event.data.type === 'SYNC_PERMANENT_FAILURE' ||
+      event.data.type === 'SYNC_REDUNDANT'
     )) {
-      callback(event.data);
+      callback(event.data as ServiceWorkerMessage);
     }
   };
 

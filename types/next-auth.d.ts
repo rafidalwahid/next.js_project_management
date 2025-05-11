@@ -1,6 +1,9 @@
-import { DefaultSession } from "next-auth";
-import { JWT } from "next-auth/jwt";
+import { DefaultSession, DefaultUser } from "next-auth";
+import { JWT, DefaultJWT } from "next-auth/jwt";
 
+/**
+ * Extend the built-in session types
+ */
 declare module "next-auth" {
   interface Session {
     user: {
@@ -9,15 +12,19 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 
-  interface User {
+  interface User extends DefaultUser {
+    id: string;
+    role: string;
+    lastLogin?: Date | null;
+  }
+}
+
+/**
+ * Extend the built-in JWT types
+ */
+declare module "next-auth/jwt" {
+  interface JWT extends DefaultJWT {
     id: string;
     role: string;
   }
 }
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    role: string;
-  }
-} 

@@ -7,18 +7,13 @@ import { getTaskIncludeObject } from "@/lib/queries/task-queries";
 import { Prisma } from "@prisma/client";
 import { toggleTaskCompletion } from "@/lib/utils/task-utils";
 import { withResourcePermission } from "@/lib/api-middleware";
-
-interface Params {
-  params: {
-    taskId: string;
-  } | Promise<{ taskId: string }>;
-}
+import { UpdateTaskDTO } from "@/types/task";
 
 // GET handler to get a task by ID
 export const GET = withResourcePermission(
   'taskId',
   checkTaskPermission,
-  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+  async (_req: NextRequest, _context: any, _session: Session, taskId: string) => {
     try {
       // Get task with full details - include 3 levels of subtasks and activities
       const taskWithDetails = await prisma.task.findUnique({
@@ -33,12 +28,12 @@ export const GET = withResourcePermission(
       }, null, 2));
 
       return NextResponse.json({ task: taskWithDetails });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching task:", error);
 
       // Provide more detailed error information
       let errorMessage = "An error occurred while fetching the task";
-      let errorDetails = {};
+      let errorDetails: Record<string, unknown> = {};
 
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -87,7 +82,7 @@ const updateTaskSchema = z.object({
 export const PATCH = withResourcePermission(
   'taskId',
   checkTaskPermission,
-  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+  async (req: NextRequest, _context: any, _session: Session, taskId: string) => {
     try {
       const body = await req.json();
 
@@ -104,6 +99,10 @@ export const PATCH = withResourcePermission(
       const task = await prisma.task.findUnique({
         where: { id: taskId }
       });
+
+      if (!task) {
+        return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      }
 
     const {
       title,
@@ -140,8 +139,10 @@ export const PATCH = withResourcePermission(
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
-    if (statusId !== undefined) updateData.statusId = statusId;
-    if (parentId !== undefined) updateData.parentId = parentId;
+    if (statusId !== undefined) {
+      updateData.status = statusId ? { connect: { id: statusId } } : { disconnect: true };
+    }
+    if (parentId !== undefined) updateData.parent = parentId ? { connect: { id: parentId } } : { disconnect: true };
     if (estimatedTime !== undefined) updateData.estimatedTime = estimatedTime;
     if (timeSpent !== undefined) updateData.timeSpent = timeSpent;
 
@@ -170,15 +171,15 @@ export const PATCH = withResourcePermission(
       if (!targetProject) {
         return NextResponse.json({ error: "Target project not found" }, { status: 404 });
       }
-      updateData.projectId = projectId;
-      // Reset statusId if project changes, as status is project-specific
-      updateData.statusId = null;
+      updateData.project = { connect: { id: projectId } };
+      // Reset status if project changes, as status is project-specific
+      updateData.status = { disconnect: true };
     }
 
     // -- Start Transaction for Assignee Update --
     const updatedTask = await prisma.$transaction(async (tx) => {
       // Update direct task fields first
-      const partiallyUpdatedTask = await tx.task.update({
+      await tx.task.update({
         where: { id: taskId },
         data: updateData,
       });
@@ -237,7 +238,7 @@ export const PATCH = withResourcePermission(
 
     return NextResponse.json({ task: updatedTask });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error updating task:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "An error occurred while updating the task" },
@@ -250,7 +251,7 @@ export const PATCH = withResourcePermission(
 export const DELETE = withResourcePermission(
   'taskId',
   checkTaskPermission,
-  async (req: NextRequest, context: any, session: Session, taskId: string) => {
+  async (_req: NextRequest, _context: any, _session: Session, taskId: string) => {
     try {
       console.log('DELETE task handler called for taskId:', taskId);
 
@@ -259,12 +260,16 @@ export const DELETE = withResourcePermission(
         where: { id: taskId }
       });
 
-    console.log('DELETE task: Found task:', {
-      id: task.id,
-      title: task.title,
-      projectId: task.projectId,
-      parentId: task.parentId
-    });
+      if (!task) {
+        return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      }
+
+      console.log('DELETE task: Found task:', {
+        id: task.id,
+        title: task.title,
+        projectId: task.projectId,
+        parentId: task.parentId
+      });
 
     // Check if task has subtasks
     const subtasksCount = await prisma.task.count({
@@ -307,12 +312,12 @@ export const DELETE = withResourcePermission(
 
     console.log('DELETE task: Successfully deleted task with ID:', taskId);
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting task:", error);
 
     // Provide more detailed error information
     let errorMessage = "An error occurred while deleting the task";
-    let errorDetails = {};
+    let errorDetails: Record<string, unknown> = {};
 
     if (error instanceof Error) {
       errorMessage = error.message;

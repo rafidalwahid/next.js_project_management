@@ -104,7 +104,7 @@ export function withPermission(
  */
 export function withResourcePermission(
   resourceIdParam: string,
-  permissionChecker: (resourceId: string, session: Session | null, action: string) => Promise<{ hasPermission: boolean, error?: string }>,
+  permissionChecker: (resourceId: string, session: Session | null, action?: string) => Promise<{ hasPermission: boolean, error?: string | null, task?: any | null, teamMember?: any | null, project?: any | null }>,
   handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
   defaultAction: string = 'view'
 ) {

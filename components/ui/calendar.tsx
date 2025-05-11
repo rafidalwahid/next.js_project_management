@@ -7,14 +7,52 @@ import { DayPicker } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+// Create a custom type that extends DayPicker props but allows for string dates
+export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, 'selected'> & {
+  selected?: Date | Date[] | null | string | string[];
+  onSelect?: (date: Date | undefined) => void;
+}
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  selected,
+  onSelect,
   ...props
 }: CalendarProps) {
+  // Convert string dates to Date objects
+  const parseSelected = (): Date | Date[] | null | undefined => {
+    if (!selected) return selected as null | undefined;
+
+    if (typeof selected === 'string') {
+      try {
+        return new Date(selected);
+      } catch (e) {
+        console.error("Invalid date string:", selected);
+        return undefined;
+      }
+    } else if (Array.isArray(selected) && selected.length > 0 && typeof selected[0] === 'string') {
+      try {
+        return selected.map(date => new Date(date as string));
+      } catch (e) {
+        console.error("Invalid date string array:", selected);
+        return undefined;
+      }
+    }
+
+    return selected as Date | Date[] | null;
+  };
+
+  // Handle day selection
+  const handleSelect = (day: Date | undefined) => {
+    if (onSelect) {
+      onSelect(day);
+    }
+  };
+  // Parse the selected date(s)
+  const parsedSelected = parseSelected();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -57,6 +95,8 @@ function Calendar({
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
+      selected={parsedSelected}
+      onSelect={handleSelect}
       {...props}
     />
   )

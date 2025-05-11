@@ -1,21 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth-options";
 import { checkTaskPermission } from "@/lib/permissions/task-permissions";
 import { toggleTaskCompletion } from "@/lib/utils/task-utils";
-
-interface Params {
-  params: {
-    taskId: string;
-  } | Promise<{ taskId: string }>;
-}
+import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
 
 /**
  * POST /api/tasks/[taskId]/toggle-completion
  * Toggle a task's completion status
  */
-export async function POST(req: NextRequest, { params }: Params) {
+export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
+  req,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions);
 
@@ -23,8 +21,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Await params before accessing properties
-    const resolvedParams = await params;
+    // Extract params safely
+    const resolvedParams = await getParams(params);
     const taskId = resolvedParams.taskId;
 
     // Check if user has permission to update the task
@@ -47,8 +45,8 @@ export async function POST(req: NextRequest, { params }: Params) {
         entityType: "task",
         entityId: taskId,
         description: `Task "${updatedTask.title}" completion status toggled to ${updatedTask.completed ? 'completed' : 'not completed'}`,
-        userId: session.user.id,
-        projectId: updatedTask.project.id,
+        userId: session.user?.id || "",
+        projectId: updatedTask.project?.id,
         taskId,
       },
     });

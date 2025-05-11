@@ -48,7 +48,7 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
         >
           <div className="flex items-center gap-3 w-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.image} alt={user?.name ?? ""} />
+              <AvatarImage src={user?.image || undefined} alt={user?.name ?? ""} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
 
