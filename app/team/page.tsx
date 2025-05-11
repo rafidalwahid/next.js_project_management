@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { useHasPermission } from "@/hooks/use-has-permission"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -57,7 +58,10 @@ export default function TeamPage() {
   const { toast } = useToast()
   const router = useRouter()
   const { data: session, status } = useSession()
-  const [canAddMembers, setCanAddMembers] = useState(false)
+
+  // Use the permission hook instead of manual fetch
+  const { hasPermission: canAddMembers } = useHasPermission("team_add")
+  const { hasPermission: canDeleteUsers } = useHasPermission("user_delete")
 
   useEffect(() => {
     // If user is not authenticated, redirect to login
@@ -65,20 +69,7 @@ export default function TeamPage() {
       router.push("/login")
       return
     }
-
-    // Check if user has permission to add team members
-    if (session?.user?.id) {
-      fetch(`/api/users/check-permission?userId=${session.user.id}&permission=team_add`)
-        .then(res => res.json())
-        .then(data => {
-          setCanAddMembers(data.hasPermission)
-        })
-        .catch(err => {
-          console.error("Error checking permission:", err)
-          setCanAddMembers(false)
-        })
-    }
-  }, [status, router, session?.user?.id])
+  }, [status, router])
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -90,6 +81,16 @@ export default function TeamPage() {
   }
 
   const confirmDelete = (userId: string) => {
+    // Check if user has permission to delete users
+    if (!canDeleteUsers) {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to delete users.",
+        variant: "destructive"
+      })
+      return
+    }
+
     setUserToDelete(userId)
     setShowDeleteDialog(true)
   }

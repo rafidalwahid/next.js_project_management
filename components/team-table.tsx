@@ -32,7 +32,26 @@ export function TeamTable({ projectId }: TeamTableProps) {
   const { teamMembers, isLoading, isError, mutate, pagination } = useTeamMembers(projectId, page, 10)
   const { toast } = useToast()
   const [roleDialogOpen, setRoleDialogOpen] = useState(false)
-  const [selectedTeamMember, setSelectedTeamMember] = useState<any>(null)
+  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null)
+
+  // Define TeamMember type to match the one in RoleManagementDialog
+  type TeamMember = {
+    id: string
+    projectId: string
+    userId: string
+    user: {
+      id: string
+      name: string | null
+      email: string
+      role: string
+    }
+    project: {
+      id: string
+      title: string
+    }
+    createdAt: string | Date
+    taskCount?: number
+  }
 
   // Use the removeTeamMember hook
   const { removeTeamMember, isRemoving, error: removeError } = useRemoveTeamMember()

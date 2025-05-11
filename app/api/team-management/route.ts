@@ -61,7 +61,10 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       // Check if user has permission to view this project's team
       const isTeamMember = project.teamMembers.length > 0;
       const isProjectCreator = project.createdById === session.user.id;
-      const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, "team_view");
+      const hasTeamViewPermission = await PermissionService.hasPermissionById(
+        session.user.id,
+        "team_view"
+      );
 
       // Log permission check details for debugging
       console.log("Team permission check:", {
@@ -69,7 +72,6 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
         userId: session.user.id,
         isTeamMember,
         isProjectCreator,
-        userRole: session.user.role,
         hasTeamViewPermission
       });
 
@@ -86,8 +88,14 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
 
       // If requesting team memberships for another user, check if the current user has permission
       if (userId !== session.user.id) {
-        const hasUserManagementPermission = await PermissionService.hasPermission(session.user.role, "user_management");
-        const hasTeamViewPermission = await PermissionService.hasPermission(session.user.role, "team_view");
+        const hasUserManagementPermission = await PermissionService.hasPermissionById(
+          session.user.id,
+          "user_management"
+        );
+        const hasTeamViewPermission = await PermissionService.hasPermissionById(
+          session.user.id,
+          "team_view"
+        );
         const hasPermission = hasUserManagementPermission || hasTeamViewPermission;
 
         if (!hasPermission) {
@@ -244,7 +252,10 @@ export const POST = withPermission(
       // Check if user has permission to add team members to this project
       const isTeamMember = project.teamMembers.length > 0;
       const isProjectCreator = project.createdById === session.user.id;
-      const hasTeamAddPermission = await PermissionService.hasPermission(session.user.role, "team_add");
+      const hasTeamAddPermission = await PermissionService.hasPermissionById(
+        session.user.id,
+        "team_add"
+      );
 
       if (!isTeamMember && !isProjectCreator && !hasTeamAddPermission) {
         return NextResponse.json(

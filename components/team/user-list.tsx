@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { RoleBadge } from "@/components/ui/role-badge"
+import { useHasPermission } from "@/hooks/use-has-permission"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,8 +26,12 @@ interface UserListProps {
 
 export function UserList({ users, onDelete }: UserListProps) {
   const { data: session } = useSession()
-  const currentUserRole = session?.user?.role || "user"
   const currentUserId = session?.user?.id
+
+  // Use permission-based checks instead of role-based checks
+  const { hasPermission: canEditUsers } = useHasPermission("user_edit")
+  const { hasPermission: canManageRoles } = useHasPermission("manage_roles")
+  const { hasPermission: canDeleteUsers } = useHasPermission("user_delete")
 
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
@@ -116,7 +121,7 @@ export function UserList({ users, onDelete }: UserListProps) {
                         View Profile
                       </Link>
                     </DropdownMenuItem>
-                    {(currentUserRole === "admin" || currentUserRole === "manager") && (
+                    {canEditUsers && (
                       <DropdownMenuItem asChild>
                         <Link href={`/team/edit/${user.id}`} className="cursor-pointer">
                           <Edit className="mr-2 h-4 w-4" />
@@ -124,14 +129,16 @@ export function UserList({ users, onDelete }: UserListProps) {
                         </Link>
                       </DropdownMenuItem>
                     )}
-                    {currentUserRole === "admin" && (
+                    {canManageRoles && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/team/roles?userId=${user.id}`} className="cursor-pointer">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Manage Role
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {canDeleteUsers && (
                       <>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/team/roles?userId=${user.id}`} className="cursor-pointer">
-                            <ShieldCheck className="mr-2 h-4 w-4" />
-                            Manage Role
-                          </Link>
-                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"

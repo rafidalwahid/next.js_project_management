@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { AlertCircle, Info } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { RoleBadge } from "@/components/ui/role-badge"
-import { teamApi } from "@/lib/api"
+import { teamManagementApi } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
 interface TeamMember {
