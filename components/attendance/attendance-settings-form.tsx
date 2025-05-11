@@ -284,9 +284,24 @@ export function AttendanceSettingsForm({ userId }: AttendanceSettingsFormProps) 
                     value={settings?.autoCheckoutTime || "17:00"}
                     onChange={e => setSettings(prev => prev ? {...prev, autoCheckoutTime: e.target.value} : null)}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    You'll be automatically checked out at this time if you forget to do so
-                  </p>
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      You'll be automatically checked out at this time if you forget to do so
+                    </p>
+                    <div className="bg-black/5 p-3 rounded-md">
+                      <h4 className="text-xs font-medium mb-1">How auto-checkout works:</h4>
+                      <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                        <li>The system will check if you're still checked in at the specified time</li>
+                        <li>If you're checked in, you'll be automatically checked out</li>
+                        <li>Auto-checkout only applies when you're actively using the application</li>
+                        <li>Records created by auto-checkout are marked in your attendance history</li>
+                        <li>You can disable this feature at any time</li>
+                      </ul>
+                    </div>
+                    <Badge variant="outline" className="mt-2 text-xs bg-yellow-50 text-yellow-800 border-yellow-200">
+                      Auto-checkout is active
+                    </Badge>
+                  </div>
                 </div>
               )}
             </div>

@@ -83,11 +83,36 @@ export async function registerBackgroundSync() {
 
   try {
     const registration = await navigator.serviceWorker.ready;
+
+    // Register attendance sync
     await registration.sync.register('attendance-sync');
-    console.log('Background sync registered!');
+    console.log('Attendance background sync registered!');
+
+    // Register auto-checkout sync
+    await registration.sync.register('auto-checkout-sync');
+    console.log('Auto-checkout background sync registered!');
+
     return true;
   } catch (error) {
     console.error('Background sync registration failed:', error);
+    return false;
+  }
+}
+
+// Register auto-checkout sync specifically
+export async function registerAutoCheckoutSync() {
+  if (!isBackgroundSyncSupported()) {
+    console.log('Background Sync is not supported in this browser');
+    return false;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.sync.register('auto-checkout-sync');
+    console.log('Auto-checkout sync registered!');
+    return true;
+  } catch (error) {
+    console.error('Auto-checkout sync registration failed:', error);
     return false;
   }
 }
@@ -101,7 +126,8 @@ export function listenForServiceWorkerMessages(callback: (data: any) => void) {
   const messageHandler = (event: MessageEvent) => {
     if (event.data && (
       event.data.type === 'SYNC_SUCCESS' ||
-      event.data.type === 'SYNC_COMPLETED'
+      event.data.type === 'SYNC_COMPLETED' ||
+      event.data.type === 'AUTO_CHECKOUT_COMPLETED'
     )) {
       callback(event.data);
     }

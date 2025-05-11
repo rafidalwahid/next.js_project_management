@@ -1,8 +1,9 @@
 // Service Worker for Background Sync and Offline Support
-const CACHE_NAME = 'attendance-cache-v2'; // Increment version when making changes
-const STATIC_CACHE_NAME = 'attendance-static-v2';
-const DYNAMIC_CACHE_NAME = 'attendance-dynamic-v2';
+const CACHE_NAME = 'attendance-cache-v3'; // Increment version when making changes
+const STATIC_CACHE_NAME = 'attendance-static-v3';
+const DYNAMIC_CACHE_NAME = 'attendance-dynamic-v3';
 const ATTENDANCE_SYNC_QUEUE = 'attendance-sync-queue';
+const AUTO_CHECKOUT_SYNC_TAG = 'auto-checkout-sync';
 
 // Essential files to cache during installation
 const STATIC_ASSETS = [
@@ -177,7 +178,55 @@ self.addEventListener('sync', (event) => {
     console.log('[Service Worker] Syncing attendance records');
     event.waitUntil(syncAttendanceRecords());
   }
+
+  if (event.tag === AUTO_CHECKOUT_SYNC_TAG) {
+    console.log('[Service Worker] Performing auto-checkout check');
+    event.waitUntil(checkForAutoCheckout());
+  }
 });
+
+// Check if auto-checkout should be performed
+async function checkForAutoCheckout() {
+  try {
+    // First check if we're online
+    if (!self.navigator.onLine) {
+      console.log('[Service Worker] Offline, skipping auto-checkout check');
+      return;
+    }
+
+    // Check if the user is currently checked in and has auto-checkout enabled
+    const response = await fetch('/api/attendance/auto-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.checked_out) {
+        console.log('[Service Worker] Auto-checkout performed successfully');
+
+        // Notify all clients
+        notifyClients({
+          type: 'AUTO_CHECKOUT_COMPLETED',
+          checkOutTime: data.checkOutTime,
+          totalHours: data.totalHours
+        });
+      } else if (data.next_checkout) {
+        console.log('[Service Worker] Auto-checkout scheduled for later:', data.next_checkout);
+      } else {
+        console.log('[Service Worker] No auto-checkout needed');
+      }
+    } else {
+      console.error('[Service Worker] Auto-checkout check failed:', await response.text());
+    }
+  } catch (error) {
+    console.error('[Service Worker] Error checking for auto-checkout:', error);
+  }
+}
 
 // Maximum number of sync retries
 const MAX_SYNC_RETRIES = 5;

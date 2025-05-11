@@ -17,7 +17,7 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true, // Temporarily set to true to bypass the type error
+    ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,

@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { registerServiceWorker, isServiceWorkerSupported } from "@/lib/service-worker"
+import { AutoCheckoutHandler } from "@/components/attendance/auto-checkout-handler"
+import { useSession } from "next-auth/react"
 
 export function ServiceWorkerProvider({ children }: { children: React.ReactNode }) {
   const [swRegistered, setSwRegistered] = useState(false)
+  const { status } = useSession()
 
   // Initial service worker registration
   useEffect(() => {
@@ -73,5 +76,10 @@ export function ServiceWorkerProvider({ children }: { children: React.ReactNode 
     }
   }, [swRegistered])
 
-  return <>{children}</>
+  return (
+    <>
+      {status === "authenticated" && <AutoCheckoutHandler />}
+      {children}
+    </>
+  )
 }

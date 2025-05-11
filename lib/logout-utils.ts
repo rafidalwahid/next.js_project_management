@@ -52,20 +52,19 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
         // Race between position acquisition and timeout
         position = await Promise.race([positionPromise, timeoutPromise]);
 
-        // Prepare check-out data with notes indicating this was from logout
+        // Use the dedicated auto-checkout endpoint with force flag
         const checkOutData = {
-          attendanceId: data.attendance.id,
+          forceCheckout: true, // Force checkout regardless of settings
           latitude: position?.coords?.latitude,
           longitude: position?.coords?.longitude,
-          notes: "Auto checkout during logout",
         };
 
-        // Call the check-out API with a timeout
+        // Call the auto-checkout API with a timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
         try {
-          const checkoutResponse = await fetch('/api/attendance/check-out', {
+          const checkoutResponse = await fetch('/api/attendance/auto-checkout', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -78,12 +77,12 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
 
           if (checkoutResponse.ok) {
             const checkoutData = await checkoutResponse.json();
-            toast({
-              title: "Checked Out",
-              description: checkoutData.wasAutoCheckout
-                ? "You've been automatically checked out for a previous session."
-                : "You've been checked out as part of the logout process.",
-            });
+            if (checkoutData.checked_out) {
+              toast({
+                title: "Checked Out",
+                description: "You've been checked out as part of the logout process.",
+              });
+            }
           } else {
             const errorText = await checkoutResponse.text();
             console.error("Failed to auto-checkout during logout:", errorText);
