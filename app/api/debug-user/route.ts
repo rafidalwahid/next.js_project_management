@@ -11,14 +11,14 @@ export async function GET(req: NextRequest) {
   try {
     // Get the session
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({
         error: "No session found",
         authenticated: false
       });
     }
-    
+
     if (!session.user) {
       return NextResponse.json({
         error: "Session has no user object",
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         authenticated: true
       });
     }
-    
+
     if (!session.user.id) {
       return NextResponse.json({
         error: "Session user has no ID",
@@ -34,9 +34,9 @@ export async function GET(req: NextRequest) {
         authenticated: true
       });
     }
-    
+
     const userId = session.user.id;
-    
+
     // Check if user exists in database
     const userInDb = await prisma.user.findUnique({
       where: { id: userId },
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
         active: true
       }
     });
-    
+
     // Check if user has attendance settings
     const attendanceSettings = await prisma.attendanceSettings.findUnique({
       where: { userId },
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
         workDays: true
       }
     });
-    
+
     // Get all users in the database (for debugging)
     const allUsers = await prisma.user.findMany({
       select: {
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
       },
       take: 5 // Limit to 5 users for brevity
     });
-    
+
     // Return the debug information
     return NextResponse.json({
       session: {
@@ -83,7 +83,6 @@ export async function GET(req: NextRequest) {
       totalUsers: await prisma.user.count()
     });
   } catch (error) {
-    console.error("Error in debug-user:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }

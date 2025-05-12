@@ -235,11 +235,9 @@ export function UserProfileView({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={handleProfileUpdate}>
-              <Save className="mr-2 h-4 w-4" /> Save Changes
+            <Button type="submit" onClick={handleProfileUpdate}>
+              <Save className="mr-2 h-4 w-4" />
+              Save changes
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -498,12 +496,10 @@ export function UserProfileView({
         </TabsContent>
 
         <TabsContent value="projects" className="mt-6">
-          {console.log('Projects data in UserProfileView:', projects)}
           <UserProfileProjects projects={projects} />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-6">
-          {console.log('Tasks data in UserProfileView:', tasks)}
           <UserProfileTasks tasks={tasks} />
         </TabsContent>
 

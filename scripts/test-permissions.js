@@ -19,7 +19,7 @@ async function main() {
   console.log('\nTest 2: Checking if permissions exist...');
   const permissions = await prisma.permission.findMany();
   console.log(`Found ${permissions.length} permissions`);
-  
+
   // Group permissions by category
   const permissionsByCategory = {};
   permissions.forEach(permission => {
@@ -29,7 +29,7 @@ async function main() {
     }
     permissionsByCategory[category].push(permission);
   });
-  
+
   // Print permissions by category
   Object.entries(permissionsByCategory).forEach(([category, perms]) => {
     console.log(`\n${category} (${perms.length}):`);
@@ -45,7 +45,7 @@ async function main() {
       where: { roleId: role.id },
       include: { permission: true }
     });
-    
+
     console.log(`\nRole "${role.name}" has ${rolePermissions.length} permissions:`);
     rolePermissions.forEach(rp => {
       console.log(`- ${rp.permission.name}`);
@@ -54,7 +54,7 @@ async function main() {
 
   // Test 4: Check permission checks
   console.log('\nTest 4: Testing permission checks...');
-  
+
   // Define test cases
   const testCases = [
     { role: 'admin', permission: 'user_management', expected: true },
@@ -66,26 +66,26 @@ async function main() {
     { role: 'guest', permission: 'view_projects', expected: true },
     { role: 'guest', permission: 'task_creation', expected: false },
   ];
-  
+
   // Run test cases
   for (const testCase of testCases) {
     const { role, permission, expected } = testCase;
-    
+
     // Find the role
     const roleRecord = await prisma.role.findUnique({
       where: { name: role }
     });
-    
+
     if (!roleRecord) {
       console.log(`Role "${role}" not found, skipping test case`);
       continue;
     }
-    
+
     // Find the permission
     const permissionRecord = await prisma.permission.findUnique({
       where: { name: permission }
     });
-    
+
     // For nonexistent permissions, we expect false
     if (!permissionRecord) {
       const result = false;
@@ -93,7 +93,7 @@ async function main() {
       console.log(`${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`);
       continue;
     }
-    
+
     // Check if the role has the permission
     const rolePermission = await prisma.rolePermission.findFirst({
       where: {
@@ -101,7 +101,7 @@ async function main() {
         permissionId: permissionRecord.id
       }
     });
-    
+
     const result = !!rolePermission;
     const passed = result === expected;
     console.log(`${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`);
@@ -113,7 +113,6 @@ async function main() {
 // Run the main function
 main()
   .catch((e) => {
-    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

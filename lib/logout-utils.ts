@@ -11,7 +11,6 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
   try {
     // Check if we're online before attempting to fetch
     if (!navigator.onLine) {
-      console.log("Offline: Skipping auto-checkout and proceeding with logout");
       await signOut({ callbackUrl });
       return;
     }
@@ -27,7 +26,6 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
     });
 
     if (!response.ok) {
-      console.error("Error fetching current attendance:", await response.text());
       await signOut({ callbackUrl });
       return;
     }
@@ -40,7 +38,6 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
         // Get current position if available, with timeout to prevent hanging
         let position: GeolocationPosition | null = null;
         const positionPromise = getCurrentPosition().catch(err => {
-          console.warn("Could not get position for checkout:", err);
           return null;
         });
 
@@ -84,19 +81,12 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
               });
             }
           } else {
-            const errorText = await checkoutResponse.text();
-            console.error("Failed to auto-checkout during logout:", errorText);
+            // Silently continue if checkout fails
           }
         } catch (fetchError) {
-          if (fetchError.name === 'AbortError') {
-            console.warn("Auto-checkout request timed out");
-          } else {
-            console.error("Error during checkout API call:", fetchError);
-          }
-          // Continue with logout regardless
+          // Continue with logout regardless of any errors
         }
       } catch (error) {
-        console.error("Error during auto-checkout:", error);
         // Continue with logout even if checkout fails
       }
     }
@@ -104,7 +94,6 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
     // Finally, log the user out
     await signOut({ callbackUrl })
   } catch (error) {
-    console.error("Error during checkout and logout:", error)
     // If anything fails, still try to log the user out
     await signOut({ callbackUrl })
   }
@@ -147,7 +136,6 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
         // @ts-ignore - Add the original error code for reference
         enhancedError.code = error.code;
 
-        console.error("Geolocation error:", errorMessage, error);
         reject(enhancedError);
       },
       {

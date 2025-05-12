@@ -34,20 +34,4 @@ export function findSubtaskById(id: string, tasks: Subtask[]): Subtask | null {
   return null
 }
 
-/**
- * Log the subtask structure for debugging
- */
-export function logSubtaskStructure(tasks: Subtask[], level = 0): void {
-  tasks.forEach(task => {
-    console.log(
-      `${'  '.repeat(level)}${task.title} ` +
-      `(ID: ${task.id}, ` +
-      `Parent: ${task.parentId || 'none'}, ` +
-      `Priority: ${task.priority}, ` +
-      `Nested: ${task.subtasks?.length || 0})`
-    )
-    if (task.subtasks && task.subtasks.length > 0) {
-      logSubtaskStructure(task.subtasks, level + 1)
-    }
-  })
-}
+// Removed console.log debugging function

@@ -24,7 +24,6 @@ export async function logActivity(params: ActivityLogParams): Promise<any | null
 
     return activity;
   } catch (error) {
-    console.error('Failed to log activity:', error);
     // Don't throw the error - logging should never break the main functionality
     return null;
   }
@@ -64,7 +63,6 @@ export async function getUserActivities(userId: string, limit = 10): Promise<Act
 
     return activities;
   } catch (error) {
-    console.error('Failed to get user activities:', error);
     return [];
   }
 }
@@ -105,7 +103,6 @@ export async function getProjectActivities(projectId: string, limit = 20): Promi
 
     return activities;
   } catch (error) {
-    console.error('Failed to get project activities:', error);
     return [];
   }
 }
@@ -154,7 +151,6 @@ export async function getEntityActivities(entityType: string, entityId: string, 
 
     return activities;
   } catch (error) {
-    console.error(`Failed to get activities for ${entityType} ${entityId}:`, error);
     return [];
   }
 }

@@ -62,7 +62,6 @@ export function ensureDate(date: Date | string | null | undefined): Date | null 
 
     return null;
   } catch (error) {
-    console.error("Error ensuring date:", error);
     return null;
   }
 }
@@ -78,13 +77,11 @@ export function safeParseISO(dateString: string): Date {
 
     // Check if the date is valid
     if (isNaN(parsedDate.getTime())) {
-      console.warn(`Invalid date string: ${dateString}`);
       return new Date();
     }
 
     return parsedDate;
   } catch (error) {
-    console.error(`Error parsing date: ${dateString}`, error);
     return new Date();
   }
 }
@@ -115,7 +112,6 @@ export function formatDate(
   try {
     return format(dateObj, formatString);
   } catch (error) {
-    console.error("Error formatting date:", error);
     return fallback;
   }
 }
@@ -135,7 +131,6 @@ export function formatDateForInput(
   try {
     return format(dateObj, "yyyy-MM-dd");
   } catch (error) {
-    console.error("Error formatting date for input:", error);
     return "";
   }
 }
@@ -155,7 +150,6 @@ export function formatDateTimeForInput(
   try {
     return format(dateObj, "yyyy-MM-dd'T'HH:mm");
   } catch (error) {
-    console.error("Error formatting datetime for input:", error);
     return "";
   }
 }
@@ -258,7 +252,7 @@ export function processApiDates<T extends Record<string, any>>(
           (result[field] as any) = date;
         }
       } catch (error) {
-        console.error(`Error converting field ${String(field)} to Date:`, error);
+        // Silently continue if date conversion fails
       }
     }
   }
@@ -305,7 +299,6 @@ export function calculateDuration(
 
     return `${hours}h ${minutes}m`;
   } catch (error) {
-    console.error("Error calculating duration:", error);
     return "Error";
   }
 }
@@ -333,7 +326,6 @@ export function calculateHours(
     // Convert to hours with 2 decimal precision
     return Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
   } catch (error) {
-    console.error("Error calculating hours:", error);
     return null;
   }
 }

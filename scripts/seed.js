@@ -124,8 +124,6 @@ const PERMISSION_MATRIX = {
 };
 
 async function main() {
-  console.log('Starting unified database seeding process...');
-
   // Clear existing data
   await clearExistingData();
 
@@ -170,13 +168,11 @@ async function main() {
   // Create task attachments
   await seedTaskAttachments(tasks, users);
 
-  console.log('Unified database seeding completed successfully!');
+
 }
 
 // Clear existing data - be careful with this in production!
 async function clearExistingData() {
-  console.log('Clearing existing data...');
-
   // Delete dependent records first to avoid foreign key constraints
   await prisma.rolePermission.deleteMany({});
   await prisma.permission.deleteMany({});
@@ -198,12 +194,12 @@ async function clearExistingData() {
   await prisma.user.deleteMany({});
   await prisma.verificationToken.deleteMany({});
 
-  console.log('Existing data cleared.');
+
 }
 
 // Seed roles
 async function seedRoles() {
-  console.log('Seeding roles...');
+
 
   const roleMap = {};
 
@@ -218,7 +214,7 @@ async function seedRoles() {
     });
 
     roleMap[roleId] = role;
-    console.log(`Created role: ${roleData.name}`);
+
   }
 
   return roleMap;
@@ -226,7 +222,7 @@ async function seedRoles() {
 
 // Seed permissions
 async function seedPermissions() {
-  console.log('Seeding permissions...');
+
 
   const permissionMap = {};
 
@@ -244,7 +240,7 @@ async function seedPermissions() {
     });
 
     permissionMap[permission.id] = createdPermission;
-    console.log(`Created permission: ${permission.name}`);
+
   }
 
   return permissionMap;
@@ -252,14 +248,13 @@ async function seedPermissions() {
 
 // Seed role-permission relationships
 async function seedRolePermissions(roles, permissions) {
-  console.log('Seeding role-permission relationships...');
+
 
   // For each role in the permission matrix
   for (const [roleKey, permissionList] of Object.entries(PERMISSION_MATRIX)) {
     const role = roles[roleKey.toLowerCase()];
 
     if (!role) {
-      console.warn(`Role ${roleKey} not found in database, skipping permissions`);
       continue;
     }
 
@@ -268,8 +263,7 @@ async function seedRolePermissions(roles, permissions) {
       const permission = permissions[permissionKey];
 
       if (!permission) {
-        console.warn(`Permission ${permissionKey} not found in database, skipping`);
-        continue;
+          continue;
       }
 
       // Create the role-permission relationship
@@ -280,7 +274,7 @@ async function seedRolePermissions(roles, permissions) {
         }
       });
 
-      console.log(`Assigned permission ${permissionKey} to role ${roleKey}`);
+
     }
   }
 }
@@ -321,7 +315,7 @@ function getAllPermissionsWithMetadata() {
 
 // Seed users
 async function seedUsers() {
-  console.log('Seeding users...');
+
 
   const hashedPassword = await hash('password123', 10);
 
@@ -402,7 +396,7 @@ async function seedUsers() {
     await prisma.$executeRaw`UPDATE user SET role = ${role} WHERE id = ${user.id}`;
 
     users[role === 'user' ? userData.jobTitle.toLowerCase().replace(/\s+/g, '_') : role] = user;
-    console.log(`Created user: ${userData.name} (${userData.email})`);
+
   }
 
   // Create additional users for team diversity
@@ -427,7 +421,7 @@ async function seedUsers() {
     await prisma.$executeRaw`UPDATE user SET role = 'user' WHERE id = ${extraUser.id}`;
 
     extraUsers.push(extraUser);
-    console.log(`Created additional user: User ${i}`);
+
   }
 
   users.extraUsers = extraUsers;
@@ -436,7 +430,7 @@ async function seedUsers() {
 
 // Seed projects
 async function seedProjects(users) {
-  console.log('Seeding projects...');
+
 
   const now = new Date();
   const projectsToCreate = [
@@ -495,7 +489,7 @@ async function seedProjects(users) {
     }
 
     projects.push(project);
-    console.log(`Created project: ${projectData.title}`);
+
   }
 
   return projects;
@@ -503,7 +497,7 @@ async function seedProjects(users) {
 
 // Seed team members
 async function seedTeamMembers(projects, users) {
-  console.log('Seeding team members...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -532,7 +526,7 @@ async function seedTeamMembers(projects, users) {
             userId: user.id
           }
         });
-        console.log(`Added ${user.name} to project "${project.title}"`);
+
       }
     }
     // Add only some users to the second project (Mobile App)
@@ -552,7 +546,7 @@ async function seedTeamMembers(projects, users) {
             userId: user.id
           }
         });
-        console.log(`Added ${user.name} to project "${project.title}"`);
+
       }
     }
   }
@@ -560,7 +554,7 @@ async function seedTeamMembers(projects, users) {
 
 // Seed tasks
 async function seedTasks(projects, users) {
-  console.log('Seeding tasks...');
+
 
   const tasks = [];
   const now = new Date();
@@ -629,7 +623,7 @@ async function seedTasks(projects, users) {
     for (const subtaskData of designSubtasks) {
       const subtask = await prisma.task.create({ data: subtaskData });
       tasks.push(subtask);
-      console.log(`Created subtask: ${subtask.title}`);
+
     }
 
     // Create more parent tasks
@@ -663,7 +657,7 @@ async function seedTasks(projects, users) {
     });
     tasks.push(contentTask);
 
-    console.log(`Created tasks for project "${websiteProject.title}"`);
+
   }
 
   // Mobile App Development project tasks
@@ -741,7 +735,7 @@ async function seedTasks(projects, users) {
     });
     tasks.push(testingTask);
 
-    console.log(`Created tasks for project "${mobileProject.title}"`);
+
   }
 
   return tasks;
@@ -749,7 +743,7 @@ async function seedTasks(projects, users) {
 
 // Seed task assignees
 async function seedTaskAssignees(tasks, users) {
-  console.log('Assigning users to tasks...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -781,14 +775,14 @@ async function seedTaskAssignees(tasks, users) {
           userId: user.id
         }
       });
-      console.log(`Assigned user ${user.name} to task "${task.title}"`);
+
     }
   }
 }
 
 // Seed comments
 async function seedComments(tasks, users) {
-  console.log('Creating comments on tasks...');
+
 
   const commentTemplates = [
     "I've started working on this task. Will update progress soon.",
@@ -844,13 +838,13 @@ async function seedComments(tasks, users) {
       });
     }
 
-    console.log(`Added ${commentCount} comments to task "${task.title}"`);
+
   }
 }
 
 // Seed attendance records
 async function seedAttendanceRecords(users, projects, tasks) {
-  console.log('Creating attendance records...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -938,7 +932,7 @@ async function seedAttendanceRecords(users, projects, tasks) {
       }
     }
 
-    console.log(`Created attendance records for ${date.toDateString()}`);
+
   }
 
   // Create some attendance records with notes
@@ -962,7 +956,7 @@ async function seedAttendanceRecords(users, projects, tasks) {
 
 // Seed attendance settings
 async function seedAttendanceSettings(users) {
-  console.log('Creating attendance settings...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -1001,13 +995,13 @@ async function seedAttendanceSettings(users) {
       }
     });
 
-    console.log(`Created attendance settings for user ${user.name}`);
+
   }
 }
 
 // Seed events
 async function seedEvents(projects) {
-  console.log('Creating events...');
+
 
   const now = new Date();
   const eventTypes = [
@@ -1042,13 +1036,13 @@ async function seedEvents(projects) {
       });
     }
 
-    console.log(`Created ${eventCount} events for project "${project.title}"`);
+
   }
 }
 
 // Seed documents
 async function seedDocuments(users) {
-  console.log('Creating documents...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -1104,13 +1098,13 @@ async function seedDocuments(users) {
       });
     }
 
-    console.log(`Created ${docCount} documents for user ${user.name}`);
+
   }
 }
 
 // Seed activities
 async function seedActivities(users, projects, tasks) {
-  console.log('Creating activity logs...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -1207,12 +1201,12 @@ async function seedActivities(users, projects, tasks) {
     }
   }
 
-  console.log('Activity logs created successfully');
+
 }
 
 // Seed task attachments
 async function seedTaskAttachments(tasks, users) {
-  console.log('Creating task attachments...');
+
 
   // Map user job titles to keys
   const usersByRole = {};
@@ -1269,7 +1263,7 @@ async function seedTaskAttachments(tasks, users) {
         });
       }
 
-      console.log(`Added ${attachmentCount} attachments to task "${task.title}"`);
+
     }
   }
 }
@@ -1277,7 +1271,6 @@ async function seedTaskAttachments(tasks, users) {
 // Execute the main function
 main()
   .catch(e => {
-    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

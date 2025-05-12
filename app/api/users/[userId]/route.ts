@@ -217,8 +217,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         ? `${Math.round((completedTasksCount / totalTasksCount) * 100)}%`
         : '0%';
 
-      console.log('Raw projects data:', JSON.stringify(projects, null, 2));
-      console.log('Raw tasks data:', JSON.stringify(tasks, null, 2));
+
 
       // Check if the user has any team memberships directly
       const teamMemberships = await prisma.teamMember.findMany({
@@ -274,7 +273,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         }
       });
 
-      console.log('Team memberships:', JSON.stringify(teamMemberships, null, 2));
+
 
       // Check if the user has any task assignments directly
       const taskAssignments = await prisma.taskAssignee.findMany({
@@ -330,7 +329,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         take: 10
       });
 
-      console.log('Task assignments:', JSON.stringify(taskAssignments, null, 2));
+
 
       // Combine projects from team memberships with the original projects query
       const allProjects = [
@@ -392,8 +391,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         project: task.project
       }));
 
-      console.log('Formatted projects:', JSON.stringify(formattedProjects, null, 2));
-      console.log('Formatted tasks:', JSON.stringify(formattedTasks, null, 2));
+
 
       // Return the user with additional profile data
       return NextResponse.json({
@@ -420,7 +418,6 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
     // Return just the user data for non-profile requests
     return NextResponse.json({ user });
   } catch (error: any) {
-    console.error('Error fetching user:', error);
     return NextResponse.json(
       { error: 'Failed to fetch user', details: error.message },
       { status: 500 }
@@ -485,7 +482,6 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
 
     return NextResponse.json({ user: updatedUser });
   } catch (error: any) {
-    console.error('Error updating user:', error);
     return NextResponse.json(
       { error: 'Failed to update user', details: error.message },
       { status: 500 }

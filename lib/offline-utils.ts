@@ -35,7 +35,6 @@ export function getOfflineQueue(): OfflineAction[] {
     const queue = localStorage.getItem('attendanceOfflineQueue');
     return queue ? JSON.parse(queue) : [];
   } catch (error) {
-    console.error('Error reading offline queue:', error);
     return [];
   }
 }
@@ -73,7 +72,6 @@ export async function checkNetworkConnectivity(): Promise<boolean> {
     });
     return response.ok;
   } catch (error) {
-    console.warn('Network connectivity check failed:', error);
     return false;
   }
 }

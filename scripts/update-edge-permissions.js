@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 async function updateEdgePermissions() {
   try {
-    console.log('Updating edge permissions from database...');
+
 
     // Get all roles with their permissions
     const roles = await prisma.role.findMany({
@@ -80,9 +80,8 @@ async function updateEdgePermissions() {
     // Write the updated file
     fs.writeFileSync(filePath, newContent);
 
-    console.log('Edge permissions updated successfully!');
+
   } catch (error) {
-    console.error('Error updating edge permissions:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

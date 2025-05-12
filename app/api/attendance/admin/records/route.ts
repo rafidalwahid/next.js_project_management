@@ -142,7 +142,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Get admin attendance records error:", error);
     return NextResponse.json(
       { error: "Failed to retrieve attendance records" },
       { status: 500 }

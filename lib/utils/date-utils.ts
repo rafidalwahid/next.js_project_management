@@ -5,6 +5,9 @@
  * New code should import directly from '@/lib/utils/date' instead.
  */
 
+// Import formatDate function explicitly
+import { formatDate } from './date';
+
 // Re-export everything from date.ts
 export * from './date';
 

@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     // If user has team_view permission, they can see all users
     // If not and no specific project is requested, limit to users in the same projects
     if (!hasTeamViewPermission && !projectId) {
-      console.log(`User ${session.user.id} does not have team_view permission. Limiting to project members.`);
+
 
       // Get projects the user is part of
       const userProjects = await prisma.teamMember.findMany({
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         },
       };
     } else if (hasTeamViewPermission) {
-      console.log(`User ${session.user.id} has TEAM_VIEW permission. Showing all users.`);
+
     }
 
     if (role && role !== 'all') {
@@ -119,7 +119,6 @@ export async function GET(req: NextRequest) {
       ...(result.counts ? { counts: result.counts } : {})
     });
   } catch (error: any) {
-    console.error('Error fetching users:', error);
     return NextResponse.json(
       { error: 'Failed to fetch users', details: error.message },
       { status: 500 }
@@ -145,7 +144,6 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
         { status: 400 }
@@ -177,7 +175,6 @@ export async function POST(req: NextRequest) {
     // Validate request body
     const validationResult = userSchema.safeParse(body);
     if (!validationResult.success) {
-      console.log('Validation error:', validationResult.error.format());
       return NextResponse.json(
         { error: "Validation error", details: validationResult.error.format() },
         { status: 400 }
@@ -212,7 +209,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating user:', error);
+
 
     // Handle duplicate email
     if (error.code === 'P2002' && error.meta?.target?.includes('email')) {

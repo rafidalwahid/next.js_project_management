@@ -13,19 +13,16 @@ try {
     log: ['error'],
   });
 } catch (error) {
-  console.error('Failed to initialize Edge PrismaClient:', error);
-  
-  // Provide a dummy client that logs errors instead of crashing
+  // Provide a dummy client that handles errors instead of crashing
   prisma = new Proxy({} as PrismaClient, {
     get(target, prop) {
       if (prop === 'then') {
         // Special case for promise resolution
         return undefined;
       }
-      
-      // Return a function that logs the error
+
+      // Return a function that rejects with an error
       return () => {
-        console.error(`Edge PrismaClient method ${String(prop)} called but client failed to initialize`);
         return Promise.reject(new Error('Edge PrismaClient not available'));
       };
     },

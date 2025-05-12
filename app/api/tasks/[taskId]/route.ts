@@ -21,15 +21,11 @@ export const GET = withResourcePermission(
         include: getTaskIncludeObject(3, true, 5) // 3 levels deep, include activities, 5 activities max
       });
 
-      console.log('GET task response:', JSON.stringify({
-        id: taskWithDetails?.id,
-        title: taskWithDetails?.title,
-        dueDate: taskWithDetails?.dueDate
-      }, null, 2));
+
 
       return NextResponse.json({ task: taskWithDetails });
     } catch (error: unknown) {
-      console.error("Error fetching task:", error);
+
 
       // Provide more detailed error information
       let errorMessage = "An error occurred while fetching the task";
@@ -147,19 +143,14 @@ export const PATCH = withResourcePermission(
     if (timeSpent !== undefined) updateData.timeSpent = timeSpent;
 
     // Handle nullable date fields
-    console.log("Updating task with date fields:", { startDate, endDate, dueDate });
-
     if (startDate !== undefined) {
       updateData.startDate = startDate ? new Date(startDate) : null;
-      console.log("Setting startDate to:", updateData.startDate);
     }
     if (endDate !== undefined) {
       updateData.endDate = endDate ? new Date(endDate) : null;
-      console.log("Setting endDate to:", updateData.endDate);
     }
     if (dueDate !== undefined) {
       updateData.dueDate = dueDate ? new Date(dueDate) : null;
-      console.log("Setting dueDate to:", updateData.dueDate);
     }
 
     // Handle project change (if allowed and provided)
@@ -234,12 +225,12 @@ export const PATCH = withResourcePermission(
     });
     // -- End Transaction --
 
-    console.log('Task updated successfully:', JSON.stringify(updatedTask, null, 2));
+
 
     return NextResponse.json({ task: updatedTask });
 
   } catch (error: unknown) {
-    console.error("Error updating task:", error);
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "An error occurred while updating the task" },
       { status: 500 }
@@ -253,7 +244,7 @@ export const DELETE = withResourcePermission(
   checkTaskPermission,
   async (_req: NextRequest, _context: any, _session: Session, taskId: string) => {
     try {
-      console.log('DELETE task handler called for taskId:', taskId);
+
 
       // Get the task to delete
       const task = await prisma.task.findUnique({
@@ -264,19 +255,14 @@ export const DELETE = withResourcePermission(
         return NextResponse.json({ error: "Task not found" }, { status: 404 });
       }
 
-      console.log('DELETE task: Found task:', {
-        id: task.id,
-        title: task.title,
-        projectId: task.projectId,
-        parentId: task.parentId
-      });
+
 
     // Check if task has subtasks
     const subtasksCount = await prisma.task.count({
       where: { parentId: taskId }
     });
 
-    console.log('DELETE task: Subtasks count:', subtasksCount);
+
 
     try {
       // Delete task
@@ -284,12 +270,11 @@ export const DELETE = withResourcePermission(
         where: { id: taskId }
       });
     } catch (deleteError) {
-      console.error('DELETE task: Error during deletion:', deleteError);
+
 
       // Check if this is a foreign key constraint error
       if (deleteError instanceof Error && deleteError.message.includes('foreign key constraint')) {
         // Try to delete all subtasks first
-        console.log('DELETE task: Attempting to delete subtasks first');
 
         try {
           // Delete all subtasks
@@ -302,7 +287,7 @@ export const DELETE = withResourcePermission(
             where: { id: taskId }
           });
         } catch (cascadeError) {
-          console.error('DELETE task: Error during cascade deletion:', cascadeError);
+
           throw cascadeError;
         }
       } else {
@@ -310,10 +295,10 @@ export const DELETE = withResourcePermission(
       }
     }
 
-    console.log('DELETE task: Successfully deleted task with ID:', taskId);
+
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("Error deleting task:", error);
+
 
     // Provide more detailed error information
     let errorMessage = "An error occurred while deleting the task";
