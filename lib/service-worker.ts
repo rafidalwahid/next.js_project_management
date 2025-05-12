@@ -41,7 +41,9 @@ export async function registerServiceWorker(maxRetries = 3) {
 
   while (retries < maxRetries) {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      // Use absolute URL to avoid redirect issues
+      const swUrl = `${window.location.origin}/sw.js`;
+      const registration = await navigator.serviceWorker.register(swUrl, {
         scope: '/'
       });
       console.log('Service Worker registered with scope:', registration.scope);

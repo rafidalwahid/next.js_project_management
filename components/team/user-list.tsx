@@ -47,7 +47,7 @@ export function UserList({ users, onDelete }: UserListProps) {
 
   if (users.length === 0) {
     return (
-      <div className="rounded-md border-0 shadow-sm overflow-hidden">
+      <div className="rounded-md border-0 shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -70,7 +70,7 @@ export function UserList({ users, onDelete }: UserListProps) {
   }
 
   return (
-    <div className="rounded-md border-0 shadow-sm overflow-hidden">
+    <div className="rounded-md border-0 shadow-xs overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>

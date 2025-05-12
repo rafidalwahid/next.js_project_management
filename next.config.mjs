@@ -27,9 +27,24 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  headers: async () => {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config) => {
-    // Consider removing this if you don't have specific webpack issues
-    // as it can negatively impact build performance
     config.cache = true;
     return config;
   },

@@ -96,7 +96,7 @@ export function TaskCard({
   return (
     <div
       className={cn(
-        "bg-background p-2 xs:p-3 rounded-md shadow-sm border-l-4 flex flex-col gap-1.5 xs:gap-2",
+        "bg-background p-2 xs:p-3 rounded-md shadow-xs border-l-4 flex flex-col gap-1.5 xs:gap-2",
         "transition-all duration-200 hover:shadow-md touch-manipulation",
         isCompleted ? "opacity-70" : "",
         isDragging ? "shadow-lg ring-2 ring-primary ring-opacity-50" : ""
@@ -111,7 +111,7 @@ export function TaskCard({
           <Checkbox
             checked={isCompleted}
             onCheckedChange={() => onToggleComplete(task.id)}
-            className="mt-0.5 xs:mt-1 flex-shrink-0 h-4 w-4"
+            className="mt-0.5 xs:mt-1 shrink-0 h-4 w-4"
             aria-label={`Mark task "${task.title}" as ${isCompleted ? "incomplete" : "complete"}`}
           />
           <div className="min-w-0 flex-1">

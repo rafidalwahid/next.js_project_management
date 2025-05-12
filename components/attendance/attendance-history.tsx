@@ -184,7 +184,7 @@ export function AttendanceHistory() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <span className="text-sm whitespace-nowrap">Group by:</span>
           <select
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-1 sm:flex-none"
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-1 sm:flex-none"
             value={groupBy || ''}
             onChange={(e) => setGroupBy(e.target.value || null)}
           >
@@ -586,7 +586,7 @@ export function AttendanceHistory() {
                               {/* Session Summary at the top for quick reference */}
                               <div className="bg-primary/5 p-3 rounded-md text-sm border">
                                 <p className="font-medium flex items-center gap-2">
-                                  <Info className="h-4 w-4 flex-shrink-0" />
+                                  <Info className="h-4 w-4 shrink-0" />
                                   Session Summary
                                 </p>
                                 <div className="mt-2 space-y-1">
@@ -614,7 +614,7 @@ export function AttendanceHistory() {
                               {/* Check-in Location */}
                               <div className="space-y-3">
                                 <h4 className="text-sm font-medium flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                                  <MapPin className="h-4 w-4 shrink-0" />
                                   Check-in Location
                                 </h4>
                                 {record.checkInLatitude && record.checkInLongitude ? (
@@ -651,7 +651,7 @@ export function AttendanceHistory() {
                               {record.checkOutTime && (
                                 <div className="space-y-3 border-t pt-3">
                                   <h4 className="text-sm font-medium flex items-center gap-2">
-                                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                                    <MapPin className="h-4 w-4 shrink-0" />
                                     Check-out Location
                                   </h4>
                                   {record.checkOutLatitude && record.checkOutLongitude ? (

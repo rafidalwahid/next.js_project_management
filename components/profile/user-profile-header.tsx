@@ -88,11 +88,11 @@ export function UserProfileHeader({
   return (
     <div className="grid gap-6 md:grid-cols-3">
       {/* Left Column - Profile Card */}
-      <div className="md:col-span-1 overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
+      <div className="md:col-span-1 overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs">
         {/* Profile Header */}
-        <div className="relative h-24 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+        <div className="relative h-24 w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500">
           {/* Overlay pattern for visual interest */}
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle,_transparent_20%,_#fff_20%,_#fff_30%,_transparent_30%,_transparent_70%,_#fff_70%,_#fff_80%,_transparent_80%)]" style={{ backgroundSize: '20px 20px' }}>
+          <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle,transparent_20%,#fff_20%,#fff_30%,transparent_30%,transparent_70%,#fff_70%,#fff_80%,transparent_80%)]" style={{ backgroundSize: '20px 20px' }}>
           </div>
         </div>
 
@@ -108,7 +108,7 @@ export function UserProfileHeader({
                 {user.image ? (
                   <AvatarImage src={user.image} alt={user.name || "User"} />
                 ) : null}
-                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-3xl font-semibold">
+                <AvatarFallback className="bg-linear-to-br from-indigo-500 to-purple-600 text-white text-3xl font-semibold">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
@@ -121,7 +121,7 @@ export function UserProfileHeader({
                     accept="image/*"
                     onChange={handleImageChange}
                   />
-                  <div className="absolute bottom-1 right-1 rounded-full bg-primary p-1.5 text-primary-foreground shadow-sm ring-2 ring-background hover:bg-primary/90 transition-colors">
+                  <div className="absolute bottom-1 right-1 rounded-full bg-primary p-1.5 text-primary-foreground shadow-xs ring-2 ring-background hover:bg-primary/90 transition-colors">
                     {isUploading ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     ) : (
@@ -202,26 +202,26 @@ export function UserProfileHeader({
       <div className="md:col-span-2 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-xs">
             <div className="text-3xl font-bold text-primary">{stats?.projectCount ?? 0}</div>
             <div className="text-sm text-muted-foreground">Projects</div>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-xs">
             <div className="text-3xl font-bold text-primary">{stats?.taskCount ?? 0}</div>
             <div className="text-sm text-muted-foreground">Tasks</div>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-xs">
             <div className="text-3xl font-bold text-primary">{stats?.teamCount ?? 0}</div>
             <div className="text-sm text-muted-foreground">Teams</div>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-xs">
             <div className="text-3xl font-bold text-primary">{stats?.completionRate ?? '0%'}</div>
             <div className="text-sm text-muted-foreground">Completion</div>
           </div>
         </div>
 
         {/* About Me Section */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border bg-card p-6 shadow-xs">
           <h3 className="text-lg font-semibold mb-4">About Me</h3>
           <p className="text-muted-foreground">
             {user.bio || "No bio information available. Add a description about yourself, your skills, and experience."}
@@ -235,7 +235,7 @@ export function UserProfileHeader({
         </div>
 
         {/* Skills Section */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border bg-card p-6 shadow-xs">
           <h3 className="text-lg font-semibold mb-4">Skills & Expertise</h3>
           <div className="flex flex-wrap gap-2">
             <Badge>Project Management</Badge>

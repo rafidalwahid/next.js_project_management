@@ -455,7 +455,7 @@ export default function ProjectsPage() {
 
       {/* Date Filter Panel - Enhanced Responsive Design */}
       {showFilters && (
-        <div className="bg-muted/40 rounded-md p-3 sm:p-4 mt-3 space-y-3 sm:space-y-4 shadow-sm">
+        <div className="bg-muted/40 rounded-md p-3 sm:p-4 mt-3 space-y-3 sm:space-y-4 shadow-xs">
           <div className="flex items-center justify-between">
             <h3 className="text-sm sm:text-base font-medium">Filter Projects by Date</h3>
             <Button
@@ -519,7 +519,7 @@ export default function ProjectsPage() {
           <p className="mt-2 text-xs sm:text-sm text-muted-foreground">Loading projects...</p>
         </div>
       ) : isError ? (
-        <div className="text-center p-3 sm:p-4 mt-3 sm:mt-4 text-red-500 border border-red-200 rounded-md bg-red-50/50 shadow-sm">
+        <div className="text-center p-3 sm:p-4 mt-3 sm:mt-4 text-red-500 border border-red-200 rounded-md bg-red-50/50 shadow-xs">
           <p className="font-semibold text-sm sm:text-base">Error loading projects</p>
           <p className="text-xs sm:text-sm mt-1 sm:mt-2">{isError instanceof Error ? isError.message : "An unexpected error occurred"}</p>
           <Button
@@ -534,7 +534,7 @@ export default function ProjectsPage() {
       ) : projects && projects.length > 0 ? (
         <div className="mt-4">
           {/* Desktop Table View - Hidden on Small Screens */}
-          <div className="hidden sm:block rounded-md border shadow-sm overflow-x-auto">
+          <div className="hidden sm:block rounded-md border shadow-xs overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -691,7 +691,7 @@ export default function ProjectsPage() {
           {/* Mobile Card View - Enhanced for Small Screens */}
           <div className="sm:hidden space-y-3">
             {projects.map((project: Project) => (
-              <div key={project.id} className="border rounded-md p-3 shadow-sm bg-card">
+              <div key={project.id} className="border rounded-md p-3 shadow-xs bg-card">
                 <div className="flex justify-between items-start mb-1.5">
                   <Link
                     href={`/projects/${project.id}`}
@@ -797,7 +797,7 @@ export default function ProjectsPage() {
           )}
         </div>
       ) : (
-        <div className="text-center p-4 sm:p-6 mt-3 sm:mt-4 border rounded-md bg-muted/10 shadow-sm">
+        <div className="text-center p-4 sm:p-6 mt-3 sm:mt-4 border rounded-md bg-muted/10 shadow-xs">
           <p className="text-muted-foreground text-sm sm:text-base">No projects found</p>
           <Button
             variant="outline"

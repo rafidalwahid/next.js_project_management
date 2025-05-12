@@ -562,7 +562,7 @@ export function AttendanceWidget() {
         {pendingActions.length > 0 && (
           <div className="mb-4 p-3 bg-amber-50 text-amber-800 rounded-md text-xs flex items-center justify-between gap-2 border border-amber-200">
             <div className="flex items-center gap-2">
-              <CloudOff className="h-4 w-4 flex-shrink-0" />
+              <CloudOff className="h-4 w-4 shrink-0" />
               <span>{pendingActions.length} pending {pendingActions.length === 1 ? 'action' : 'actions'} to sync</span>
             </div>
             {isOnline && !syncInProgress && (
@@ -599,7 +599,7 @@ export function AttendanceWidget() {
 
         {error && (
           <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-xs flex items-center gap-2 border border-destructive/20">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -609,7 +609,7 @@ export function AttendanceWidget() {
           {currentAttendance && !currentAttendance.checkOutTime ? (
             <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
               <div className="flex items-center">
-                <div className="bg-primary/10 p-2 rounded-full mr-3 flex-shrink-0">
+                <div className="bg-primary/10 p-2 rounded-full mr-3 shrink-0">
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -631,7 +631,7 @@ export function AttendanceWidget() {
             <div className="bg-muted/30 p-3 rounded-lg border">
               {currentAttendance ? (
                 <div className="flex items-center">
-                  <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
+                  <div className="bg-muted/50 p-2 rounded-full mr-3 shrink-0">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -650,7 +650,7 @@ export function AttendanceWidget() {
                 </div>
               ) : (
                 <div className="flex items-center">
-                  <div className="bg-muted/50 p-2 rounded-full mr-3 flex-shrink-0">
+                  <div className="bg-muted/50 p-2 rounded-full mr-3 shrink-0">
                     <Info className="h-4 w-4 text-blue-600" />
                   </div>
                   <span className="text-sm">You haven't checked in today</span>
@@ -675,13 +675,13 @@ export function AttendanceWidget() {
 
               {/* Map */}
               {currentAttendance.checkInLatitude && currentAttendance.checkInLongitude && (
-                <div className="relative border rounded-lg overflow-hidden shadow-sm">
+                <div className="relative border rounded-lg overflow-hidden shadow-xs">
                   <LocationMap
                     latitude={currentAttendance.checkInLatitude}
                     longitude={currentAttendance.checkInLongitude}
                     className="h-[150px] w-full"
                   />
-                  <div className="absolute bottom-0 right-0 p-1.5 bg-background/90 text-xs rounded-tl-md backdrop-blur-sm">
+                  <div className="absolute bottom-0 right-0 p-1.5 bg-background/90 text-xs rounded-tl-md backdrop-blur-xs">
                     <a
                       href={`https://www.openstreetmap.org/?mlat=${currentAttendance.checkInLatitude}&mlon=${currentAttendance.checkInLongitude}#map=16/${currentAttendance.checkInLatitude}/${currentAttendance.checkInLongitude}`}
                       target="_blank"

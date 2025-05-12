@@ -199,7 +199,7 @@ function StatusSection({
         </CollapsibleTrigger>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div
-            className="w-3 h-3 rounded-full flex-shrink-0"
+            className="w-3 h-3 rounded-full shrink-0"
             style={{ backgroundColor: status.color }}
           />
 
@@ -239,7 +239,7 @@ function StatusSection({
             <h3 className="font-medium truncate">{status.name}</h3>
           )}
 
-          <div className="flex items-center justify-center h-5 min-w-[1.5rem] px-1.5 text-xs font-medium rounded-full bg-muted">
+          <div className="flex items-center justify-center h-5 min-w-6 px-1.5 text-xs font-medium rounded-full bg-muted">
             {tasks.length}
           </div>
         </div>

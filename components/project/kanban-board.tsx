@@ -288,7 +288,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm rounded-full shadow-md"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-xs rounded-full shadow-md"
           onClick={scrollLeft}
           aria-label="Scroll left"
         >
@@ -301,7 +301,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm rounded-full shadow-md"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-xs rounded-full shadow-md"
           onClick={scrollRight}
           aria-label="Scroll right"
         >
@@ -333,7 +333,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={cn(
-                      "flex-shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md",
+                      "shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md",
                       snapshot.isDraggingOver && "ring-2 ring-primary ring-opacity-50"
                     )}
                   >
@@ -343,7 +343,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          className="w-3 h-3 rounded-full shrink-0"
                           style={{ backgroundColor: status.color }}
                         />
 

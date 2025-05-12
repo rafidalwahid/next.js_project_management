@@ -129,7 +129,7 @@ export function UserProfileView({
   return (
     <div className="space-y-6">
       {/* Profile Header */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div className="md:flex">
           {/* Avatar Section */}
           <div className="relative flex flex-col items-center p-6 md:w-1/3">
@@ -146,7 +146,7 @@ export function UserProfileView({
                 </AvatarFallback>
               </Avatar>
               {isCurrentUser && (
-                <div className="absolute bottom-0 right-0 rounded-full bg-primary p-1 text-primary-foreground shadow-sm">
+                <div className="absolute bottom-0 right-0 rounded-full bg-primary p-1 text-primary-foreground shadow-xs">
                   <Camera className="h-4 w-4" />
                 </div>
               )}

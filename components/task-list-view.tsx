@@ -51,7 +51,7 @@ export default function TaskListView({ columns, onAddTask }: Props) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
+    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xs">
       {columns.map((column) => (
         <div key={column.id} className="border-b last:border-b-0">
           <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
@@ -70,7 +70,7 @@ export default function TaskListView({ columns, onAddTask }: Props) {
             {newTask?.columnId === column.id && (
               <div className="px-6 py-4 bg-blue-50">
                 <div className="flex items-start gap-4">
-                  <ChevronRight size={16} className="text-gray-400 flex-shrink-0 mt-2" />
+                  <ChevronRight size={16} className="text-gray-400 shrink-0 mt-2" />
                   <div className="flex-1 space-y-3">
                     <Input
                       type="text"
@@ -139,7 +139,7 @@ export default function TaskListView({ columns, onAddTask }: Props) {
             {column.tasks.map((task) => (
               <div key={task.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-4">
-                  <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
+                  <ChevronRight size={16} className="text-gray-400 shrink-0" />
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{task.title}</h3>
                     <p className="text-sm text-gray-600">{task.description}</p>

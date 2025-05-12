@@ -65,7 +65,7 @@ export function UserCard({ user, onDelete }: UserCardProps) {
 
   return (
     <div
-      className="relative rounded-lg border-0 bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20"
+      className="relative rounded-lg border-0 bg-card text-card-foreground shadow-xs transition-all hover:shadow-md hover:border-primary/20"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

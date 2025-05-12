@@ -275,7 +275,7 @@ export function QuickAttendanceWidget() {
       <CardContent className="p-4">
         {error && (
           <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-xs flex items-center gap-2 border border-destructive/20">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}

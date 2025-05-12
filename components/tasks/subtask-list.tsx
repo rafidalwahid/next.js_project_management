@@ -245,7 +245,7 @@ export function SubtaskList({
                   {subtask.subtasks && subtask.subtasks.length > 0 ? (
                     <button
                       onClick={() => toggleSubtaskExpansion(subtask.id)}
-                      className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer mr-1"
+                      className="shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer mr-1"
                       aria-label={expandedSubtasks[subtask.id] ? "Collapse subtasks" : "Expand subtasks"}
                       type="button"
                     >
@@ -262,7 +262,7 @@ export function SubtaskList({
                   <button
                     onClick={() => handleToggleStatus(subtask.id, subtask.completed || false)}
                     className={cn(
-                      "flex-shrink-0 transition-colors rounded-full",
+                      "shrink-0 transition-colors rounded-full",
                       subtask.completed
                         ? "text-primary hover:text-primary/80"
                         : "text-muted-foreground hover:text-primary"

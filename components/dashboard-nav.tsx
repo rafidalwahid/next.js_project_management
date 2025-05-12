@@ -92,7 +92,7 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
           >
             <Icon
               className={cn(
-                "flex-shrink-0",
+                "shrink-0",
                 collapsed ? "h-5 w-5" : "h-4 w-4 mr-2"
               )}
             />

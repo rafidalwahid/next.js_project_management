@@ -567,7 +567,7 @@ export default function RolePermissionsPage() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger>
-                                        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                        <Info className="h-4 w-4 text-muted-foreground shrink-0" />
                                       </TooltipTrigger>
                                       <TooltipContent side="right">
                                         <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>
@@ -688,7 +688,7 @@ export default function RolePermissionsPage() {
               </div>
             </div>
           </DialogHeader>
-          <div className="py-4 flex-grow overflow-hidden">
+          <div className="py-4 grow overflow-hidden">
             {loading ? (
               <div className="flex justify-center items-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -745,7 +745,7 @@ export default function RolePermissionsPage() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger>
-                                        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                        <Info className="h-4 w-4 text-muted-foreground shrink-0" />
                                       </TooltipTrigger>
                                       <TooltipContent side="right">
                                         <p className="max-w-[200px] sm:max-w-[300px]">{permission.description}</p>

@@ -83,14 +83,14 @@ export function UserProfileHeaderNew({
   return (
     <div className="space-y-8">
       {/* Profile Summary Card */}
-      <Card className="border shadow-sm">
+      <Card className="border shadow-xs">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left Column - Profile Info */}
             <div className="flex flex-col items-center md:items-start space-y-4">
               <div className="relative">
                 <Avatar
-                  className="h-24 w-24 cursor-pointer shadow-sm border border-border"
+                  className="h-24 w-24 cursor-pointer shadow-xs border border-border"
                   onClick={handleImageClick}
                 >
                   {user.image ? (
@@ -109,7 +109,7 @@ export function UserProfileHeaderNew({
                       accept="image/*"
                       onChange={handleImageChange}
                     />
-                    <div className="absolute bottom-0 right-0 rounded-full bg-primary p-1.5 text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors">
+                    <div className="absolute bottom-0 right-0 rounded-full bg-primary p-1.5 text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
                       {isUploading ? (
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                       ) : (

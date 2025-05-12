@@ -373,7 +373,7 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
   const columnCount = React.useMemo(() => columns(onDelete, onToggleCompletion).length, [onDelete, onToggleCompletion])
 
   return (
-    <div className="rounded-md border shadow-sm overflow-hidden">
+    <div className="rounded-md border shadow-xs overflow-hidden">
       {/* Responsive table with horizontal scrolling on small screens */}
       <div className="hidden sm:block overflow-x-auto">
         <Table className="w-full">
@@ -456,7 +456,7 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "h-8 w-8 p-0 flex-shrink-0 mt-0.5",
+                            "h-8 w-8 p-0 shrink-0 mt-0.5",
                             task.completed && "text-green-500"
                           )}
                           onClick={() => onToggleCompletion(task.id)}

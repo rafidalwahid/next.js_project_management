@@ -180,7 +180,7 @@ export default function TeamPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4 mt-2">
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-0 shadow-sm">
+        <Card className="bg-linear-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-0 shadow-xs">
           <CardHeader className="pb-2">
             <CardDescription>Total Members</CardDescription>
             <CardTitle className="text-3xl">{userCounts.total}</CardTitle>
@@ -190,7 +190,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/50 dark:to-pink-950/50 border-0 shadow-sm">
+        <Card className="bg-linear-to-br from-red-50 to-pink-50 dark:from-red-950/50 dark:to-pink-950/50 border-0 shadow-xs">
           <CardHeader className="pb-2">
             <CardDescription>Admins</CardDescription>
             <CardTitle className="text-3xl">{userCounts.admin}</CardTitle>
@@ -200,7 +200,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-0 shadow-sm">
+        <Card className="bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-0 shadow-xs">
           <CardHeader className="pb-2">
             <CardDescription>Managers</CardDescription>
             <CardTitle className="text-3xl">{userCounts.manager}</CardTitle>
@@ -210,7 +210,7 @@ export default function TeamPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-sm">
+        <Card className="bg-linear-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/50 dark:to-amber-950/50 border-0 shadow-xs">
           <CardHeader className="pb-2">
             <CardDescription>Regular Users</CardDescription>
             <CardTitle className="text-3xl">{userCounts.user}</CardTitle>
@@ -221,7 +221,7 @@ export default function TeamPage() {
         </Card>
       </div>
 
-      <Card className="shadow-sm border-0">
+      <Card className="shadow-xs border-0">
         <CardHeader className="pb-3 px-6 pt-6">
           <div className="flex items-center justify-between">
             <div>
@@ -255,7 +255,7 @@ export default function TeamPage() {
               </div>
               <div className="flex items-center gap-2">
                 <select
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >

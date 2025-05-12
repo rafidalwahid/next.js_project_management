@@ -525,7 +525,7 @@ export function UserProfileView({
                 <div className="space-y-6">
                   {activities.map(activity => (
                     <div key={activity.id} className="flex items-start gap-3 border-b pb-4 last:border-0 last:pb-0">
-                      <div className="rounded-full bg-slate-100 p-2 mt-0.5 flex-shrink-0">
+                      <div className="rounded-full bg-slate-100 p-2 mt-0.5 shrink-0">
                         <CalendarClock className="h-4 w-4 text-slate-600" />
                       </div>
                       <div className="min-w-0 flex-1">

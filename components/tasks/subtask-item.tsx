@@ -46,7 +46,7 @@ export function SubtaskItem({
         {hasNestedSubtasks && onToggleExpand ? (
           <button
             onClick={() => onToggleExpand(subtask.id)}
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
             aria-label={isExpanded ? "Collapse subtasks" : "Expand subtasks"}
           >
             {isExpanded ? (
@@ -61,7 +61,7 @@ export function SubtaskItem({
 
         <button
           onClick={() => onToggleStatus(subtask.id, subtask.completed)}
-          className="flex-shrink-0 text-primary hover:text-primary/80 transition-colors"
+          className="shrink-0 text-primary hover:text-primary/80 transition-colors"
         >
           {subtask.completed ? (
             <CheckCircle2 className="h-5 w-5" />

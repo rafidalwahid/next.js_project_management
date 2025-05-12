@@ -54,7 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 w-full md:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full md:hidden border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
         <div className="flex h-14 items-center justify-between px-2 sm:px-4">
           <div className="flex items-center">
             <Button
@@ -71,7 +71,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="hidden md:inline">Project Management</span>
             </span>
           </div>
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <TopCornerAttendance />
           </div>
         </div>
@@ -224,10 +224,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <div className="flex-1 p-4 md:p-6 space-y-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex-grow min-w-0">
+                <div className="grow min-w-0">
                   <Breadcrumbs />
                 </div>
-                <div className="hidden md:block flex-shrink-0">
+                <div className="hidden md:block shrink-0">
                   <TopCornerAttendance />
                 </div>
               </div>
@@ -239,10 +239,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <main className="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ml-[240px]">
             <div className="flex-1 p-4 md:p-6 space-y-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex-grow min-w-0">
+                <div className="grow min-w-0">
                   <Breadcrumbs />
                 </div>
-                <div className="hidden md:block flex-shrink-0">
+                <div className="hidden md:block shrink-0">
                   <TopCornerAttendance />
                 </div>
               </div>

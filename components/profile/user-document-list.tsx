@@ -137,10 +137,10 @@ export function UserDocumentList({ userId, canEdit }: UserDocumentListProps) {
         <div className="space-y-4">
           {documents.map((document) => (
             <div key={document.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
-              <div className="flex-shrink-0 mb-2 sm:mb-0">
+              <div className="shrink-0 mb-2 sm:mb-0">
                 {getFileIcon(document.fileType)}
               </div>
-              <div className="flex-grow min-w-0 w-full">
+              <div className="grow min-w-0 w-full">
                 <h3 className="font-medium text-base truncate">{document.name}</h3>
                 {document.description && (
                   <p className="text-sm text-muted-foreground mt-1">{document.description}</p>
@@ -150,7 +150,7 @@ export function UserDocumentList({ userId, canEdit }: UserDocumentListProps) {
                   <span>Uploaded {formatDate(document.createdAt, "MMM d, yyyy")}</span>
                 </div>
               </div>
-              <div className="flex-shrink-0 flex gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
+              <div className="shrink-0 flex gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
                 <Button variant="outline" size="sm" className="flex-1 sm:flex-initial" asChild>
                   <a 
                     href={document.filePath} 

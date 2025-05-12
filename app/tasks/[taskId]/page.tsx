@@ -536,23 +536,23 @@ export default function TaskDetailPage() {
     <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* Streamlined breadcrumb navigation */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground overflow-hidden">
-        <Button variant="ghost" size="sm" asChild className="p-0 h-8 w-8 flex-shrink-0">
+        <Button variant="ghost" size="sm" asChild className="p-0 h-8 w-8 shrink-0">
           <Link href="/tasks">
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to Tasks</span>
           </Link>
         </Button>
-        <Link href="/tasks" className="hover:text-foreground transition-colors flex-shrink-0">
+        <Link href="/tasks" className="hover:text-foreground transition-colors shrink-0">
           Tasks
         </Link>
         {task.project && (
           <>
-            <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+            <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
             <Link
               href={`/projects/${task.project.id}`}
               className="hover:text-foreground transition-colors flex items-center gap-1 truncate"
             >
-              <Briefcase className="h-3 w-3 flex-shrink-0" />
+              <Briefcase className="h-3 w-3 shrink-0" />
               <span className="truncate">{task.project.title}</span>
             </Link>
           </>
@@ -560,7 +560,7 @@ export default function TaskDetailPage() {
       </div>
 
       {/* Enhanced task header with better mobile responsiveness */}
-      <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
         {/* Task header with completion toggle and actions */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -570,7 +570,7 @@ export default function TaskDetailPage() {
               size="icon"
               onClick={handleToggleCompletion}
               className={cn(
-                "h-8 w-8 sm:h-9 sm:w-9 rounded-full flex-shrink-0 transition-colors",
+                "h-8 w-8 sm:h-9 sm:w-9 rounded-full shrink-0 transition-colors",
                 task.completed ? "bg-green-500 hover:bg-green-600 text-white border-0" : "border-2"
               )}
               title={task.completed ? "Mark as incomplete" : "Mark as complete"}
@@ -720,7 +720,7 @@ export default function TaskDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         <div className="lg:col-span-2 space-y-3 sm:space-y-4 order-2 lg:order-1">
           {/* Enhanced description section */}
-          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+          <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
             <div className="flex items-center justify-between p-3 border-b">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
@@ -792,7 +792,7 @@ export default function TaskDetailPage() {
             </TabsList>
 
             <TabsContent value="subtasks">
-              <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+              <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
                 {/* Subtasks header with progress */}
                 <div className="p-4 border-b">
                   <div className="flex items-center justify-between">
@@ -831,7 +831,7 @@ export default function TaskDetailPage() {
                       <Plus className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
                     </div>
                     <Button
-                      className="h-10 px-4 bg-black hover:bg-black/90 text-white flex-shrink-0"
+                      className="h-10 px-4 bg-black hover:bg-black/90 text-white shrink-0"
                       onClick={handleCreateSubtask}
                       disabled={!task || newTask.title.trim().length < 3}
                     >
@@ -865,7 +865,7 @@ export default function TaskDetailPage() {
             </TabsContent>
 
             <TabsContent value="comments">
-              <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+              <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
                 {/* Comments header */}
                 <div className="p-3 border-b">
                   <div className="flex items-center justify-between">
@@ -884,7 +884,7 @@ export default function TaskDetailPage() {
                 <div className="p-3 sm:p-4">
                   {/* Enhanced comment input */}
                   <div className="flex flex-col xs:flex-row gap-2 mb-4">
-                    <Avatar className="h-8 w-8 border border-black/10 flex-shrink-0 hidden xs:block">
+                    <Avatar className="h-8 w-8 border border-black/10 shrink-0 hidden xs:block">
                       <AvatarFallback className="text-xs">ME</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -914,7 +914,7 @@ export default function TaskDetailPage() {
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
                       {task.comments.map((comment) => (
                         <div key={comment.id} className="flex gap-2 group">
-                          <Avatar className="h-7 w-7 border border-background flex-shrink-0">
+                          <Avatar className="h-7 w-7 border border-background shrink-0">
                             {comment.user.image ? (
                               <AvatarImage src={comment.user.image} alt={comment.user.name || "User"} />
                             ) : null}
@@ -963,7 +963,7 @@ export default function TaskDetailPage() {
             </TabsContent>
 
             <TabsContent value="attachments">
-              <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+              <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
                 {/* Attachments header */}
                 <div className="p-3 border-b">
                   <div className="flex items-center justify-between">
@@ -1008,7 +1008,7 @@ export default function TaskDetailPage() {
                     <div className="mb-4 bg-muted/40 rounded-md p-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={cn(
-                          "h-10 w-10 rounded flex items-center justify-center flex-shrink-0",
+                          "h-10 w-10 rounded flex items-center justify-center shrink-0",
                           selectedFile.type.startsWith('image/') ? "bg-blue-50" :
                           selectedFile.type.startsWith('video/') ? "bg-red-50" :
                           selectedFile.type.startsWith('audio/') ? "bg-purple-50" :
@@ -1056,7 +1056,7 @@ export default function TaskDetailPage() {
                           className="border rounded-md p-2.5 flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 group hover:bg-muted/30 transition-colors"
                         >
                           <div className={cn(
-                            "h-9 w-9 rounded flex items-center justify-center flex-shrink-0",
+                            "h-9 w-9 rounded flex items-center justify-center shrink-0",
                             attachment.fileType.startsWith('image/') ? "bg-blue-50" :
                             attachment.fileType.startsWith('video/') ? "bg-red-50" :
                             attachment.fileType.startsWith('audio/') ? "bg-purple-50" :
@@ -1236,7 +1236,7 @@ export default function TaskDetailPage() {
 
         <div className="space-y-4 order-1 lg:order-2">
           {/* Enhanced Task Details Card */}
-          <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+          <div className="bg-card rounded-lg border shadow-xs overflow-hidden">
             <div className="p-3 border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

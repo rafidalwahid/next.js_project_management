@@ -307,7 +307,7 @@ export default function ProjectPage() {
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 flex-shrink-0 rounded-full mt-1"
+              className="h-8 w-8 shrink-0 rounded-full mt-1"
               title="Edit Project"
               onClick={() => setIsSettingsDialogOpen(true)}
             >
@@ -425,7 +425,7 @@ export default function ProjectPage() {
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border border-black flex-shrink-0">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border border-black shrink-0">
                     {project.createdBy?.image ? (
                       <AvatarImage src={project.createdBy.image} alt={project.createdBy.name || ""} />
                     ) : (
@@ -483,7 +483,7 @@ export default function ProjectPage() {
                       .map((user) => (
                       <div key={user.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <Avatar className="h-8 w-8 border border-black flex-shrink-0">
+                          <Avatar className="h-8 w-8 border border-black shrink-0">
                             {user.image ? (
                               <AvatarImage src={user.image} alt={user.name || ""} />
                             ) : (
@@ -502,7 +502,7 @@ export default function ProjectPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive flex-shrink-0 ml-1 sm:ml-2"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 ml-1 sm:ml-2"
                             onClick={() => setUserToRemove(user)}
                             title="Remove from team"
                           >
@@ -697,7 +697,7 @@ export default function ProjectPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                                 <div
-                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
+                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
                                   style={{ backgroundColor: status.color }}
                                 />
                                 <span className="text-xs sm:text-sm truncate">{status.name}</span>
@@ -740,7 +740,7 @@ export default function ProjectPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                                 <div
-                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
+                                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
                                   style={{ backgroundColor: priorityColor }}
                                 />
                                 <span className="text-xs sm:text-sm capitalize">{priority}</span>
