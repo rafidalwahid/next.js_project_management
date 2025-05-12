@@ -33,6 +33,18 @@ export async function GET(req: NextRequest) {
 
     // If no settings exist, create default settings
     if (!settings) {
+      // First check if the user exists
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id }
+      });
+      
+      if (!user) {
+        return NextResponse.json(
+          { error: "User not found in database" },
+          { status: 404 }
+        );
+      }
+      
       const defaultSettings = await prisma.attendanceSettings.create({
         data: {
           userId: session.user.id,

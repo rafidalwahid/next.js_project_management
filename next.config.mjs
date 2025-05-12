@@ -17,13 +17,10 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   typescript: {
-    // We've fixed most TypeScript errors in the codebase, but there are still
-    // some issues with the Next.js App Router types that need to be resolved.
-    // For now, we're ignoring build errors to allow the build to complete.
     ignoreBuildErrors: true
   },
   images: {
-    unoptimized: false, // Keep as is if you have a specific reason for this setting
+    unoptimized: false, 
   },
   experimental: {
     webpackBuildWorker: true,
