@@ -1,6 +1,6 @@
 /**
  * OAuth Provider Type Definitions
- * 
+ *
  * This file contains type definitions for OAuth providers used with NextAuth.
  */
 
@@ -10,7 +10,7 @@
 export interface OAuthConfig<P = Record<string, any>> {
   id: string;
   name: string;
-  type: "oauth";
+  type: 'oauth';
   authorization: string | { params: Record<string, string> };
   token?: string;
   userinfo?: {

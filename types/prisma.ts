@@ -5,7 +5,7 @@
  * Following Next.js 15 documentation standards for type definitions.
  */
 
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
 /**
  * User Where Input
@@ -130,11 +130,7 @@ export type PermissionOrderByInput = Prisma.PermissionOrderByWithRelationInput;
 /**
  * Generic Prisma Query Parameters
  */
-export interface PrismaQueryParams<
-  WhereInput,
-  IncludeInput,
-  OrderByInput
-> {
+export interface PrismaQueryParams<WhereInput, IncludeInput, OrderByInput> {
   where?: WhereInput;
   include?: IncludeInput;
   orderBy?: OrderByInput | OrderByInput[];
@@ -147,11 +143,7 @@ export interface PrismaQueryParams<
 /**
  * User Query Parameters
  */
-export type UserQueryParams = PrismaQueryParams<
-  UserWhereInput,
-  UserIncludeInput,
-  UserOrderByInput
->;
+export type UserQueryParams = PrismaQueryParams<UserWhereInput, UserIncludeInput, UserOrderByInput>;
 
 /**
  * Project Query Parameters
@@ -165,11 +157,7 @@ export type ProjectQueryParams = PrismaQueryParams<
 /**
  * Task Query Parameters
  */
-export type TaskQueryParams = PrismaQueryParams<
-  TaskWhereInput,
-  TaskIncludeInput,
-  TaskOrderByInput
->;
+export type TaskQueryParams = PrismaQueryParams<TaskWhereInput, TaskIncludeInput, TaskOrderByInput>;
 
 /**
  * Attendance Query Parameters
@@ -201,11 +189,7 @@ export type DocumentQueryParams = PrismaQueryParams<
 /**
  * Role Query Parameters
  */
-export type RoleQueryParams = PrismaQueryParams<
-  RoleWhereInput,
-  RoleIncludeInput,
-  RoleOrderByInput
->;
+export type RoleQueryParams = PrismaQueryParams<RoleWhereInput, RoleIncludeInput, RoleOrderByInput>;
 
 /**
  * Permission Query Parameters

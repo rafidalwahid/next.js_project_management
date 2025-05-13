@@ -22,7 +22,7 @@ export async function getLocationName(latitude: number, longitude: number): Prom
       throw new Error('Failed to fetch location data');
     }
 
-    const data = await response.json() as LocationNameResult;
+    const data = (await response.json()) as LocationNameResult;
 
     // Format the address based on available data
     if (data.display_name) {
@@ -94,7 +94,11 @@ export function getDeviceInfo(userAgent: string): string {
       os = 'Linux';
     } else if (userAgent.indexOf('Android') !== -1) {
       os = 'Android';
-    } else if (userAgent.indexOf('iOS') !== -1 || userAgent.indexOf('iPhone') !== -1 || userAgent.indexOf('iPad') !== -1) {
+    } else if (
+      userAgent.indexOf('iOS') !== -1 ||
+      userAgent.indexOf('iPhone') !== -1 ||
+      userAgent.indexOf('iPad') !== -1
+    ) {
       os = 'iOS';
     }
 
@@ -114,7 +118,9 @@ export function getDeviceInfo(userAgent: string): string {
       deviceName = 'iPad';
     } else if (userAgent.indexOf('Android') !== -1) {
       // Try to extract Android device model
-      const androidModelMatch = userAgent.match(/Android[\s\/]([\d\.]+)[;\)](?:[^;]*;)*\s([^;]*[^\s;])/i);
+      const androidModelMatch = userAgent.match(
+        /Android[\s\/]([\d\.]+)[;\)](?:[^;]*;)*\s([^;]*[^\s;])/i
+      );
       if (androidModelMatch && androidModelMatch[2]) {
         deviceName = androidModelMatch[2].trim();
       } else {

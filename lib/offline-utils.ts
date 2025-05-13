@@ -68,7 +68,7 @@ export async function checkNetworkConnectivity(): Promise<boolean> {
     const response = await fetch('/api/health', {
       method: 'HEAD',
       // Short timeout to avoid long waits
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
     });
     return response.ok;
   } catch (error) {

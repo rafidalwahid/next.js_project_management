@@ -1,24 +1,18 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
 import { getUserById, updateUser } from '@/lib/queries/user-queries';
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { ApiRouteHandlerOneParam, getParams } from '@/lib/api-route-types';
 
 // GET /api/users/[userId] - Get a specific user by ID
-export const GET: ApiRouteHandlerOneParam<'userId'> = async (
-  req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Extract userId from params safely
@@ -31,7 +25,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
     const isOwnProfile = session.user.id === userId;
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!isOwnProfile && !hasUserManagementPermission) {
@@ -45,10 +39,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
     const user = await getUserById(userId);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // If this is a profile request, include additional data
@@ -58,9 +49,9 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         where: {
           teamMembers: {
             some: {
-              userId: userId
-            }
-          }
+              userId: userId,
+            },
+          },
         },
         select: {
           id: true,
@@ -72,31 +63,31 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
           endDate: true,
           statuses: {
             where: {
-              isDefault: true
+              isDefault: true,
             },
             select: {
               id: true,
               name: true,
               color: true,
               description: true,
-              isDefault: true
+              isDefault: true,
             },
-            take: 1
+            take: 1,
           },
           teamMembers: {
             where: {
-              userId: userId
+              userId: userId,
             },
             select: {
-              createdAt: true
+              createdAt: true,
             },
-            take: 1
-          }
+            take: 1,
+          },
         },
         orderBy: {
-          updatedAt: 'desc'
+          updatedAt: 'desc',
         },
-        take: 5 // Limit to 5 most recent projects
+        take: 5, // Limit to 5 most recent projects
       });
 
       // Get tasks assigned to the user
@@ -104,9 +95,9 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         where: {
           assignees: {
             some: {
-              userId: userId
-            }
-          }
+              userId: userId,
+            },
+          },
         },
         select: {
           id: true,
@@ -118,26 +109,26 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
             select: {
               id: true,
               name: true,
-              color: true
-            }
+              color: true,
+            },
           },
           project: {
             select: {
               id: true,
-              title: true
-            }
-          }
+              title: true,
+            },
+          },
         },
         orderBy: {
-          updatedAt: 'desc'
+          updatedAt: 'desc',
         },
-        take: 10 // Limit to 10 most recent tasks
+        take: 10, // Limit to 10 most recent tasks
       });
 
       // Get user's recent activities
       const activities = await prisma.activity.findMany({
         where: {
-          userId: userId
+          userId: userId,
         },
         select: {
           id: true,
@@ -149,36 +140,36 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
           project: {
             select: {
               id: true,
-              title: true
-            }
+              title: true,
+            },
           },
           task: {
             select: {
               id: true,
-              title: true
-            }
-          }
+              title: true,
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: 'desc',
         },
-        take: 20 // Limit to 20 most recent activities
+        take: 20, // Limit to 20 most recent activities
       });
 
       // Calculate stats
       const projectCount = await prisma.teamMember.count({
-        where: { userId }
+        where: { userId },
       });
 
       const taskCount = await prisma.taskAssignee.count({
-        where: { userId }
+        where: { userId },
       });
 
       // Count team members the user has worked with
       // Using a simpler approach to avoid Prisma validation errors
       const teamProjects = await prisma.teamMember.findMany({
         where: { userId },
-        select: { projectId: true }
+        select: { projectId: true },
       });
 
       // Get the project IDs the user is a member of
@@ -190,8 +181,8 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
         teamCount = await prisma.teamMember.count({
           where: {
             projectId: { in: projectIds },
-            userId: { not: userId }
-          }
+            userId: { not: userId },
+          },
         });
       }
 
@@ -199,25 +190,24 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
       const completedTasksCount = await prisma.task.count({
         where: {
           assignees: {
-            some: { userId }
+            some: { userId },
           },
-          completed: true
-        }
+          completed: true,
+        },
       });
 
       const totalTasksCount = await prisma.task.count({
         where: {
           assignees: {
-            some: { userId }
-          }
-        }
+            some: { userId },
+          },
+        },
       });
 
-      const completionRate = totalTasksCount > 0
-        ? `${Math.round((completedTasksCount / totalTasksCount) * 100)}%`
-        : '0%';
-
-
+      const completionRate =
+        totalTasksCount > 0
+          ? `${Math.round((completedTasksCount / totalTasksCount) * 100)}%`
+          : '0%';
 
       // Check if the user has any team memberships directly
       const teamMemberships = await prisma.teamMember.findMany({
@@ -237,17 +227,17 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
                   name: true,
                   color: true,
                   description: true,
-                  isDefault: true
+                  isDefault: true,
                 },
-                take: 1
+                take: 1,
               },
               tasks: {
                 where: {
                   assignees: {
                     some: {
-                      userId: userId
-                    }
-                  }
+                      userId: userId,
+                    },
+                  },
                 },
                 select: {
                   id: true,
@@ -259,21 +249,19 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
                     select: {
                       id: true,
                       name: true,
-                      color: true
-                    }
-                  }
+                      color: true,
+                    },
+                  },
                 },
-                take: 5
-              }
-            }
-          }
+                take: 5,
+              },
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
-
-
 
       // Check if the user has any task assignments directly
       const taskAssignments = await prisma.taskAssignee.findMany({
@@ -293,8 +281,8 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
                 select: {
                   id: true,
                   name: true,
-                  color: true
-                }
+                  color: true,
+                },
               },
               project: {
                 select: {
@@ -306,30 +294,28 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
                     select: {
                       id: true,
                       name: true,
-                      color: true
+                      color: true,
                     },
-                    take: 1
-                  }
-                }
+                    take: 1,
+                  },
+                },
               },
               subtasks: {
                 select: {
                   id: true,
                   title: true,
-                  completed: true
+                  completed: true,
                 },
-                take: 3
-              }
-            }
-          }
+                take: 3,
+              },
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
+          createdAt: 'desc',
         },
-        take: 10
+        take: 10,
       });
-
-
 
       // Combine projects from team memberships with the original projects query
       const allProjects = [
@@ -342,24 +328,29 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
           endDate: tm.project.endDate,
           statuses: tm.project.statuses,
           teamMembers: [{ createdAt: tm.createdAt }],
-          createdAt: new Date()
-        }))
+          createdAt: new Date(),
+        })),
       ];
 
       // Remove duplicates
-      const uniqueProjects = allProjects.filter((project, index, self) =>
-        index === self.findIndex(p => p.id === project.id)
+      const uniqueProjects = allProjects.filter(
+        (project, index, self) => index === self.findIndex(p => p.id === project.id)
       );
 
       // Transform projects data to match the expected format for UserProfileProjects
       const formattedProjects = uniqueProjects.map(project => ({
         id: project.id,
         title: project.title,
-        status: project.statuses?.[0] || { id: 'unknown', name: 'Unknown', color: '#6E56CF', isDefault: true },
+        status: project.statuses?.[0] || {
+          id: 'unknown',
+          name: 'Unknown',
+          color: '#6E56CF',
+          isDefault: true,
+        },
         startDate: project.startDate,
         endDate: project.endDate,
         role: 'Member', // Default role
-        joinedAt: project.teamMembers?.[0]?.createdAt || project.createdAt
+        joinedAt: project.teamMembers?.[0]?.createdAt || project.createdAt,
       }));
 
       // Combine tasks from task assignments with the original tasks query
@@ -372,26 +363,24 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
           completed: ta.task.completed,
           dueDate: ta.task.dueDate,
           status: ta.task.status,
-          project: ta.task.project
-        }))
+          project: ta.task.project,
+        })),
       ];
 
       // Remove duplicates
-      const uniqueTasks = allTasks.filter((task, index, self) =>
-        index === self.findIndex(t => t.id === task.id)
+      const uniqueTasks = allTasks.filter(
+        (task, index, self) => index === self.findIndex(t => t.id === task.id)
       );
 
       // Transform tasks data to match the expected format for UserProfileTasks
       const formattedTasks = uniqueTasks.map(task => ({
         id: task.id,
         title: task.title,
-        status: task.completed ? 'completed' : (task.status?.name?.toLowerCase() || 'in-progress'),
+        status: task.completed ? 'completed' : task.status?.name?.toLowerCase() || 'in-progress',
         priority: task.priority,
         dueDate: task.dueDate,
-        project: task.project
+        project: task.project,
       }));
-
-
 
       // Return the user with additional profile data
       return NextResponse.json({
@@ -404,14 +393,14 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
           projectId: tm.project.id,
           projectTitle: tm.project.title,
           projectStatus: tm.project.statuses?.[0] || null,
-          joinedAt: tm.createdAt
+          joinedAt: tm.createdAt,
         })),
         stats: {
           projectCount,
           taskCount,
           teamCount,
-          completionRate
-        }
+          completionRate,
+        },
       });
     }
 
@@ -423,7 +412,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
       { status: 500 }
     );
   }
-}
+};
 
 // PATCH /api/users/[userId] - Update a user
 export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
@@ -431,11 +420,8 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }    // Extract userId from params safely
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    } // Extract userId from params safely
     const resolvedParams = await getParams(params);
     const { userId } = resolvedParams;
 
@@ -444,7 +430,7 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
     const isOwnProfile = session.user.id === userId;
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!isOwnProfile && !hasUserManagementPermission) {
@@ -460,7 +446,7 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
     // If trying to change role, only users with manage_roles permission can do that
     const hasManageRolesPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "manage_roles"
+      'manage_roles'
     );
 
     if (body.role && !hasManageRolesPermission) {
@@ -474,10 +460,7 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
     const updatedUser = await updateUser(userId, body);
 
     if (!updatedUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json({ user: updatedUser });
@@ -487,7 +470,7 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE /api/users/[userId] - Delete a user
 export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
@@ -495,10 +478,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Extract userId from params safely
@@ -508,7 +488,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     // Only users with user_management permission can delete users
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!hasUserManagementPermission) {
@@ -520,23 +500,20 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
 
     // Check if user exists
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Delete the user
     await prisma.user.delete({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     return NextResponse.json({
-      message: 'User deleted successfully'
+      message: 'User deleted successfully',
     });
   } catch (error: any) {
     console.error('Error deleting user:', error);
@@ -545,4 +522,4 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
       { status: 500 }
     );
   }
-}
+};

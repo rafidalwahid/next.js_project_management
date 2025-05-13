@@ -30,26 +30,26 @@ const getDashboardStats = unstable_cache(
           {
             teamMembers: {
               some: {
-                userId
-              }
-            }
-          }
-        ]
+                userId,
+              },
+            },
+          },
+        ],
       };
     } else {
       // Regular users only see projects they're a member of
       whereClause = {
         teamMembers: {
           some: {
-            userId
-          }
-        }
+            userId,
+          },
+        },
       };
     }
 
     // Get total projects count
     const totalProjects = await prisma.project.count({
-      where: whereClause
+      where: whereClause,
     });
 
     // Get projects with their task counts
@@ -59,14 +59,14 @@ const getDashboardStats = unstable_cache(
         _count: {
           select: {
             tasks: true,
-            teamMembers: true
-          }
+            teamMembers: true,
+          },
         },
         tasks: {
           select: {
             id: true,
-            completed: true
-          }
+            completed: true,
+          },
         },
         teamMembers: {
           include: {
@@ -74,22 +74,22 @@ const getDashboardStats = unstable_cache(
               select: {
                 id: true,
                 name: true,
-                image: true
-              }
-            }
-          }
+                image: true,
+              },
+            },
+          },
         },
         createdBy: {
           select: {
             id: true,
-            name: true
-          }
-        }
+            name: true,
+          },
+        },
       },
       orderBy: {
-        updatedAt: 'desc'
+        updatedAt: 'desc',
       },
-      take: 5
+      take: 5,
     });
 
     // Calculate project growth (comparing to last month)
@@ -101,23 +101,24 @@ const getDashboardStats = unstable_cache(
       where: {
         ...whereClause,
         createdAt: {
-          lt: new Date()
-        }
-      }
+          lt: new Date(),
+        },
+      },
     });
 
     const projectsThisMonth = await prisma.project.count({
       where: {
         ...whereClause,
         createdAt: {
-          gte: lastMonth
-        }
-      }
+          gte: lastMonth,
+        },
+      },
     });
 
-    const growthRate = projectsLastMonth > 0
-      ? ((projectsThisMonth - projectsLastMonth) / projectsLastMonth) * 100
-      : 0;
+    const growthRate =
+      projectsLastMonth > 0
+        ? ((projectsThisMonth - projectsLastMonth) / projectsLastMonth) * 100
+        : 0;
 
     // Get system-wide stats for users with system_settings permission
     let systemStats = null;
@@ -140,13 +141,12 @@ const getDashboardStats = unstable_cache(
           usersByRole: {
             admin: adminCount,
             manager: managerCount,
-            user: userCount
+            user: userCount,
           },
           totalTasks: totalSystemTasks,
           completedTasks: completedSystemTasks,
-          completionRate: totalSystemTasks > 0
-            ? Math.round((completedSystemTasks / totalSystemTasks) * 100)
-            : 0
+          completionRate:
+            totalSystemTasks > 0 ? Math.round((completedSystemTasks / totalSystemTasks) * 100) : 0,
         };
       } catch (error) {
         console.error('Error fetching system stats:', error);
@@ -156,11 +156,11 @@ const getDashboardStats = unstable_cache(
           usersByRole: {
             admin: 0,
             manager: 0,
-            user: 0
+            user: 0,
           },
           totalTasks: 0,
           completedTasks: 0,
-          completionRate: 0
+          completionRate: 0,
         };
       }
     }
@@ -175,13 +175,16 @@ const getDashboardStats = unstable_cache(
         teamCount: project._count.teamMembers,
         taskCount: project._count.tasks,
         completedTaskCount: project.tasks.filter(t => t.completed).length,
-        progress: project._count.tasks > 0
-          ? Math.round((project.tasks.filter(t => t.completed).length / project._count.tasks) * 100)
-          : 0,
-        team: project.teamMembers.map(member => member.user)
+        progress:
+          project._count.tasks > 0
+            ? Math.round(
+                (project.tasks.filter(t => t.completed).length / project._count.tasks) * 100
+              )
+            : 0,
+        team: project.teamMembers.map(member => member.user),
       })),
       projectGrowth: Math.round(growthRate),
-      systemStats // Will be null for non-admin users
+      systemStats, // Will be null for non-admin users
     };
   },
   ['dashboard-stats'],
@@ -201,7 +204,7 @@ export async function GET() {
       // Check if user exists
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, name: true, role: true }
+        select: { id: true, name: true, role: true },
       });
 
       if (!user) {
@@ -219,15 +222,18 @@ export async function GET() {
       console.error('Database error in dashboard stats:', dbError);
 
       // Return a minimal response with empty stats to prevent UI from breaking
-      return NextResponse.json({
-        stats: {
-          totalProjects: 0,
-          recentProjects: [],
-          projectGrowth: 0,
-          systemStats: null
+      return NextResponse.json(
+        {
+          stats: {
+            totalProjects: 0,
+            recentProjects: [],
+            projectGrowth: 0,
+            systemStats: null,
+          },
+          error: 'Database error occurred',
         },
-        error: 'Database error occurred'
-      }, { status: 200 });
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error('Dashboard stats error:', error);

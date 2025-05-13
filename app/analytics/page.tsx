@@ -1,10 +1,10 @@
-import Link from "next/link"
-import { BarChart3 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DashboardNav } from "@/components/dashboard-nav"
-import { UserNav } from "@/components/user-nav"
-import { ResourceAllocationChart } from "@/components/resource-allocation-chart"
-import { ResourceMetricsChart } from "@/components/resource-metrics-chart"
+import Link from 'next/link';
+import { BarChart3 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardNav } from '@/components/dashboard-nav';
+import { UserNav } from '@/components/user-nav';
+import { ResourceAllocationChart } from '@/components/resource-allocation-chart';
+import { ResourceMetricsChart } from '@/components/resource-metrics-chart';
 
 export default function AnalyticsPage() {
   return (
@@ -16,19 +16,31 @@ export default function AnalyticsPage() {
             <span>ProjectPro</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="/dashboard"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Dashboard
             </Link>
-            <Link href="/projects" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="/projects"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Proyectos
             </Link>
-            <Link href="/tasks" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="/tasks"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Tareas
             </Link>
             <Link href="/team" className="text-sm font-medium transition-colors hover:text-primary">
               Equipo
             </Link>
-            <Link href="/resources" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="/resources"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Recursos
             </Link>
           </nav>
@@ -70,5 +82,5 @@ export default function AnalyticsPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

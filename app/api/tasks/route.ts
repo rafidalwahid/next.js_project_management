@@ -1,23 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { withAuth } from "@/lib/api-middleware";
-import { checkProjectPermission } from "@/lib/permissions/project-permissions";
-import { checkTaskPermission } from "@/lib/permissions/task-permissions";
-import { getTaskListIncludeObject, taskOrderBy } from "@/lib/queries/task-queries";
-import { getNextOrderValue } from "@/lib/ordering/task-ordering";
-import { createTaskSchema, CreateTaskValues } from "@/lib/validations/task";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { withAuth } from '@/lib/api-middleware';
+import { checkProjectPermission } from '@/lib/permissions/project-permissions';
+import { checkTaskPermission } from '@/lib/permissions/task-permissions';
+import { getTaskListIncludeObject, taskOrderBy } from '@/lib/queries/task-queries';
+import { getNextOrderValue } from '@/lib/ordering/task-ordering';
+import { createTaskSchema, CreateTaskValues } from '@/lib/validations/task';
 
 // GET handler to list tasks
 export const GET = withAuth(async (req: NextRequest, _, session) => {
   try {
     // Get search params
     const searchParams = req.nextUrl.searchParams;
-    const projectId = searchParams.get("projectId");
-    const assigneeId = searchParams.get("assigneeId");
-    const priority = searchParams.get("priority");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const page = parseInt(searchParams.get("page") || "1");
+    const projectId = searchParams.get('projectId');
+    const assigneeId = searchParams.get('assigneeId');
+    const priority = searchParams.get('priority');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = parseInt(searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
 
     // Build filter
@@ -31,8 +31,8 @@ export const GET = withAuth(async (req: NextRequest, _, session) => {
       // Use the TaskAssignee relation for filtering
       where.assignees = {
         some: {
-          userId: assigneeId
-        }
+          userId: assigneeId,
+        },
       };
     }
 
@@ -44,12 +44,12 @@ export const GET = withAuth(async (req: NextRequest, _, session) => {
     const total = await prisma.task.count({ where });
 
     // Only get top-level tasks (no parentId) unless specifically requested
-    if (!searchParams.has("includeSubtasks") && !searchParams.has("parentId")) {
+    if (!searchParams.has('includeSubtasks') && !searchParams.has('parentId')) {
       where.parentId = null;
     }
 
     // If parentId is specified, get subtasks of that parent
-    const parentId = searchParams.get("parentId");
+    const parentId = searchParams.get('parentId');
     if (parentId) {
       where.parentId = parentId;
     }
@@ -70,16 +70,13 @@ export const GET = withAuth(async (req: NextRequest, _, session) => {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-      }
+      },
     });
   } catch (error) {
-    console.error("Error fetching tasks:", error);
-    return NextResponse.json(
-      { error: "An error occurred while fetching tasks" },
-      { status: 500 }
-    );
+    console.error('Error fetching tasks:', error);
+    return NextResponse.json({ error: 'An error occurred while fetching tasks' }, { status: 500 });
   }
-}, "view_projects");
+}, 'view_projects');
 
 // Validation schema for creating a task
 // export const createTaskSchema = z.object({ ... }); // Remove schema definition
@@ -95,7 +92,7 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -112,7 +109,7 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       projectId,
       statusId,
       assigneeIds,
-      parentId
+      parentId,
     } = validationResult.data;
     console.log('POST /api/tasks: Parsed data:', { title, projectId, assigneeIds });
 
@@ -120,7 +117,7 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
     const { hasPermission, error } = await checkProjectPermission(projectId, session, 'update');
 
     if (!hasPermission) {
-      return NextResponse.json({ error }, { status: error === "Project not found" ? 404 : 403 });
+      return NextResponse.json({ error }, { status: error === 'Project not found' ? 404 : 403 });
     }
 
     // Validate assigneeIds if provided
@@ -128,14 +125,14 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       const userCount = await prisma.user.count({
         where: {
           id: {
-            in: assigneeIds
-          }
-        }
+            in: assigneeIds,
+          },
+        },
       });
 
       if (userCount !== assigneeIds.length) {
         return NextResponse.json(
-          { error: "One or more users in assigneeIds not found" },
+          { error: 'One or more users in assigneeIds not found' },
           { status: 400 }
         );
       }
@@ -149,14 +146,14 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       if (!parentResult.hasPermission) {
         return NextResponse.json(
           { error: parentResult.error },
-          { status: parentResult.error === "Task not found" ? 404 : 403 }
+          { status: parentResult.error === 'Task not found' ? 404 : 403 }
         );
       }
 
       // Verify parent task belongs to the same project
       if (parentResult.task.projectId !== projectId) {
         return NextResponse.json(
-          { error: "Subtask must belong to the same project as parent task" },
+          { error: 'Subtask must belong to the same project as parent task' },
           { status: 400 }
         );
       }
@@ -170,9 +167,9 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       where: {
         projectId_userId: {
           projectId,
-          userId: session.user.id
-        }
-      }
+          userId: session.user.id,
+        },
+      },
     });
 
     if (!isTeamMember) {
@@ -180,8 +177,8 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       await prisma.teamMember.create({
         data: {
           userId: session.user.id,
-          projectId
-        }
+          projectId,
+        },
       });
     }
 
@@ -191,8 +188,8 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       const defaultStatus = await prisma.projectStatus.findFirst({
         where: {
           projectId,
-          isDefault: true
-        }
+          isDefault: true,
+        },
       });
 
       if (defaultStatus) {
@@ -201,7 +198,7 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
     }
 
     // Log date fields for debugging
-    console.log("Creating task with date fields:", { startDate, endDate, dueDate });
+    console.log('Creating task with date fields:', { startDate, endDate, dueDate });
 
     // Create task
     const task = await prisma.task.create({
@@ -240,9 +237,9 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
                 name: true,
                 email: true,
                 image: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
       },
     });
@@ -252,14 +249,14 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
       // First, verify that the user exists in the database
       const userExists = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { id: true }
+        select: { id: true },
       });
 
       if (userExists) {
         await prisma.activity.create({
           data: {
-            action: "created",
-            entityType: parentId ? "subtask" : "task",
+            action: 'created',
+            entityType: parentId ? 'subtask' : 'task',
             entityId: task.id, // Now we have the task ID
             description: parentId
               ? `Subtask "${title}" was created under task ID ${parentId}`
@@ -267,7 +264,7 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
             userId: session.user.id,
             projectId,
             taskId: task.id, // Link to the task
-          }
+          },
         });
       } else {
         console.warn(`Activity not created: User ID ${session.user.id} not found in database`);
@@ -292,21 +289,23 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
         const userCount = await prisma.user.count({
           where: {
             id: {
-              in: allAssigneeIds
-            }
-          }
+              in: allAssigneeIds,
+            },
+          },
         });
 
         if (userCount !== allAssigneeIds.length) {
-          console.warn("One or more users in assigneeIds not found. Proceeding with valid users only.");
+          console.warn(
+            'One or more users in assigneeIds not found. Proceeding with valid users only.'
+          );
           // Get the valid user IDs
           const validUsers = await prisma.user.findMany({
             where: {
               id: {
-                in: allAssigneeIds
-              }
+                in: allAssigneeIds,
+              },
             },
-            select: { id: true }
+            select: { id: true },
           });
           allAssigneeIds = validUsers.map(user => user.id);
         }
@@ -321,22 +320,22 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
               data: {
                 taskId: task.id,
                 userId,
-              }
+              },
             })
           )
         );
 
         // Add users as team members if needed
         await Promise.all(
-          allAssigneeIds.map(async (userId) => {
+          allAssigneeIds.map(async userId => {
             // Check if user is already a team member of the project
             const existingTeamMember = await prisma.teamMember.findUnique({
               where: {
                 projectId_userId: {
                   projectId,
-                  userId
-                }
-              }
+                  userId,
+                },
+              },
             });
 
             // If not, add them as a team member
@@ -344,10 +343,12 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
               await prisma.teamMember.create({
                 data: {
                   userId,
-                  projectId
-                }
+                  projectId,
+                },
               });
-              console.log(`Added user ${userId} as team member to project ${projectId} during task creation`);
+              console.log(
+                `Added user ${userId} as team member to project ${projectId} during task creation`
+              );
             }
           })
         );
@@ -364,11 +365,11 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
                     name: true,
                     email: true,
                     image: true,
-                  }
-                }
-              }
-            }
-          }
+                  },
+                },
+              },
+            },
+          },
         });
 
         if (updatedTask && 'assignees' in updatedTask && updatedTask.assignees) {
@@ -377,52 +378,55 @@ export const POST = withAuth(async (req: NextRequest, _, session) => {
         }
       }
     } catch (error) {
-      console.error("Error creating task assignees:", error);
+      console.error('Error creating task assignees:', error);
       // Don't fail the task creation if assignee creation fails
     }
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
-    console.error("Error creating task:", error);
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace available");
+    console.error('Error creating task:', error);
+    console.error(
+      'Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace available'
+    );
 
     // Provide more detailed error information
-    let errorMessage = "An error occurred while creating the task";
+    let errorMessage = 'An error occurred while creating the task';
     let errorDetails: any = {};
 
     if (error instanceof Error) {
       errorMessage = error.message;
       errorDetails = {
         stack: error.stack,
-        name: error.name
+        name: error.name,
       };
 
       // Check for Prisma-specific errors
-      if (error.message.includes("Unknown field `parentId`")) {
-        errorMessage = "Database schema mismatch: parentId field is missing";
+      if (error.message.includes('Unknown field `parentId`')) {
+        errorMessage = 'Database schema mismatch: parentId field is missing';
         errorDetails = {
           ...errorDetails,
-          hint: "The Prisma client needs to be regenerated. Run 'npx prisma generate' to update it."
+          hint: "The Prisma client needs to be regenerated. Run 'npx prisma generate' to update it.",
         };
-      } else if (error.message.includes("foreign key constraint")) {
+      } else if (error.message.includes('foreign key constraint')) {
         // Add specific handling for foreign key errors
-        if (error.message.includes("User")) {
-          errorMessage = "Invalid user reference: The specified user does not exist";
-        } else if (error.message.includes("Project")) {
-          errorMessage = "Invalid project reference: The specified project does not exist";
+        if (error.message.includes('User')) {
+          errorMessage = 'Invalid user reference: The specified user does not exist';
+        } else if (error.message.includes('Project')) {
+          errorMessage = 'Invalid project reference: The specified project does not exist';
         } else {
-          errorMessage = "A database constraint error occurred";
+          errorMessage = 'A database constraint error occurred';
         }
-        errorDetails.constraint = "foreign key";
+        errorDetails.constraint = 'foreign key';
       }
     }
 
     return NextResponse.json(
       {
         error: errorMessage,
-        details: errorDetails
+        details: errorDetails,
       },
       { status: 500 }
     );
   }
-}, "task_creation");
+}, 'task_creation');

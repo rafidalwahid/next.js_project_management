@@ -18,7 +18,7 @@ export async function registerUser(credentials: RegisterCredentials) {
       method: 'POST',
       body: JSON.stringify({
         ...credentials,
-        isRegistration: true
+        isRegistration: true,
       }),
     });
     return response;

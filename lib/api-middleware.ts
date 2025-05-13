@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Session } from "next-auth";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { PermissionCheckFn } from "@/types/api";
+import { NextRequest, NextResponse } from 'next/server';
+import { Session } from 'next-auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { PermissionCheckFn } from '@/types/api';
 
 /**
  * Middleware for API routes to handle authentication and authorization
@@ -22,10 +22,7 @@ export function withAuth(
       const session = await getServerSession(authOptions);
 
       if (!session) {
-        return NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
       // Check authorization if a permission is required
@@ -37,7 +34,7 @@ export function withAuth(
 
         if (!hasPermission) {
           return NextResponse.json(
-            { error: "Forbidden: Insufficient permissions" },
+            { error: 'Forbidden: Insufficient permissions' },
             { status: 403 }
           );
         }
@@ -46,9 +43,12 @@ export function withAuth(
       // Call the original handler with the session
       return handler(req, context, session);
     } catch (error) {
-      console.error("API middleware error:", error);
+      console.error('API middleware error:', error);
       return NextResponse.json(
-        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        {
+          error: 'Internal server error',
+          details: error instanceof Error ? error.message : String(error),
+        },
         { status: 500 }
       );
     }
@@ -69,10 +69,7 @@ export function withPermission(
   return withAuth(async (req: NextRequest, context: any, session: Session) => {
     try {
       // Check if the user has the required permission
-      const hasPermission = await PermissionService.hasPermissionById(
-        session.user.id,
-        permission
-      );
+      const hasPermission = await PermissionService.hasPermissionById(session.user.id, permission);
 
       if (!hasPermission) {
         return NextResponse.json(
@@ -84,9 +81,12 @@ export function withPermission(
       // Call the original handler
       return handler(req, context, session);
     } catch (error) {
-      console.error("API permission middleware error:", error);
+      console.error('API permission middleware error:', error);
       return NextResponse.json(
-        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        {
+          error: 'Internal server error',
+          details: error instanceof Error ? error.message : String(error),
+        },
         { status: 500 }
       );
     }
@@ -104,8 +104,23 @@ export function withPermission(
  */
 export function withResourcePermission(
   resourceIdParam: string,
-  permissionChecker: (resourceId: string, session: Session | null, action?: string) => Promise<{ hasPermission: boolean, error?: string | null, task?: any | null, teamMember?: any | null, project?: any | null }>,
-  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  permissionChecker: (
+    resourceId: string,
+    session: Session | null,
+    action?: string
+  ) => Promise<{
+    hasPermission: boolean;
+    error?: string | null;
+    task?: any | null;
+    teamMember?: any | null;
+    project?: any | null;
+  }>,
+  handler: (
+    req: NextRequest,
+    context: any,
+    session: Session,
+    resourceId: string
+  ) => Promise<NextResponse>,
   defaultAction: string = 'view'
 ) {
   return withAuth(async (req: NextRequest, context: any, session: Session) => {
@@ -115,10 +130,7 @@ export function withResourcePermission(
       const resourceId = params[resourceIdParam];
 
       if (!resourceId) {
-        return NextResponse.json(
-          { error: `${resourceIdParam} is required` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `${resourceIdParam} is required` }, { status: 400 });
       }
 
       // Determine the action based on the HTTP method
@@ -141,17 +153,20 @@ export function withResourcePermission(
 
       if (!hasPermission) {
         return NextResponse.json(
-          { error: error || "Forbidden: Insufficient permissions" },
-          { status: error?.includes("not found") ? 404 : 403 }
+          { error: error || 'Forbidden: Insufficient permissions' },
+          { status: error?.includes('not found') ? 404 : 403 }
         );
       }
 
       // Call the original handler with the resource ID
       return handler(req, context, session, resourceId);
     } catch (error) {
-      console.error("API resource permission middleware error:", error);
+      console.error('API resource permission middleware error:', error);
       return NextResponse.json(
-        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        {
+          error: 'Internal server error',
+          details: error instanceof Error ? error.message : String(error),
+        },
         { status: 500 }
       );
     }
@@ -170,7 +185,12 @@ export function withResourcePermission(
 export function withOwnerOrPermission(
   resourceIdParam: string,
   resourceFetcher: (resourceId: string) => Promise<{ userId: string } | null>,
-  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  handler: (
+    req: NextRequest,
+    context: any,
+    session: Session,
+    resourceId: string
+  ) => Promise<NextResponse>,
   requiredPermission: string
 ) {
   return withAuth(async (req: NextRequest, context: any, session: Session) => {
@@ -180,20 +200,14 @@ export function withOwnerOrPermission(
       const resourceId = params[resourceIdParam];
 
       if (!resourceId) {
-        return NextResponse.json(
-          { error: `${resourceIdParam} is required` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `${resourceIdParam} is required` }, { status: 400 });
       }
 
       // Fetch the resource
       const resource = await resourceFetcher(resourceId);
 
       if (!resource) {
-        return NextResponse.json(
-          { error: "Resource not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
       }
 
       // Check if the user is the owner
@@ -220,9 +234,12 @@ export function withOwnerOrPermission(
       // Call the original handler with the resource ID
       return handler(req, context, session, resourceId);
     } catch (error) {
-      console.error("API owner/permission middleware error:", error);
+      console.error('API owner/permission middleware error:', error);
       return NextResponse.json(
-        { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+        {
+          error: 'Internal server error',
+          details: error instanceof Error ? error.message : String(error),
+        },
         { status: 500 }
       );
     }
@@ -236,11 +253,16 @@ export function withOwnerOrPermission(
 export function withOwnerOrAdmin(
   resourceIdParam: string,
   resourceFetcher: (resourceId: string) => Promise<{ userId: string } | null>,
-  handler: (req: NextRequest, context: any, session: Session, resourceId: string) => Promise<NextResponse>,
+  handler: (
+    req: NextRequest,
+    context: any,
+    session: Session,
+    resourceId: string
+  ) => Promise<NextResponse>,
   adminOnly: boolean = false
 ) {
   // Map adminOnly to the appropriate permission
-  const requiredPermission = adminOnly ? "user_management" : "view_projects";
+  const requiredPermission = adminOnly ? 'user_management' : 'view_projects';
 
   // Use the new withOwnerOrPermission function
   return withOwnerOrPermission(resourceIdParam, resourceFetcher, handler, requiredPermission);

@@ -1,206 +1,222 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Plus, Edit, Trash, Move, Check, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import { useState, useEffect } from 'react';
+import { Plus, Edit, Trash, Move, Check, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface ProjectStatus {
-  id: string
-  name: string
-  color: string
-  description?: string | null
-  order: number
-  isDefault: boolean
-  projectId: string
+  id: string;
+  name: string;
+  color: string;
+  description?: string | null;
+  order: number;
+  isDefault: boolean;
+  projectId: string;
 }
 
 interface StatusManagementProps {
-  projectId: string
+  projectId: string;
 }
 
 export function StatusManagement({ projectId }: StatusManagementProps) {
-  const [statuses, setStatuses] = useState<ProjectStatus[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [newStatus, setNewStatus] = useState({ name: "", color: "#6E56CF", description: "", isDefault: false })
-  const [editingStatus, setEditingStatus] = useState<ProjectStatus | null>(null)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const { toast } = useToast()
+  const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newStatus, setNewStatus] = useState({
+    name: '',
+    color: '#6E56CF',
+    description: '',
+    isDefault: false,
+  });
+  const [editingStatus, setEditingStatus] = useState<ProjectStatus | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   // Fetch statuses
   const fetchStatuses = async () => {
     try {
-      setIsLoading(true)
-      const response = await fetch(`/api/projects/${projectId}/statuses`)
+      setIsLoading(true);
+      const response = await fetch(`/api/projects/${projectId}/statuses`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch statuses")
+        throw new Error('Failed to fetch statuses');
       }
 
-      const data = await response.json()
-      setStatuses(data.statuses || [])
+      const data = await response.json();
+      setStatuses(data.statuses || []);
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch statuses",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch statuses',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Load statuses on component mount
   useEffect(() => {
     if (projectId) {
-      fetchStatuses()
+      fetchStatuses();
     }
-  }, [projectId])
+  }, [projectId]);
 
   const handleAddStatus = async () => {
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newStatus)
-      })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStatus),
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to create status")
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create status');
       }
 
-      setNewStatus({ name: "", color: "#6E56CF", description: "", isDefault: false })
-      setIsAddDialogOpen(false)
-      await fetchStatuses()
+      setNewStatus({ name: '', color: '#6E56CF', description: '', isDefault: false });
+      setIsAddDialogOpen(false);
+      await fetchStatuses();
       toast({
-        title: "Status created",
-        description: "The status has been created successfully"
-      })
+        title: 'Status created',
+        description: 'The status has been created successfully',
+      });
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create status",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create status',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handleEditStatus = async () => {
-    if (!editingStatus) return
+    if (!editingStatus) return;
 
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses/${editingStatus.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editingStatus.name,
           color: editingStatus.color,
           description: editingStatus.description,
-          isDefault: editingStatus.isDefault
-        })
-      })
+          isDefault: editingStatus.isDefault,
+        }),
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to update status")
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update status');
       }
 
-      setEditingStatus(null)
-      setIsEditDialogOpen(false)
-      await fetchStatuses()
+      setEditingStatus(null);
+      setIsEditDialogOpen(false);
+      await fetchStatuses();
       toast({
-        title: "Status updated",
-        description: "The status has been updated successfully"
-      })
+        title: 'Status updated',
+        description: 'The status has been updated successfully',
+      });
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update status",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update status',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handleDeleteStatus = async (statusId: string) => {
-    if (!confirm("Are you sure you want to delete this status? All tasks in this status will be moved to the default status.")) {
-      return
+    if (
+      !confirm(
+        'Are you sure you want to delete this status? All tasks in this status will be moved to the default status.'
+      )
+    ) {
+      return;
     }
 
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses/${statusId}`, {
-        method: "DELETE"
-      })
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to delete status")
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete status');
       }
 
-      await fetchStatuses()
+      await fetchStatuses();
       toast({
-        title: "Status deleted",
-        description: "The status has been deleted successfully"
-      })
+        title: 'Status deleted',
+        description: 'The status has been deleted successfully',
+      });
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete status",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete status',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handleDragEnd = async (result: any) => {
-    if (!result.destination) return
+    if (!result.destination) return;
 
-    const sourceIndex = result.source.index
-    const destinationIndex = result.destination.index
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
 
-    if (sourceIndex === destinationIndex) return
+    if (sourceIndex === destinationIndex) return;
 
     try {
       // Optimistically update the UI
-      const newStatuses = [...statuses]
-      const [movedStatus] = newStatuses.splice(sourceIndex, 1)
-      newStatuses.splice(destinationIndex, 0, movedStatus)
-      setStatuses(newStatuses)
+      const newStatuses = [...statuses];
+      const [movedStatus] = newStatuses.splice(sourceIndex, 1);
+      newStatuses.splice(destinationIndex, 0, movedStatus);
+      setStatuses(newStatuses);
 
       // Send the update to the server
       const response = await fetch(`/api/projects/${projectId}/statuses/reorder`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           statusId: result.draggableId,
           sourceIndex,
-          destinationIndex
-        })
-      })
+          destinationIndex,
+        }),
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to reorder statuses")
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to reorder statuses');
         // If there's an error, we should refetch to get the correct order
-        await fetchStatuses()
+        await fetchStatuses();
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reorder statuses",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to reorder statuses',
+        variant: 'destructive',
+      });
       // Refetch to ensure we have the correct data
-      await fetchStatuses()
+      await fetchStatuses();
     }
-  }
+  };
 
   return (
     <Card>
@@ -223,7 +239,7 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                 <Input
                   id="name"
                   value={newStatus.name}
-                  onChange={(e) => setNewStatus({ ...newStatus, name: e.target.value })}
+                  onChange={e => setNewStatus({ ...newStatus, name: e.target.value })}
                   placeholder="e.g., In Progress"
                 />
               </div>
@@ -234,12 +250,12 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                     id="color"
                     type="color"
                     value={newStatus.color}
-                    onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
+                    onChange={e => setNewStatus({ ...newStatus, color: e.target.value })}
                     className="w-16 h-10"
                   />
                   <Input
                     value={newStatus.color}
-                    onChange={(e) => setNewStatus({ ...newStatus, color: e.target.value })}
+                    onChange={e => setNewStatus({ ...newStatus, color: e.target.value })}
                     placeholder="#6E56CF"
                   />
                 </div>
@@ -249,7 +265,7 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                 <Textarea
                   id="description"
                   value={newStatus.description}
-                  onChange={(e) => setNewStatus({ ...newStatus, description: e.target.value })}
+                  onChange={e => setNewStatus({ ...newStatus, description: e.target.value })}
                   placeholder="Describe what this status represents"
                   rows={3}
                 />
@@ -259,15 +275,19 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                   type="checkbox"
                   id="isDefault"
                   checked={newStatus.isDefault}
-                  onChange={(e) => setNewStatus({ ...newStatus, isDefault: e.target.checked })}
+                  onChange={e => setNewStatus({ ...newStatus, isDefault: e.target.checked })}
                   className="h-4 w-4 rounded border-gray-300"
                 />
                 <Label htmlFor="isDefault">Make this the default status for new tasks</Label>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddStatus} disabled={!newStatus.name}>Create Status</Button>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddStatus} disabled={!newStatus.name}>
+                Create Status
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -284,25 +304,18 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="statuses">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="space-y-2"
-                >
+              {provided => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
                   {statuses.map((status, index) => (
                     <Draggable key={status.id} draggableId={status.id} index={index}>
-                      {(provided) => (
+                      {provided => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className="flex items-center justify-between p-3 border rounded-md"
                         >
                           <div className="flex items-center gap-3">
-                            <div
-                              {...provided.dragHandleProps}
-                              className="cursor-move"
-                            >
+                            <div {...provided.dragHandleProps} className="cursor-move">
                               <Move className="h-4 w-4 text-muted-foreground" />
                             </div>
                             <div
@@ -319,7 +332,9 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                                 )}
                               </div>
                               {status.description && (
-                                <div className="text-xs text-muted-foreground">{status.description}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {status.description}
+                                </div>
                               )}
                             </div>
                           </div>
@@ -328,8 +343,8 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                setEditingStatus(status)
-                                setIsEditDialogOpen(true)
+                                setEditingStatus(status);
+                                setIsEditDialogOpen(true);
                               }}
                             >
                               <Edit className="h-4 w-4" />
@@ -367,7 +382,7 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                   <Input
                     id="edit-name"
                     value={editingStatus.name}
-                    onChange={(e) => setEditingStatus({ ...editingStatus, name: e.target.value })}
+                    onChange={e => setEditingStatus({ ...editingStatus, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -376,13 +391,13 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                     <Input
                       id="edit-color"
                       type="color"
-                      value={editingStatus.color || "#6E56CF"}
-                      onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
+                      value={editingStatus.color || '#6E56CF'}
+                      onChange={e => setEditingStatus({ ...editingStatus, color: e.target.value })}
                       className="w-16 h-10"
                     />
                     <Input
-                      value={editingStatus.color || "#6E56CF"}
-                      onChange={(e) => setEditingStatus({ ...editingStatus, color: e.target.value })}
+                      value={editingStatus.color || '#6E56CF'}
+                      onChange={e => setEditingStatus({ ...editingStatus, color: e.target.value })}
                     />
                   </div>
                 </div>
@@ -390,8 +405,10 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                   <Label htmlFor="edit-description">Description (optional)</Label>
                   <Textarea
                     id="edit-description"
-                    value={editingStatus.description || ""}
-                    onChange={(e) => setEditingStatus({ ...editingStatus, description: e.target.value })}
+                    value={editingStatus.description || ''}
+                    onChange={e =>
+                      setEditingStatus({ ...editingStatus, description: e.target.value })
+                    }
                     rows={3}
                   />
                 </div>
@@ -400,7 +417,9 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                     type="checkbox"
                     id="edit-isDefault"
                     checked={editingStatus.isDefault}
-                    onChange={(e) => setEditingStatus({ ...editingStatus, isDefault: e.target.checked })}
+                    onChange={e =>
+                      setEditingStatus({ ...editingStatus, isDefault: e.target.checked })
+                    }
                     className="h-4 w-4 rounded border-gray-300"
                   />
                   <Label htmlFor="edit-isDefault">Make this the default status for new tasks</Label>
@@ -408,12 +427,16 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
               </div>
             )}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleEditStatus} disabled={!editingStatus?.name}>Save Changes</Button>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditStatus} disabled={!editingStatus?.name}>
+                Save Changes
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardContent>
     </Card>
-  )
+  );
 }

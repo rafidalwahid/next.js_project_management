@@ -1,37 +1,33 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  CheckCircle2,
-  FileText,
-  Layers,
-  Clock
-} from "lucide-react"
-import { DashboardStats } from "@/types/dashboard"
-import { calculateTaskStats } from "@/utils/dashboard-utils"
-import { useUserTasks } from "@/hooks/use-user-tasks"
-import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CheckCircle2, FileText, Layers, Clock } from 'lucide-react';
+import { DashboardStats } from '@/types/dashboard';
+import { calculateTaskStats } from '@/utils/dashboard-utils';
+import { useUserTasks } from '@/hooks/use-user-tasks';
+import Link from 'next/link';
 
-import { StatsCard } from "./stats-card"
+import { StatsCard } from './stats-card';
 
 interface UserDashboardProps {
-  stats: DashboardStats
+  stats: DashboardStats;
 }
 
 export function UserDashboard({ stats }: UserDashboardProps) {
   // Get derived stats directly from the API response
-  const totalProjects = stats?.totalProjects || 0
-  const recentProjects = stats?.recentProjects || []
-  const projectGrowth = stats?.projectGrowth || 0
+  const totalProjects = stats?.totalProjects || 0;
+  const recentProjects = stats?.recentProjects || [];
+  const projectGrowth = stats?.projectGrowth || 0;
 
   // Use utility functions for calculations
-  const { totalTasks, completedTasks, pendingTasks, completionRate } = calculateTaskStats(recentProjects)
+  const { totalTasks, completedTasks, pendingTasks, completionRate } =
+    calculateTaskStats(recentProjects);
 
   // Fetch real task data from the API
-  const { tasks: myTasks, upcomingTasks, isLoading: tasksLoading } = useUserTasks()
+  const { tasks: myTasks, upcomingTasks, isLoading: tasksLoading } = useUserTasks();
 
   return (
     <div className="space-y-4">
@@ -43,10 +39,7 @@ export function UserDashboard({ stats }: UserDashboardProps) {
         <TabsContent value="overview" className="space-y-4">
           <div className="flex justify-end mb-4">
             <Link href="/attendance/dashboard">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-              >
+              <Button variant="outline" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>Go to Attendance</span>
               </Button>
@@ -78,9 +71,7 @@ export function UserDashboard({ stats }: UserDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Project Progress</CardTitle>
-                <CardDescription>
-                  Your current project status
-                </CardDescription>
+                <CardDescription>Your current project status</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentProjects.length === 0 ? (
@@ -113,9 +104,7 @@ export function UserDashboard({ stats }: UserDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Upcoming Tasks</CardTitle>
-                <CardDescription>
-                  Your pending tasks with nearest deadlines
-                </CardDescription>
+                <CardDescription>Your pending tasks with nearest deadlines</CardDescription>
               </CardHeader>
               <CardContent>
                 {tasksLoading ? (
@@ -125,23 +114,31 @@ export function UserDashboard({ stats }: UserDashboardProps) {
                     <Skeleton className="h-6 w-full" />
                   </div>
                 ) : upcomingTasks.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No upcoming tasks
-                  </div>
+                  <div className="text-center py-4 text-muted-foreground">No upcoming tasks</div>
                 ) : (
                   <div className="space-y-4">
                     {upcomingTasks.map(task => (
                       <div key={task.id} className="flex items-start space-x-2">
-                        <div className={`mt-0.5 h-4 w-4 rounded-full ${
-                          task.priority === 'high' ? 'bg-red-500' :
-                          task.priority === 'medium' ? 'bg-amber-500' : 'bg-green-500'
-                        }`} />
+                        <div
+                          className={`mt-0.5 h-4 w-4 rounded-full ${
+                            task.priority === 'high'
+                              ? 'bg-red-500'
+                              : task.priority === 'medium'
+                                ? 'bg-amber-500'
+                                : 'bg-green-500'
+                          }`}
+                        />
                         <div className="space-y-1">
                           <p className="text-sm font-medium">{task.title}</p>
                           <div className="flex items-center text-xs text-muted-foreground">
                             <span>{task.projectTitle}</span>
                             <span className="mx-1">•</span>
-                            <span>Due {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}</span>
+                            <span>
+                              Due{' '}
+                              {task.dueDate
+                                ? new Date(task.dueDate).toLocaleDateString()
+                                : 'No due date'}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -158,9 +155,7 @@ export function UserDashboard({ stats }: UserDashboardProps) {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>My Tasks</CardTitle>
-                <CardDescription>
-                  View and manage your assigned tasks
-                </CardDescription>
+                <CardDescription>View and manage your assigned tasks</CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm">
@@ -202,14 +197,19 @@ export function UserDashboard({ stats }: UserDashboardProps) {
                     </div>
                     <div className="divide-y">
                       {myTasks.slice(0, 10).map(task => (
-                        <div key={task.id} className={`px-4 py-3 flex items-center text-sm ${task.completed ? 'bg-muted/50' : ''}`}>
+                        <div
+                          key={task.id}
+                          className={`px-4 py-3 flex items-center text-sm ${task.completed ? 'bg-muted/50' : ''}`}
+                        >
                           <div className="w-6">
                             <div className="h-4 w-4 rounded border border-primary flex items-center justify-center">
                               {task.completed && <CheckCircle2 className="h-3 w-3 text-primary" />}
                             </div>
                           </div>
                           <div className="flex-1 ml-2">
-                            <span className={task.completed ? 'line-through text-muted-foreground' : ''}>
+                            <span
+                              className={task.completed ? 'line-through text-muted-foreground' : ''}
+                            >
                               {task.title}
                             </span>
                           </div>
@@ -217,14 +217,20 @@ export function UserDashboard({ stats }: UserDashboardProps) {
                             {task.projectTitle}
                           </div>
                           <div className="w-28 text-right">
-                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No due date'}
+                            {task.dueDate
+                              ? new Date(task.dueDate).toLocaleDateString()
+                              : 'No due date'}
                           </div>
                           <div className="w-20 text-right">
-                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${
-                              task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                              task.priority === 'medium' ? 'bg-amber-100 text-amber-800' :
-                              'bg-green-100 text-green-800'
-                            }`}>
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs ${
+                                task.priority === 'high'
+                                  ? 'bg-red-100 text-red-800'
+                                  : task.priority === 'medium'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-green-100 text-green-800'
+                              }`}
+                            >
                               {task.priority}
                             </span>
                           </div>
@@ -244,9 +250,7 @@ export function UserDashboard({ stats }: UserDashboardProps) {
             </CardContent>
           </Card>
         </TabsContent>
-
-
       </Tabs>
     </div>
-  )
+  );
 }

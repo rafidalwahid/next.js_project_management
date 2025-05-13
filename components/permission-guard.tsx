@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import { ReactNode } from "react"
-import { useHasPermission } from "@/hooks/use-has-permission"
-import { Spinner } from "@/components/ui/spinner"
+import { ReactNode } from 'react';
+import { useHasPermission } from '@/hooks/use-has-permission';
+import { Spinner } from '@/components/ui/spinner';
 
 interface PermissionGuardProps {
-  permission: string
-  children: ReactNode
-  fallback?: ReactNode
-  showLoading?: boolean
-  loadingComponent?: ReactNode
+  permission: string;
+  children: ReactNode;
+  fallback?: ReactNode;
+  showLoading?: boolean;
+  loadingComponent?: ReactNode;
 }
 
 /**
@@ -21,20 +21,28 @@ export function PermissionGuard({
   children,
   fallback = null,
   showLoading = true,
-  loadingComponent = null
+  loadingComponent = null,
 }: PermissionGuardProps) {
-  const { hasPermission, isLoading } = useHasPermission(permission)
+  const { hasPermission, isLoading } = useHasPermission(permission);
 
   // Show loading state if requested and still checking permissions
   if (isLoading && showLoading) {
-    return <>{loadingComponent || <div className="flex justify-center py-4"><Spinner size="sm" /></div>}</>
+    return (
+      <>
+        {loadingComponent || (
+          <div className="flex justify-center py-4">
+            <Spinner size="sm" />
+          </div>
+        )}
+      </>
+    );
   }
 
   // If permission check is complete and user has permission, render children
   if (hasPermission) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   // Otherwise, render fallback
-  return <>{fallback}</>
+  return <>{fallback}</>;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { RoleDashboard } from "@/components/dashboard/role-dashboard"
+import { RoleDashboard } from '@/components/dashboard/role-dashboard';
 
 export default function DashboardPage() {
   return (
@@ -9,5 +9,5 @@ export default function DashboardPage() {
         <RoleDashboard />
       </div>
     </div>
-  )
+  );
 }

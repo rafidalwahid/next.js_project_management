@@ -2,18 +2,24 @@
   "name": "project_management",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && node scripts/update-edge-permissions.js && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "type-check": "tsc --noEmit",
     "setup-db": "node scripts/setup-db.js",
     "seed": "node scripts/seed.js",
     "seed-permissions": "node scripts/seed-permissions.js",
     "update-edge-permissions": "node scripts/update-edge-permissions.js",
     "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed && npm run seed-permissions && npm run update-edge-permissions",
     "prisma:generate": "npx prisma generate",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -86,16 +92,30 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.26.0",
     "@faker-js/faker": "^9.7.0",
+    "@next/eslint-plugin-next": "^15.3.2",
     "@tailwindcss/postcss": "^4.1.6",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^22",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
+    "eslint-config-next": "^15.3.2",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
     "postcss": "^8",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4.1.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.32.0"
   }
 }

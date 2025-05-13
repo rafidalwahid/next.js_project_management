@@ -1,20 +1,14 @@
-"use client"
+'use client';
 
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { AuthGuard } from "@/components/auth-guard"
+import { DashboardLayout } from '@/components/dashboard-layout';
+import { AuthGuard } from '@/components/auth-guard';
 
-export default function TasksLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function TasksLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <div className="flex min-h-screen flex-col">
-        <DashboardLayout>
-          {children}
-        </DashboardLayout>
+        <DashboardLayout>{children}</DashboardLayout>
       </div>
     </AuthGuard>
-  )
+  );
 }

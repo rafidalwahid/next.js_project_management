@@ -3,28 +3,25 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/prisma';
 import { getDayBoundaries } from '@/lib/utils/date';
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 export async function GET() {
   try {
     // Authenticate the user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has attendance management permission
     const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "attendance_management"
+      'attendance_management'
     );
 
     if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: You do not have permission to access attendance statistics" },
+        { error: 'Forbidden: You do not have permission to access attendance statistics' },
         { status: 403 }
       );
     }
@@ -48,7 +45,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching present count:', error);
     return new NextResponse(JSON.stringify({ error: 'Failed to fetch present count' }), {
-      status: 500
+      status: 500,
     });
   }
 }

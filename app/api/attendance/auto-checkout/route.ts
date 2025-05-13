@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { ACTION_TYPES } from "@/lib/constants/activity";
-import { WORK_DAY } from "@/lib/constants/attendance";
-import { API_ERROR_CODES } from "@/lib/constants/api";
-import { getLocationName } from "@/lib/utils/geo-utils";
-import { calculateTotalHours } from "@/lib/utils/date";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { ACTION_TYPES } from '@/lib/constants/activity';
+import { WORK_DAY } from '@/lib/constants/attendance';
+import { API_ERROR_CODES } from '@/lib/constants/api';
+import { getLocationName } from '@/lib/utils/geo-utils';
+import { calculateTotalHours } from '@/lib/utils/date';
 
 /**
  * POST /api/attendance/auto-checkout
@@ -20,10 +20,7 @@ export async function POST(req: NextRequest) {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: API_ERROR_CODES.UNAUTHORIZED }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: API_ERROR_CODES.UNAUTHORIZED });
     }
 
     // Parse request body (optional parameters)
@@ -38,7 +35,7 @@ export async function POST(req: NextRequest) {
     // If auto-checkout is not enabled and we're not forcing a checkout, return early
     if (!settings?.autoCheckoutEnabled && !forceCheckout) {
       return NextResponse.json({
-        message: "Auto-checkout is not enabled for this user",
+        message: 'Auto-checkout is not enabled for this user',
         checked_out: false,
       });
     }
@@ -57,7 +54,7 @@ export async function POST(req: NextRequest) {
     // If no active attendance record, return early
     if (!attendance) {
       return NextResponse.json({
-        message: "No active check-in found",
+        message: 'No active check-in found',
         checked_out: false,
       });
     }
@@ -76,7 +73,7 @@ export async function POST(req: NextRequest) {
       // If it's not yet time to auto-checkout, return early
       if (now < autoCheckoutTime) {
         return NextResponse.json({
-          message: "Not yet time for auto-checkout",
+          message: 'Not yet time for auto-checkout',
           checked_out: false,
           next_checkout: autoCheckoutTime.toISOString(),
         });
@@ -87,14 +84,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculate total hours
-    const totalHours = calculateTotalHours(
-      new Date(attendance.checkInTime),
-      checkOutTime,
-      {
-        maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY,
-        isAutoCheckout: true
-      }
-    );
+    const totalHours = calculateTotalHours(new Date(attendance.checkInTime), checkOutTime, {
+      maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY,
+      isAutoCheckout: true,
+    });
 
     // Get location name (if coordinates are available)
     const locationName = await getLocationName(null, null);
@@ -105,8 +98,8 @@ export async function POST(req: NextRequest) {
       data: {
         checkOutTime,
         checkOutLocationName: locationName,
-        checkOutIpAddress: req.headers.get("x-forwarded-for") || null,
-        checkOutDeviceInfo: req.headers.get("user-agent") || null,
+        checkOutIpAddress: req.headers.get('x-forwarded-for') || null,
+        checkOutDeviceInfo: req.headers.get('user-agent') || null,
         totalHours,
         autoCheckout: true, // Flag as auto-checkout
       },
@@ -116,7 +109,7 @@ export async function POST(req: NextRequest) {
     await prisma.activity.create({
       data: {
         action: ACTION_TYPES.AUTO_CHECKOUT,
-        entityType: "attendance",
+        entityType: 'attendance',
         entityId: attendance.id,
         description: `System performed automatic checkout (${totalHours} hours) based on user settings`,
         userId: session.user.id,
@@ -124,16 +117,16 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      message: "Auto-checkout successful",
+      message: 'Auto-checkout successful',
       checked_out: true,
       attendance: updatedAttendance,
       checkOutTime: checkOutTime.toISOString(),
       totalHours,
     });
   } catch (error: any) {
-    console.error("Error during auto-checkout:", error);
+    console.error('Error during auto-checkout:', error);
     return NextResponse.json(
-      { error: "Failed to perform auto-checkout", details: error.message },
+      { error: 'Failed to perform auto-checkout', details: error.message },
       { status: 500 }
     );
   }

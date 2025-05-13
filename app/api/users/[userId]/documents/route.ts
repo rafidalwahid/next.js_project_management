@@ -1,27 +1,21 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
-import { existsSync } from "fs";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { existsSync } from 'fs';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { ApiRouteHandlerOneParam, getParams } from '@/lib/api-route-types';
 
 // GET /api/users/[userId]/documents - Get documents for a specific user
-export const GET: ApiRouteHandlerOneParam<'userId'> = async (
-  _req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerOneParam<'userId'> = async (_req, { params }) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Extract userId from params safely
     const userId = await getParams(params).then(p => p.userId);
@@ -31,12 +25,12 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
     const isOwnProfile = session.user.id === userId;
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: You do not have permission to view this user\'s documents' },
+        { error: "Forbidden: You do not have permission to view this user's documents" },
         { status: 403 }
       );
     }
@@ -44,7 +38,7 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
     // Get documents for the user
     const documents = await prisma.document.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ documents });
@@ -55,21 +49,15 @@ export const GET: ApiRouteHandlerOneParam<'userId'> = async (
       { status: 500 }
     );
   }
-}
+};
 
 // POST /api/users/[userId]/documents - Upload a document for a user
-export const POST: ApiRouteHandlerOneParam<'userId'> = async (
-  req,
-  { params }
-) => {
+export const POST: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Extract userId from params safely
     const userId = await getParams(params).then(p => p.userId);
@@ -79,7 +67,7 @@ export const POST: ApiRouteHandlerOneParam<'userId'> = async (
     const isOwnProfile = session.user.id === userId;
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!isOwnProfile && !hasUserManagementPermission) {
@@ -90,22 +78,16 @@ export const POST: ApiRouteHandlerOneParam<'userId'> = async (
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File;
-    const description = formData.get("description") as string || "";
+    const file = formData.get('file') as File;
+    const description = (formData.get('description') as string) || '';
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File too large (max 10MB)' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 });
     }
 
     // Get file data
@@ -114,11 +96,11 @@ export const POST: ApiRouteHandlerOneParam<'userId'> = async (
 
     // Generate a unique filename with the original extension
     const originalName = file.name;
-    const extension = originalName.split(".").pop() || "";
+    const extension = originalName.split('.').pop() || '';
     const filename = `${uuidv4()}.${extension}`;
 
     // Create directory if it doesn't exist
-    const uploadDir = join(process.cwd(), "public/uploads/documents");
+    const uploadDir = join(process.cwd(), 'public/uploads/documents');
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -135,8 +117,8 @@ export const POST: ApiRouteHandlerOneParam<'userId'> = async (
         description,
         fileType: file.type,
         fileSize: file.size,
-        filePath: `/uploads/documents/${filename}`
-      }
+        filePath: `/uploads/documents/${filename}`,
+      },
     });
 
     return NextResponse.json({ document });
@@ -147,21 +129,15 @@ export const POST: ApiRouteHandlerOneParam<'userId'> = async (
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE /api/users/[userId]/documents - Delete a document
-export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
-  req,
-  { params }
-) => {
+export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Extract userId from params safely
     const userId = await getParams(params).then(p => p.userId);
@@ -169,10 +145,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
     const documentId = searchParams.get('documentId');
 
     if (!documentId) {
-      return NextResponse.json(
-        { error: 'Document ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
     }
 
     // Check if user has permission to delete this document
@@ -180,7 +153,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
     const isOwnProfile = session.user.id === userId;
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "user_management"
+      'user_management'
     );
 
     if (!isOwnProfile && !hasUserManagementPermission) {
@@ -192,14 +165,11 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
 
     // Check if document exists and belongs to the user
     const document = await prisma.document.findUnique({
-      where: { id: documentId }
+      where: { id: documentId },
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Document not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
     if (document.userId !== userId) {
@@ -211,7 +181,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
 
     // Delete the document record
     await prisma.document.delete({
-      where: { id: documentId }
+      where: { id: documentId },
     });
 
     // Note: We're not deleting the actual file to avoid file system operations
@@ -225,4 +195,4 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (
       { status: 500 }
     );
   }
-}
+};

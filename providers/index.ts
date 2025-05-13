@@ -1,3 +1,3 @@
-import { googleProvider } from "./google"
+import { googleProvider } from './google';
 
-export { googleProvider }
+export { googleProvider };

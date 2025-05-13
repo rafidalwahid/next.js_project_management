@@ -1,14 +1,14 @@
 // lib/permissions/unified-permission-service.ts
 // Unified Permission Service that exclusively uses database models
 
-import prisma from "@/lib/prisma";
-import { Session } from "next-auth";
+import prisma from '@/lib/prisma';
+import { Session } from 'next-auth';
 import {
   PermissionCacheEntry,
   PermissionListCacheEntry,
   RoleCacheEntry,
-  UiPermission
-} from "@/types/service";
+  UiPermission,
+} from '@/types/service';
 
 /**
  * Unified Permission Service
@@ -51,10 +51,7 @@ export class PermissionService {
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
         return this.permissionCache[cacheKey];
       }
 
@@ -64,10 +61,10 @@ export class PermissionService {
         include: {
           permissions: {
             include: {
-              permission: true
-            }
-          }
-        }
+              permission: true,
+            },
+          },
+        },
       });
 
       if (!roleRecord) {
@@ -77,9 +74,7 @@ export class PermissionService {
       }
 
       // Check if the role has the permission
-      const hasPermission = roleRecord.permissions.some(
-        rp => rp.permission.name === permission
-      );
+      const hasPermission = roleRecord.permissions.some(rp => rp.permission.name === permission);
 
       // Update cache
       this.permissionCache[cacheKey] = hasPermission;
@@ -107,10 +102,7 @@ export class PermissionService {
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
         return this.permissionCache[cacheKey];
       }
 
@@ -119,8 +111,8 @@ export class PermissionService {
         where: { id: userId },
         select: {
           role: true,
-          id: true
-        }
+          id: true,
+        },
       });
 
       if (!user) {
@@ -134,10 +126,10 @@ export class PermissionService {
         include: {
           permissions: {
             include: {
-              permission: true
-            }
-          }
-        }
+              permission: true,
+            },
+          },
+        },
       });
 
       if (!roleRecord) {
@@ -147,9 +139,7 @@ export class PermissionService {
       }
 
       // Check if the role has the permission
-      const hasPermission = roleRecord.permissions.some(
-        rp => rp.permission.name === permission
-      );
+      const hasPermission = roleRecord.permissions.some(rp => rp.permission.name === permission);
 
       // Update cache
       this.permissionCache[cacheKey] = hasPermission;
@@ -175,10 +165,7 @@ export class PermissionService {
       const now = Date.now();
 
       // If cache is valid and has this role's permissions, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionListCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionListCache) {
         return this.permissionListCache[cacheKey];
       }
 
@@ -188,10 +175,10 @@ export class PermissionService {
         include: {
           permissions: {
             include: {
-              permission: true
-            }
-          }
-        }
+              permission: true,
+            },
+          },
+        },
       });
 
       if (!roleRecord) {
@@ -225,7 +212,7 @@ export class PermissionService {
       // Get the user to check their role
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { role: true }
+        select: { role: true },
       });
 
       if (!user) {
@@ -245,16 +232,15 @@ export class PermissionService {
    *
    * @returns A promise that resolves to an array of role objects
    */
-  static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
+  static async getAllRoles(): Promise<
+    { id: string; name: string; description: string; color: string }[]
+  > {
     try {
       // Check cache first
       const now = Date.now();
 
       // If cache is valid and has roles, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        'roles' in this.roleCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && 'roles' in this.roleCache) {
         return this.roleCache['roles'];
       }
 
@@ -269,7 +255,7 @@ export class PermissionService {
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' '),
         description: role.description || `${role.name} role`,
-        color: role.color || 'bg-gray-500'
+        color: role.color || 'bg-gray-500',
       }));
 
       // Update cache
@@ -294,10 +280,7 @@ export class PermissionService {
       const now = Date.now();
 
       // If cache is valid and has permissions, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        'permissions' in this.roleCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && 'permissions' in this.roleCache) {
         return this.roleCache['permissions'];
       }
 
@@ -312,7 +295,7 @@ export class PermissionService {
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' '),
         description: p.description || `Permission to ${p.name.replace(/_/g, ' ')}`,
-        category: p.category
+        category: p.category,
       }));
 
       // Update cache
@@ -349,16 +332,16 @@ export class PermissionService {
 
         // Delete existing role permissions
         await prisma.rolePermission.deleteMany({
-          where: { roleId: role.id }
+          where: { roleId: role.id },
         });
 
         // Get the permission records
         const permissionRecords = await prisma.permission.findMany({
           where: {
             name: {
-              in: rolePermissions
-            }
-          }
+              in: rolePermissions,
+            },
+          },
         });
 
         // Create new role permissions
@@ -367,8 +350,8 @@ export class PermissionService {
             prisma.rolePermission.create({
               data: {
                 roleId: role.id,
-                permissionId: permission.id
-              }
+                permissionId: permission.id,
+              },
             })
           )
         );
@@ -396,7 +379,7 @@ export class PermissionService {
     try {
       // Check if role already exists
       const existingRole = await prisma.role.findUnique({
-        where: { name }
+        where: { name },
       });
 
       if (existingRole) {
@@ -408,8 +391,8 @@ export class PermissionService {
         data: {
           name,
           description,
-          color
-        }
+          color,
+        },
       });
 
       // Clear the permission cache
@@ -432,7 +415,7 @@ export class PermissionService {
     try {
       // Check if role exists
       const role = await prisma.role.findUnique({
-        where: { name }
+        where: { name },
       });
 
       if (!role) {
@@ -441,12 +424,12 @@ export class PermissionService {
 
       // Delete role permissions first
       await prisma.rolePermission.deleteMany({
-        where: { roleId: role.id }
+        where: { roleId: role.id },
       });
 
       // Delete the role
       await prisma.role.delete({
-        where: { id: role.id }
+        where: { id: role.id },
       });
 
       // Clear the permission cache

@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { format } from "date-fns"
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { format } from 'date-fns';
 import {
   ArrowLeft,
   Calendar,
@@ -33,94 +33,94 @@ import {
   X,
   ChevronRight,
   ChevronDown,
-  MoreHorizontal
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Spinner } from "@/components/ui/spinner"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TaskForm } from "@/components/project/task-form"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+  MoreHorizontal,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TaskForm } from '@/components/project/task-form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { SubtaskList } from "@/components/tasks/subtask-list"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import React from "react"
-import { Task, TaskAssignee, TaskWithRelations, TaskComment, TaskAttachment } from "@/types/task"
+} from '@/components/ui/dropdown-menu';
+import { SubtaskList } from '@/components/tasks/subtask-list';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import React from 'react';
+import { Task, TaskAssignee, TaskWithRelations, TaskComment, TaskAttachment } from '@/types/task';
 
 export default function TaskDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const taskId = params.taskId as string
-  const [task, setTask] = useState<TaskWithRelations | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const params = useParams();
+  const router = useRouter();
+  const taskId = params.taskId as string;
+  const [task, setTask] = useState<TaskWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState<any>({
-    title: "",
-    description: "",
-    priority: "medium",
-    projectId: "",
-    parentId: null
-  })
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [newComment, setNewComment] = useState("")
-  const [isAddingComment, setIsAddingComment] = useState(false)
-  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const { toast } = useToast()
-  const fetchInProgress = React.useRef(false)
+    title: '',
+    description: '',
+    priority: 'medium',
+    projectId: '',
+    parentId: null,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { toast } = useToast();
+  const fetchInProgress = React.useRef(false);
 
   // Fetch task data
   const fetchTask = React.useCallback(async () => {
-    if (fetchInProgress.current) return
+    if (fetchInProgress.current) return;
 
     try {
-      fetchInProgress.current = true
-      setIsLoading(true)
-      const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`)
+      fetchInProgress.current = true;
+      setIsLoading(true);
+      const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to fetch task: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to fetch task: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
       if (!data.task) {
-        throw new Error("Task data not found in response")
+        throw new Error('Task data not found in response');
       }
 
-      setTask(data.task)
+      setTask(data.task);
     } catch (error) {
-      console.error("Error fetching task:", error)
+      console.error('Error fetching task:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch task details",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch task details',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
-      fetchInProgress.current = false
+      setIsLoading(false);
+      fetchInProgress.current = false;
     }
-  }, [taskId, toast])
+  }, [taskId, toast]);
 
   useEffect(() => {
     if (taskId) {
-      fetchTask()
+      fetchTask();
     }
 
     return () => {
-      fetchInProgress.current = false
-    }
-  }, [taskId, fetchTask])
+      fetchInProgress.current = false;
+    };
+  }, [taskId, fetchTask]);
 
   // Initialize newTask with project ID when task is loaded
   useEffect(() => {
@@ -128,116 +128,116 @@ export default function TaskDetailPage() {
       setNewTask(prev => ({
         ...prev,
         projectId: task.projectId,
-        parentId: task.id
-      }))
+        parentId: task.id,
+      }));
     }
-  }, [task])
+  }, [task]);
 
   const handleEditTask = () => {
-    setIsEditDialogOpen(true)
-  }
+    setIsEditDialogOpen(true);
+  };
 
   const handleEditDialogClose = () => {
-    setIsEditDialogOpen(false)
+    setIsEditDialogOpen(false);
     // Refresh task data
-    fetchTask()
-  }
+    fetchTask();
+  };
 
   const handleDeleteTask = async () => {
-    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
-      return
+    if (!confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+      return;
     }
 
     try {
-      setIsDeleting(true)
+      setIsDeleting(true);
 
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "DELETE",
-      })
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete task")
+        throw new Error('Failed to delete task');
       }
 
       toast({
-        title: "Task deleted",
-        description: "The task has been deleted successfully",
-      })
+        title: 'Task deleted',
+        description: 'The task has been deleted successfully',
+      });
 
       // Navigate back to the tasks page
-      router.push("/tasks")
+      router.push('/tasks');
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleToggleCompletion = async () => {
-    if (!task) return
+    if (!task) return;
 
     try {
       // Optimistically update the UI
-      setTask(prev => prev ? { ...prev, completed: !prev.completed } : null)
+      setTask(prev => (prev ? { ...prev, completed: !prev.completed } : null));
 
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           completed: !task.completed,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update task")
+        throw new Error('Failed to update task');
       }
 
       // Refresh task data
-      fetchTask()
+      fetchTask();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update task completion status",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to update task completion status',
+        variant: 'destructive',
+      });
       // Revert the optimistic update
-      fetchTask()
+      fetchTask();
     }
-  }
+  };
 
   const handleTimeUpdate = (newTime: number) => {
     // Update the task's time spent in the UI
-    setTask(prev => prev ? { ...prev, timeSpent: newTime } : null)
-  }
+    setTask(prev => (prev ? { ...prev, timeSpent: newTime } : null));
+  };
 
   // Format date for display
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return null
-    return format(new Date(dateString), "MMM d, yyyy")
-  }
+    if (!dateString) return null;
+    return format(new Date(dateString), 'MMM d, yyyy');
+  };
 
   // Get priority badge color
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "text-destructive border-destructive"
-      case "low":
-        return "text-muted-foreground"
+      case 'high':
+        return 'text-destructive border-destructive';
+      case 'low':
+        return 'text-muted-foreground';
       default:
-        return ""
+        return '';
     }
-  }
+  };
 
   // Handle subtask changes
   const handleSubtaskChange = () => {
-    fetchTask()
-  }
+    fetchTask();
+  };
 
   // Handle inline subtask creation
   const handleCreateSubtask = async () => {
@@ -256,272 +256,281 @@ export default function TaskDetailPage() {
           title: newTask.title.trim(),
           projectId: task.projectId,
           parentId: task.id,
-          priority: "medium",
+          priority: 'medium',
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create subtask");
+        throw new Error(errorData.error || 'Failed to create subtask');
       }
 
       // Reset the form
       setNewTask({
         ...newTask,
-        title: "",
+        title: '',
       });
 
       // Refresh the task data to show the new subtask
       fetchTask();
 
       toast({
-        title: "Subtask created",
-        description: "The subtask has been created successfully",
+        title: 'Subtask created',
+        description: 'The subtask has been created successfully',
       });
     } catch (error) {
-      console.error("Error creating subtask:", error);
+      console.error('Error creating subtask:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create subtask",
-        variant: "destructive",
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create subtask',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   // Handle adding a comment
   const handleAddComment = async () => {
-    if (!newComment.trim()) return
+    if (!newComment.trim()) return;
 
     try {
-      setIsAddingComment(true)
+      setIsAddingComment(true);
 
       // Call the API endpoint to add the comment
       const response = await fetch(`/api/tasks/${taskId}/comments`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           content: newComment.trim(),
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to add comment")
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add comment');
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       // Update the UI with the new comment
       setTask(prev => {
-        if (!prev) return null
+        if (!prev) return null;
         return {
           ...prev,
           comments: [...(prev.comments || []), data.comment],
-        }
-      })
+        };
+      });
 
-      setNewComment("")
+      setNewComment('');
       toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully",
-      })
+        title: 'Comment added',
+        description: 'Your comment has been added successfully',
+      });
     } catch (error) {
-      console.error("Error adding comment:", error)
+      console.error('Error adding comment:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add comment. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to add comment. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsAddingComment(false)
+      setIsAddingComment(false);
     }
-  }
+  };
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0])
+      setSelectedFile(e.target.files[0]);
     }
-  }
+  };
 
   // Handle file upload
   const handleFileUpload = async () => {
-    if (!selectedFile) return
+    if (!selectedFile) return;
 
     try {
-      setIsUploadingAttachment(true)
+      setIsUploadingAttachment(true);
 
       // Call the API endpoint to upload the file
-      const formData = new FormData()
-      formData.append("file", selectedFile)
+      const formData = new FormData();
+      formData.append('file', selectedFile);
 
       const response = await fetch(`/api/tasks/${taskId}/attachments`, {
-        method: "POST",
+        method: 'POST',
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to upload file")
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload file');
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       // Update the UI with the new attachment
       setTask(prev => {
-        if (!prev) return null
+        if (!prev) return null;
         return {
           ...prev,
           attachments: [...(prev.attachments || []), data.attachment],
-        }
-      })
+        };
+      });
 
-      setSelectedFile(null)
+      setSelectedFile(null);
       toast({
-        title: "File uploaded",
-        description: "Your file has been uploaded successfully",
-      })
+        title: 'File uploaded',
+        description: 'Your file has been uploaded successfully',
+      });
     } catch (error) {
-      console.error("Error uploading file:", error)
+      console.error('Error uploading file:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload file. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to upload file. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsUploadingAttachment(false)
+      setIsUploadingAttachment(false);
     }
-  }
+  };
 
   // Format file size
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return '0 Bytes';
 
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   // Get file icon based on file type
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith('image/')) {
-      return <ImageIcon className="h-4 w-4" />
+      return <ImageIcon className="h-4 w-4" />;
     } else if (fileType.startsWith('video/')) {
-      return <VideoIcon className="h-4 w-4" />
+      return <VideoIcon className="h-4 w-4" />;
     } else if (fileType.startsWith('audio/')) {
-      return <MusicIcon className="h-4 w-4" />
+      return <MusicIcon className="h-4 w-4" />;
     } else if (fileType === 'application/pdf') {
-      return <FileTextIcon className="h-4 w-4" />
+      return <FileTextIcon className="h-4 w-4" />;
     } else if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
-      return <TableIcon className="h-4 w-4" />
+      return <TableIcon className="h-4 w-4" />;
     } else if (fileType.includes('document') || fileType.includes('word')) {
-      return <FileIcon className="h-4 w-4" />
+      return <FileIcon className="h-4 w-4" />;
     } else if (fileType.includes('presentation') || fileType.includes('powerpoint')) {
-      return <BarChartIcon className="h-4 w-4" />
+      return <BarChartIcon className="h-4 w-4" />;
     } else {
-      return <FileIcon className="h-4 w-4" />
+      return <FileIcon className="h-4 w-4" />;
     }
-  }
+  };
 
   // Handle deleting a comment
   const handleDeleteComment = async (commentId: string) => {
     try {
       // Optimistically update the UI
       setTask(prev => {
-        if (!prev) return null
+        if (!prev) return null;
         return {
           ...prev,
           comments: prev.comments?.filter(comment => comment.id !== commentId) || [],
-        }
-      })
+        };
+      });
 
       // Call the API endpoint to delete the comment
       const response = await fetch(`/api/tasks/${taskId}/comments?commentId=${commentId}`, {
-        method: "DELETE",
-      })
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to delete comment")
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete comment');
       }
 
       toast({
-        title: "Comment deleted",
-        description: "The comment has been deleted successfully",
-      })
+        title: 'Comment deleted',
+        description: 'The comment has been deleted successfully',
+      });
     } catch (error) {
-      console.error("Error deleting comment:", error)
+      console.error('Error deleting comment:', error);
 
       // Revert the optimistic update
-      fetchTask()
+      fetchTask();
 
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete comment. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to delete comment. Please try again.',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Handle deleting an attachment
   const handleDeleteAttachment = async (attachmentId: string) => {
     try {
       // Optimistically update the UI
       setTask(prev => {
-        if (!prev) return null
+        if (!prev) return null;
         return {
           ...prev,
           attachments: prev.attachments?.filter(attachment => attachment.id !== attachmentId) || [],
-        }
-      })
+        };
+      });
 
       // Call the API endpoint to delete the attachment
-      const response = await fetch(`/api/tasks/${taskId}/attachments?attachmentId=${attachmentId}`, {
-        method: "DELETE",
-      })
+      const response = await fetch(
+        `/api/tasks/${taskId}/attachments?attachmentId=${attachmentId}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to delete attachment")
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete attachment');
       }
 
       toast({
-        title: "Attachment deleted",
-        description: "The attachment has been deleted successfully",
-      })
+        title: 'Attachment deleted',
+        description: 'The attachment has been deleted successfully',
+      });
     } catch (error) {
-      console.error("Error deleting attachment:", error)
+      console.error('Error deleting attachment:', error);
 
       // Revert the optimistic update
-      fetchTask()
+      fetchTask();
 
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete attachment. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to delete attachment. Please try again.',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-theme(space.14))] md:h-[50vh]">
         <Spinner className="h-8 w-8" />
       </div>
-    )
+    );
   }
 
   if (!task) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold">Task not found</h2>
-        <p className="text-muted-foreground mt-2">The task you're looking for doesn't exist or you don't have access to it.</p>
+        <p className="text-muted-foreground mt-2">
+          The task you're looking for doesn't exist or you don't have access to it.
+        </p>
         <Button asChild className="mt-4">
           <Link href="/tasks">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -529,7 +538,7 @@ export default function TaskDetailPage() {
           </Link>
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -566,14 +575,14 @@ export default function TaskDetailPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Completion toggle */}
             <Button
-              variant={task.completed ? "default" : "outline"}
+              variant={task.completed ? 'default' : 'outline'}
               size="icon"
               onClick={handleToggleCompletion}
               className={cn(
-                "h-8 w-8 sm:h-9 sm:w-9 rounded-full shrink-0 transition-colors",
-                task.completed ? "bg-green-500 hover:bg-green-600 text-white border-0" : "border-2"
+                'h-8 w-8 sm:h-9 sm:w-9 rounded-full shrink-0 transition-colors',
+                task.completed ? 'bg-green-500 hover:bg-green-600 text-white border-0' : 'border-2'
               )}
-              title={task.completed ? "Mark as incomplete" : "Mark as complete"}
+              title={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
             >
               {task.completed ? (
                 <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -588,7 +597,7 @@ export default function TaskDetailPage() {
                 className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
                 style={{
                   backgroundColor: `${task.status.color}20`,
-                  color: task.status.color
+                  color: task.status.color,
                 }}
               >
                 <div
@@ -627,7 +636,11 @@ export default function TaskDetailPage() {
                   disabled={isDeleting}
                   className="text-destructive focus:text-destructive"
                 >
-                  {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : <Trash className="mr-2 h-4 w-4" />}
+                  {isDeleting ? (
+                    <Spinner className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Trash className="mr-2 h-4 w-4" />
+                  )}
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -637,10 +650,12 @@ export default function TaskDetailPage() {
 
         {/* Task title and metadata */}
         <div className="p-3 sm:p-4">
-          <h1 className={cn(
-            "text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words",
-            task.completed && "text-muted-foreground line-through"
-          )}>
+          <h1
+            className={cn(
+              'text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words',
+              task.completed && 'text-muted-foreground line-through'
+            )}
+          >
             {task.title}
           </h1>
 
@@ -649,22 +664,33 @@ export default function TaskDetailPage() {
             {/* First row: Priority and Due date */}
             <div className="flex flex-wrap items-center gap-2">
               <Badge
-                variant={task.priority === "high" ? "destructive" : task.priority === "low" ? "outline" : "secondary"}
+                variant={
+                  task.priority === 'high'
+                    ? 'destructive'
+                    : task.priority === 'low'
+                      ? 'outline'
+                      : 'secondary'
+                }
                 className="capitalize text-xs sm:text-sm h-6 sm:h-7"
               >
                 {task.priority} priority
               </Badge>
 
               {task.dueDate && (
-                <span className={cn(
-                  "text-xs sm:text-sm flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md",
-                  new Date(task.dueDate) < new Date() ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"
-                )}>
+                <span
+                  className={cn(
+                    'text-xs sm:text-sm flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md',
+                    new Date(task.dueDate) < new Date()
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-muted text-muted-foreground'
+                  )}
+                >
                   <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  {new Date(task.dueDate) < new Date()
-                    ? <span>Due: {formatDate(task.dueDate)} (Overdue)</span>
-                    : <span>Due: {formatDate(task.dueDate)}</span>
-                  }
+                  {new Date(task.dueDate) < new Date() ? (
+                    <span>Due: {formatDate(task.dueDate)} (Overdue)</span>
+                  ) : (
+                    <span>Due: {formatDate(task.dueDate)}</span>
+                  )}
                 </span>
               )}
             </div>
@@ -676,13 +702,19 @@ export default function TaskDetailPage() {
                 <div className="flex items-center gap-1.5 bg-muted px-2 py-1 rounded-md">
                   <Users className="h-3.5 w-3.5 text-muted-foreground" />
                   <div className="flex -space-x-2 mr-1">
-                    {task.assignees.slice(0, 3).map((assignee) => (
+                    {task.assignees.slice(0, 3).map(assignee => (
                       <Avatar key={assignee.id} className="h-5 w-5 border border-background">
                         {assignee.user.image ? (
-                          <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                          <AvatarImage
+                            src={assignee.user.image}
+                            alt={assignee.user.name || 'User'}
+                          />
                         ) : null}
                         <AvatarFallback className="text-[10px]">
-                          {assignee.user.name?.split(" ").map((n: string) => n[0]).join("") || "U"}
+                          {assignee.user.name
+                            ?.split(' ')
+                            .map((n: string) => n[0])
+                            .join('') || 'U'}
                         </AvatarFallback>
                       </Avatar>
                     ))}
@@ -726,26 +758,23 @@ export default function TaskDetailPage() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <h3 className="font-medium">Description</h3>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2"
-                onClick={handleEditTask}
-              >
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={handleEditTask}>
                 <Edit className="h-3.5 w-3.5 mr-1" />
-                {task.description ? "Edit" : "Add"}
+                {task.description ? 'Edit' : 'Add'}
               </Button>
             </div>
             <div className="p-3 sm:p-4">
               {task.description ? (
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                  {task.description.split('\n').map((paragraph, index) => (
+                  {task.description.split('\n').map((paragraph, index) =>
                     paragraph ? (
-                      <p key={index} className="mb-2">{paragraph}</p>
+                      <p key={index} className="mb-2">
+                        {paragraph}
+                      </p>
                     ) : (
                       <br key={index} />
                     )
-                  ))}
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -762,29 +791,47 @@ export default function TaskDetailPage() {
           {/* Consolidated tabs with simplified design */}
           <Tabs defaultValue="subtasks" className="space-y-3 sm:space-y-4">
             <TabsList className="bg-muted/50 p-0.5 sm:p-1 h-auto w-full grid grid-cols-3">
-              <TabsTrigger value="subtasks" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
+              <TabsTrigger
+                value="subtasks"
+                className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9"
+              >
                 <CheckCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden xs:inline">Subtasks</span>
                 {task.subtasks && task.subtasks.length > 0 && (
-                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge
+                    variant="secondary"
+                    className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]"
+                  >
                     {task.subtasks.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="comments" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
+              <TabsTrigger
+                value="comments"
+                className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9"
+              >
                 <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden xs:inline">Comments</span>
                 {task.comments && task.comments.length > 0 && (
-                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge
+                    variant="secondary"
+                    className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]"
+                  >
                     {task.comments.length}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="attachments" className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9">
+              <TabsTrigger
+                value="attachments"
+                className="flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs h-8 sm:h-9"
+              >
                 <Paperclip className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden xs:inline">Files</span>
                 {task.attachments && task.attachments.length > 0 && (
-                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]">
+                  <Badge
+                    variant="secondary"
+                    className="ml-0 xs:ml-1 h-3.5 sm:h-4 px-1 text-[8px] sm:text-[10px]"
+                  >
                     {task.attachments.length}
                   </Badge>
                 )}
@@ -804,7 +851,8 @@ export default function TaskDetailPage() {
                         <h3 className="font-medium">Subtasks</h3>
                         {task.subtasks && task.subtasks.length > 0 && (
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {task.subtasks.filter(s => s.completed).length} of {task.subtasks.length} completed
+                            {task.subtasks.filter(s => s.completed).length} of{' '}
+                            {task.subtasks.length} completed
                           </p>
                         )}
                       </div>
@@ -820,9 +868,9 @@ export default function TaskDetailPage() {
                       <Input
                         placeholder="Add a new subtask..."
                         value={newTask.title}
-                        onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                        onChange={e => setNewTask({ ...newTask, title: e.target.value })}
                         className="h-10 pl-10 pr-4 border-dashed focus:border-solid"
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === 'Enter' && newTask.title.trim().length >= 3) {
                             handleCreateSubtask();
                           }
@@ -856,7 +904,8 @@ export default function TaskDetailPage() {
                       </div>
                       <p className="text-sm font-medium text-muted-foreground">No subtasks yet</p>
                       <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-                        Break down this task into smaller steps by adding subtasks using the form above
+                        Break down this task into smaller steps by adding subtasks using the form
+                        above
                       </p>
                     </div>
                   )}
@@ -891,7 +940,7 @@ export default function TaskDetailPage() {
                       <Textarea
                         placeholder="Add a comment..."
                         value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                        onChange={e => setNewComment(e.target.value)}
                         className="min-h-[80px] resize-none text-sm"
                       />
                       <div className="flex justify-end mt-2">
@@ -901,7 +950,11 @@ export default function TaskDetailPage() {
                           className="flex items-center gap-1.5 w-full xs:w-auto justify-center"
                           size="sm"
                         >
-                          {isAddingComment ? <Spinner className="h-3.5 w-3.5 mr-1" /> : <Send className="h-3.5 w-3.5 mr-1" />}
+                          {isAddingComment ? (
+                            <Spinner className="h-3.5 w-3.5 mr-1" />
+                          ) : (
+                            <Send className="h-3.5 w-3.5 mr-1" />
+                          )}
                           <span className="xs:hidden">Post</span>
                           <span className="hidden xs:inline">Post Comment</span>
                         </Button>
@@ -912,14 +965,20 @@ export default function TaskDetailPage() {
                   {/* Comments list with improved styling */}
                   {task.comments && task.comments.length > 0 ? (
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
-                      {task.comments.map((comment) => (
+                      {task.comments.map(comment => (
                         <div key={comment.id} className="flex gap-2 group">
                           <Avatar className="h-7 w-7 border border-background shrink-0">
                             {comment.user.image ? (
-                              <AvatarImage src={comment.user.image} alt={comment.user.name || "User"} />
+                              <AvatarImage
+                                src={comment.user.image}
+                                alt={comment.user.name || 'User'}
+                              />
                             ) : null}
                             <AvatarFallback className="text-[10px]">
-                              {comment.user.name?.split(" ").map((n: string) => n[0]).join("") || "U"}
+                              {comment.user.name
+                                ?.split(' ')
+                                .map((n: string) => n[0])
+                                .join('') || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
@@ -929,7 +988,7 @@ export default function TaskDetailPage() {
                                   {comment.user.name || comment.user.email}
                                 </span>
                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                  {format(new Date(comment.createdAt), "MMM d, h:mm a")}
+                                  {format(new Date(comment.createdAt), 'MMM d, h:mm a')}
                                 </span>
                               </div>
                               <div className="text-xs mt-1.5 whitespace-pre-wrap break-words">
@@ -1007,14 +1066,20 @@ export default function TaskDetailPage() {
                   {selectedFile && (
                     <div className="mb-4 bg-muted/40 rounded-md p-3 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "h-10 w-10 rounded flex items-center justify-center shrink-0",
-                          selectedFile.type.startsWith('image/') ? "bg-blue-50" :
-                          selectedFile.type.startsWith('video/') ? "bg-red-50" :
-                          selectedFile.type.startsWith('audio/') ? "bg-purple-50" :
-                          selectedFile.type === 'application/pdf' ? "bg-orange-50" :
-                          "bg-muted/50"
-                        )}>
+                        <div
+                          className={cn(
+                            'h-10 w-10 rounded flex items-center justify-center shrink-0',
+                            selectedFile.type.startsWith('image/')
+                              ? 'bg-blue-50'
+                              : selectedFile.type.startsWith('video/')
+                                ? 'bg-red-50'
+                                : selectedFile.type.startsWith('audio/')
+                                  ? 'bg-purple-50'
+                                  : selectedFile.type === 'application/pdf'
+                                    ? 'bg-orange-50'
+                                    : 'bg-muted/50'
+                          )}
+                        >
                           {getFileIcon(selectedFile.type)}
                         </div>
                         <div className="min-w-0">
@@ -1031,7 +1096,11 @@ export default function TaskDetailPage() {
                           onClick={handleFileUpload}
                           disabled={isUploadingAttachment}
                         >
-                          {isUploadingAttachment ? <Spinner className="h-3.5 w-3.5 mr-1.5" /> : <Upload className="h-3.5 w-3.5 mr-1.5" />}
+                          {isUploadingAttachment ? (
+                            <Spinner className="h-3.5 w-3.5 mr-1.5" />
+                          ) : (
+                            <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          )}
                           <span className="xs:hidden">Add</span>
                           <span className="hidden xs:inline">Upload</span>
                         </Button>
@@ -1050,29 +1119,35 @@ export default function TaskDetailPage() {
                   {/* Attachments list with improved styling */}
                   {task.attachments && task.attachments.length > 0 ? (
                     <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                      {task.attachments.map((attachment) => (
+                      {task.attachments.map(attachment => (
                         <div
                           key={attachment.id}
                           className="border rounded-md p-2.5 flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 group hover:bg-muted/30 transition-colors"
                         >
-                          <div className={cn(
-                            "h-9 w-9 rounded flex items-center justify-center shrink-0",
-                            attachment.fileType.startsWith('image/') ? "bg-blue-50" :
-                            attachment.fileType.startsWith('video/') ? "bg-red-50" :
-                            attachment.fileType.startsWith('audio/') ? "bg-purple-50" :
-                            attachment.fileType === 'application/pdf' ? "bg-orange-50" :
-                            "bg-muted/50"
-                          )}>
+                          <div
+                            className={cn(
+                              'h-9 w-9 rounded flex items-center justify-center shrink-0',
+                              attachment.fileType.startsWith('image/')
+                                ? 'bg-blue-50'
+                                : attachment.fileType.startsWith('video/')
+                                  ? 'bg-red-50'
+                                  : attachment.fileType.startsWith('audio/')
+                                    ? 'bg-purple-50'
+                                    : attachment.fileType === 'application/pdf'
+                                      ? 'bg-orange-50'
+                                      : 'bg-muted/50'
+                            )}
+                          >
                             {getFileIcon(attachment.fileType)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium truncate">{attachment.filename}</div>
+                            <div className="text-sm font-medium truncate">
+                              {attachment.filename}
+                            </div>
                             <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1">
                               <span>{formatFileSize(attachment.fileSize)}</span>
                               <span className="hidden xs:inline">•</span>
-                              <span>
-                                {format(new Date(attachment.createdAt), "MMM d, yyyy")}
-                              </span>
+                              <span>{format(new Date(attachment.createdAt), 'MMM d, yyyy')}</span>
                               {attachment.user && (
                                 <>
                                   <span className="hidden xs:inline">•</span>
@@ -1149,8 +1224,10 @@ export default function TaskDetailPage() {
                       {(task.activities || []).map((activity, index) => {
                         // Group activities by date
                         const activityDate = new Date(activity.createdAt);
-                        const prevActivityDate = index > 0 ? new Date((task.activities || [])[index - 1].createdAt) : null;
-                        const showDateHeader = !prevActivityDate ||
+                        const prevActivityDate =
+                          index > 0 ? new Date((task.activities || [])[index - 1].createdAt) : null;
+                        const showDateHeader =
+                          !prevActivityDate ||
                           activityDate.toDateString() !== prevActivityDate.toDateString();
 
                         // Get icon based on activity type
@@ -1178,7 +1255,7 @@ export default function TaskDetailPage() {
                             {showDateHeader && (
                               <div className="relative -left-6 mb-4 mt-6 first:mt-0">
                                 <div className="bg-muted text-muted-foreground text-xs font-medium px-2 py-1 rounded inline-block">
-                                  {format(activityDate, "MMMM d, yyyy")}
+                                  {format(activityDate, 'MMMM d, yyyy')}
                                 </div>
                               </div>
                             )}
@@ -1190,28 +1267,42 @@ export default function TaskDetailPage() {
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-6 w-6">
                                     {activity.user?.image ? (
-                                      <AvatarImage src={activity.user.image} alt={activity.user.name || "User"} />
+                                      <AvatarImage
+                                        src={activity.user.image}
+                                        alt={activity.user.name || 'User'}
+                                      />
                                     ) : null}
                                     <AvatarFallback className="text-xs">
-                                      {activity.user?.name?.split(" ").map((n: string) => n[0]).join("") || "U"}
+                                      {activity.user?.name
+                                        ?.split(' ')
+                                        .map((n: string) => n[0])
+                                        .join('') || 'U'}
                                     </AvatarFallback>
                                   </Avatar>
                                   <span className="text-sm font-medium">
-                                    {activity.user?.name || "Someone"}
+                                    {activity.user?.name || 'Someone'}
                                   </span>
                                   <span className="text-xs text-muted-foreground">
-                                    {format(activityDate, "h:mm a")}
+                                    {format(activityDate, 'h:mm a')}
                                   </span>
                                 </div>
                                 <p className="text-sm mt-1 ml-8">
-                                  {activity.action === 'created' && "created this task"}
-                                  {activity.action === 'updated' && "updated this task"}
-                                  {activity.action === 'deleted' && "deleted an item"}
+                                  {activity.action === 'created' && 'created this task'}
+                                  {activity.action === 'updated' && 'updated this task'}
+                                  {activity.action === 'deleted' && 'deleted an item'}
                                   {activity.action === 'completion_toggled' && activity.description}
-                                  {activity.action === 'comment_added' && "added a comment"}
-                                  {activity.action === 'attachment_added' && "added an attachment"}
-                                  {!['created', 'updated', 'deleted', 'completion_toggled', 'comment_added', 'attachment_added'].includes(activity.action) &&
-                                    (activity.description || `performed action: ${activity.action}`)}
+                                  {activity.action === 'comment_added' && 'added a comment'}
+                                  {activity.action === 'attachment_added' && 'added an attachment'}
+                                  {![
+                                    'created',
+                                    'updated',
+                                    'deleted',
+                                    'completion_toggled',
+                                    'comment_added',
+                                    'attachment_added',
+                                  ].includes(activity.action) &&
+                                    (activity.description ||
+                                      `performed action: ${activity.action}`)}
                                 </p>
                               </div>
                             </div>
@@ -1253,7 +1344,7 @@ export default function TaskDetailPage() {
                     if (detailsCard) {
                       window.scrollTo({
                         top: detailsCard.getBoundingClientRect().top + window.scrollY - 80,
-                        behavior: 'smooth'
+                        behavior: 'smooth',
                       });
                     }
                   }}
@@ -1295,18 +1386,22 @@ export default function TaskDetailPage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="text-xs text-muted-foreground font-medium">Due Date</div>
                   {task.dueDate && new Date(task.dueDate) < new Date() && (
-                    <Badge variant="destructive" className="text-[10px] h-4 px-1.5">Overdue</Badge>
+                    <Badge variant="destructive" className="text-[10px] h-4 px-1.5">
+                      Overdue
+                    </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{task.dueDate ? formatDate(task.dueDate) : "Not set"}</span>
+                  <span>{task.dueDate ? formatDate(task.dueDate) : 'Not set'}</span>
                 </div>
               </div>
 
               {/* Time tracking - with improved styling */}
               <div className="bg-muted/30 rounded-md p-2.5">
-                <div className="text-xs text-muted-foreground font-medium mb-1.5">Time Tracking</div>
+                <div className="text-xs text-muted-foreground font-medium mb-1.5">
+                  Time Tracking
+                </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1324,11 +1419,11 @@ export default function TaskDetailPage() {
                   <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className={cn(
-                        "h-full",
-                        (task.timeSpent || 0) > task.estimatedTime ? "bg-destructive" : "bg-primary"
+                        'h-full',
+                        (task.timeSpent || 0) > task.estimatedTime ? 'bg-destructive' : 'bg-primary'
                       )}
                       style={{
-                        width: `${Math.min(100, ((task.timeSpent || 0) / task.estimatedTime) * 100)}%`
+                        width: `${Math.min(100, ((task.timeSpent || 0) / task.estimatedTime) * 100)}%`,
                       }}
                     />
                   </div>
@@ -1345,8 +1440,8 @@ export default function TaskDetailPage() {
                     onClick={() => {
                       // This would open an assignee selection dialog in a real implementation
                       toast({
-                        title: "Feature coming soon",
-                        description: "Adding assignees will be implemented in a future update",
+                        title: 'Feature coming soon',
+                        description: 'Adding assignees will be implemented in a future update',
                       });
                     }}
                   >
@@ -1357,19 +1452,30 @@ export default function TaskDetailPage() {
 
                 {task.assignees && task.assignees.length > 0 ? (
                   <div className="space-y-2.5">
-                    {task.assignees.map((assignee) => (
-                      <div key={assignee.id} className="flex items-center justify-between group bg-background rounded-md p-1.5 pr-2">
+                    {task.assignees.map(assignee => (
+                      <div
+                        key={assignee.id}
+                        className="flex items-center justify-between group bg-background rounded-md p-1.5 pr-2"
+                      >
                         <div className="flex items-center gap-2">
                           <Avatar className="h-7 w-7 border border-black/10">
                             {assignee.user.image ? (
-                              <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                              <AvatarImage
+                                src={assignee.user.image}
+                                alt={assignee.user.name || 'User'}
+                              />
                             ) : null}
                             <AvatarFallback className="text-[10px]">
-                              {assignee.user.name?.split(" ").map((n: string) => n[0]).join("") || "U"}
+                              {assignee.user.name
+                                ?.split(' ')
+                                .map((n: string) => n[0])
+                                .join('') || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
-                            <div className="text-xs font-medium truncate">{assignee.user.name || "Unnamed User"}</div>
+                            <div className="text-xs font-medium truncate">
+                              {assignee.user.name || 'Unnamed User'}
+                            </div>
                           </div>
                         </div>
                         <Button
@@ -1379,8 +1485,9 @@ export default function TaskDetailPage() {
                           onClick={() => {
                             // This would remove the assignee in a real implementation
                             toast({
-                              title: "Feature coming soon",
-                              description: "Removing assignees will be implemented in a future update",
+                              title: 'Feature coming soon',
+                              description:
+                                'Removing assignees will be implemented in a future update',
                             });
                           }}
                         >
@@ -1400,11 +1507,11 @@ export default function TaskDetailPage() {
               <div className="bg-muted/30 rounded-md p-2.5 text-xs text-muted-foreground">
                 <div className="flex justify-between mb-1.5">
                   <span className="font-medium">Created</span>
-                  <span>{format(new Date(task.createdAt), "MMM d, yyyy")}</span>
+                  <span>{format(new Date(task.createdAt), 'MMM d, yyyy')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Updated</span>
-                  <span>{format(new Date(task.updatedAt), "MMM d, yyyy")}</span>
+                  <span>{format(new Date(task.updatedAt), 'MMM d, yyyy')}</span>
                 </div>
               </div>
 
@@ -1417,8 +1524,8 @@ export default function TaskDetailPage() {
                   onClick={() => {
                     // This would open a time logging dialog in a real implementation
                     toast({
-                      title: "Feature coming soon",
-                      description: "Time logging will be implemented in a future update",
+                      title: 'Feature coming soon',
+                      description: 'Time logging will be implemented in a future update',
                     });
                   }}
                 >
@@ -1455,8 +1562,6 @@ export default function TaskDetailPage() {
           )}
         </DialogContent>
       </Dialog>
-
-
     </div>
-  )
+  );
 }

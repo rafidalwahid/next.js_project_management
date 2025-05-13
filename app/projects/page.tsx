@@ -1,33 +1,51 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { Filter, Plus, Search, Edit, Trash, MoreHorizontal, Eye, ChevronLeft, ChevronRight, ArrowUpDown, Users, Check, X, Calendar } from "lucide-react"
-import { useState, useEffect } from "react"
-import { NewProjectDialog } from "@/components/project/new-project-dialog"
+import Link from 'next/link';
+import {
+  Filter,
+  Plus,
+  Search,
+  Edit,
+  Trash,
+  MoreHorizontal,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  Users,
+  Check,
+  X,
+  Calendar,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { NewProjectDialog } from '@/components/project/new-project-dialog';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { useProjects } from "@/hooks/use-data"
-import { projectApi } from "@/lib/api"
-import { teamManagementApi } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { DashboardLayout } from '@/components/dashboard-layout';
+import { useProjects } from '@/hooks/use-data';
+import { projectApi } from '@/lib/api';
+import { teamManagementApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -35,30 +53,30 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { Pagination } from "@/components/tasks/pagination"
-import { Project, TeamMember } from "@/types/project"
+} from '@/components/ui/command';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { Pagination } from '@/components/tasks/pagination';
+import { Project, TeamMember } from '@/types/project';
 
 export default function ProjectsPage() {
-  const [page, setPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filters, setFilters] = useState<Record<string, string>>({})
-  const [showFilters, setShowFilters] = useState(false)
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [showFilters, setShowFilters] = useState(false);
   const [dateFilter, setDateFilter] = useState<{
     startDate: string;
     endDate: string;
-  }>({ startDate: "", endDate: "" })
-  const [sortField, setSortField] = useState<string>("updatedAt")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [teamMemberFilter, setTeamMemberFilter] = useState<string[]>([])
-  const [teamMemberOpen, setTeamMemberOpen] = useState(false)
-  const [teamMembers, setTeamMembers] = useState<any[]>([])
-  const [isLoadingTeamMembers, setIsLoadingTeamMembers] = useState(false)
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false)
-  const isMobile = useIsMobile()
+  }>({ startDate: '', endDate: '' });
+  const [sortField, setSortField] = useState<string>('updatedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [teamMemberFilter, setTeamMemberFilter] = useState<string[]>([]);
+  const [teamMemberOpen, setTeamMemberOpen] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [isLoadingTeamMembers, setIsLoadingTeamMembers] = useState(false);
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   // Apply filters when search or date filters change
   const activeFilters = {
@@ -68,18 +86,18 @@ export default function ProjectsPage() {
     ...(teamMemberFilter.length > 0 ? { teamMemberIds: teamMemberFilter.join(',') } : {}),
     ...(sortField ? { sortField } : {}),
     ...(sortDirection ? { sortDirection } : {}),
-    ...filters
-  }
+    ...filters,
+  };
 
-  const { projects, isLoading, isError, mutate, pagination } = useProjects(page, 10, activeFilters)
-  const { toast } = useToast()
+  const { projects, isLoading, isError, mutate, pagination } = useProjects(page, 10, activeFilters);
+  const { toast } = useToast();
 
   // Fetch team members for filtering
   useEffect(() => {
     const fetchTeamMembers = async () => {
-      setIsLoadingTeamMembers(true)
+      setIsLoadingTeamMembers(true);
       try {
-        const response = await teamManagementApi.getTeamMembers(undefined, 1, 100)
+        const response = await teamManagementApi.getTeamMembers(undefined, 1, 100);
         // Create a unique list of users from team memberships
         const uniqueUsers = Array.from(
           new Map(
@@ -89,42 +107,40 @@ export default function ProjectsPage() {
                 id: member.user.id,
                 name: member.user.name,
                 email: member.user.email,
-                image: member.user.image
-              }
+                image: member.user.image,
+              },
             ])
           ).values()
-        )
-        setTeamMembers(uniqueUsers)
+        );
+        setTeamMembers(uniqueUsers);
       } catch (error) {
-        console.error("Error fetching team members:", error)
+        console.error('Error fetching team members:', error);
       } finally {
-        setIsLoadingTeamMembers(false)
+        setIsLoadingTeamMembers(false);
       }
-    }
+    };
 
-    fetchTeamMembers()
-  }, [])
+    fetchTeamMembers();
+  }, []);
 
   // Handle sorting
   const handleSort = (field: string) => {
     if (sortField === field) {
       // Toggle direction if clicking the same field
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       // Set new field and default to ascending
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection('asc');
     }
-  }
+  };
 
   // Handle team member filter toggle
   const toggleTeamMember = (userId: string) => {
     setTeamMemberFilter(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    )
-  }
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
 
   // Handle pagination
   const handlePageChange = (newPage: number) => {
@@ -140,9 +156,9 @@ export default function ProjectsPage() {
     if (isError) {
       console.error('Projects page error:', isError);
       toast({
-        title: "Error loading projects",
-        description: isError instanceof Error ? isError.message : "Failed to load projects",
-        variant: "destructive",
+        title: 'Error loading projects',
+        description: isError instanceof Error ? isError.message : 'Failed to load projects',
+        variant: 'destructive',
       });
     }
   }, [isError, toast]);
@@ -160,39 +176,39 @@ export default function ProjectsPage() {
 
   // Reset filters
   const resetFilters = () => {
-    setDateFilter({ startDate: "", endDate: "" });
+    setDateFilter({ startDate: '', endDate: '' });
     setFilters({});
-    setSearchTerm("");
+    setSearchTerm('');
     setTeamMemberFilter([]);
-    setSortField("updatedAt");
-    setSortDirection("desc");
+    setSortField('updatedAt');
+    setSortDirection('desc');
     mutate();
   };
 
   const deleteProject = async (id: string) => {
     try {
-      await projectApi.deleteProject(id)
-      mutate() // Refresh the data
+      await projectApi.deleteProject(id);
+      mutate(); // Refresh the data
       toast({
-        title: "Project deleted",
-        description: "The project has been deleted successfully",
-      })
+        title: 'Project deleted',
+        description: 'The project has been deleted successfully',
+      });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete the project",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to delete the project',
+        variant: 'destructive',
+      });
     }
   };
 
   // Function to get user initials for avatar fallback
   const getUserInitials = (name?: string | null) => {
-    if (!name) return "?";
+    if (!name) return '?';
     return name
-      .split(" ")
+      .split(' ')
       .map(part => part[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .substring(0, 2);
   };
@@ -204,7 +220,7 @@ export default function ProjectsPage() {
         <div className="flex items-center gap-2">
           <Button onClick={() => setIsNewProjectDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            <span className={isMobile ? "sr-only" : ""}>New Project</span>
+            <span className={isMobile ? 'sr-only' : ''}>New Project</span>
             {isMobile && <span className="sr-only">Create Project</span>}
           </Button>
         </div>
@@ -233,15 +249,13 @@ export default function ProjectsPage() {
                   variant="outline"
                   size="sm"
                   className={cn(
-                    "h-9 flex-1",
-                    teamMemberFilter.length > 0 && "bg-primary/10 text-primary"
+                    'h-9 flex-1',
+                    teamMemberFilter.length > 0 && 'bg-primary/10 text-primary'
                   )}
                 >
                   <Users className="mr-1 h-4 w-4" />
                   <span className="truncate">
-                    {teamMemberFilter.length > 0
-                      ? `${teamMemberFilter.length}`
-                      : "Members"}
+                    {teamMemberFilter.length > 0 ? `${teamMemberFilter.length}` : 'Members'}
                   </span>
                 </Button>
               </PopoverTrigger>
@@ -256,7 +270,7 @@ export default function ProjectsPage() {
                           <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
                         </div>
                       ) : (
-                        teamMembers.map((member) => (
+                        teamMembers.map(member => (
                           <CommandItem
                             key={member.id}
                             onSelect={() => toggleTeamMember(member.id)}
@@ -270,19 +284,19 @@ export default function ProjectsPage() {
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6 border border-black">
                                   {member.image ? (
-                                    <AvatarImage src={member.image} alt={member.name || ""} />
+                                    <AvatarImage src={member.image} alt={member.name || ''} />
                                   ) : (
                                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                       {getUserInitials(member.name)}
                                     </AvatarFallback>
                                   )}
                                 </Avatar>
-                                <span className="text-sm truncate">{member.name || member.email}</span>
+                                <span className="text-sm truncate">
+                                  {member.name || member.email}
+                                </span>
                               </div>
                             </div>
-                            {teamMemberFilter.includes(member.id) && (
-                              <Check className="h-4 w-4" />
-                            )}
+                            {teamMemberFilter.includes(member.id) && <Check className="h-4 w-4" />}
                           </CommandItem>
                         ))
                       )}
@@ -309,8 +323,8 @@ export default function ProjectsPage() {
               variant="outline"
               size="sm"
               className={cn(
-                "h-9 flex-1",
-                (dateFilter.startDate || dateFilter.endDate) && "bg-primary/10 text-primary"
+                'h-9 flex-1',
+                (dateFilter.startDate || dateFilter.endDate) && 'bg-primary/10 text-primary'
               )}
               onClick={() => setShowFilters(!showFilters)}
             >
@@ -319,13 +333,11 @@ export default function ProjectsPage() {
             </Button>
 
             {/* Clear Filters Button - Mobile */}
-            {(Object.keys(activeFilters).length > 2 || teamMemberFilter.length > 0 || dateFilter.startDate || dateFilter.endDate) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-9 w-9 p-0"
-                onClick={resetFilters}
-              >
+            {(Object.keys(activeFilters).length > 2 ||
+              teamMemberFilter.length > 0 ||
+              dateFilter.startDate ||
+              dateFilter.endDate) && (
+              <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={resetFilters}>
                 <X className="h-4 w-4" />
                 <span className="sr-only">Clear Filters</span>
               </Button>
@@ -353,15 +365,15 @@ export default function ProjectsPage() {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-9 w-[150px]",
-                  teamMemberFilter.length > 0 && "bg-primary/10 text-primary"
+                  'h-9 w-[150px]',
+                  teamMemberFilter.length > 0 && 'bg-primary/10 text-primary'
                 )}
               >
                 <Users className="mr-2 h-4 w-4" />
                 <span className="truncate">
                   {teamMemberFilter.length > 0
                     ? `${teamMemberFilter.length} Member${teamMemberFilter.length > 1 ? 's' : ''}`
-                    : "Team Members"}
+                    : 'Team Members'}
                 </span>
               </Button>
             </PopoverTrigger>
@@ -376,7 +388,7 @@ export default function ProjectsPage() {
                         <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
                       </div>
                     ) : (
-                      teamMembers.map((member) => (
+                      teamMembers.map(member => (
                         <CommandItem
                           key={member.id}
                           onSelect={() => toggleTeamMember(member.id)}
@@ -390,19 +402,19 @@ export default function ProjectsPage() {
                             <div className="flex items-center gap-2">
                               <Avatar className="h-6 w-6 border border-black">
                                 {member.image ? (
-                                  <AvatarImage src={member.image} alt={member.name || ""} />
+                                  <AvatarImage src={member.image} alt={member.name || ''} />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                     {getUserInitials(member.name)}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
-                              <span className="text-sm truncate">{member.name || member.email}</span>
+                              <span className="text-sm truncate">
+                                {member.name || member.email}
+                              </span>
                             </div>
                           </div>
-                          {teamMemberFilter.includes(member.id) && (
-                            <Check className="h-4 w-4" />
-                          )}
+                          {teamMemberFilter.includes(member.id) && <Check className="h-4 w-4" />}
                         </CommandItem>
                       ))
                     )}
@@ -429,8 +441,8 @@ export default function ProjectsPage() {
             variant="outline"
             size="sm"
             className={cn(
-              "h-9 w-[120px]",
-              (dateFilter.startDate || dateFilter.endDate) && "bg-primary/10 text-primary"
+              'h-9 w-[120px]',
+              (dateFilter.startDate || dateFilter.endDate) && 'bg-primary/10 text-primary'
             )}
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -439,13 +451,11 @@ export default function ProjectsPage() {
           </Button>
 
           {/* Clear Filters Button - Desktop */}
-          {(Object.keys(activeFilters).length > 2 || teamMemberFilter.length > 0 || dateFilter.startDate || dateFilter.endDate) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9"
-              onClick={resetFilters}
-            >
+          {(Object.keys(activeFilters).length > 2 ||
+            teamMemberFilter.length > 0 ||
+            dateFilter.startDate ||
+            dateFilter.endDate) && (
+            <Button variant="ghost" size="sm" className="h-9" onClick={resetFilters}>
               <X className="mr-2 h-4 w-4" />
               <span className="truncate">Clear Filters</span>
             </Button>
@@ -475,7 +485,7 @@ export default function ProjectsPage() {
               <Input
                 type="date"
                 value={dateFilter.startDate}
-                onChange={(e) => setDateFilter({...dateFilter, startDate: e.target.value})}
+                onChange={e => setDateFilter({ ...dateFilter, startDate: e.target.value })}
                 className="h-8 sm:h-9 text-sm"
               />
             </div>
@@ -484,7 +494,7 @@ export default function ProjectsPage() {
               <Input
                 type="date"
                 value={dateFilter.endDate}
-                onChange={(e) => setDateFilter({...dateFilter, endDate: e.target.value})}
+                onChange={e => setDateFilter({ ...dateFilter, endDate: e.target.value })}
                 className="h-8 sm:h-9 text-sm"
               />
             </div>
@@ -496,17 +506,13 @@ export default function ProjectsPage() {
               size="sm"
               className="h-8 text-xs sm:text-sm"
               onClick={() => {
-                setDateFilter({ startDate: "", endDate: "" });
+                setDateFilter({ startDate: '', endDate: '' });
                 setShowFilters(false);
               }}
             >
               Clear
             </Button>
-            <Button
-              size="sm"
-              className="h-8 text-xs sm:text-sm"
-              onClick={applyDateFilters}
-            >
+            <Button size="sm" className="h-8 text-xs sm:text-sm" onClick={applyDateFilters}>
               Apply
             </Button>
           </div>
@@ -521,7 +527,9 @@ export default function ProjectsPage() {
       ) : isError ? (
         <div className="text-center p-3 sm:p-4 mt-3 sm:mt-4 text-red-500 border border-red-200 rounded-md bg-red-50/50 shadow-xs">
           <p className="font-semibold text-sm sm:text-base">Error loading projects</p>
-          <p className="text-xs sm:text-sm mt-1 sm:mt-2">{isError instanceof Error ? isError.message : "An unexpected error occurred"}</p>
+          <p className="text-xs sm:text-sm mt-1 sm:mt-2">
+            {isError instanceof Error ? isError.message : 'An unexpected error occurred'}
+          </p>
           <Button
             variant="outline"
             size="sm"
@@ -541,20 +549,19 @@ export default function ProjectsPage() {
                   <TableHead>
                     <Button
                       variant="ghost"
-                      onClick={() => handleSort("title")}
+                      onClick={() => handleSort('title')}
                       className={cn(
-                        "flex items-center gap-1 font-medium -ml-3 px-3",
-                        sortField === "title" && "text-primary"
+                        'flex items-center gap-1 font-medium -ml-3 px-3',
+                        sortField === 'title' && 'text-primary'
                       )}
                     >
                       Name
-                      <ArrowUpDown className={cn(
-                        "h-4 w-4",
-                        sortField === "title" && "text-primary"
-                      )} />
-                      {sortField === "title" && (
+                      <ArrowUpDown
+                        className={cn('h-4 w-4', sortField === 'title' && 'text-primary')}
+                      />
+                      {sortField === 'title' && (
                         <span className="sr-only">
-                          {sortDirection === "asc" ? "sorted ascending" : "sorted descending"}
+                          {sortDirection === 'asc' ? 'sorted ascending' : 'sorted descending'}
                         </span>
                       )}
                     </Button>
@@ -563,20 +570,19 @@ export default function ProjectsPage() {
                   <TableHead>
                     <Button
                       variant="ghost"
-                      onClick={() => handleSort("startDate")}
+                      onClick={() => handleSort('startDate')}
                       className={cn(
-                        "flex items-center gap-1 font-medium -ml-3 px-3",
-                        sortField === "startDate" && "text-primary"
+                        'flex items-center gap-1 font-medium -ml-3 px-3',
+                        sortField === 'startDate' && 'text-primary'
                       )}
                     >
                       Start Date
-                      <ArrowUpDown className={cn(
-                        "h-4 w-4",
-                        sortField === "startDate" && "text-primary"
-                      )} />
-                      {sortField === "startDate" && (
+                      <ArrowUpDown
+                        className={cn('h-4 w-4', sortField === 'startDate' && 'text-primary')}
+                      />
+                      {sortField === 'startDate' && (
                         <span className="sr-only">
-                          {sortDirection === "asc" ? "sorted ascending" : "sorted descending"}
+                          {sortDirection === 'asc' ? 'sorted ascending' : 'sorted descending'}
                         </span>
                       )}
                     </Button>
@@ -584,20 +590,19 @@ export default function ProjectsPage() {
                   <TableHead>
                     <Button
                       variant="ghost"
-                      onClick={() => handleSort("endDate")}
+                      onClick={() => handleSort('endDate')}
                       className={cn(
-                        "flex items-center gap-1 font-medium -ml-3 px-3",
-                        sortField === "endDate" && "text-primary"
+                        'flex items-center gap-1 font-medium -ml-3 px-3',
+                        sortField === 'endDate' && 'text-primary'
                       )}
                     >
                       End Date
-                      <ArrowUpDown className={cn(
-                        "h-4 w-4",
-                        sortField === "endDate" && "text-primary"
-                      )} />
-                      {sortField === "endDate" && (
+                      <ArrowUpDown
+                        className={cn('h-4 w-4', sortField === 'endDate' && 'text-primary')}
+                      />
+                      {sortField === 'endDate' && (
                         <span className="sr-only">
-                          {sortDirection === "asc" ? "sorted ascending" : "sorted descending"}
+                          {sortDirection === 'asc' ? 'sorted ascending' : 'sorted descending'}
                         </span>
                       )}
                     </Button>
@@ -609,9 +614,7 @@ export default function ProjectsPage() {
               <TableBody>
                 {projects.map((project: Project) => (
                   <TableRow key={project.id}>
-                    <TableCell className="font-medium">
-                      {project.title}
-                    </TableCell>
+                    <TableCell className="font-medium">{project.title}</TableCell>
                     <TableCell>
                       {project.createdBy ? (
                         <span>{project.createdBy.name || project.createdBy.email}</span>
@@ -620,7 +623,9 @@ export default function ProjectsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}
+                      {project.startDate
+                        ? new Date(project.startDate).toLocaleDateString()
+                        : 'Not set'}
                     </TableCell>
                     <TableCell>
                       {project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}
@@ -629,10 +634,13 @@ export default function ProjectsPage() {
                       <div className="flex -space-x-2 overflow-hidden">
                         {project.teamMembers && project.teamMembers.length > 0 ? (
                           <>
-                            {project.teamMembers.slice(0, 3).map((member) => (
+                            {project.teamMembers.slice(0, 3).map(member => (
                               <Avatar key={member.id} className="h-8 w-8 border border-black">
                                 {member.user.image ? (
-                                  <AvatarImage src={member.user.image} alt={member.user.name || ""} />
+                                  <AvatarImage
+                                    src={member.user.image}
+                                    alt={member.user.name || ''}
+                                  />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                     {getUserInitials(member.user.name)}
@@ -663,12 +671,18 @@ export default function ProjectsPage() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
-                            <Link href={`/projects/${project.id}`} className="cursor-pointer flex items-center">
+                            <Link
+                              href={`/projects/${project.id}`}
+                              className="cursor-pointer flex items-center"
+                            >
                               <Eye className="mr-2 h-4 w-4" /> View
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/projects/${project.id}`} className="cursor-pointer flex items-center">
+                            <Link
+                              href={`/projects/${project.id}`}
+                              className="cursor-pointer flex items-center"
+                            >
                               <Edit className="mr-2 h-4 w-4" /> Edit
                             </Link>
                           </DropdownMenuItem>
@@ -710,12 +724,18 @@ export default function ProjectsPage() {
                       <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild className="text-xs">
-                        <Link href={`/projects/${project.id}`} className="cursor-pointer flex items-center">
+                        <Link
+                          href={`/projects/${project.id}`}
+                          className="cursor-pointer flex items-center"
+                        >
                           <Eye className="mr-2 h-3.5 w-3.5" /> View
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="text-xs">
-                        <Link href={`/projects/${project.id}`} className="cursor-pointer flex items-center">
+                        <Link
+                          href={`/projects/${project.id}`}
+                          className="cursor-pointer flex items-center"
+                        >
                           <Edit className="mr-2 h-3.5 w-3.5" /> Edit
                         </Link>
                       </DropdownMenuItem>
@@ -739,8 +759,12 @@ export default function ProjectsPage() {
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     <span>
-                      {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'No start date'}
-                      {project.endDate ? ` - ${new Date(project.endDate).toLocaleDateString()}` : ''}
+                      {project.startDate
+                        ? new Date(project.startDate).toLocaleDateString()
+                        : 'No start date'}
+                      {project.endDate
+                        ? ` - ${new Date(project.endDate).toLocaleDateString()}`
+                        : ''}
                     </span>
                   </div>
                 </div>
@@ -749,10 +773,10 @@ export default function ProjectsPage() {
                   <div className="flex -space-x-1.5 overflow-hidden">
                     {project.teamMembers && project.teamMembers.length > 0 ? (
                       <>
-                        {project.teamMembers.slice(0, 3).map((member) => (
+                        {project.teamMembers.slice(0, 3).map(member => (
                           <Avatar key={member.id} className="h-6 w-6 border border-black">
                             {member.user.image ? (
-                              <AvatarImage src={member.user.image} alt={member.user.name || ""} />
+                              <AvatarImage src={member.user.image} alt={member.user.name || ''} />
                             ) : (
                               <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
                                 {getUserInitials(member.user.name)}
@@ -771,15 +795,8 @@ export default function ProjectsPage() {
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-6 text-xs px-2"
-                    asChild
-                  >
-                    <Link href={`/projects/${project.id}`}>
-                      View
-                    </Link>
+                  <Button variant="outline" size="sm" className="h-6 text-xs px-2" asChild>
+                    <Link href={`/projects/${project.id}`}>View</Link>
                   </Button>
                 </div>
               </div>
@@ -817,6 +834,5 @@ export default function ProjectsPage() {
         onSuccess={() => mutate()} // Refresh the project list after creating a new project
       />
     </>
-  )
+  );
 }
-

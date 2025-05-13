@@ -157,10 +157,10 @@ export interface TaskComment extends CommentWithRelations {
  */
 export interface TaskAttachment {
   id: string;
-  filename: string;       // Matches database schema
-  fileUrl: string;        // Matches database schema
-  name?: string;          // Alias for filename for compatibility
-  filePath?: string;      // Alias for fileUrl for compatibility
+  filename: string; // Matches database schema
+  fileUrl: string; // Matches database schema
+  name?: string; // Alias for filename for compatibility
+  filePath?: string; // Alias for fileUrl for compatibility
   fileSize: number;
   fileType: string;
   taskId: string;
@@ -179,7 +179,7 @@ export function normalizeAttachment(attachment: TaskAttachment): TaskAttachment 
     name: attachment.name || attachment.filename,
     filePath: attachment.filePath || attachment.fileUrl,
     filename: attachment.filename || attachment.name || '',
-    fileUrl: attachment.fileUrl || attachment.filePath || ''
+    fileUrl: attachment.fileUrl || attachment.filePath || '',
   };
 }
 

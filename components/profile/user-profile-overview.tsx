@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { UserProfile } from "@/hooks/use-user-profile"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
-import { Mail, User, Calendar, MapPin, Phone, Briefcase } from "lucide-react"
+import { UserProfile } from '@/hooks/use-user-profile';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/lib/utils';
+import { Mail, User, Calendar, MapPin, Phone, Briefcase } from 'lucide-react';
 
 interface UserProfileOverviewProps {
-  user: UserProfile
+  user: UserProfile;
 }
 
 export function UserProfileOverview({ user }: UserProfileOverviewProps) {
@@ -41,7 +41,7 @@ export function UserProfileOverview({ user }: UserProfileOverviewProps) {
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
-            
+
             <div className="flex items-start">
               <User className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
               <div>
@@ -49,7 +49,7 @@ export function UserProfileOverview({ user }: UserProfileOverviewProps) {
                 <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
               </div>
             </div>
-            
+
             <div className="flex items-start">
               <Calendar className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
               <div>
@@ -79,5 +79,5 @@ export function UserProfileOverview({ user }: UserProfileOverviewProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

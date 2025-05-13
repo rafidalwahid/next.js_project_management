@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { Calendar, Clock, MoreHorizontal, Plus } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import Link from 'next/link';
+import { Calendar, Clock, MoreHorizontal, Plus } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,26 +13,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 
 interface Project {
-  id: string
-  title: string
+  id: string;
+  title: string;
   status: {
-    id: string
-    name: string
-    color: string
-    description?: string | null
-    isDefault?: boolean
-  }
-  startDate: string | null
-  endDate: string | null
-  role: string
-  joinedAt: string
+    id: string;
+    name: string;
+    color: string;
+    description?: string | null;
+    isDefault?: boolean;
+  };
+  startDate: string | null;
+  endDate: string | null;
+  role: string;
+  joinedAt: string;
 }
 
 interface UserProfileProjectsProps {
-  projects: Project[]
+  projects: Project[];
 }
 
 export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
@@ -64,7 +64,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -77,9 +77,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href="/app/projects">
-                View All
-              </Link>
+              <Link href="/app/projects">View All</Link>
             </Button>
             <Button size="sm" variant="default" asChild>
               <Link href="/app/projects/new">
@@ -92,7 +90,7 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project) => (
+          {projects.map(project => (
             <Card key={project.id} className="h-full overflow-hidden border bg-background">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -140,15 +138,17 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
                     <div className="flex items-center">
                       <Calendar className="mr-2 h-4 w-4" />
                       <span>
-                        {project.startDate ? formatDate(project.startDate) : "Not started"}
-                        {" - "}
-                        {project.endDate ? formatDate(project.endDate) : "Ongoing"}
+                        {project.startDate ? formatDate(project.startDate) : 'Not started'}
+                        {' - '}
+                        {project.endDate ? formatDate(project.endDate) : 'Ongoing'}
                       </span>
                     </div>
                   )}
                   <div className="flex items-center">
                     <Clock className="mr-2 h-4 w-4" />
-                    <span>Joined {project.joinedAt ? formatDate(project.joinedAt) : 'Recently'}</span>
+                    <span>
+                      Joined {project.joinedAt ? formatDate(project.joinedAt) : 'Recently'}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -157,5 +157,5 @@ export function UserProfileProjects({ projects }: UserProfileProjectsProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

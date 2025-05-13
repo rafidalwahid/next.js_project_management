@@ -1,102 +1,96 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Filter, Plus, Search, LayoutGrid, List, Info } from "lucide-react"
-import { useUsers } from "@/hooks/use-users"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
-import { useHasPermission } from "@/hooks/use-has-permission"
+import { useState, useEffect } from 'react';
+import { Filter, Plus, Search, LayoutGrid, List, Info } from 'lucide-react';
+import { useUsers } from '@/hooks/use-users';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useHasPermission } from '@/hooks/use-has-permission';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Spinner } from "@/components/ui/spinner"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { UserGrid } from "@/components/team/user-grid"
-import { UserList } from "@/components/team/user-list"
-import { Pagination } from "@/components/team/pagination"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserGrid } from '@/components/team/user-grid';
+import { UserList } from '@/components/team/user-list';
+import { Pagination } from '@/components/team/pagination';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog"
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function TeamPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [roleFilter, setRoleFilter] = useState<string>("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<string | null>(null)
-  const itemsPerPage = 12
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const itemsPerPage = 12;
 
   // Use the enhanced useUsers hook with server-side pagination and filtering
-  const {
-    users,
-    pagination,
-    isLoading,
-    isError,
-    mutate
-  } = useUsers({
+  const { users, pagination, isLoading, isError, mutate } = useUsers({
     search: searchQuery,
     role: roleFilter,
     page: currentPage,
-    limit: itemsPerPage
-  })
+    limit: itemsPerPage,
+  });
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  const { toast } = useToast()
-  const router = useRouter()
-  const { data: session, status } = useSession()
+  const { toast } = useToast();
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Use the permission hook instead of manual fetch
-  const { hasPermission: canAddMembers } = useHasPermission("team_add")
-  const { hasPermission: canDeleteUsers } = useHasPermission("user_delete")
+  const { hasPermission: canAddMembers } = useHasPermission('team_add');
+  const { hasPermission: canDeleteUsers } = useHasPermission('user_delete');
 
   useEffect(() => {
     // If user is not authenticated, redirect to login
-    if (status === "unauthenticated") {
-      router.push("/login")
-      return
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
     }
-  }, [status, router])
+  }, [status, router]);
 
   // Reset to first page when filters change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, roleFilter])
+    setCurrentPage(1);
+  }, [searchQuery, roleFilter]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
+    setSearchQuery(e.target.value);
+  };
 
   const confirmDelete = (userId: string) => {
     // Check if user has permission to delete users
     if (!canDeleteUsers) {
       toast({
-        title: "Permission Denied",
+        title: 'Permission Denied',
         description: "You don't have permission to delete users.",
-        variant: "destructive"
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
-    setUserToDelete(userId)
-    setShowDeleteDialog(true)
-  }
+    setUserToDelete(userId);
+    setShowDeleteDialog(true);
+  };
 
   const handleDelete = async () => {
-    if (!userToDelete) return
+    if (!userToDelete) return;
 
     try {
       const response = await fetch(`/api/users/${userToDelete}`, {
@@ -112,28 +106,28 @@ export default function TeamPage() {
       }
 
       toast({
-        title: "User deleted",
-        description: "The user has been successfully deleted.",
+        title: 'User deleted',
+        description: 'The user has been successfully deleted.',
       });
 
       // Close dialog and reset state
-      setShowDeleteDialog(false)
-      setUserToDelete(null)
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
 
       // Refresh the users list
       mutate();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete user",
-        variant: "destructive",
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete user',
+        variant: 'destructive',
       });
     }
-  }
+  };
 
   // Show loading state when checking auth or loading data
-  if (status === "loading" || isLoading) {
+  if (status === 'loading' || isLoading) {
     return (
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Team</h1>
@@ -141,7 +135,7 @@ export default function TeamPage() {
           <Spinner size="lg" />
         </div>
       </div>
-    )
+    );
   }
 
   if (isError) {
@@ -152,7 +146,7 @@ export default function TeamPage() {
           <p className="text-destructive">Error loading users. Please try again later.</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Get user counts by role (using the available users data)
@@ -160,8 +154,8 @@ export default function TeamPage() {
     total: users.length,
     admin: users.filter(u => u.role.toLowerCase() === 'admin').length,
     manager: users.filter(u => u.role.toLowerCase() === 'manager').length,
-    user: users.filter(u => u.role.toLowerCase() === 'user').length
-  }
+    user: users.filter(u => u.role.toLowerCase() === 'user').length,
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -186,7 +180,9 @@ export default function TeamPage() {
             <CardTitle className="text-3xl">{userCounts.total}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Active team members in your organization</p>
+            <p className="text-xs text-muted-foreground">
+              Active team members in your organization
+            </p>
           </CardContent>
         </Card>
 
@@ -216,7 +212,9 @@ export default function TeamPage() {
             <CardTitle className="text-3xl">{userCounts.user}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">Regular team members with standard access</p>
+            <p className="text-xs text-muted-foreground">
+              Regular team members with standard access
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -226,15 +224,15 @@ export default function TeamPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Team Directory</CardTitle>
-              <CardDescription>
-                View and manage team members in your organization.
-              </CardDescription>
+              <CardDescription>View and manage team members in your organization.</CardDescription>
             </div>
             <div className="text-sm text-muted-foreground">
               {pagination && (
                 <span>
-                  Showing {users.length} of {pagination.totalCount} {pagination.totalCount === 1 ? 'member' : 'members'}
-                  {roleFilter !== 'all' && ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
+                  Showing {users.length} of {pagination.totalCount}{' '}
+                  {pagination.totalCount === 1 ? 'member' : 'members'}
+                  {roleFilter !== 'all' &&
+                    ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
                   {searchQuery && ` matching: "${searchQuery}"`}
                 </span>
               )}
@@ -257,7 +255,7 @@ export default function TeamPage() {
                 <select
                   className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                   value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
+                  onChange={e => setRoleFilter(e.target.value)}
                 >
                   <option value="all">All Roles</option>
                   <option value="admin">Admin</option>
@@ -267,7 +265,11 @@ export default function TeamPage() {
               </div>
             </div>
 
-            <Tabs defaultValue={viewMode} onValueChange={(value) => setViewMode(value as "grid" | "list")} className="w-full md:w-auto">
+            <Tabs
+              defaultValue={viewMode}
+              onValueChange={value => setViewMode(value as 'grid' | 'list')}
+              className="w-full md:w-auto"
+            >
               <TabsList className="grid w-full grid-cols-2 md:w-[160px] bg-background/80">
                 <TabsTrigger value="grid" className="flex items-center gap-2">
                   <LayoutGrid className="h-4 w-4" />
@@ -288,7 +290,7 @@ export default function TeamPage() {
               </div>
             )}
 
-            {viewMode === "grid" ? (
+            {viewMode === 'grid' ? (
               <UserGrid users={users} onDelete={confirmDelete} />
             ) : (
               <UserList users={users} onDelete={confirmDelete} />
@@ -316,21 +318,15 @@ export default function TeamPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-            >
+            <Button variant="destructive" onClick={handleDelete}>
               Delete User
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
 
 /**
  * GET /api/debug-user
@@ -14,24 +14,24 @@ export async function GET(req: NextRequest) {
 
     if (!session) {
       return NextResponse.json({
-        error: "No session found",
-        authenticated: false
+        error: 'No session found',
+        authenticated: false,
       });
     }
 
     if (!session.user) {
       return NextResponse.json({
-        error: "Session has no user object",
+        error: 'Session has no user object',
         session,
-        authenticated: true
+        authenticated: true,
       });
     }
 
     if (!session.user.id) {
       return NextResponse.json({
-        error: "Session user has no ID",
+        error: 'Session user has no ID',
         user: session.user,
-        authenticated: true
+        authenticated: true,
       });
     }
 
@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
         email: true,
         name: true,
         role: true,
-        active: true
-      }
+        active: true,
+      },
     });
 
     // Check if user has attendance settings
@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
         id: true,
         userId: true,
         workHoursPerDay: true,
-        workDays: true
-      }
+        workDays: true,
+      },
     });
 
     // Get all users in the database (for debugging)
@@ -65,26 +65,29 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         email: true,
-        name: true
+        name: true,
       },
-      take: 5 // Limit to 5 users for brevity
+      take: 5, // Limit to 5 users for brevity
     });
 
     // Return the debug information
     return NextResponse.json({
       session: {
-        user: session.user
+        user: session.user,
       },
       userExists: !!userInDb,
       userInDb,
       attendanceSettingsExist: !!attendanceSettings,
       attendanceSettings,
       sampleUsers: allUsers,
-      totalUsers: await prisma.user.count()
+      totalUsers: await prisma.user.count(),
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

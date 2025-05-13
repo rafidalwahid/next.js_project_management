@@ -1,36 +1,27 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { checkTaskPermission } from "@/lib/permissions/task-permissions";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
-import { existsSync } from "fs";
-import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { checkTaskPermission } from '@/lib/permissions/task-permissions';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { existsSync } from 'fs';
+import { ApiRouteHandlerOneParam, getParams } from '@/lib/api-route-types';
 
 // GET /api/tasks/[taskId]/attachments - Get attachments for a task
-export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
-  _req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerOneParam<'taskId'> = async (_req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const taskId = await getParams(params).then(p => p.taskId);
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'view');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     // Get attachments for the task
@@ -51,52 +42,38 @@ export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ attachments });
   } catch (error: any) {
-    console.error("Error fetching task attachments:", error);
+    console.error('Error fetching task attachments:', error);
     return NextResponse.json(
-      { error: "Failed to fetch task attachments", details: error.message },
+      { error: 'Failed to fetch task attachments', details: error.message },
       { status: 500 }
     );
   }
-}
+};
 
 // POST /api/tasks/[taskId]/attachments - Upload an attachment to a task
-export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
-  req,
-  { params }
-) => {
+export const POST: ApiRouteHandlerOneParam<'taskId'> = async (req, { params }) => {
   try {
-    const session = await getServerSession(authOptions);    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const taskId = await getParams(params).then(p => p.taskId);
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: "File too large (max 10MB)" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 });
     }
 
     // Get file data
@@ -105,11 +82,11 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
 
     // Generate a unique filename with the original extension
     const originalName = file.name;
-    const extension = originalName.split(".").pop() || "";
+    const extension = originalName.split('.').pop() || '';
     const filename = `${uuidv4()}.${extension}`;
 
     // Create directory if it doesn't exist
-    const uploadDir = join(process.cwd(), "public/uploads/task-attachments");
+    const uploadDir = join(process.cwd(), 'public/uploads/task-attachments');
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -143,8 +120,8 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
     // Log activity
     await prisma.activity.create({
       data: {
-        action: "uploaded",
-        entityType: "attachment",
+        action: 'uploaded',
+        entityType: 'attachment',
         entityId: attachment.id,
         description: `uploaded attachment "${originalName}"`,
         userId: session.user.id,
@@ -155,44 +132,33 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ attachment });
   } catch (error: any) {
-    console.error("Error uploading task attachment:", error);
+    console.error('Error uploading task attachment:', error);
     return NextResponse.json(
-      { error: "Failed to upload task attachment", details: error.message },
+      { error: 'Failed to upload task attachment', details: error.message },
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE /api/tasks/[taskId]/attachments?attachmentId=xxx - Delete an attachment
-export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
-  req,
-  { params }
-) => {
+export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (req, { params }) => {
   try {
-    const session = await getServerSession(authOptions);    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const taskId = await getParams(params).then(p => p.taskId);
     const { searchParams } = new URL(req.url);
     const attachmentId = searchParams.get('attachmentId');
 
     if (!attachmentId) {
-      return NextResponse.json(
-        { error: "Attachment ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Attachment ID is required' }, { status: 400 });
     }
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     // Get the attachment
@@ -201,17 +167,14 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
     });
 
     if (!attachment) {
-      return NextResponse.json(
-        { error: "Attachment not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Attachment not found' }, { status: 404 });
     }
 
     // Check if user is the attachment uploader or has task management permission
     const isAttachmentUploader = attachment.userId === session.user.id;
     const hasTaskManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "task_management"
+      'task_management'
     );
 
     if (!isAttachmentUploader && !hasTaskManagementPermission) {
@@ -232,8 +195,8 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
     // Log activity
     await prisma.activity.create({
       data: {
-        action: "deleted",
-        entityType: "attachment",
+        action: 'deleted',
+        entityType: 'attachment',
         entityId: attachmentId,
         description: `deleted attachment "${attachment.filename}"`,
         userId: session.user.id,
@@ -244,10 +207,10 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Error deleting task attachment:", error);
+    console.error('Error deleting task attachment:', error);
     return NextResponse.json(
-      { error: "Failed to delete task attachment", details: error.message },
+      { error: 'Failed to delete task attachment', details: error.message },
       { status: 500 }
     );
   }
-}
+};

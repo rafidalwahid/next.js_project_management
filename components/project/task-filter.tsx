@@ -1,15 +1,11 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Search, Filter, X, Check } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { useState, useEffect } from 'react';
+import { Search, Filter, X, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -17,17 +13,17 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from '@/components/ui/command';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useTaskContext } from "./task-context"
-import { TaskFilters } from "@/types/task"
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useTaskContext } from './task-context';
+import { TaskFilters } from '@/types/task';
 
 export function TaskFilterNew() {
   const { statuses, users, filters, setFilters } = useTaskContext();
@@ -43,7 +39,7 @@ export function TaskFilterNew() {
     setFilters({
       ...filters,
       statusIds: filters.statusIds.includes(statusId)
-        ? filters.statusIds.filter((id) => id !== statusId)
+        ? filters.statusIds.filter(id => id !== statusId)
         : [...filters.statusIds, statusId],
     });
   };
@@ -52,19 +48,19 @@ export function TaskFilterNew() {
     setFilters({
       ...filters,
       assigneeIds: filters.assigneeIds.includes(userId)
-        ? filters.assigneeIds.filter((id) => id !== userId)
+        ? filters.assigneeIds.filter(id => id !== userId)
         : [...filters.assigneeIds, userId],
     });
   };
 
   const handlePriorityChange = (value: string) => {
-    setFilters({ ...filters, priority: value === "all" ? null : value });
+    setFilters({ ...filters, priority: value === 'all' ? null : value });
   };
 
   const handleCompletedChange = (value: string) => {
-    if (value === "all") {
+    if (value === 'all') {
       setFilters({ ...filters, completed: null });
-    } else if (value === "completed") {
+    } else if (value === 'completed') {
       setFilters({ ...filters, completed: true });
     } else {
       setFilters({ ...filters, completed: false });
@@ -73,7 +69,7 @@ export function TaskFilterNew() {
 
   const clearFilters = () => {
     setFilters({
-      search: "",
+      search: '',
       statusIds: [],
       assigneeIds: [],
       priority: null,
@@ -82,7 +78,7 @@ export function TaskFilterNew() {
   };
 
   const hasActiveFilters =
-    filters.search !== "" ||
+    filters.search !== '' ||
     filters.statusIds.length > 0 ||
     filters.assigneeIds.length > 0 ||
     filters.priority !== null ||
@@ -104,7 +100,7 @@ export function TaskFilterNew() {
               variant="ghost"
               size="sm"
               className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-primary"
-              onClick={() => setFilters({ ...filters, search: "" })}
+              onClick={() => setFilters({ ...filters, search: '' })}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -113,11 +109,17 @@ export function TaskFilterNew() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Popover open={statusOpen} onOpenChange={setStatusOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start w-full h-10 bg-background hover:bg-muted/50">
+              <Button
+                variant="outline"
+                className="justify-start w-full h-10 bg-background hover:bg-muted/50"
+              >
                 <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="truncate">Status</span>
                 {filters.statusIds.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full px-2 bg-primary/10 text-primary">
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 rounded-full px-2 bg-primary/10 text-primary"
+                  >
                     {filters.statusIds.length}
                   </Badge>
                 )}
@@ -129,7 +131,7 @@ export function TaskFilterNew() {
                 <CommandList>
                   <CommandEmpty>No results found.</CommandEmpty>
                   <CommandGroup>
-                    {statuses.map((status) => (
+                    {statuses.map(status => (
                       <CommandItem
                         key={status.id}
                         onSelect={() => toggleStatus(status.id)}
@@ -146,9 +148,7 @@ export function TaskFilterNew() {
                           />
                           <span>{status.name}</span>
                         </div>
-                        {filters.statusIds.includes(status.id) && (
-                          <Check className="h-4 w-4" />
-                        )}
+                        {filters.statusIds.includes(status.id) && <Check className="h-4 w-4" />}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -159,11 +159,17 @@ export function TaskFilterNew() {
 
           <Popover open={assigneeOpen} onOpenChange={setAssigneeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start w-full h-10 bg-background hover:bg-muted/50">
+              <Button
+                variant="outline"
+                className="justify-start w-full h-10 bg-background hover:bg-muted/50"
+              >
                 <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="truncate">Assignee</span>
                 {filters.assigneeIds.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full px-2 bg-primary/10 text-primary">
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 rounded-full px-2 bg-primary/10 text-primary"
+                  >
                     {filters.assigneeIds.length}
                   </Badge>
                 )}
@@ -175,7 +181,7 @@ export function TaskFilterNew() {
                 <CommandList>
                   <CommandEmpty>No results found.</CommandEmpty>
                   <CommandGroup>
-                    {users.map((user) => (
+                    {users.map(user => (
                       <CommandItem
                         key={user.id}
                         onSelect={() => toggleAssignee(user.id)}
@@ -188,9 +194,7 @@ export function TaskFilterNew() {
                           />
                           <span>{user.name || user.email}</span>
                         </div>
-                        {filters.assigneeIds.includes(user.id) && (
-                          <Check className="h-4 w-4" />
-                        )}
+                        {filters.assigneeIds.includes(user.id) && <Check className="h-4 w-4" />}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -199,10 +203,7 @@ export function TaskFilterNew() {
             </PopoverContent>
           </Popover>
 
-          <Select
-            value={filters.priority || "all"}
-            onValueChange={handlePriorityChange}
-          >
+          <Select value={filters.priority || 'all'} onValueChange={handlePriorityChange}>
             <SelectTrigger className="w-full h-10 bg-background hover:bg-muted/50">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
@@ -215,7 +216,7 @@ export function TaskFilterNew() {
           </Select>
 
           <Select
-            value={filters.completed === null ? "all" : filters.completed ? "completed" : "active"}
+            value={filters.completed === null ? 'all' : filters.completed ? 'completed' : 'active'}
             onValueChange={handleCompletedChange}
           >
             <SelectTrigger className="w-full h-10 bg-background hover:bg-muted/50">
@@ -234,7 +235,10 @@ export function TaskFilterNew() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t">
           <div className="flex flex-wrap gap-2">
             {filters.statusIds.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1"
+              >
                 Statuses: {filters.statusIds.length}
                 <Button
                   variant="ghost"
@@ -247,7 +251,10 @@ export function TaskFilterNew() {
               </Badge>
             )}
             {filters.assigneeIds.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1"
+              >
                 Assignees: {filters.assigneeIds.length}
                 <Button
                   variant="ghost"
@@ -260,7 +267,10 @@ export function TaskFilterNew() {
               </Badge>
             )}
             {filters.priority && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1"
+              >
                 Priority: {filters.priority}
                 <Button
                   variant="ghost"
@@ -273,8 +283,11 @@ export function TaskFilterNew() {
               </Badge>
             )}
             {filters.completed !== null && (
-              <Badge variant="secondary" className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1">
-                {filters.completed ? "Completed" : "Active"}
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors px-3 py-1"
+              >
+                {filters.completed ? 'Completed' : 'Active'}
                 <Button
                   variant="ghost"
                   size="icon"

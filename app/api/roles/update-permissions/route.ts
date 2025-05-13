@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import prisma from '@/lib/prisma';
 
 // POST /api/roles/update-permissions - Update role permissions
 export async function POST(req: NextRequest) {
@@ -10,19 +10,16 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'manage_roles'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     // Parse request body
@@ -39,36 +36,30 @@ export async function POST(req: NextRequest) {
 
     // Get the role
     const role = await prisma.role.findUnique({
-      where: { id: roleId }
+      where: { id: roleId },
     });
 
     if (!role) {
-      return NextResponse.json(
-        { error: 'Role not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Role not found' }, { status: 404 });
     }
 
     // Don't allow modifying admin role permissions
     if (role.name === 'admin') {
-      return NextResponse.json(
-        { error: 'Cannot modify admin role permissions' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Cannot modify admin role permissions' }, { status: 400 });
     }
 
     // Delete existing role permissions
     await prisma.rolePermission.deleteMany({
-      where: { roleId }
+      where: { roleId },
     });
 
     // Create new role permissions
     const permissionRecords = await prisma.permission.findMany({
       where: {
         name: {
-          in: permissions
-        }
-      }
+          in: permissions,
+        },
+      },
     });
 
     // Check if all permissions exist
@@ -79,7 +70,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'Some permissions do not exist',
-          missingPermissions
+          missingPermissions,
         },
         { status: 400 }
       );
@@ -91,8 +82,8 @@ export async function POST(req: NextRequest) {
         prisma.rolePermission.create({
           data: {
             roleId,
-            permissionId: permission.id
-          }
+            permissionId: permission.id,
+          },
         })
       )
     );
@@ -104,7 +95,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       message: 'Role permissions updated successfully',
       roleId,
-      permissionsCount: rolePermissions.length
+      permissionsCount: rolePermissions.length,
     });
   } catch (error: any) {
     console.error('Error updating role permissions:', error);

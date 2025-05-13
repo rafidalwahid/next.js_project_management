@@ -1,22 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { Task } from "@/types/task";
-import { ProjectStatus } from "@/types/project";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { Task } from '@/types/task';
+import { ProjectStatus } from '@/types/project';
 
 // PATCH: Update a task's status
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ taskId: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ taskId: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const taskId = params.taskId;
@@ -37,17 +34,14 @@ export async function PATCH(
     });
 
     if (!task) {
-      return NextResponse.json(
-        { error: "Task not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
     // Check if user has permission to update the task
     const isTeamMember = task.project.teamMembers.some(tm => tm.userId === session.user.id);
     const hasTaskManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "task_management"
+      'task_management'
     );
 
     if (!isTeamMember && !hasTaskManagementPermission) {
@@ -67,7 +61,7 @@ export async function PATCH(
     const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -122,11 +116,11 @@ export async function PATCH(
     // Create activity record
     await prisma.activity.create({
       data: {
-        action: "status_changed",
-        entityType: "task",
+        action: 'status_changed',
+        entityType: 'task',
         entityId: taskId,
         description: `Task "${updatedTask.title}" moved from ${
-          oldStatus ? `"${oldStatus.name}"` : "no status"
+          oldStatus ? `"${oldStatus.name}"` : 'no status'
         } to "${status.name}"`,
         userId: session.user.id,
         projectId: task.projectId,
@@ -136,9 +130,9 @@ export async function PATCH(
 
     return NextResponse.json({ task: updatedTask });
   } catch (error) {
-    console.error("Error updating task status:", error);
+    console.error('Error updating task status:', error);
     return NextResponse.json(
-      { error: "An error occurred while updating the task status" },
+      { error: 'An error occurred while updating the task status' },
       { status: 500 }
     );
   }

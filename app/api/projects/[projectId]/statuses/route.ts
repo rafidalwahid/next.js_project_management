@@ -1,20 +1,17 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { ApiRouteHandlerOneParam, getParams } from "@/lib/api-route-types";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { ApiRouteHandlerOneParam, getParams } from '@/lib/api-route-types';
 
 // GET: Fetch all statuses for a project
-export const GET: ApiRouteHandlerOneParam<'projectId'> = async (
-  _req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerOneParam<'projectId'> = async (_req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const projectId = await getParams(params).then(p => p.projectId);
@@ -30,38 +27,32 @@ export const GET: ApiRouteHandlerOneParam<'projectId'> = async (
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Get all statuses for the project, ordered by their order field
     const statuses = await prisma.projectStatus.findMany({
       where: { projectId },
-      orderBy: { order: "asc" },
+      orderBy: { order: 'asc' },
     });
 
     return NextResponse.json({ statuses });
   } catch (error) {
-    console.error("Error fetching project statuses:", error);
+    console.error('Error fetching project statuses:', error);
     return NextResponse.json(
-      { error: "An error occurred while fetching project statuses" },
+      { error: 'An error occurred while fetching project statuses' },
       { status: 500 }
     );
   }
-}
+};
 
 // POST: Create a new status for a project
-export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
-  req,
-  { params }
-) => {
+export const POST: ApiRouteHandlerOneParam<'projectId'> = async (req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const projectId = await getParams(params).then(p => p.projectId);
@@ -77,14 +68,11 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Only project team members can create statuses
-    if (project.teamMembers.length === 0 && session.user.role !== "admin") {
+    if (project.teamMembers.length === 0 && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: "You don't have permission to create statuses for this project" },
         { status: 403 }
@@ -104,7 +92,7 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
     const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -124,7 +112,7 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
 
     if (existingStatus) {
       return NextResponse.json(
-        { error: "A status with this name already exists for this project" },
+        { error: 'A status with this name already exists for this project' },
         { status: 400 }
       );
     }
@@ -132,14 +120,15 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
     // Get the highest order value to place the new status at the end
     const highestOrder = await prisma.projectStatus.findFirst({
       where: { projectId },
-      orderBy: { order: "desc" },
+      orderBy: { order: 'desc' },
       select: { order: true },
     });
 
     const newOrder = (highestOrder?.order || 0) + 1;
 
     // If this is the first status or isDefault is true, make it the default
-    const shouldBeDefault = isDefault ||
+    const shouldBeDefault =
+      isDefault ||
       !(await prisma.projectStatus.findFirst({
         where: { projectId, isDefault: true },
       }));
@@ -156,7 +145,7 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
     const status = await prisma.projectStatus.create({
       data: {
         name,
-        color: color || "#6E56CF", // Default color if not provided
+        color: color || '#6E56CF', // Default color if not provided
         description,
         order: newOrder,
         isDefault: shouldBeDefault,
@@ -167,8 +156,8 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
     // Create activity record
     await prisma.activity.create({
       data: {
-        action: "created",
-        entityType: "project_status",
+        action: 'created',
+        entityType: 'project_status',
         entityId: status.id,
         description: `Status "${name}" was created for project`,
         userId: session.user.id,
@@ -178,10 +167,10 @@ export const POST: ApiRouteHandlerOneParam<'projectId'> = async (
 
     return NextResponse.json({ status }, { status: 201 });
   } catch (error) {
-    console.error("Error creating project status:", error);
+    console.error('Error creating project status:', error);
     return NextResponse.json(
-      { error: "An error occurred while creating the project status" },
+      { error: 'An error occurred while creating the project status' },
       { status: 500 }
     );
   }
-}
+};

@@ -1,42 +1,32 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { z } from "zod";
-import { checkTaskPermission } from "@/lib/permissions/task-permissions";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { ApiRouteHandlerOneParam } from "@/lib/api-route-types";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { z } from 'zod';
+import { checkTaskPermission } from '@/lib/permissions/task-permissions';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { ApiRouteHandlerOneParam } from '@/lib/api-route-types';
 
 // Validation schema for creating a comment
 const createCommentSchema = z.object({
-  content: z.string().min(1, "Comment content is required"),
+  content: z.string().min(1, 'Comment content is required'),
 });
 
 // GET /api/tasks/[taskId]/comments - Get comments for a task
-export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
-  _req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerOneParam<'taskId'> = async (_req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const taskId = typeof params === 'object' && 'taskId' in params
-      ? params.taskId
-      : (await params).taskId;
+    const taskId =
+      typeof params === 'object' && 'taskId' in params ? params.taskId : (await params).taskId;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'view');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     // Get comments for the task
@@ -57,39 +47,29 @@ export const GET: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ comments });
   } catch (error: any) {
-    console.error("Error fetching task comments:", error);
+    console.error('Error fetching task comments:', error);
     return NextResponse.json(
-      { error: "Failed to fetch task comments", details: error.message },
+      { error: 'Failed to fetch task comments', details: error.message },
       { status: 500 }
     );
   }
-}
+};
 
 // POST /api/tasks/[taskId]/comments - Add a comment to a task
-export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
-  req,
-  { params }
-) => {
+export const POST: ApiRouteHandlerOneParam<'taskId'> = async (req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const taskId = typeof params === 'object' && 'taskId' in params
-      ? params.taskId
-      : (await params).taskId;
+    const taskId =
+      typeof params === 'object' && 'taskId' in params ? params.taskId : (await params).taskId;
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     // Parse and validate request body
@@ -97,7 +77,7 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
     const validationResult = createCommentSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -109,7 +89,7 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
       data: {
         content,
         taskId,
-        userId: session.user?.id || "",
+        userId: session.user?.id || '',
       },
       include: {
         user: {
@@ -126,11 +106,11 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
     // Log activity
     await prisma.activity.create({
       data: {
-        action: "commented",
-        entityType: "task",
+        action: 'commented',
+        entityType: 'task',
         entityId: taskId,
         description: `commented on task`,
-        userId: session.user?.id || "",
+        userId: session.user?.id || '',
         taskId,
         projectId: (await prisma.task.findUnique({ where: { id: taskId } }))?.projectId,
       },
@@ -138,48 +118,35 @@ export const POST: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ comment });
   } catch (error: any) {
-    console.error("Error adding task comment:", error);
+    console.error('Error adding task comment:', error);
     return NextResponse.json(
-      { error: "Failed to add task comment", details: error.message },
+      { error: 'Failed to add task comment', details: error.message },
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE /api/tasks/[taskId]/comments?commentId=xxx - Delete a comment
-export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
-  req,
-  { params }
-) => {
+export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const taskId = typeof params === 'object' && 'taskId' in params
-      ? params.taskId
-      : (await params).taskId;
+    const taskId =
+      typeof params === 'object' && 'taskId' in params ? params.taskId : (await params).taskId;
     const { searchParams } = new URL(req.url);
     const commentId = searchParams.get('commentId');
 
     if (!commentId) {
-      return NextResponse.json(
-        { error: "Comment ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Comment ID is required' }, { status: 400 });
     }
 
     // Check permission
     const { hasPermission, error } = await checkTaskPermission(taskId, session, 'update');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error },
-        { status: error === "Task not found" ? 404 : 403 }
-      );
+      return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
     }
 
     // Get the comment
@@ -188,17 +155,14 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
     });
 
     if (!comment) {
-      return NextResponse.json(
-        { error: "Comment not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
     }
 
     // Check if user is the comment author or has task management permission
     const isCommentAuthor = comment.userId === session.user?.id;
     const hasTaskManagementPermission = await PermissionService.hasPermissionById(
-      session.user?.id || "",
-      "task_management"
+      session.user?.id || '',
+      'task_management'
     );
 
     if (!isCommentAuthor && !hasTaskManagementPermission) {
@@ -216,11 +180,11 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
     // Log activity
     await prisma.activity.create({
       data: {
-        action: "deleted",
-        entityType: "comment",
+        action: 'deleted',
+        entityType: 'comment',
         entityId: commentId,
         description: `deleted a comment`,
-        userId: session.user?.id || "",
+        userId: session.user?.id || '',
         taskId,
         projectId: (await prisma.task.findUnique({ where: { id: taskId } }))?.projectId,
       },
@@ -228,10 +192,10 @@ export const DELETE: ApiRouteHandlerOneParam<'taskId'> = async (
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Error deleting task comment:", error);
+    console.error('Error deleting task comment:', error);
     return NextResponse.json(
-      { error: "Failed to delete task comment", details: error.message },
+      { error: 'Failed to delete task comment', details: error.message },
       { status: 500 }
     );
   }
-}
+};

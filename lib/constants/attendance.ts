@@ -19,8 +19,8 @@ export const WORK_DAY = {
   // Maximum allowed working hours per day (to prevent unrealistic values)
   MAX_HOURS_PER_DAY: 12,
   // Default checkout time in hours (for auto-checkout)
-  DEFAULT_CHECKOUT_HOURS: 8
-}
+  DEFAULT_CHECKOUT_HOURS: 8,
+};
 
 export const GRACE_PERIODS = {
   // Grace period for late arrivals (in minutes)
@@ -30,17 +30,17 @@ export const GRACE_PERIODS = {
   // Auto-checkout period (in hours after workday end)
   AUTO_CHECKOUT: 2,
   // Location accuracy threshold (in meters)
-  LOCATION: 100
-}
+  LOCATION: 100,
+};
 
 export const STATUS_COLORS = {
-  PRESENT: "green",
-  ABSENT: "red",
-  LATE: "amber",
-  PARTIAL: "blue",
-  WEEKEND: "slate",
-  HOLIDAY: "purple"
-}
+  PRESENT: 'green',
+  ABSENT: 'red',
+  LATE: 'amber',
+  PARTIAL: 'blue',
+  WEEKEND: 'slate',
+  HOLIDAY: 'purple',
+};
 
 // Attendance status thresholds
 
@@ -50,19 +50,19 @@ export const THRESHOLDS = {
   // Minimum hours that constitute a valid work day (as percentage of standard day)
   VALID_DAY_PERCENT: 80,
   // Minimum hours for partial day
-  PARTIAL_DAY_HOURS: 4
-}
+  PARTIAL_DAY_HOURS: 4,
+};
 
 export const DATE_FORMATS = {
   // Format for API date parameters (YYYY-MM-DD)
-  API_DATE: "yyyy-MM-dd",
+  API_DATE: 'yyyy-MM-dd',
   // Format for display date (Month D, YYYY)
-  DISPLAY_DATE: "MMM d, yyyy",
+  DISPLAY_DATE: 'MMM d, yyyy',
   // Format for displaying time (h:mm a)
-  DISPLAY_TIME: "h:mm a",
+  DISPLAY_TIME: 'h:mm a',
   // Format for database timestamps
-  DB_TIMESTAMP: "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"
-}
+  DB_TIMESTAMP: "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
+};
 
 export const DASHBOARD_DEFAULTS = {
   // Default time range for dashboard charts (in days)
@@ -72,8 +72,8 @@ export const DASHBOARD_DEFAULTS = {
   // Number of days to show in calendar view
   CALENDAR_DAYS: 31,
   // Default chart height in pixels
-  CHART_HEIGHT: 300
-}
+  CHART_HEIGHT: 300,
+};
 
 export const API_ERROR_CODES = {
   // Consistent error codes for attendance-related API responses
@@ -83,12 +83,12 @@ export const API_ERROR_CODES = {
   ALREADY_CHECKED_IN: 400,
   ALREADY_CHECKED_OUT: 400,
   MISSING_RECORD: 404,
-  SERVER_ERROR: 500
-}
+  SERVER_ERROR: 500,
+};
 
 export const ACTION_TYPES = {
   // Attendance action types for activity logging
   CHECK_IN: 'checked-in',
   CHECK_OUT: 'checked-out',
-  AUTO_CHECKOUT: 'auto-checkout'
-}
+  AUTO_CHECKOUT: 'auto-checkout',
+};

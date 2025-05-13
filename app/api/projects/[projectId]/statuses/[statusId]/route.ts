@@ -1,20 +1,17 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { ApiRouteHandlerTwoParams, getParams } from "@/lib/api-route-types";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { ApiRouteHandlerTwoParams, getParams } from '@/lib/api-route-types';
 
 // GET: Fetch a specific status
-export const GET: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
-  req,
-  { params }
-) => {
+export const GET: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Extract params safely
@@ -32,10 +29,7 @@ export const GET: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Get the status
@@ -52,32 +46,26 @@ export const GET: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!status || status.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Status not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Status not found' }, { status: 404 });
     }
 
     return NextResponse.json({ status });
   } catch (error) {
-    console.error("Error fetching project status:", error);
+    console.error('Error fetching project status:', error);
     return NextResponse.json(
-      { error: "An error occurred while fetching the project status" },
+      { error: 'An error occurred while fetching the project status' },
       { status: 500 }
     );
   }
-}
+};
 
 // PATCH: Update a status
-export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
-  req,
-  { params }
-) => {
+export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (req, { params }) => {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Extract params safely
@@ -95,14 +83,11 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Only project team members can update statuses
-    if (project.teamMembers.length === 0 && session.user.role !== "admin") {
+    if (project.teamMembers.length === 0 && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: "You don't have permission to update statuses for this project" },
         { status: 403 }
@@ -115,10 +100,7 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!existingStatus || existingStatus.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Status not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Status not found' }, { status: 404 });
     }
 
     const body = await req.json();
@@ -134,7 +116,7 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -155,7 +137,7 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
 
       if (duplicateStatus) {
         return NextResponse.json(
-          { error: "A status with this name already exists for this project" },
+          { error: 'A status with this name already exists for this project' },
           { status: 400 }
         );
       }
@@ -183,8 +165,8 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     // Create activity record
     await prisma.activity.create({
       data: {
-        action: "updated",
-        entityType: "project_status",
+        action: 'updated',
+        entityType: 'project_status',
         entityId: statusId,
         description: `Status "${updatedStatus.name}" was updated`,
         userId: session.user.id,
@@ -194,13 +176,13 @@ export const PATCH: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
 
     return NextResponse.json({ status: updatedStatus });
   } catch (error) {
-    console.error("Error updating project status:", error);
+    console.error('Error updating project status:', error);
     return NextResponse.json(
-      { error: "An error occurred while updating the project status" },
+      { error: 'An error occurred while updating the project status' },
       { status: 500 }
     );
   }
-}
+};
 
 // DELETE: Delete a status
 export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
@@ -210,7 +192,7 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Extract params safely
@@ -228,14 +210,11 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Only project team members can delete statuses
-    if (project.teamMembers.length === 0 && session.user.role !== "admin") {
+    if (project.teamMembers.length === 0 && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: "You don't have permission to delete statuses for this project" },
         { status: 403 }
@@ -253,10 +232,7 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     });
 
     if (!existingStatus || existingStatus.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Status not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Status not found' }, { status: 404 });
     }
 
     // Cannot delete the default status if it's the only status
@@ -267,7 +243,7 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
 
       if (statusCount === 1) {
         return NextResponse.json(
-          { error: "Cannot delete the only status in the project" },
+          { error: 'Cannot delete the only status in the project' },
           { status: 400 }
         );
       }
@@ -339,11 +315,11 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
     // Create activity record
     await prisma.activity.create({
       data: {
-        action: "deleted",
-        entityType: "project_status",
+        action: 'deleted',
+        entityType: 'project_status',
         entityId: statusId,
         description: `Status "${existingStatus.name}" was deleted${
-          targetStatusId ? " and tasks were moved to another status" : ""
+          targetStatusId ? ' and tasks were moved to another status' : ''
         }`,
         userId: session.user.id,
         projectId,
@@ -352,10 +328,10 @@ export const DELETE: ApiRouteHandlerTwoParams<'projectId', 'statusId'> = async (
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting project status:", error);
+    console.error('Error deleting project status:', error);
     return NextResponse.json(
-      { error: "An error occurred while deleting the project status" },
+      { error: 'An error occurred while deleting the project status' },
       { status: 500 }
     );
   }
-}
+};

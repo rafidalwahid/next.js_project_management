@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useRef } from "react"
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import { useState, useEffect, useRef } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
   Plus,
   MoreHorizontal,
@@ -10,24 +10,24 @@ import {
   Check,
   X,
   ChevronLeft,
-  ChevronRight
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Spinner } from "@/components/ui/spinner"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import { TaskCard } from "./task-card"
-import { useTaskContext } from "./task-context"
-import { Task } from "@/types/task"
-import { ProjectStatus } from "@/types/project"
+  ChevronRight,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { TaskCard } from './task-card';
+import { useTaskContext } from './task-context';
+import { Task } from '@/types/task';
+import { ProjectStatus } from '@/types/project';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,9 +37,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { CreateStatusDialogNew } from "@/components/project/create-status-dialog"
-import { QuickTaskDialogNew } from "@/components/project/quick-task-dialog"
+} from '@/components/ui/alert-dialog';
+import { CreateStatusDialogNew } from '@/components/project/create-status-dialog';
+import { QuickTaskDialogNew } from '@/components/project/quick-task-dialog';
 
 interface KanbanBoardProps {
   projectId: string;
@@ -55,14 +55,14 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
     toggleTaskCompletion,
     deleteTask,
     updateTaskAssignees,
-    moveTask
+    moveTask,
   } = useTaskContext();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftScroll, setShowLeftScroll] = useState(false);
   const [showRightScroll, setShowRightScroll] = useState(false);
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
-  const [editingStatusName, setEditingStatusName] = useState<string>("");
+  const [editingStatusName, setEditingStatusName] = useState<string>('');
   const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null);
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
@@ -113,9 +113,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
 
   // Group tasks by status
   const getTasksByStatus = (statusId: string) => {
-    return tasks
-      .filter(task => task.statusId === statusId)
-      .sort((a, b) => a.order - b.order);
+    return tasks.filter(task => task.statusId === statusId).sort((a, b) => a.order - b.order);
   };
 
   // Handle task drag and drop
@@ -126,10 +124,8 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
     if (!destination) return;
 
     // Dropped in the same position
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index)
+      return;
 
     // Get the task that was dragged
     const taskId = draggableId;
@@ -166,12 +162,12 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
         targetTaskId = tasksWithoutDragged[destination.index].id;
       }
 
-      console.log("Reordering within same column:", {
+      console.log('Reordering within same column:', {
         taskId,
         statusId: source.droppableId,
         sourceIndex: source.index,
         destinationIndex: destination.index,
-        targetTaskId
+        targetTaskId,
       });
 
       // Move the task (same status, just reordering)
@@ -191,13 +187,13 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
 
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses/${editingStatusId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editingStatusName }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update status");
+        throw new Error('Failed to update status');
       }
 
       // Refresh tasks to get updated status
@@ -205,16 +201,16 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
 
       // Reset editing state
       setEditingStatusId(null);
-      setEditingStatusName("");
+      setEditingStatusName('');
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error('Error updating status:', error);
     }
   };
 
   // Cancel editing
   const handleCancelEdit = () => {
     setEditingStatusId(null);
-    setEditingStatusName("");
+    setEditingStatusName('');
   };
 
   // Delete status
@@ -231,17 +227,17 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
       }
 
       const response = await fetch(`/api/projects/${projectId}/statuses/${deleteStatusId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete status");
+        throw new Error('Failed to delete status');
       }
 
       // Refresh tasks to get updated statuses
       await refreshTasks();
     } catch (error) {
-      console.error("Error deleting status:", error);
+      console.error('Error deleting status:', error);
     } finally {
       setDeleteStatusId(null);
     }
@@ -273,9 +269,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
           <p className="text-muted-foreground text-center mb-4">
             No statuses defined for this project. Create statuses to start organizing tasks.
           </p>
-          <CreateStatusDialogNew
-            projectId={projectId}
-          />
+          <CreateStatusDialogNew projectId={projectId} />
         </CardContent>
       </Card>
     );
@@ -326,137 +320,139 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
             className="flex overflow-x-auto pb-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6 h-full pr-2 sm:pr-4 pl-1 -ml-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent touch-pan-x no-scrollbar"
             aria-label="Kanban board columns"
           >
-            {statuses.sort((a, b) => a.order - b.order).map((status) => (
-              <Droppable key={status.id} droppableId={status.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md",
-                      snapshot.isDraggingOver && "ring-2 ring-primary ring-opacity-50"
-                    )}
-                  >
+            {statuses
+              .sort((a, b) => a.order - b.order)
+              .map(status => (
+                <Droppable key={status.id} droppableId={status.id}>
+                  {(provided, snapshot) => (
                     <div
-                      className="flex items-center justify-between p-3 rounded-t-md"
-                      style={{ backgroundColor: status.color + "20" }}
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        'shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md',
+                        snapshot.isDraggingOver && 'ring-2 ring-primary ring-opacity-50'
+                      )}
                     >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div
-                          className="w-3 h-3 rounded-full shrink-0"
-                          style={{ backgroundColor: status.color }}
-                        />
+                      <div
+                        className="flex items-center justify-between p-3 rounded-t-md"
+                        style={{ backgroundColor: status.color + '20' }}
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div
+                            className="w-3 h-3 rounded-full shrink-0"
+                            style={{ backgroundColor: status.color }}
+                          />
 
-                        {editingStatusId === status.id ? (
-                          <div className="flex items-center gap-1">
-                            <Input
-                              ref={statusInputRef}
-                              value={editingStatusName}
-                              onChange={(e) => setEditingStatusName(e.target.value)}
-                              className="h-7 w-[120px] py-1 px-2 text-sm"
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  handleSaveStatusName();
-                                } else if (e.key === "Escape") {
-                                  handleCancelEdit();
-                                }
-                              }}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={handleSaveStatusName}
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={handleCancelEdit}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <h3 className="font-medium truncate">{status.name}</h3>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditStatus(status)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => setDeleteStatusId(status.id)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <QuickTaskDialogNew
-                          projectId={projectId}
-                          statusId={status.id}
-                          statusName={status.name}
-                          onTaskCreated={refreshTasks}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex-1 min-h-0 bg-muted/20 rounded-b-md p-2 overflow-y-auto">
-                      <div className="space-y-2">
-                        {getTasksByStatus(status.id).map((task, index) => (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="touch-manipulation"
+                          {editingStatusId === status.id ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                ref={statusInputRef}
+                                value={editingStatusName}
+                                onChange={e => setEditingStatusName(e.target.value)}
+                                className="h-7 w-[120px] py-1 px-2 text-sm"
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveStatusName();
+                                  } else if (e.key === 'Escape') {
+                                    handleCancelEdit();
+                                  }
+                                }}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={handleSaveStatusName}
                               >
-                                <TaskCard
-                                  task={task}
-                                  isDragging={snapshot.isDragging}
-                                  onToggleComplete={toggleTaskCompletion}
-                                  onEdit={onEditTask}
-                                  onDelete={(taskId) => setDeleteTaskId(taskId)}
-                                  onUpdateAssignees={updateTaskAssignees}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
+                                <Check className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={handleCancelEdit}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <h3 className="font-medium truncate">{status.name}</h3>
+                          )}
+                        </div>
 
-                        {getTasksByStatus(status.id).length === 0 && (
-                          <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-muted-foreground/20 rounded-md p-4">
-                            <p className="text-sm text-muted-foreground text-center">
-                              No tasks in this status
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1 text-center">
-                              Drag tasks here or use the + button to add a new task
-                            </p>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditStatus(status)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => setDeleteStatusId(status.id)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+
+                          <QuickTaskDialogNew
+                            projectId={projectId}
+                            statusId={status.id}
+                            statusName={status.name}
+                            onTaskCreated={refreshTasks}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-h-0 bg-muted/20 rounded-b-md p-2 overflow-y-auto">
+                        <div className="space-y-2">
+                          {getTasksByStatus(status.id).map((task, index) => (
+                            <Draggable key={task.id} draggableId={task.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="touch-manipulation"
+                                >
+                                  <TaskCard
+                                    task={task}
+                                    isDragging={snapshot.isDragging}
+                                    onToggleComplete={toggleTaskCompletion}
+                                    onEdit={onEditTask}
+                                    onDelete={taskId => setDeleteTaskId(taskId)}
+                                    onUpdateAssignees={updateTaskAssignees}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+
+                          {getTasksByStatus(status.id).length === 0 && (
+                            <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-muted-foreground/20 rounded-md p-4">
+                              <p className="text-sm text-muted-foreground text-center">
+                                No tasks in this status
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1 text-center">
+                                Drag tasks here or use the + button to add a new task
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </Droppable>
-            ))}
+                  )}
+                </Droppable>
+              ))}
           </div>
         </div>
       </DragDropContext>
@@ -498,9 +494,7 @@ export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTask}>
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteTask}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

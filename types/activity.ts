@@ -1,6 +1,6 @@
 /**
  * Activity and Event Types
- * 
+ *
  * This file contains all type definitions related to activities and events in the application.
  * Following Next.js 15 documentation standards for type definitions.
  */

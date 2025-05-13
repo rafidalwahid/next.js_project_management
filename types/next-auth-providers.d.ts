@@ -5,7 +5,7 @@
 export interface OAuthConfig<P> {
   id: string;
   name: string;
-  type: "oauth";
+  type: 'oauth';
   authorization: string | { params: Record<string, string> };
   token?: string;
   userinfo?: {

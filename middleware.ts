@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
-import { EdgePermissionService } from '@/lib/permissions/edge-permission-service'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { EdgePermissionService } from '@/lib/permissions/edge-permission-service';
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
@@ -18,57 +18,59 @@ const PUBLIC_PATHS = [
   '/fonts',
   '/api/trpc', // Allow access to tRPC if used
   '/api/health', // Allow health checks
-  '/api/webhooks' // Allow webhooks
-]
+  '/api/webhooks', // Allow webhooks
+];
 
 // Permission-protected paths mapping
 const PROTECTED_PATHS = {
   // Admin-only paths
-  '/team/permissions': "manage_permissions", // Changed from manage_roles to manage_permissions
-  '/team/roles': "manage_roles",
-  '/api/roles': "manage_roles",
-  '/api/permissions': "manage_permissions", // Changed from manage_roles to manage_permissions
+  '/team/permissions': 'manage_permissions', // Changed from manage_roles to manage_permissions
+  '/team/roles': 'manage_roles',
+  '/api/roles': 'manage_roles',
+  '/api/permissions': 'manage_permissions', // Changed from manage_roles to manage_permissions
 
   // User management paths
-  '/team/new': "team_add", // Changed from user_management to team_add
-  '/api/users': "user_management",
+  '/team/new': 'team_add', // Changed from user_management to team_add
+  '/api/users': 'user_management',
 
   // Project management paths
-  '/projects/new': "project_creation",
+  '/projects/new': 'project_creation',
 
   // Attendance management paths
-  '/attendance/admin': "attendance_management",
-  '/api/attendance/admin': "attendance_management",
-  '/api/attendance/admin/records': "attendance_management",
-  '/api/attendance/admin/correction-requests': "attendance_management",
+  '/attendance/admin': 'attendance_management',
+  '/api/attendance/admin': 'attendance_management',
+  '/api/attendance/admin/records': 'attendance_management',
+  '/api/attendance/admin/correction-requests': 'attendance_management',
 
   // System settings paths
-  '/settings': "system_settings",
-  '/api/settings': "system_settings",
-}
+  '/settings': 'system_settings',
+  '/api/settings': 'system_settings',
+};
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  const { pathname } = request.nextUrl;
 
   // Check if the path is public
-  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path));
   if (isPublicPath) {
-    return NextResponse.next()
+    return NextResponse.next();
   }
 
   // Check if the user is authenticated
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET
-  })
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
   // If not authenticated, redirect to login
   if (!token) {
-    return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(pathname)}`, request.url))
+    return NextResponse.redirect(
+      new URL(`/login?callbackUrl=${encodeURIComponent(pathname)}`, request.url)
+    );
   }
 
   // Permission-based access control for specific paths
-  const userId = token.sub as string
+  const userId = token.sub as string;
 
   // Check if the path is protected by a specific permission
   for (const [protectedPath, requiredPermission] of Object.entries(PROTECTED_PATHS)) {
@@ -76,9 +78,9 @@ export async function middleware(request: NextRequest) {
       // Special case for user-specific API routes
       if (protectedPath === '/api/users') {
         // Allow users to access their own data
-        const userIdInPath = pathname.match(/\/api\/users\/([^\/]+)/)?.[1]
+        const userIdInPath = pathname.match(/\/api\/users\/([^\/]+)/)?.[1];
         if (userIdInPath && userIdInPath === userId) {
-          return NextResponse.next()
+          return NextResponse.next();
         }
       }
 
@@ -91,17 +93,17 @@ export async function middleware(request: NextRequest) {
           return NextResponse.json(
             { error: 'Forbidden: Insufficient permissions' },
             { status: 403 }
-          )
+          );
         }
 
         // For UI routes, redirect to dashboard
-        return NextResponse.redirect(new URL('/dashboard', request.url))
+        return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }
   }
 
   // If we get here, the user is authenticated and has the required permissions
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 // See "Matching Paths" below to learn more
@@ -117,4 +119,4 @@ export const config = {
      */
     '/((?!api/auth|_next/static|_next/image|favicon.ico|images|fonts).*)',
   ],
-}
+};

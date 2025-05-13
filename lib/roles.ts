@@ -31,7 +31,7 @@ export const SYSTEM_ROLES = {
     name: 'Guest',
     description: 'Minimal access for temporary users',
     color: 'bg-gray-500',
-  }
+  },
 };
 
 // Get display name for a role
@@ -48,9 +48,9 @@ export function getAvailableRoles(includeGuest: boolean = false): SystemRole[] {
 }
 
 // Get role options for select components
-export function getRoleOptions(includeGuest: boolean = false): { value: string, label: string }[] {
+export function getRoleOptions(includeGuest: boolean = false): { value: string; label: string }[] {
   return getAvailableRoles(includeGuest).map(role => ({
     value: role,
-    label: SYSTEM_ROLES[role].name
+    label: SYSTEM_ROLES[role].name,
   }));
 }

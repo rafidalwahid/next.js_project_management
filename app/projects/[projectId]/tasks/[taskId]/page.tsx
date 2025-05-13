@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Calendar,
@@ -14,196 +14,198 @@ import {
   MessageSquare,
   Paperclip,
   Users,
-  Plus
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Spinner } from "@/components/ui/spinner"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TaskForm } from "@/components/project/task-form"
-import { TimeTracker } from "@/components/project/time-tracker"
-import { format } from "date-fns"
-import { safeFormat } from "@/lib/utils/date-utils"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Breadcrumbs } from "@/components/breadcrumbs"
-import { Task, TaskAssignee, TaskWithRelations } from "@/types/task"
+  Plus,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TaskForm } from '@/components/project/task-form';
+import { TimeTracker } from '@/components/project/time-tracker';
+import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date-utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { Task, TaskAssignee, TaskWithRelations } from '@/types/task';
 
 export default function TaskDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const projectId = params.projectId as string
-  const taskId = params.taskId as string
-  const [task, setTask] = useState<TaskWithRelations | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const { toast } = useToast()
+  const params = useParams();
+  const router = useRouter();
+  const projectId = params.projectId as string;
+  const taskId = params.taskId as string;
+  const [task, setTask] = useState<TaskWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   // Fetch task data
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        setIsLoading(true)
-        const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`)
+        setIsLoading(true);
+        const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch task")
+          throw new Error('Failed to fetch task');
         }
 
-        const data = await response.json()
-        setTask(data.task)
+        const data = await response.json();
+        setTask(data.task);
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to fetch task details",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch task details',
+          variant: 'destructive',
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (taskId) {
-      fetchTask()
+      fetchTask();
     }
-  }, [taskId])
+  }, [taskId]);
 
   const handleEditTask = () => {
-    setIsEditDialogOpen(true)
-  }
+    setIsEditDialogOpen(true);
+  };
 
   const handleEditDialogClose = () => {
-    setIsEditDialogOpen(false)
+    setIsEditDialogOpen(false);
     // Refresh task data
-    fetchTask()
-  }
+    fetchTask();
+  };
 
   const handleDeleteTask = async () => {
-    if (!confirm("Are you sure you want to delete this task? This action cannot be undone.")) {
-      return
+    if (!confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+      return;
     }
 
     try {
-      setIsDeleting(true)
+      setIsDeleting(true);
 
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "DELETE",
-      })
+        method: 'DELETE',
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete task")
+        throw new Error('Failed to delete task');
       }
 
       toast({
-        title: "Task deleted",
-        description: "The task has been deleted successfully",
-      })
+        title: 'Task deleted',
+        description: 'The task has been deleted successfully',
+      });
 
       // Navigate back to the project page
-      router.push(`/projects/${projectId}`)
+      router.push(`/projects/${projectId}`);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleToggleCompletion = async () => {
     try {
       // Optimistically update the UI
-      setTask(prev => prev ? { ...prev, completed: !prev.completed } : null)
+      setTask(prev => (prev ? { ...prev, completed: !prev.completed } : null));
 
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           completed: task ? !task.completed : false,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update task")
+        throw new Error('Failed to update task');
       }
 
       // Refresh task data
-      fetchTask()
+      fetchTask();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update task completion status",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to update task completion status',
+        variant: 'destructive',
+      });
       // Revert the optimistic update
-      fetchTask()
+      fetchTask();
     }
-  }
+  };
 
   const handleTimeUpdate = (newTime: number) => {
     // Update the task's time spent in the UI
-    setTask(prev => prev ? { ...prev, timeSpent: newTime } : null)
-  }
+    setTask(prev => (prev ? { ...prev, timeSpent: newTime } : null));
+  };
 
   // Fetch task data (defined here to be used in multiple places)
   const fetchTask = async () => {
     try {
-      const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`)
+      const response = await fetch(`/api/tasks/${taskId}?includeSubtasks=true`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch task")
+        throw new Error('Failed to fetch task');
       }
 
-      const data = await response.json()
-      setTask(data.task)
+      const data = await response.json();
+      setTask(data.task);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch task details",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to fetch task details',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Format date for display
   const formatDate = (dateString?: string | Date | null) => {
-    return safeFormat(dateString, "MMM d, yyyy", "Not set")
-  }
+    return safeFormat(dateString, 'MMM d, yyyy', 'Not set');
+  };
 
   // Get priority badge color
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
-      case "high":
-        return "bg-red-100 text-red-800"
-      case "medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "low":
-        return "bg-blue-100 text-blue-800"
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-blue-100 text-blue-800';
       default:
-        return "bg-gray-100 text-gray-800"
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   if (!task) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold">Task not found</h2>
-        <p className="text-muted-foreground mt-2">The task you're looking for doesn't exist or you don't have access to it.</p>
+        <p className="text-muted-foreground mt-2">
+          The task you're looking for doesn't exist or you don't have access to it.
+        </p>
         <Button asChild className="mt-4">
           <Link href={`/projects/${projectId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -211,7 +213,7 @@ export default function TaskDetailPage() {
           </Link>
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -254,7 +256,9 @@ export default function TaskDetailPage() {
               </Button>
             </div>
             <div>
-              <h1 className={`text-3xl font-bold tracking-tight ${task.completed ? "line-through text-muted-foreground" : ""}`}>
+              <h1
+                className={`text-3xl font-bold tracking-tight ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+              >
                 {task.title}
               </h1>
 
@@ -264,7 +268,7 @@ export default function TaskDetailPage() {
                     className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
                     style={{
                       backgroundColor: `${task.status.color}20`,
-                      color: task.status.color
+                      color: task.status.color,
                     }}
                   >
                     <div
@@ -294,8 +298,17 @@ export default function TaskDetailPage() {
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Button>
-            <Button size="sm" variant="destructive" onClick={handleDeleteTask} disabled={isDeleting}>
-              {isDeleting ? <Spinner className="mr-2 h-4 w-4" /> : <Trash className="mr-2 h-4 w-4" />}
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleDeleteTask}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Spinner className="mr-2 h-4 w-4" />
+              ) : (
+                <Trash className="mr-2 h-4 w-4" />
+              )}
               Delete
             </Button>
           </div>
@@ -304,7 +317,7 @@ export default function TaskDetailPage() {
         <div className="flex items-center gap-1">
           {task.assignees && task.assignees.length > 0 ? (
             <div className="flex -space-x-2">
-              {task.assignees.map((assignee) => (
+              {task.assignees.map(assignee => (
                 <Avatar key={assignee.id} className="border border-black">
                   <AvatarImage src={assignee.user.image || undefined} />
                   <AvatarFallback>
@@ -330,9 +343,7 @@ export default function TaskDetailPage() {
             </CardHeader>
             <CardContent>
               {task.description ? (
-                <div className="prose max-w-none">
-                  {task.description}
-                </div>
+                <div className="prose max-w-none">{task.description}</div>
               ) : (
                 <p className="text-muted-foreground">No description provided.</p>
               )}
@@ -358,7 +369,7 @@ export default function TaskDetailPage() {
                 <CardContent>
                   {task.subtasks && task.subtasks.length > 0 ? (
                     <div className="space-y-2">
-                      {task.subtasks.map((subtask) => (
+                      {task.subtasks.map(subtask => (
                         <div
                           key={subtask.id}
                           className="flex items-center justify-between p-3 border rounded-md"
@@ -374,7 +385,7 @@ export default function TaskDetailPage() {
                             <div>
                               <Link
                                 href={`/projects/${projectId}/tasks/${subtask.id}`}
-                                className={`font-medium hover:underline ${subtask.completed ? "line-through text-muted-foreground" : ""}`}
+                                className={`font-medium hover:underline ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
                               >
                                 {subtask.title}
                               </Link>
@@ -407,7 +418,9 @@ export default function TaskDetailPage() {
                   <div className="flex items-center justify-center py-8">
                     <div className="text-center">
                       <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                      <p className="mt-2 text-muted-foreground">Comments will be implemented in a future update.</p>
+                      <p className="mt-2 text-muted-foreground">
+                        Comments will be implemented in a future update.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -423,7 +436,9 @@ export default function TaskDetailPage() {
                   <div className="flex items-center justify-center py-8">
                     <div className="text-center">
                       <Paperclip className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                      <p className="mt-2 text-muted-foreground">Attachments will be implemented in a future update.</p>
+                      <p className="mt-2 text-muted-foreground">
+                        Attachments will be implemented in a future update.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -506,14 +521,15 @@ export default function TaskDetailPage() {
                       <span className="font-medium">Spent:</span> {task.timeSpent || 0} hours
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="font-medium">Estimated:</span> {task.estimatedTime || 0} hours
+                      <span className="font-medium">Estimated:</span> {task.estimatedTime || 0}{' '}
+                      hours
                     </div>
                     {task.estimatedTime && task.estimatedTime > 0 && (
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary"
                           style={{
-                            width: `${Math.min(100, ((task.timeSpent || 0) / task.estimatedTime) * 100)}%`
+                            width: `${Math.min(100, ((task.timeSpent || 0) / task.estimatedTime) * 100)}%`,
                           }}
                         />
                       </div>
@@ -542,7 +558,10 @@ export default function TaskDetailPage() {
 
       {/* Edit Task Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6" style={{ zIndex: 100 }}>
+        <DialogContent
+          className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6"
+          style={{ zIndex: 100 }}
+        >
           <DialogHeader className="mb-4">
             <DialogTitle>Edit Task</DialogTitle>
           </DialogHeader>
@@ -555,5 +574,5 @@ export default function TaskDetailPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -1,19 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { calculateTotalHours } from "@/lib/utils/date";
-import { WORK_DAY } from "@/lib/constants/attendance";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { calculateTotalHours } from '@/lib/utils/date';
+import { WORK_DAY } from '@/lib/constants/attendance';
 
 export async function GET(req: NextRequest) {
   try {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get the current date (start of day and end of day)
@@ -39,16 +36,16 @@ export async function GET(req: NextRequest) {
             id: true,
             title: true,
             description: true,
-          }
+          },
         },
         task: {
           select: {
             id: true,
             title: true,
             description: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     // If no attendance records found for today
@@ -67,25 +64,25 @@ export async function GET(req: NextRequest) {
               id: true,
               title: true,
               description: true,
-            }
+            },
           },
           task: {
             select: {
               id: true,
               title: true,
               description: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return NextResponse.json({
-        message: "No attendance record found for today",
+        message: 'No attendance record found for today',
         attendance: lastAttendance,
         todayAttendances: [],
         currentAttendance: null,
         totalHoursToday: 0,
-        hasActiveSession: false
+        hasActiveSession: false,
       });
     }
 
@@ -104,11 +101,9 @@ export async function GET(req: NextRequest) {
       } else {
         // For active session, calculate elapsed time
         hasActiveSession = true;
-        const elapsedHours = calculateTotalHours(
-          new Date(record.checkInTime),
-          now,
-          { maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY }
-        );
+        const elapsedHours = calculateTotalHours(new Date(record.checkInTime), now, {
+          maxHoursPerDay: WORK_DAY.MAX_HOURS_PER_DAY,
+        });
         totalHoursToday += elapsedHours;
       }
     });
@@ -117,17 +112,17 @@ export async function GET(req: NextRequest) {
     totalHoursToday = Math.round(totalHoursToday * 100) / 100;
 
     return NextResponse.json({
-      message: "Attendance records retrieved",
+      message: 'Attendance records retrieved',
       attendance: currentAttendance, // For backward compatibility
       currentAttendance,
       todayAttendances,
       totalHoursToday,
-      hasActiveSession
+      hasActiveSession,
     });
   } catch (error) {
-    console.error("Get current attendance error:", error);
+    console.error('Get current attendance error:', error);
     return NextResponse.json(
-      { error: "Failed to retrieve attendance information" },
+      { error: 'Failed to retrieve attendance information' },
       { status: 500 }
     );
   }

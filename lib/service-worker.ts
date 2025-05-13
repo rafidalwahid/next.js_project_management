@@ -26,9 +26,7 @@ export const isServiceWorkerSupported = (): boolean =>
   typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
 
 export const isBackgroundSyncSupported = (): boolean =>
-  typeof navigator !== 'undefined' &&
-  'serviceWorker' in navigator &&
-  'SyncManager' in window;
+  typeof navigator !== 'undefined' && 'serviceWorker' in navigator && 'SyncManager' in window;
 
 // Register the service worker with retry mechanism
 export async function registerServiceWorker(maxRetries = 3) {
@@ -44,7 +42,7 @@ export async function registerServiceWorker(maxRetries = 3) {
       // Use absolute URL to avoid redirect issues
       const swUrl = `${window.location.origin}/sw.js`;
       const registration = await navigator.serviceWorker.register(swUrl, {
-        scope: '/'
+        scope: '/',
       });
       console.log('Service Worker registered with scope:', registration.scope);
 
@@ -55,7 +53,10 @@ export async function registerServiceWorker(maxRetries = 3) {
       return true;
     } catch (error) {
       retries++;
-      console.error(`Service Worker registration failed (attempt ${retries}/${maxRetries}):`, error);
+      console.error(
+        `Service Worker registration failed (attempt ${retries}/${maxRetries}):`,
+        error
+      );
 
       if (retries >= maxRetries) {
         console.error('Max retries reached for Service Worker registration');
@@ -101,7 +102,7 @@ export async function registerBackgroundSync(): Promise<boolean> {
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready as ExtendedServiceWorkerRegistration;
+    const registration = (await navigator.serviceWorker.ready) as ExtendedServiceWorkerRegistration;
 
     // Register attendance sync
     if ('sync' in registration) {
@@ -130,7 +131,7 @@ export async function registerAutoCheckoutSync(): Promise<boolean> {
   }
 
   try {
-    const registration = await navigator.serviceWorker.ready as ExtendedServiceWorkerRegistration;
+    const registration = (await navigator.serviceWorker.ready) as ExtendedServiceWorkerRegistration;
     if ('sync' in registration) {
       await registration.sync.register('auto-checkout-sync');
       console.log('Auto-checkout sync registered!');
@@ -154,14 +155,15 @@ export function listenForServiceWorkerMessages(
   }
 
   const messageHandler = (event: MessageEvent) => {
-    if (event.data && (
-      event.data.type === 'SYNC_SUCCESS' ||
-      event.data.type === 'SYNC_COMPLETED' ||
-      event.data.type === 'AUTO_CHECKOUT_COMPLETED' ||
-      event.data.type === 'SYNC_FAILURE' ||
-      event.data.type === 'SYNC_PERMANENT_FAILURE' ||
-      event.data.type === 'SYNC_REDUNDANT'
-    )) {
+    if (
+      event.data &&
+      (event.data.type === 'SYNC_SUCCESS' ||
+        event.data.type === 'SYNC_COMPLETED' ||
+        event.data.type === 'AUTO_CHECKOUT_COMPLETED' ||
+        event.data.type === 'SYNC_FAILURE' ||
+        event.data.type === 'SYNC_PERMANENT_FAILURE' ||
+        event.data.type === 'SYNC_REDUNDANT')
+    ) {
       callback(event.data as ServiceWorkerMessage);
     }
   };

@@ -1,130 +1,134 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Spinner } from "@/components/ui/spinner"
-import { AlertCircle, Plus } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useToast } from "@/hooks/use-toast"
-import { HexColorPicker } from "react-colorful"
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Spinner } from '@/components/ui/spinner';
+import { AlertCircle, Plus } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { HexColorPicker } from 'react-colorful';
 
 interface CreateStatusModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onStatusCreated: (status: any) => void
-  projectId: string // Add projectId prop
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onStatusCreated: (status: any) => void;
+  projectId: string; // Add projectId prop
 }
 
 export function CreateStatusModal({
   open,
   onOpenChange,
   onStatusCreated,
-  projectId
+  projectId,
 }: CreateStatusModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    color: "#22c55e", // Default green color
-    description: "",
+    name: '',
+    color: '#22c55e', // Default green color
+    description: '',
     isDefault: false,
-    projectId: projectId // Include projectId in form data
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+    projectId: projectId, // Include projectId in form data
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target
-    setFormData(prev => ({ ...prev, [name]: checked }))
-  }
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
 
   const handleColorChange = (color: string) => {
-    setFormData(prev => ({ ...prev, color }))
-  }
+    setFormData(prev => ({ ...prev, color }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("Status name is required")
-      return
+      setError('Status name is required');
+      return;
     }
 
-    setIsSubmitting(true)
-    setError(null)
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        console.error("Status creation error:", data)
-        throw new Error(data.error || "Failed to create status")
+        console.error('Status creation error:', data);
+        throw new Error(data.error || 'Failed to create status');
       }
 
-      console.log("Status creation response:", data)
+      console.log('Status creation response:', data);
 
       toast({
-        title: "Status created",
+        title: 'Status created',
         description: `Status "${formData.name}" has been created successfully`,
-      })
+      });
 
       // Make sure we're passing the correct data structure
       if (data.status) {
-        onStatusCreated(data.status)
+        onStatusCreated(data.status);
       } else {
-        console.warn("Status created but unexpected response format:", data)
+        console.warn('Status created but unexpected response format:', data);
         // Try to use the data directly if it has an id
-        onStatusCreated(data.id ? data : {
-          id: "temp-" + Date.now(),
-          name: formData.name,
-          color: formData.color,
-          description: formData.description,
-          isDefault: formData.isDefault
-        })
+        onStatusCreated(
+          data.id
+            ? data
+            : {
+                id: 'temp-' + Date.now(),
+                name: formData.name,
+                color: formData.color,
+                description: formData.description,
+                isDefault: formData.isDefault,
+              }
+        );
       }
 
-      onOpenChange(false)
+      onOpenChange(false);
 
       // Reset form
       setFormData({
-        name: "",
-        color: "#22c55e",
-        description: "",
+        name: '',
+        color: '#22c55e',
+        description: '',
         isDefault: false,
-        projectId: projectId
-      })
+        projectId: projectId,
+      });
     } catch (err: any) {
-      console.error("Error creating status:", err)
-      const errorMessage = err.message || "Failed to create status. Please try again."
-      console.log("Setting error message:", errorMessage)
-      setError(errorMessage)
+      console.error('Error creating status:', err);
+      const errorMessage = err.message || 'Failed to create status. Please try again.';
+      console.log('Setting error message:', errorMessage);
+      setError(errorMessage);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,9 +136,7 @@ export function CreateStatusModal({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Status</DialogTitle>
-            <DialogDescription>
-              Add a new project status to the system
-            </DialogDescription>
+            <DialogDescription>Add a new project status to the system</DialogDescription>
           </DialogHeader>
 
           {error && (
@@ -205,7 +207,12 @@ export function CreateStatusModal({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -225,5 +232,5 @@ export function CreateStatusModal({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

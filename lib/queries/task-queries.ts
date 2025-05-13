@@ -72,50 +72,50 @@ export function getTaskIncludeObject(
   // Base include object
   const includeObj: TaskIncludeWithSubtasks = {
     project: {
-      select: projectSelectFields
+      select: projectSelectFields,
     },
     // Use assignees as the primary way to get task assignees
     assignees: {
       include: {
         user: {
-          select: userSelectFields
-        }
-      }
+          select: userSelectFields,
+        },
+      },
     },
     parent: {
       select: {
         id: true,
         title: true,
-      }
+      },
     },
     // Include comments and attachments
     comments: {
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       include: {
         user: {
-          select: userSelectFields
-        }
-      }
+          select: userSelectFields,
+        },
+      },
     },
     attachments: {
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       include: {
         user: {
-          select: userSelectFields
-        }
-      }
-    }
+          select: userSelectFields,
+        },
+      },
+    },
   };
 
   // Add activities if requested
   if (includeActivities) {
     includeObj.activities = {
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       take: activitiesLimit,
       include: {
@@ -123,67 +123,58 @@ export function getTaskIncludeObject(
           select: {
             id: true,
             name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
   // Add subtasks based on requested depth
   if (depth >= 1) {
     includeObj.subtasks = {
-      orderBy: [
-        { order: 'asc' },
-        { createdAt: 'asc' }
-      ],
+      orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       include: {
         assignees: {
           include: {
             user: {
-              select: userMinimalSelectFields
-            }
-          }
+              select: userMinimalSelectFields,
+            },
+          },
         },
-        status: { select: { name: true, color: true }}
-      }
+        status: { select: { name: true, color: true } },
+      },
     };
 
     // Add second level of subtasks
     if (depth >= 2 && includeObj.subtasks?.include) {
       includeObj.subtasks.include.subtasks = {
-        orderBy: [
-          { order: 'asc' },
-          { createdAt: 'asc' }
-        ],
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         include: {
           assignees: {
             include: {
               user: {
-                select: userMinimalSelectFields
-              }
-            }
+                select: userMinimalSelectFields,
+              },
+            },
           },
-          status: { select: { name: true, color: true }}
-        }
+          status: { select: { name: true, color: true } },
+        },
       };
 
       // Add third level of subtasks
       if (depth >= 3 && includeObj.subtasks.include.subtasks?.include) {
         includeObj.subtasks.include.subtasks.include.subtasks = {
-          orderBy: [
-            { order: 'asc' },
-            { createdAt: 'asc' }
-          ],
+          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
           include: {
             assignees: {
               include: {
                 user: {
-                  select: userMinimalSelectFields
-                }
-              }
+                  select: userMinimalSelectFields,
+                },
+              },
             },
-            status: { select: { name: true, color: true }}
-          }
+            status: { select: { name: true, color: true } },
+          },
         };
       }
     }
@@ -201,25 +192,25 @@ export function getTaskListIncludeObject(): Prisma.TaskInclude {
     status: {
       select: {
         name: true,
-        color: true
-      }
+        color: true,
+      },
     },
     project: {
-      select: projectMinimalSelectFields
+      select: projectMinimalSelectFields,
     },
     // Use assignees as the primary way to get task assignees
     assignees: {
       include: {
         user: {
-          select: userMinimalSelectFields
-        }
-      }
+          select: userMinimalSelectFields,
+        },
+      },
     },
     subtasks: {
       select: {
         id: true,
-      }
-    }
+      },
+    },
   };
   // Note: Fields like dueDate, priority, etc. are automatically included from the Task model
   // and don't need to be explicitly specified in the include object
@@ -229,10 +220,10 @@ export function getTaskListIncludeObject(): Prisma.TaskInclude {
  * Standard order by for task queries
  */
 export const taskOrderBy: Prisma.TaskOrderByWithRelationInput[] = [
-  { priority: "desc" },
-  { order: "asc" },
-  { dueDate: "asc" },
-  { updatedAt: "desc" }
+  { priority: 'desc' },
+  { order: 'asc' },
+  { dueDate: 'asc' },
+  { updatedAt: 'desc' },
 ];
 
 /**

@@ -1,7 +1,7 @@
 import prisma from '../prisma';
 import { Prisma, User } from '@prisma/client';
 import { hash } from 'bcrypt';
-import { getTaskListIncludeObject } from "./task-queries"; // Assuming this is correctly imported
+import { getTaskListIncludeObject } from './task-queries'; // Assuming this is correctly imported
 import { CreateUserDTO, UpdateUserDTO } from '@/types/user';
 
 // Re-export types from types/user.ts for backward compatibility
@@ -9,16 +9,18 @@ export type UserCreateInput = CreateUserDTO;
 export type UserUpdateInput = UpdateUserDTO;
 
 // Get all users with optional filters and pagination
-export async function getUsers(args: {
-  skip?: number;
-  take?: number;
-  orderBy?: Prisma.UserOrderByWithRelationInput;
-  where?: Prisma.UserWhereInput;
-  includeProjects?: boolean;
-  includeTasks?: boolean;
-  includeTeams?: boolean;
-  includeCounts?: boolean; // New option to include role counts
-} = {}) {
+export async function getUsers(
+  args: {
+    skip?: number;
+    take?: number;
+    orderBy?: Prisma.UserOrderByWithRelationInput;
+    where?: Prisma.UserWhereInput;
+    includeProjects?: boolean;
+    includeTasks?: boolean;
+    includeTeams?: boolean;
+    includeCounts?: boolean; // New option to include role counts
+  } = {}
+) {
   const {
     skip = 0,
     take = 50,
@@ -27,7 +29,7 @@ export async function getUsers(args: {
     includeProjects = false,
     includeTasks = false,
     includeTeams = false,
-    includeCounts = false
+    includeCounts = false,
   } = args;
 
   const select: Prisma.UserSelect = {
@@ -55,10 +57,10 @@ export async function getUsers(args: {
             description: true,
             startDate: true,
             endDate: true,
-          }
-        }
+          },
+        },
       },
-      take: 5
+      take: 5,
     };
   }
 
@@ -77,12 +79,12 @@ export async function getUsers(args: {
               select: {
                 id: true,
                 title: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
-      take: 5
+      take: 5,
     };
   }
 
@@ -95,11 +97,11 @@ export async function getUsers(args: {
           select: {
             id: true,
             title: true,
-          }
+          },
         },
         createdAt: true,
       },
-      take: 5
+      take: 5,
     };
   }
 
@@ -120,15 +122,15 @@ export async function getUsers(args: {
   if (includeCounts) {
     // Count users by role
     const adminCount = await prisma.user.count({
-      where: { ...where, role: 'admin' }
+      where: { ...where, role: 'admin' },
     });
 
     const managerCount = await prisma.user.count({
-      where: { ...where, role: 'manager' }
+      where: { ...where, role: 'manager' },
     });
 
     const userCount = await prisma.user.count({
-      where: { ...where, role: 'user' }
+      where: { ...where, role: 'user' },
     });
 
     roleCounts = {
@@ -145,7 +147,7 @@ export async function getUsers(args: {
       skip,
       take,
     },
-    ...(includeCounts ? { counts: roleCounts } : {})
+    ...(includeCounts ? { counts: roleCounts } : {}),
   };
 }
 
@@ -180,7 +182,7 @@ export async function getUserById(id: string, includeRelations: boolean = false)
         startDate: true,
         endDate: true,
         createdAt: true,
-      }
+      },
     };
     // Get tasks directly assigned to the user (via assignedToId)
     select.tasks = {
@@ -193,9 +195,9 @@ export async function getUserById(id: string, includeRelations: boolean = false)
           select: {
             id: true,
             title: true,
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
     // Get tasks assigned via TaskAssignee table (multiple assignees)
@@ -212,16 +214,16 @@ export async function getUserById(id: string, includeRelations: boolean = false)
               select: {
                 id: true,
                 title: true,
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      },
     };
     select.activities = {
       take: 10,
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       select: {
         id: true,
@@ -233,15 +235,15 @@ export async function getUserById(id: string, includeRelations: boolean = false)
           select: {
             id: true,
             title: true,
-          }
+          },
         },
         task: {
           select: {
             id: true,
             title: true,
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
@@ -278,7 +280,7 @@ export async function getUserProfile(id: string) {
     const lastAttendance = await prisma.attendance.findFirst({
       where: { userId: id },
       orderBy: { checkInTime: 'desc' },
-      select: { checkInTime: true }
+      select: { checkInTime: true },
     });
 
     if (lastAttendance) {
@@ -290,7 +292,7 @@ export async function getUserProfile(id: string) {
   const stats = await getUserStats(id);
 
   // Combine tasks from both direct assignments and TaskAssignee table
-  let allTasks = [...(user.tasks || [])];
+  const allTasks = [...(user.tasks || [])];
 
   // Add tasks from taskAssignments if they exist
   if (user.taskAssignments && Array.isArray(user.taskAssignments)) {
@@ -311,9 +313,9 @@ export async function getUserProfile(id: string) {
     where: {
       teamMembers: {
         some: {
-          userId: id
-        }
-      }
+          userId: id,
+        },
+      },
     },
     select: {
       id: true,
@@ -322,15 +324,15 @@ export async function getUserProfile(id: string) {
       startDate: true,
       endDate: true,
       createdAt: true,
-    }
+    },
   });
 
   // Combine with any projects already in the user object
   const allProjects = [...(user.projects || []), ...teamProjects];
 
   // Remove duplicates by project ID
-  const uniqueProjects = allProjects.filter((project, index, self) =>
-    index === self.findIndex((p) => p.id === project.id)
+  const uniqueProjects = allProjects.filter(
+    (project, index, self) => index === self.findIndex(p => p.id === project.id)
   );
 
   return {
@@ -339,7 +341,7 @@ export async function getUserProfile(id: string) {
     tasks: allTasks,
     projects: uniqueProjects,
     stats,
-    lastLogin: lastLogin || null
+    lastLogin: lastLogin || null,
   };
 }
 
@@ -351,22 +353,22 @@ export async function getUserStats(userId: string) {
       teamMembers: {
         some: {
           userId,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   // Get task count (both direct assignments and via TaskAssignee table)
   const directTaskCount = await prisma.task.count({
     where: {
-      assignedToId: userId
-    }
+      assignedToId: userId,
+    },
   });
 
   const taskAssigneeCount = await prisma.taskAssignee.count({
     where: {
-      userId
-    }
+      userId,
+    },
   });
 
   const taskCount = directTaskCount + taskAssigneeCount;
@@ -375,7 +377,7 @@ export async function getUserStats(userId: string) {
   const teamCount = await prisma.teamMember.count({
     where: {
       userId,
-    }
+    },
   });
 
   // Calculate completion rate
@@ -386,15 +388,14 @@ export async function getUserStats(userId: string) {
   // In a real implementation, you might want to add a 'completed' boolean field to the Task model
   const completedTasks = 0;
 
-  const completionRate = totalTasks > 0
-    ? `${Math.round((completedTasks / totalTasks) * 100)}%`
-    : '0%';
+  const completionRate =
+    totalTasks > 0 ? `${Math.round((completedTasks / totalTasks) * 100)}%` : '0%';
 
   return {
     projectCount,
     taskCount,
     teamCount,
-    completionRate
+    completionRate,
   };
 }
 
@@ -420,7 +421,7 @@ export async function createUser(data: UserCreateInput) {
       image: true,
       role: true,
       createdAt: true,
-    }
+    },
   });
 
   return user;
@@ -459,7 +460,7 @@ export async function updateUser(id: string, data: UserUpdateInput) {
       skills: true,
       createdAt: true,
       updatedAt: true,
-    }
+    },
   });
 
   return user;
@@ -477,12 +478,12 @@ export async function updateUserImage(id: string, imageUrl: string) {
   return prisma.user.update({
     where: { id },
     data: {
-      image: imageUrl
+      image: imageUrl,
     },
     select: {
       id: true,
-      image: true
-    }
+      image: true,
+    },
   });
 }
 
@@ -494,7 +495,7 @@ export async function logUserActivity(
   entityId: string,
   description?: string,
   projectId?: string,
-  taskId?: string,
+  taskId?: string
 ) {
   return prisma.activity.create({
     data: {
@@ -505,7 +506,7 @@ export async function logUserActivity(
       userId,
       projectId,
       taskId,
-    }
+    },
   });
 }
 
@@ -515,10 +516,7 @@ export async function getUserProfileData(userId: string) {
   // Fetch projects the user is a member of or created
   const projects = await prisma.project.findMany({
     where: {
-      OR: [
-        { createdById: userId },
-        { teamMembers: { some: { userId: userId } } }
-      ]
+      OR: [{ createdById: userId }, { teamMembers: { some: { userId: userId } } }],
     },
     select: {
       id: true,
@@ -530,10 +528,10 @@ export async function getUserProfileData(userId: string) {
         where: { userId: userId },
         select: {
           // Need to select fields that indicate the role, e.g., if TeamMember has a 'role' field
-          createdAt: true // Placeholder, adjust based on actual TeamMember fields
-        }
-      }
-    }
+          createdAt: true, // Placeholder, adjust based on actual TeamMember fields
+        },
+      },
+    },
   });
 
   // Map projects to include user's role (example assumes TeamMember has role)
@@ -544,23 +542,24 @@ export async function getUserProfileData(userId: string) {
     startDate: p.startDate?.toISOString() ?? null,
     endDate: p.endDate?.toISOString() ?? null,
     role: p.teamMembers[0] ? 'Member' : 'Creator', // Example role logic
-    joinedAt: p.teamMembers[0]?.createdAt.toISOString() ?? new Date().toISOString() // Example join date
+    joinedAt: p.teamMembers[0]?.createdAt.toISOString() ?? new Date().toISOString(), // Example join date
   }));
 
   // Fetch tasks assigned to the user via TaskAssignee
   const tasks = await prisma.task.findMany({
     where: {
-      assignees: { // Filter using the assignees relation
+      assignees: {
+        // Filter using the assignees relation
         some: {
-          userId: userId
-        }
-      }
+          userId: userId,
+        },
+      },
       // Remove old filter:
       // assignedToId: userId
     },
     include: getTaskListIncludeObject(), // Use the standard include for lists
     orderBy: { createdAt: 'desc' },
-    take: 100 // Example limit
+    take: 100, // Example limit
   });
 
   // ... (rest of the function, including stats calculation)

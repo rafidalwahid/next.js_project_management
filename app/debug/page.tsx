@@ -1,31 +1,31 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function DebugPage() {
-  const { data: session } = useSession()
-  const [sessionData, setSessionData] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const { data: session } = useSession();
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchSessionData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch('/api/debug-session')
-      const data = await response.json()
-      setSessionData(data)
+      const response = await fetch('/api/debug-session');
+      const data = await response.json();
+      setSessionData(data);
     } catch (error) {
-      console.error('Error fetching session data:', error)
+      console.error('Error fetching session data:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchSessionData()
-  }, [])
+    fetchSessionData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -44,9 +44,7 @@ export default function DebugPage() {
       <Card>
         <CardHeader>
           <CardTitle>Session Information</CardTitle>
-          <CardDescription>
-            Your current session details
-          </CardDescription>
+          <CardDescription>Your current session details</CardDescription>
         </CardHeader>
         <CardContent>
           <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[400px]">
@@ -58,9 +56,7 @@ export default function DebugPage() {
       <Card>
         <CardHeader>
           <CardTitle>Token and Permissions</CardTitle>
-          <CardDescription>
-            Your JWT token and permission checks
-          </CardDescription>
+          <CardDescription>Your JWT token and permission checks</CardDescription>
         </CardHeader>
         <CardContent>
           <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[400px]">
@@ -69,5 +65,5 @@ export default function DebugPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

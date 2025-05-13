@@ -1,31 +1,31 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function DebugUserPage() {
-  const { data: session } = useSession()
-  const [userData, setUserData] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const { data: session } = useSession();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchUserData = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch('/api/debug-user')
-      const data = await response.json()
-      setUserData(data)
+      const response = await fetch('/api/debug-user');
+      const data = await response.json();
+      setUserData(data);
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('Error fetching user data:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUserData()
-  }, [])
+    fetchUserData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -44,13 +44,11 @@ export default function DebugUserPage() {
       <Card>
         <CardHeader>
           <CardTitle>Session User Information</CardTitle>
-          <CardDescription>
-            Your current session user details
-          </CardDescription>
+          <CardDescription>Your current session user details</CardDescription>
         </CardHeader>
         <CardContent>
           <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[400px]">
-            {JSON.stringify(session?.user, null, 2) || "No session user data"}
+            {JSON.stringify(session?.user, null, 2) || 'No session user data'}
           </pre>
         </CardContent>
       </Card>
@@ -58,9 +56,7 @@ export default function DebugUserPage() {
       <Card>
         <CardHeader>
           <CardTitle>Database User Information</CardTitle>
-          <CardDescription>
-            Your user record in the database
-          </CardDescription>
+          <CardDescription>Your user record in the database</CardDescription>
         </CardHeader>
         <CardContent>
           <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[400px]">
@@ -69,5 +65,5 @@ export default function DebugUserPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

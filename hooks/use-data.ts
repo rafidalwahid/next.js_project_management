@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import useSWR from 'swr';
 import { projectApi, taskApi, eventApi } from '@/lib/api';
@@ -8,18 +8,17 @@ import { projectApi, taskApi, eventApi } from '@/lib/api';
  */
 export function useProjects(page = 1, limit = 10, filters: Record<string, string> = {}) {
   const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) =>
-      value !== null &&
-      value !== undefined &&
-      typeof value === 'string' &&
-      value !== '[object Object]'
+    Object.entries(filters).filter(
+      ([_, value]) =>
+        value !== null &&
+        value !== undefined &&
+        typeof value === 'string' &&
+        value !== '[object Object]'
     )
   );
 
   const queryString = `/api/projects?page=${page}&limit=${limit}${
-    Object.keys(cleanFilters).length > 0
-      ? `&${new URLSearchParams(cleanFilters).toString()}`
-      : ''
+    Object.keys(cleanFilters).length > 0 ? `&${new URLSearchParams(cleanFilters).toString()}` : ''
   }`;
 
   const { data, error, isLoading, mutate } = useSWR(
@@ -33,9 +32,10 @@ export function useProjects(page = 1, limit = 10, filters: Record<string, string
       } catch (err) {
         console.error('Project fetch error:', err);
         // Create a more descriptive error
-        const errorMessage = err instanceof Error
-          ? `Failed to fetch projects: ${err.message}`
-          : 'Failed to fetch projects';
+        const errorMessage =
+          err instanceof Error
+            ? `Failed to fetch projects: ${err.message}`
+            : 'Failed to fetch projects';
         throw new Error(errorMessage);
       }
     },
@@ -43,9 +43,9 @@ export function useProjects(page = 1, limit = 10, filters: Record<string, string
       revalidateOnFocus: false,
       shouldRetryOnError: false,
       dedupingInterval: 5000,
-      onError: (err) => {
+      onError: err => {
         console.error('SWR error in useProjects:', err);
-      }
+      },
     }
   );
 
@@ -115,11 +115,12 @@ export function useProject(id: string | null) {
 export function useTasks(page = 1, limit = 10, filters = {}) {
   // Clean filters to avoid [object Object] and other invalid values
   const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) =>
-      value !== null &&
-      value !== undefined &&
-      value !== '[object Object]' &&
-      String(value).trim() !== ''
+    Object.entries(filters).filter(
+      ([_, value]) =>
+        value !== null &&
+        value !== undefined &&
+        value !== '[object Object]' &&
+        String(value).trim() !== ''
     )
   );
 
@@ -129,14 +130,11 @@ export function useTasks(page = 1, limit = 10, filters = {}) {
       : ''
   }`;
 
-  const { data, error, isLoading, mutate } = useSWR(
-    queryString,
-    async () => {
-      console.log('Fetching tasks with query:', queryString);
-      const response = await taskApi.getTasks(page, limit, cleanFilters);
-      return response;
-    }
-  );
+  const { data, error, isLoading, mutate } = useSWR(queryString, async () => {
+    console.log('Fetching tasks with query:', queryString);
+    const response = await taskApi.getTasks(page, limit, cleanFilters);
+    return response;
+  });
 
   return {
     tasks: data?.tasks || [],
@@ -153,9 +151,9 @@ export function useTasks(page = 1, limit = 10, filters = {}) {
 export function useTask(id: string | null) {
   const { data, error, isLoading, mutate } = useSWR(
     // Skip fetching if id is null or "new"
-    id && id !== "new" ? `/api/tasks/${id}` : null,
+    id && id !== 'new' ? `/api/tasks/${id}` : null,
     async () => {
-      if (!id || id === "new") return null;
+      if (!id || id === 'new') return null;
       try {
         console.log('Fetching task with ID:', id);
         const response = await taskApi.getTask(id);
@@ -170,14 +168,14 @@ export function useTask(id: string | null) {
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
-      dedupingInterval: 5000 // Cache results for 5 seconds
+      dedupingInterval: 5000, // Cache results for 5 seconds
     }
   );
 
   return {
     task: data?.task || null,
-    isLoading: isLoading && id !== "new", // Don't show loading state for "new"
-    isError: error && id !== "new",       // Don't show error state for "new"
+    isLoading: isLoading && id !== 'new', // Don't show loading state for "new"
+    isError: error && id !== 'new', // Don't show error state for "new"
     mutate,
   };
 }
@@ -204,5 +202,3 @@ export function useEvents(projectId?: string, page = 1, limit = 10) {
     mutate,
   };
 }
-
-

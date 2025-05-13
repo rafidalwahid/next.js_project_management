@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { ClientPermissionService } from "@/lib/permissions/client-permission-service"
-import { useAuthSession } from "./use-auth-session"
+import { useState, useEffect } from 'react';
+import { ClientPermissionService } from '@/lib/permissions/client-permission-service';
+import { useAuthSession } from './use-auth-session';
 
 /**
  * Hook to check if the current user has a specific permission
@@ -10,90 +10,90 @@ import { useAuthSession } from "./use-auth-session"
  * @deprecated Use useHasPermission instead for better naming consistency
  */
 export function usePermission(permission: string) {
-  const { session } = useAuthSession()
-  const [hasPermission, setHasPermission] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const { session } = useAuthSession();
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // If no session, user doesn't have permission
     if (!session?.user?.id) {
-      setHasPermission(false)
-      setIsLoading(false)
-      return
+      setHasPermission(false);
+      setIsLoading(false);
+      return;
     }
 
     // Use the client permission service for a quick initial check
-    const userId = session.user.id
-    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission)
+    const userId = session.user.id;
+    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission);
 
     // If the quick check passes, we can return true immediately
     if (quickResult) {
-      setHasPermission(true)
-      setIsLoading(false)
-      return
+      setHasPermission(true);
+      setIsLoading(false);
+      return;
     }
 
     // If quick check fails, verify with the API
     // This handles the case where permissions might be in the database but not in the client cache
-    setIsLoading(true)
+    setIsLoading(true);
 
-    fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`)
+    fetch(
+      `/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`
+    )
       .then(res => res.json())
       .then(data => {
-        setHasPermission(data.hasPermission)
-        setIsLoading(false)
+        setHasPermission(data.hasPermission);
+        setIsLoading(false);
       })
       .catch(err => {
-        console.error("Error checking permission:", err)
+        console.error('Error checking permission:', err);
         // Fall back to the client-side check on error
-        setHasPermission(quickResult)
-        setIsLoading(false)
-      })
-  }, [session, permission])
+        setHasPermission(quickResult);
+        setIsLoading(false);
+      });
+  }, [session, permission]);
 
-  return { hasPermission, isLoading }
+  return { hasPermission, isLoading };
 }
-
-
 
 /**
  * Hook to get all permissions for a specific user
  * Uses both client-side and server-side permission checks for optimal performance
  */
 export function useUserPermissionsByUserId(userId: string) {
-  const [permissions, setPermissions] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) {
-      setPermissions([])
-      setIsLoading(false)
-      return
+      setPermissions([]);
+      setIsLoading(false);
+      return;
     }
 
     // Get initial permissions from client-side service for quick response
-    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId)
+    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId);
 
     // Set initial permissions
-    setPermissions(quickPermissions)
+    setPermissions(quickPermissions);
 
     // Then fetch the complete list from the server
     fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.permissions && Array.isArray(data.permissions)) {
-          setPermissions(data.permissions)
+          setPermissions(data.permissions);
         }
-        setIsLoading(false)
+        setIsLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching permissions:", err)
+        console.error('Error fetching permissions:', err);
         // Keep the client-side permissions on error
-        setIsLoading(false)
-      })
-  }, [userId])
+        setIsLoading(false);
+      });
+  }, [userId]);
 
-  return { permissions, isLoading }
+  return { permissions, isLoading };
 }
 
 /**
@@ -101,44 +101,44 @@ export function useUserPermissionsByUserId(userId: string) {
  * Uses both client-side and server-side permission checks for optimal performance
  */
 export function useUserPermissions() {
-  const { session, status } = useAuthSession()
-  const [permissions, setPermissions] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { session, status } = useAuthSession();
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(status === 'loading')
+    setIsLoading(status === 'loading');
 
     // If no session, user has no permissions
     if (!session?.user?.id) {
-      setPermissions([])
-      setIsLoading(false)
-      return
+      setPermissions([]);
+      setIsLoading(false);
+      return;
     }
 
     // Get initial permissions from client-side service for quick response
-    const userId = session.user.id
-    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId)
+    const userId = session.user.id;
+    const quickPermissions = ClientPermissionService.getPermissionsForUserSync(userId);
 
     // Set initial permissions
-    setPermissions(quickPermissions)
+    setPermissions(quickPermissions);
 
     // Then fetch the complete list from the server
     fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.permissions && Array.isArray(data.permissions)) {
-          setPermissions(data.permissions)
+          setPermissions(data.permissions);
         }
-        setIsLoading(false)
+        setIsLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching permissions:", err)
+        console.error('Error fetching permissions:', err);
         // Keep the client-side permissions on error
-        setIsLoading(false)
-      })
-  }, [session, status])
+        setIsLoading(false);
+      });
+  }, [session, status]);
 
-  return { permissions, isLoading }
+  return { permissions, isLoading };
 }
 
 /**
@@ -151,75 +151,77 @@ export function useUserPermissions() {
  * @returns An object with hasPermission, isLoading, and error properties
  */
 export function useHasPermission(permission: string, redirectTo?: string) {
-  const { session } = useAuthSession()
-  const [hasPermission, setHasPermission] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { session } = useAuthSession();
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // If no session, user doesn't have permission
     if (!session?.user?.id) {
-      setHasPermission(false)
-      setIsLoading(false)
-      return
+      setHasPermission(false);
+      setIsLoading(false);
+      return;
     }
 
     // Use the client permission service for a quick initial check
-    const userId = session.user.id
-    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission)
+    const userId = session.user.id;
+    const quickResult = ClientPermissionService.hasPermissionByIdSync(userId, permission);
 
     // If the quick check passes, we can return true immediately
     if (quickResult) {
-      setHasPermission(true)
-      setIsLoading(false)
-      return
+      setHasPermission(true);
+      setIsLoading(false);
+      return;
     }
 
     // If quick check fails, verify with the API
     // This handles the case where permissions might be in the database but not in the client cache
-    setIsLoading(true)
+    setIsLoading(true);
 
-    fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`)
+    fetch(
+      `/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`
+    )
       .then(res => res.json())
       .then(data => {
-        setHasPermission(data.hasPermission)
-        setIsLoading(false)
+        setHasPermission(data.hasPermission);
+        setIsLoading(false);
 
         // Handle redirection if needed
         if (redirectTo && !data.hasPermission) {
-          window.location.href = redirectTo
+          window.location.href = redirectTo;
         }
       })
       .catch(err => {
-        console.error("Error checking permission:", err)
-        setError("Failed to check permission")
+        console.error('Error checking permission:', err);
+        setError('Failed to check permission');
         // Fall back to the client-side check on error
-        setHasPermission(quickResult)
-        setIsLoading(false)
-      })
-  }, [session, permission, redirectTo])
+        setHasPermission(quickResult);
+        setIsLoading(false);
+      });
+  }, [session, permission, redirectTo]);
 
-  return { hasPermission, isLoading, error }
+  return { hasPermission, isLoading, error };
 }
 
 export function useUserRole() {
-  const { session, status } = useAuthSession()
-  const [role, setRole] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(true)
+  const { session, status } = useAuthSession();
+  const [role, setRole] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(status === 'loading')
+    setIsLoading(status === 'loading');
 
     // If no session, user has no role
     if (!session?.user?.id) {
-      setRole("")
-      setIsLoading(false)
-      return
+      setRole('');
+      setIsLoading(false);
+      return;
     }
 
     // First use the role from the session for quick initial display
     if (session.user.role) {
-      setRole(session.user.role)
+      setRole(session.user.role);
     }
 
     // Then fetch the up-to-date role from the server
@@ -227,16 +229,16 @@ export function useUserRole() {
       .then(res => res.json())
       .then(data => {
         if (data.user && data.user.role) {
-          setRole(data.user.role)
+          setRole(data.user.role);
         }
-        setIsLoading(false)
+        setIsLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching user role:", err)
+        console.error('Error fetching user role:', err);
         // Keep the session role on error
-        setIsLoading(false)
-      })
-  }, [session, status])
+        setIsLoading(false);
+      });
+  }, [session, status]);
 
-  return { role, isLoading }
+  return { role, isLoading };
 }

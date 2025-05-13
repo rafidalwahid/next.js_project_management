@@ -31,19 +31,16 @@ export function useUsers(options: UseUsersOptions = {}) {
 
   const queryString = queryParams.toString();
 
-  const { data, error, isLoading, mutate } = useSWR(
-    `/api/users?${queryString}`,
-    async () => {
-      const response = await userApi.getUsers({
-        search,
-        limit,
-        page,
-        role: role !== 'all' ? role : undefined,
-        projectId
-      });
-      return response as UsersListResponse;
-    }
-  );
+  const { data, error, isLoading, mutate } = useSWR(`/api/users?${queryString}`, async () => {
+    const response = await userApi.getUsers({
+      search,
+      limit,
+      page,
+      role: role !== 'all' ? role : undefined,
+      projectId,
+    });
+    return response as UsersListResponse;
+  });
 
   return {
     users: data?.users || [],

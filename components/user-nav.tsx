@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,54 +11,50 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, User } from "lucide-react"
-import Link from "next/link"
-import { useSession } from "next-auth/react"
-import { checkOutAndLogout } from "@/lib/logout-utils"
+} from '@/components/ui/dropdown-menu';
+import { LogOut, User } from 'lucide-react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { checkOutAndLogout } from '@/lib/logout-utils';
 
 interface UserNavProps {
-  compact?: boolean
-  showName?: boolean
-  className?: string
+  compact?: boolean;
+  showName?: boolean;
+  className?: string;
 }
 
 export function UserNav({ compact = false, showName = true, className }: UserNavProps) {
-  const { data: session } = useSession()
-  const user = session?.user
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const userInitials = user?.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
+        .split(' ')
+        .map(n => n[0])
+        .join('')
         .toUpperCase()
-    : "AU"
+    : 'AU';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={cn(
-            "relative h-8 w-full",
-            compact ? "px-2" : "px-3",
-            className
-          )}
+          className={cn('relative h-8 w-full', compact ? 'px-2' : 'px-3', className)}
         >
           <div className="flex items-center gap-3 w-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.image || undefined} alt={user?.name ?? ""} />
+              <AvatarImage src={user?.image || undefined} alt={user?.name ?? ''} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
 
             {showName && (
               <div className="flex flex-col items-start text-left">
                 <span className="text-sm font-medium leading-none">
-                  {user?.name || "Admin User"}
+                  {user?.name || 'Admin User'}
                 </span>
                 <span className="text-xs text-muted-foreground leading-none mt-1">
-                  {user?.role || "Admin"}
+                  {user?.role || 'Admin'}
                 </span>
               </div>
             )}
@@ -68,11 +64,9 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user?.name || "Admin User"}
-            </p>
+            <p className="text-sm font-medium leading-none">{user?.name || 'Admin User'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email || "admin@example.com"}
+              {user?.email || 'admin@example.com'}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -95,5 +89,5 @@ export function UserNav({ compact = false, showName = true, className }: UserNav
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

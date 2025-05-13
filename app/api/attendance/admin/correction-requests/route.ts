@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { z } from "zod";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { z } from 'zod';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 // Validation schema for correction request updates
 const updateCorrectionRequestSchema = z.object({
   id: z.string(),
-  status: z.enum(["approved", "rejected"]),
+  status: z.enum(['approved', 'rejected']),
   reviewNotes: z.string().optional(),
 });
 
@@ -18,38 +18,35 @@ export async function GET(req: NextRequest) {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has attendance management permission
     const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "attendance_management"
+      'attendance_management'
     );
 
     if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: You do not have permission to access correction requests" },
+        { error: 'Forbidden: You do not have permission to access correction requests' },
         { status: 403 }
       );
     }
 
     // Get query parameters
     const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get("limit") || "20");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const page = parseInt(url.searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
-    const status = url.searchParams.get("status");
-    const userId = url.searchParams.get("userId");
+    const status = url.searchParams.get('status');
+    const userId = url.searchParams.get('userId');
 
     // Build the where clause
     const where: any = {};
 
     // Add filters if provided
-    if (status && status !== "all") {
+    if (status && status !== 'all') {
       where.status = status;
     }
 
@@ -108,11 +105,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Get correction requests error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve correction requests" },
-      { status: 500 }
-    );
+    console.error('Get correction requests error:', error);
+    return NextResponse.json({ error: 'Failed to retrieve correction requests' }, { status: 500 });
   }
 }
 
@@ -122,21 +116,18 @@ export async function PATCH(req: NextRequest) {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has attendance management permission
     const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "attendance_management"
+      'attendance_management'
     );
 
     if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: You do not have permission to update correction requests" },
+        { error: 'Forbidden: You do not have permission to update correction requests' },
         { status: 403 }
       );
     }
@@ -147,7 +138,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -163,10 +154,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (!correctionRequest) {
-      return NextResponse.json(
-        { error: "Correction request not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Correction request not found' }, { status: 404 });
     }
 
     // Update the correction request
@@ -181,7 +169,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     // If approved, update the attendance record
-    if (status === "approved") {
+    if (status === 'approved') {
       await prisma.attendance.update({
         where: { id: correctionRequest.attendanceId },
         data: {
@@ -203,9 +191,9 @@ export async function PATCH(req: NextRequest) {
       data: {
         userId: session.user.id,
         action: `correction-${status}`,
-        entityType: "attendance",
+        entityType: 'attendance',
         entityId: correctionRequest.attendanceId,
-        description: `${status === "approved" ? "Approved" : "Rejected"} correction request: ${reviewNotes || "No notes provided"}`,
+        description: `${status === 'approved' ? 'Approved' : 'Rejected'} correction request: ${reviewNotes || 'No notes provided'}`,
       },
     });
 
@@ -214,11 +202,8 @@ export async function PATCH(req: NextRequest) {
       correctionRequest: updatedRequest,
     });
   } catch (error) {
-    console.error("Update correction request error:", error);
-    return NextResponse.json(
-      { error: "Failed to update correction request" },
-      { status: 500 }
-    );
+    console.error('Update correction request error:', error);
+    return NextResponse.json({ error: 'Failed to update correction request' }, { status: 500 });
   }
 }
 

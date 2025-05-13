@@ -1,29 +1,38 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Settings, Calendar, Clock, Users, BarChart2, UserPlus, Trash2, UserMinus } from "lucide-react"
-import { useRemoveTeamMember } from "@/hooks/use-team-management"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+  Settings,
+  Calendar,
+  Clock,
+  Users,
+  BarChart2,
+  UserPlus,
+  Trash2,
+  UserMinus,
+} from 'lucide-react';
+import { useRemoveTeamMember } from '@/hooks/use-team-management';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { KanbanBoard } from "@/components/project/kanban-board"
-import { StatusListView } from "@/components/project/status-list-view"
-import { TaskProvider } from "@/components/project/task-context"
-import { TaskFilterNew } from "@/components/project/task-filter"
-import { TaskFilters } from "@/types/task"
-import { ProjectSettingsDialog } from "@/components/project/project-settings-dialog"
-import { Spinner } from "@/components/ui/spinner"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { TaskForm } from "@/components/project/task-form"
-import { AddTeamMemberDialog } from "@/components/project/add-team-member-dialog"
-import { format } from "date-fns"
-import { safeFormat } from "@/lib/utils/date-utils"
-import { CreateStatusDialogNew } from "@/components/project/create-status-dialog"
+import { KanbanBoard } from '@/components/project/kanban-board';
+import { StatusListView } from '@/components/project/status-list-view';
+import { TaskProvider } from '@/components/project/task-context';
+import { TaskFilterNew } from '@/components/project/task-filter';
+import { TaskFilters } from '@/types/task';
+import { ProjectSettingsDialog } from '@/components/project/project-settings-dialog';
+import { Spinner } from '@/components/ui/spinner';
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TaskForm } from '@/components/project/task-form';
+import { AddTeamMemberDialog } from '@/components/project/add-team-member-dialog';
+import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date-utils';
+import { CreateStatusDialogNew } from '@/components/project/create-status-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,266 +42,277 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Project, ProjectStatus } from "@/types/project"
-import { Task } from "@/types/task"
+} from '@/components/ui/alert-dialog';
+import { Project, ProjectStatus } from '@/types/project';
+import { Task } from '@/types/task';
 
 export default function ProjectPage() {
-  const params = useParams()
-  const router = useRouter()
-  const projectId = params.projectId as string
-  const [project, setProject] = useState<Project | null>(null)
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [statuses, setStatuses] = useState<ProjectStatus[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isTasksLoading, setIsTasksLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("board")
-  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false)
-  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
-  const [isTeamDialogOpen, setIsTeamDialogOpen] = useState(false)
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
+  const params = useParams();
+  const router = useRouter();
+  const projectId = params.projectId as string;
+  const [project, setProject] = useState<Project | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTasksLoading, setIsTasksLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('board');
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [isTeamDialogOpen, setIsTeamDialogOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [taskFilters, setTaskFilters] = useState<TaskFilters>({
-    search: "",
+    search: '',
     statusIds: [],
     assigneeIds: [],
     priority: null,
     completed: null,
-  })
-  const [users, setUsers] = useState<any[]>([])
-  const [userToRemove, setUserToRemove] = useState<any>(null)
-  const [isRemovingUser, setIsRemovingUser] = useState(false)
-  const { toast } = useToast()
+  });
+  const [users, setUsers] = useState<any[]>([]);
+  const [userToRemove, setUserToRemove] = useState<any>(null);
+  const [isRemovingUser, setIsRemovingUser] = useState(false);
+  const { toast } = useToast();
 
   // Fetch project data
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        setIsLoading(true)
-        const response = await fetch(`/api/projects/${projectId}`)
+        setIsLoading(true);
+        const response = await fetch(`/api/projects/${projectId}`);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch project")
+          throw new Error('Failed to fetch project');
         }
 
-        const data = await response.json()
-        setProject(data.project)
-        setStatuses(data.project.statuses || [])
+        const data = await response.json();
+        setProject(data.project);
+        setStatuses(data.project.statuses || []);
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to fetch project details",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch project details',
+          variant: 'destructive',
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (projectId) {
-      fetchProject()
+      fetchProject();
     }
-  }, [projectId])
+  }, [projectId]);
 
   // Fetch tasks data
   const fetchTasks = async () => {
     try {
-      setIsTasksLoading(true)
-      const response = await fetch(`/api/tasks?projectId=${projectId}&limit=100`)
+      setIsTasksLoading(true);
+      const response = await fetch(`/api/tasks?projectId=${projectId}&limit=100`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch tasks")
+        throw new Error('Failed to fetch tasks');
       }
 
-      const data = await response.json()
-      setTasks(data.tasks || [])
+      const data = await response.json();
+      setTasks(data.tasks || []);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch tasks",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to fetch tasks',
+        variant: 'destructive',
+      });
     } finally {
-      setIsTasksLoading(false)
+      setIsTasksLoading(false);
     }
-  }
+  };
 
   // Load tasks on component mount and when project changes
   useEffect(() => {
     if (projectId) {
-      fetchTasks()
-      fetchUsers()
+      fetchTasks();
+      fetchUsers();
     }
-  }, [projectId])
+  }, [projectId]);
 
   // Fetch users for the project
   const fetchUsers = async () => {
     try {
-      console.log("Fetching team members for project:", projectId)
-      const response = await fetch(`/api/team-management?projectId=${projectId}`)
+      console.log('Fetching team members for project:', projectId);
+      const response = await fetch(`/api/team-management?projectId=${projectId}`);
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("API error response:", errorData)
-        throw new Error(`Failed to fetch project members: ${errorData.error || response.statusText}`)
+        const errorData = await response.json();
+        console.error('API error response:', errorData);
+        throw new Error(
+          `Failed to fetch project members: ${errorData.error || response.statusText}`
+        );
       }
 
-      const data = await response.json()
-      console.log("Team members API response:", data)
+      const data = await response.json();
+      console.log('Team members API response:', data);
 
       // Check if we have team members data
       if (data.teamMembers && Array.isArray(data.teamMembers)) {
         // Extract user data from team members
-        const usersList = data.teamMembers.map(member => member.user).filter(Boolean)
-        console.log("Fetched users:", usersList.length)
-        setUsers(usersList)
+        const usersList = data.teamMembers.map(member => member.user).filter(Boolean);
+        console.log('Fetched users:', usersList.length);
+        setUsers(usersList);
       } else {
-        console.error("No team members data found:", data)
-        setUsers([])
+        console.error('No team members data found:', data);
+        setUsers([]);
       }
     } catch (error) {
-      console.error("Error fetching users:", error)
+      console.error('Error fetching users:', error);
       toast({
-        title: "Error",
-        description: "Failed to fetch team members",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to fetch team members',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Filter tasks based on current filters
   useEffect(() => {
     if (tasks.length === 0) {
-      setFilteredTasks([])
-      return
+      setFilteredTasks([]);
+      return;
     }
 
-    let filtered = [...tasks]
+    let filtered = [...tasks];
 
     // Filter by search term
     if (taskFilters.search) {
-      const searchTerm = taskFilters.search.toLowerCase()
-      filtered = filtered.filter(task =>
-        task.title.toLowerCase().includes(searchTerm) ||
-        (task.description && task.description.toLowerCase().includes(searchTerm))
-      )
+      const searchTerm = taskFilters.search.toLowerCase();
+      filtered = filtered.filter(
+        task =>
+          task.title.toLowerCase().includes(searchTerm) ||
+          (task.description && task.description.toLowerCase().includes(searchTerm))
+      );
     }
 
     // Filter by status
     if (taskFilters.statusIds.length > 0) {
-      filtered = filtered.filter(task =>
-        task.statusId && taskFilters.statusIds.includes(task.statusId)
-      )
+      filtered = filtered.filter(
+        task => task.statusId && taskFilters.statusIds.includes(task.statusId)
+      );
     }
 
     // Filter by assignee
     if (taskFilters.assigneeIds.length > 0) {
-      filtered = filtered.filter(task =>
-        task.assignees && task.assignees.some(assignee =>
-          taskFilters.assigneeIds.includes(assignee.user.id)
-        )
-      )
+      filtered = filtered.filter(
+        task =>
+          task.assignees &&
+          task.assignees.some(assignee => taskFilters.assigneeIds.includes(assignee.user.id))
+      );
     }
 
     // Filter by priority
     if (taskFilters.priority) {
-      filtered = filtered.filter(task =>
-        task.priority.toLowerCase() === taskFilters.priority?.toLowerCase()
-      )
+      filtered = filtered.filter(
+        task => task.priority.toLowerCase() === taskFilters.priority?.toLowerCase()
+      );
     }
 
     // Filter by completion status
     if (taskFilters.completed !== null) {
-      filtered = filtered.filter(task => task.completed === taskFilters.completed)
+      filtered = filtered.filter(task => task.completed === taskFilters.completed);
     }
 
-    setFilteredTasks(filtered)
-  }, [tasks, taskFilters])
+    setFilteredTasks(filtered);
+  }, [tasks, taskFilters]);
 
   const handleCreateTask = () => {
-    setEditingTaskId(null)
-    setIsTaskDialogOpen(true)
-  }
+    setEditingTaskId(null);
+    setIsTaskDialogOpen(true);
+  };
 
   const handleEditTask = (taskId: string) => {
-    setEditingTaskId(taskId)
-    setIsTaskDialogOpen(true)
-  }
+    setEditingTaskId(taskId);
+    setIsTaskDialogOpen(true);
+  };
 
   const handleTaskDialogClose = async () => {
-    setIsTaskDialogOpen(false)
-    setEditingTaskId(null)
+    setIsTaskDialogOpen(false);
+    setEditingTaskId(null);
     // Refresh tasks after creating or editing
-    await fetchTasks()
-  }
+    await fetchTasks();
+  };
 
   // Use the removeTeamMember hook
-  const { removeTeamMember, isRemoving: isRemovingMember, error: removeError } = useRemoveTeamMember()
+  const {
+    removeTeamMember,
+    isRemoving: isRemovingMember,
+    error: removeError,
+  } = useRemoveTeamMember();
 
   const handleRemoveTeamMember = async () => {
-    if (!userToRemove) return
+    if (!userToRemove) return;
 
     try {
-      setIsRemovingUser(true)
+      setIsRemovingUser(true);
 
       // Find the team member ID for this user in this project
-      const response = await fetch(`/api/team-management?projectId=${projectId}&userId=${userToRemove.id}`)
+      const response = await fetch(
+        `/api/team-management?projectId=${projectId}&userId=${userToRemove.id}`
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to find team member")
+        throw new Error('Failed to find team member');
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.teamMembers || data.teamMembers.length === 0) {
-        throw new Error("Team member not found")
+        throw new Error('Team member not found');
       }
 
-      const teamMemberId = data.teamMembers[0].id
+      const teamMemberId = data.teamMembers[0].id;
 
       // Remove the team member using the new API
-      await removeTeamMember(teamMemberId)
+      await removeTeamMember(teamMemberId);
 
       toast({
-        title: "Team member removed",
+        title: 'Team member removed',
         description: `${userToRemove.name || userToRemove.email} has been removed from the project team`,
-      })
+      });
 
       // Refresh the team members list
-      await fetchUsers()
+      await fetchUsers();
     } catch (error: any) {
-      console.error("Error removing team member:", error)
+      console.error('Error removing team member:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove team member",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: error.message || 'Failed to remove team member',
+        variant: 'destructive',
+      });
     } finally {
-      setIsRemovingUser(false)
-      setUserToRemove(null)
+      setIsRemovingUser(false);
+      setUserToRemove(null);
     }
-  }
+  };
 
   // Use the safeFormat function from date-utils.ts instead of local implementation
   const formatDate = (dateString: string | Date | null | undefined) => {
-    return safeFormat(dateString, "MMM d, yyyy", "Not set")
-  }
+    return safeFormat(dateString, 'MMM d, yyyy', 'Not set');
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   if (!project) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold">Project not found</h2>
-        <p className="text-muted-foreground mt-2">The project you're looking for doesn't exist or you don't have access to it.</p>
+        <p className="text-muted-foreground mt-2">
+          The project you're looking for doesn't exist or you don't have access to it.
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -316,9 +336,7 @@ export default function ProjectPage() {
           </div>
 
           {project.description && (
-            <p className="text-muted-foreground text-sm sm:text-base">
-              {project.description}
-            </p>
+            <p className="text-muted-foreground text-sm sm:text-base">{project.description}</p>
           )}
 
           {/* Project Timeline Summary */}
@@ -383,12 +401,10 @@ export default function ProjectPage() {
             </TabsList>
           </div>
 
-          {activeTab === "board" && (
+          {activeTab === 'board' && (
             <div className="w-full sm:w-auto flex justify-end mt-2 sm:mt-0">
               <TaskProvider projectId={projectId}>
-                <CreateStatusDialogNew
-                  projectId={projectId}
-                />
+                <CreateStatusDialogNew projectId={projectId} />
               </TaskProvider>
             </div>
           )}
@@ -396,20 +412,14 @@ export default function ProjectPage() {
         <TabsContent value="board">
           <div className="space-y-4">
             <TaskProvider projectId={projectId}>
-              <KanbanBoard
-                projectId={projectId}
-                onEditTask={handleEditTask}
-              />
+              <KanbanBoard projectId={projectId} onEditTask={handleEditTask} />
             </TaskProvider>
           </div>
         </TabsContent>
         <TabsContent value="list">
           <div className="space-y-4">
             <TaskProvider projectId={projectId}>
-              <StatusListView
-                projectId={projectId}
-                onEditTask={handleEditTask}
-              />
+              <StatusListView projectId={projectId} onEditTask={handleEditTask} />
             </TaskProvider>
           </div>
         </TabsContent>
@@ -419,24 +429,27 @@ export default function ProjectPage() {
             <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Project Creator</CardTitle>
-                <CardDescription>
-                  The person who created this project
-                </CardDescription>
+                <CardDescription>The person who created this project</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="flex items-center gap-3 sm:gap-4">
                   <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border border-black shrink-0">
                     {project.createdBy?.image ? (
-                      <AvatarImage src={project.createdBy.image} alt={project.createdBy.name || ""} />
+                      <AvatarImage
+                        src={project.createdBy.image}
+                        alt={project.createdBy.name || ''}
+                      />
                     ) : (
                       <AvatarFallback>
-                        {project.createdBy?.name ? project.createdBy.name.charAt(0) : "?"}
+                        {project.createdBy?.name ? project.createdBy.name.charAt(0) : '?'}
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="font-medium truncate">{project.createdBy?.name || "Unknown"}</p>
-                    <p className="text-sm text-muted-foreground truncate">{project.createdBy?.email || ""}</p>
+                    <p className="font-medium truncate">{project.createdBy?.name || 'Unknown'}</p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {project.createdBy?.email || ''}
+                    </p>
                     {users.some(user => user.id === project.createdBy?.id) && (
                       <p className="text-xs text-muted-foreground mt-1 italic">
                         Also a team member
@@ -453,9 +466,7 @@ export default function ProjectPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <CardTitle className="text-lg sm:text-xl">Team Members</CardTitle>
-                    <CardDescription>
-                      People working on this project
-                    </CardDescription>
+                    <CardDescription>People working on this project</CardDescription>
                   </div>
                   <Button
                     variant="outline"
@@ -472,7 +483,8 @@ export default function ProjectPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   {project.createdBy && users.some(user => user.id === project.createdBy?.id)
                     ? (project._count?.teamMembers || 0) - 1
-                    : (project._count?.teamMembers || 0)} other members assigned to this project
+                    : project._count?.teamMembers || 0}{' '}
+                  other members assigned to this project
                 </p>
 
                 {users.length > 0 ? (
@@ -480,49 +492,52 @@ export default function ProjectPage() {
                     {users
                       .filter(user => user.id !== project.createdBy?.id)
                       .slice(0, 5)
-                      .map((user) => (
-                      <div key={user.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <Avatar className="h-8 w-8 border border-black shrink-0">
-                            {user.image ? (
-                              <AvatarImage src={user.image} alt={user.name || ""} />
-                            ) : (
-                              <AvatarFallback>
-                                {user.name ? user.name.charAt(0) : "?"}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium truncate text-sm sm:text-base">{user.name || "Unknown"}</p>
-                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      .map(user => (
+                        <div key={user.id} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <Avatar className="h-8 w-8 border border-black shrink-0">
+                              {user.image ? (
+                                <AvatarImage src={user.image} alt={user.name || ''} />
+                              ) : (
+                                <AvatarFallback>
+                                  {user.name ? user.name.charAt(0) : '?'}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium truncate text-sm sm:text-base">
+                                {user.name || 'Unknown'}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            </div>
                           </div>
+                          {/* Don't show remove button for project creator */}
+                          {user.id !== project.createdBy?.id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 ml-1 sm:ml-2"
+                              onClick={() => setUserToRemove(user)}
+                              title="Remove from team"
+                            >
+                              <UserMinus className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
-                        {/* Don't show remove button for project creator */}
-                        {user.id !== project.createdBy?.id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0 ml-1 sm:ml-2"
-                            onClick={() => setUserToRemove(user)}
-                            title="Remove from team"
-                          >
-                            <UserMinus className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+                      ))}
 
                     {users.filter(user => user.id !== project.createdBy?.id).length > 5 && (
                       <p className="text-sm text-muted-foreground text-center py-1">
-                        + {users.filter(user => user.id !== project.createdBy?.id).length - 5} more members
+                        + {users.filter(user => user.id !== project.createdBy?.id).length - 5} more
+                        members
                       </p>
                     )}
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm">
                     {project.createdBy && users.some(user => user.id === project.createdBy?.id)
-                      ? "No additional team members found for this project."
-                      : "No team members found for this project."}
+                      ? 'No additional team members found for this project.'
+                      : 'No team members found for this project.'}
                   </p>
                 )}
               </CardContent>
@@ -535,31 +550,35 @@ export default function ProjectPage() {
             <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Project Progress</CardTitle>
-                <CardDescription>
-                  Overall completion status of tasks
-                </CardDescription>
+                <CardDescription>Overall completion status of tasks</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Completion Rate</span>
                     <span className="text-sm text-muted-foreground">
-                      {project._count?.tasks ?
-                        Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100) : 0}%
+                      {project._count?.tasks
+                        ? Math.round(
+                            (tasks.filter(t => t.completed).length / project._count.tasks) * 100
+                          )
+                        : 0}
+                      %
                     </span>
                   </div>
                   <div className="h-3 sm:h-4 bg-muted rounded-full overflow-hidden mt-2">
                     <div
                       className="h-full bg-primary"
                       style={{
-                        width: project._count?.tasks ?
-                          `${Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100)}%` : "0%"
+                        width: project._count?.tasks
+                          ? `${Math.round((tasks.filter(t => t.completed).length / project._count.tasks) * 100)}%`
+                          : '0%',
                       }}
                     />
                   </div>
                   <div className="flex items-center justify-between mt-2 sm:mt-3">
                     <span className="text-xs sm:text-sm text-muted-foreground">
-                      {tasks.filter(t => t.completed).length} / {project._count?.tasks || 0} tasks completed
+                      {tasks.filter(t => t.completed).length} / {project._count?.tasks || 0} tasks
+                      completed
                     </span>
                   </div>
                 </div>
@@ -570,9 +589,7 @@ export default function ProjectPage() {
             <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Project Timeline</CardTitle>
-                <CardDescription>
-                  Start and end dates for the project
-                </CardDescription>
+                <CardDescription>Start and end dates for the project</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="space-y-3 sm:space-y-4">
@@ -621,9 +638,7 @@ export default function ProjectPage() {
             <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Time Tracking</CardTitle>
-                <CardDescription>
-                  Estimated vs actual time spent
-                </CardDescription>
+                <CardDescription>Estimated vs actual time spent</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="space-y-3 sm:space-y-4">
@@ -656,14 +671,18 @@ export default function ProjectPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Progress</span>
                         <span className="text-xs sm:text-sm text-muted-foreground">
-                          {Math.min(Math.round((project.totalTimeSpent / project.estimatedTime) * 100), 100)}%
+                          {Math.min(
+                            Math.round((project.totalTimeSpent / project.estimatedTime) * 100),
+                            100
+                          )}
+                          %
                         </span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden mt-2">
                         <div
                           className="h-full bg-primary"
                           style={{
-                            width: `${Math.min(Math.round((project.totalTimeSpent / project.estimatedTime) * 100), 100)}%`
+                            width: `${Math.min(Math.round((project.totalTimeSpent / project.estimatedTime) * 100), 100)}%`,
                           }}
                         />
                       </div>
@@ -677,9 +696,7 @@ export default function ProjectPage() {
             <Card className="overflow-hidden">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-lg sm:text-xl">Task Distribution</CardTitle>
-                <CardDescription>
-                  Tasks by status and priority
-                </CardDescription>
+                <CardDescription>Tasks by status and priority</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                 <div className="space-y-5 sm:space-y-6">
@@ -689,8 +706,9 @@ export default function ProjectPage() {
                     <div className="space-y-2">
                       {statuses.map(status => {
                         const statusTasks = tasks.filter(t => t.statusId === status.id);
-                        const percentage = project._count?.tasks ?
-                          Math.round((statusTasks.length / project._count.tasks) * 100) : 0;
+                        const percentage = project._count?.tasks
+                          ? Math.round((statusTasks.length / project._count.tasks) * 100)
+                          : 0;
 
                         return (
                           <div key={status.id} className="space-y-1">
@@ -711,7 +729,7 @@ export default function ProjectPage() {
                                 className="h-full"
                                 style={{
                                   width: `${percentage}%`,
-                                  backgroundColor: status.color
+                                  backgroundColor: status.color,
                                 }}
                               />
                             </div>
@@ -727,13 +745,16 @@ export default function ProjectPage() {
                     <div className="space-y-2">
                       {['high', 'medium', 'low'].map(priority => {
                         const priorityTasks = tasks.filter(t => t.priority === priority);
-                        const percentage = project._count?.tasks ?
-                          Math.round((priorityTasks.length / project._count.tasks) * 100) : 0;
+                        const percentage = project._count?.tasks
+                          ? Math.round((priorityTasks.length / project._count.tasks) * 100)
+                          : 0;
 
                         const priorityColor =
-                          priority === 'high' ? '#ef4444' :
-                          priority === 'medium' ? '#f59e0b' :
-                          '#10b981';
+                          priority === 'high'
+                            ? '#ef4444'
+                            : priority === 'medium'
+                              ? '#f59e0b'
+                              : '#10b981';
 
                         return (
                           <div key={priority} className="space-y-1">
@@ -754,7 +775,7 @@ export default function ProjectPage() {
                                 className="h-full"
                                 style={{
                                   width: `${percentage}%`,
-                                  backgroundColor: priorityColor
+                                  backgroundColor: priorityColor,
                                 }}
                               />
                             </div>
@@ -771,9 +792,12 @@ export default function ProjectPage() {
       </Tabs>
       {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6" style={{ zIndex: 100 }}>
+        <DialogContent
+          className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6"
+          style={{ zIndex: 100 }}
+        >
           <DialogHeader className="mb-4">
-            <DialogTitle>{editingTaskId ? "Edit Task" : "Create New Task"}</DialogTitle>
+            <DialogTitle>{editingTaskId ? 'Edit Task' : 'Create New Task'}</DialogTitle>
           </DialogHeader>
           <TaskForm
             projectId={projectId}
@@ -802,7 +826,7 @@ export default function ProjectPage() {
                 setStatuses(data.project.statuses || []);
               }
             } catch (error) {
-              console.error("Error refreshing project:", error);
+              console.error('Error refreshing project:', error);
             }
             await fetchTasks();
           }}
@@ -819,13 +843,14 @@ export default function ProjectPage() {
       />
 
       {/* Remove Team Member Confirmation Dialog */}
-      <AlertDialog open={!!userToRemove} onOpenChange={(open) => !open && setUserToRemove(null)}>
+      <AlertDialog open={!!userToRemove} onOpenChange={open => !open && setUserToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {userToRemove?.name || userToRemove?.email || "this user"} from the project team?
-              This action cannot be undone.
+              Are you sure you want to remove{' '}
+              {userToRemove?.name || userToRemove?.email || 'this user'} from the project team? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -835,11 +860,11 @@ export default function ProjectPage() {
               disabled={isRemovingUser}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isRemovingUser ? "Removing..." : "Remove"}
+              {isRemovingUser ? 'Removing...' : 'Remove'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

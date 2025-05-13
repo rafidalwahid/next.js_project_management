@@ -1,7 +1,7 @@
-import { Session } from "next-auth";
-import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { PermissionCheckFn } from "@/types/api";
+import { Session } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { PermissionCheckFn } from '@/types/api';
 
 /**
  * Check if a user has permission to access a project
@@ -17,7 +17,7 @@ export async function checkProjectPermission(
 ) {
   // If no session, no permission
   if (!session || !session.user.id) {
-    return { hasPermission: false, project: null, error: "Unauthorized" };
+    return { hasPermission: false, project: null, error: 'Unauthorized' };
   }
 
   // Get the project with related data needed for permission checks
@@ -26,15 +26,15 @@ export async function checkProjectPermission(
     include: {
       teamMembers: {
         where: {
-          userId: session.user.id
-        }
-      }
-    }
+          userId: session.user.id,
+        },
+      },
+    },
   });
 
   // If project doesn't exist, no permission
   if (!project) {
-    return { hasPermission: false, project: null, error: "Project not found" };
+    return { hasPermission: false, project: null, error: 'Project not found' };
   }
 
   // Get user ID
@@ -52,28 +52,31 @@ export async function checkProjectPermission(
   // Check permissions based on action
   if (action === 'view') {
     // For view actions, check view_projects permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermissionById(userId, "view_projects");
+    const hasViewPermission = await PermissionService.hasPermissionById(userId, 'view_projects');
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
-  }
-  else if (action === 'update') {
+  } else if (action === 'update') {
     // For update actions, check project_management permission or project creator status
-    const hasManagePermission = await PermissionService.hasPermissionById(userId, "project_management");
+    const hasManagePermission = await PermissionService.hasPermissionById(
+      userId,
+      'project_management'
+    );
     hasPermission = hasManagePermission || isProjectCreator;
-  }
-  else if (action === 'delete') {
+  } else if (action === 'delete') {
     // For delete actions, check project_deletion permission or project creator status
-    const hasDeletePermission = await PermissionService.hasPermissionById(userId, "project_deletion");
+    const hasDeletePermission = await PermissionService.hasPermissionById(
+      userId,
+      'project_deletion'
+    );
     hasPermission = hasDeletePermission || isProjectCreator;
-  }
-  else if (action === 'create') {
+  } else if (action === 'create') {
     // For create actions, check project_creation permission
-    hasPermission = await PermissionService.hasPermissionById(userId, "project_creation");
+    hasPermission = await PermissionService.hasPermissionById(userId, 'project_creation');
   }
 
   return {
     hasPermission,
     project,
-    error: hasPermission ? null : "You don't have permission to " + action + " this project"
+    error: hasPermission ? null : "You don't have permission to " + action + ' this project',
   };
 }
 
@@ -94,6 +97,6 @@ export const projectPermissionCheck: PermissionCheckFn = async (
 
   return {
     hasPermission: result.hasPermission,
-    error: result.error || undefined
+    error: result.error || undefined,
   };
 };

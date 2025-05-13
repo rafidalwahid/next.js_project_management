@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Session } from "next-auth";
-import prisma from "@/lib/prisma";
-import { withResourcePermission } from "@/lib/api-middleware";
-import { checkTeamMemberPermission } from "@/lib/permissions/team-permissions";
-import { logActivity } from "@/lib/activity-logger";
+import { NextRequest, NextResponse } from 'next/server';
+import { Session } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { withResourcePermission } from '@/lib/api-middleware';
+import { checkTeamMemberPermission } from '@/lib/permissions/team-permissions';
+import { logActivity } from '@/lib/activity-logger';
 
 /**
  * GET /api/team-management/[teamMemberId]
@@ -47,10 +47,7 @@ export const GET = withResourcePermission(
       });
 
       if (!teamMember) {
-        return NextResponse.json(
-          { error: "Team member not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Team member not found' }, { status: 404 });
       }
 
       // Get task count for the team member
@@ -70,9 +67,9 @@ export const GET = withResourcePermission(
         },
       });
     } catch (error) {
-      console.error("Error fetching team member:", error);
+      console.error('Error fetching team member:', error);
       return NextResponse.json(
-        { error: "An error occurred while fetching the team member" },
+        { error: 'An error occurred while fetching the team member' },
         { status: 500 }
       );
     }
@@ -111,16 +108,13 @@ export const DELETE = withResourcePermission(
       });
 
       if (!teamMember) {
-        return NextResponse.json(
-          { error: "Team member not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Team member not found' }, { status: 404 });
       }
 
       // Prevent removing the project creator
       if (teamMember.userId === teamMember.project.createdById) {
         return NextResponse.json(
-          { error: "Cannot remove the project creator from the team" },
+          { error: 'Cannot remove the project creator from the team' },
           { status: 403 }
         );
       }
@@ -132,8 +126,8 @@ export const DELETE = withResourcePermission(
 
       // Log the activity
       await logActivity({
-        action: "removed_team_member",
-        entityType: "project",
+        action: 'removed_team_member',
+        entityType: 'project',
         entityId: teamMember.projectId,
         description: `Removed ${teamMember.user.name || teamMember.user.email} from the project team`,
         userId: session.user.id,
@@ -142,12 +136,12 @@ export const DELETE = withResourcePermission(
 
       return NextResponse.json({
         success: true,
-        message: "Team member removed successfully",
+        message: 'Team member removed successfully',
       });
     } catch (error) {
-      console.error("Error removing team member:", error);
+      console.error('Error removing team member:', error);
       return NextResponse.json(
-        { error: "An error occurred while removing the team member" },
+        { error: 'An error occurred while removing the team member' },
         { status: 500 }
       );
     }

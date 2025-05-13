@@ -1,8 +1,18 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import Link from "next/link"
-import { Edit, Trash, MoreHorizontal, CheckCircle2, ArrowUpDown, Circle, CircleDotDashed, CircleCheck, Calendar } from "lucide-react"
+import * as React from 'react';
+import Link from 'next/link';
+import {
+  Edit,
+  Trash,
+  MoreHorizontal,
+  CheckCircle2,
+  ArrowUpDown,
+  Circle,
+  CircleDotDashed,
+  CircleCheck,
+  Calendar,
+} from 'lucide-react';
 import {
   ColumnDef,
   SortingState,
@@ -10,11 +20,11 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,65 +32,90 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
-import { Task, TaskAssignee } from "@/types/task"
+} from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { Task, TaskAssignee } from '@/types/task';
 
 interface TaskListProps {
-  tasks: Task[]
-  onDelete: (taskId: string) => void
-  onToggleCompletion?: (taskId: string) => void
+  tasks: Task[];
+  onDelete: (taskId: string) => void;
+  onToggleCompletion?: (taskId: string) => void;
 }
 
 // --- Helper Functions ---
 
 const getUserInitials = (name: string | null) => {
-  if (!name) return "U"
-  const nameParts = name.split(" ")
+  if (!name) return 'U';
+  const nameParts = name.split(' ');
   if (nameParts.length >= 2) {
-    return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+    return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
   }
-  return name.substring(0, 2).toUpperCase()
-}
+  return name.substring(0, 2).toUpperCase();
+};
 
-const getPriorityBadgeVariant = (priority: string): "destructive" | "warning" | "outline" | "secondary" => {
+const getPriorityBadgeVariant = (
+  priority: string
+): 'destructive' | 'warning' | 'outline' | 'secondary' => {
   switch (priority?.toLowerCase()) {
-    case "high": return "destructive"
-    case "medium": return "warning" // Using warning color for medium
-    case "low": return "secondary"  // Using secondary for low
-    default: return "outline"
+    case 'high':
+      return 'destructive';
+    case 'medium':
+      return 'warning'; // Using warning color for medium
+    case 'low':
+      return 'secondary'; // Using secondary for low
+    default:
+      return 'outline';
   }
-}
+};
 
-const getStatusBadgeVariant = (statusName: string | undefined | null): "outline" | "secondary" | "success" => {
+const getStatusBadgeVariant = (
+  statusName: string | undefined | null
+): 'outline' | 'secondary' | 'success' => {
   switch (statusName?.toLowerCase()) {
-    case "completed": return "success"
-    case "in-progress": return "secondary"
-    case "pending": return "outline"
+    case 'completed':
+      return 'success';
+    case 'in-progress':
+      return 'secondary';
+    case 'pending':
+      return 'outline';
     // Add other fallback variants if needed
-    default: return "outline"
+    default:
+      return 'outline';
   }
-}
+};
 
 const getStatusIcon = (statusName: string | undefined | null) => {
   switch (statusName?.toLowerCase()) {
-    case "pending": return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />
-    case "in-progress": return <CircleDotDashed className="mr-1.5 h-3 w-3 text-yellow-600" />
-    case "completed": return <CircleCheck className="mr-1.5 h-3 w-3 text-green-600" />
+    case 'pending':
+      return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />;
+    case 'in-progress':
+      return <CircleDotDashed className="mr-1.5 h-3 w-3 text-yellow-600" />;
+    case 'completed':
+      return <CircleCheck className="mr-1.5 h-3 w-3 text-green-600" />;
     // Add more cases based on actual status names if needed
-    default: return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />
+    default:
+      return <Circle className="mr-1.5 h-3 w-3 text-muted-foreground" />;
   }
-}
-
+};
 
 // --- Column Definitions for React Table ---
 
-const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskId: string) => void): ColumnDef<Task>[] => [
+const columns = (
+  onDelete: (taskId: string) => void,
+  onToggleCompletion?: (taskId: string) => void
+): ColumnDef<Task>[] => [
   {
-    id: "completed",
-    header: "",
+    id: 'completed',
+    header: '',
     cell: ({ row }) => {
       const task = row.original;
       return (
@@ -88,20 +123,13 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              "h-8 w-8 p-0",
-              task.completed && "text-green-500"
-            )}
+            className={cn('h-8 w-8 p-0', task.completed && 'text-green-500')}
             onClick={() => onToggleCompletion?.(task.id)}
             disabled={!onToggleCompletion}
           >
-            {task.completed ? (
-              <CircleCheck className="h-5 w-5" />
-            ) : (
-              <Circle className="h-5 w-5" />
-            )}
+            {task.completed ? <CircleCheck className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
             <span className="sr-only">
-              {task.completed ? "Mark as incomplete" : "Mark as complete"}
+              {task.completed ? 'Mark as incomplete' : 'Mark as complete'}
             </span>
           </Button>
         </div>
@@ -110,11 +138,11 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
     enableSorting: false,
   },
   {
-    accessorKey: "title",
+    accessorKey: 'title',
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4"
       >
         Title
@@ -128,18 +156,20 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
           <Link
             href={`/tasks/${task.id}`}
             className={cn(
-              "font-medium hover:text-primary hover:underline max-w-[250px] md:max-w-[350px] lg:max-w-[450px] truncate",
-              task.completed && "line-through text-muted-foreground"
+              'font-medium hover:text-primary hover:underline max-w-[250px] md:max-w-[350px] lg:max-w-[450px] truncate',
+              task.completed && 'line-through text-muted-foreground'
             )}
             title={task.title}
           >
             {task.title}
           </Link>
           {task.description && (
-            <p className={cn(
-              "text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[250px] md:max-w-[350px] lg:max-w-[450px]",
-              task.completed && "line-through"
-            )}>
+            <p
+              className={cn(
+                'text-xs text-muted-foreground line-clamp-1 mt-0.5 max-w-[250px] md:max-w-[350px] lg:max-w-[450px]',
+                task.completed && 'line-through'
+              )}
+            >
               {task.description}
             </p>
           )}
@@ -148,11 +178,11 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: 'status',
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4"
       >
         Status
@@ -160,11 +190,12 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
       </Button>
     ),
     cell: ({ row }) => {
-      const status = row.original.status
-      const statusName = status?.name
-      const statusColor = status?.color
+      const status = row.original.status;
+      const statusName = status?.name;
+      const statusColor = status?.color;
 
-      const baseBadgeClasses = "capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border"
+      const baseBadgeClasses =
+        'capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border';
 
       const dynamicStyle: React.CSSProperties = statusColor
         ? {
@@ -179,23 +210,23 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
           style={statusColor ? dynamicStyle : {}}
           variant={!statusColor ? getStatusBadgeVariant(statusName) : null}
           className={cn(
-             baseBadgeClasses,
-             !statusColor && "px-2 py-0.5",
-             statusColor && "px-2 py-0.5"
+            baseBadgeClasses,
+            !statusColor && 'px-2 py-0.5',
+            statusColor && 'px-2 py-0.5'
           )}
         >
           {getStatusIcon(statusName)}
-          {statusName || "No Status"}
+          {statusName || 'No Status'}
         </Badge>
-      )
+      );
     },
   },
   {
-    accessorKey: "project.title",
+    accessorKey: 'project.title',
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4 hidden lg:inline-flex"
       >
         Project
@@ -203,7 +234,7 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
       </Button>
     ),
     cell: ({ row }) => {
-      const project = row.original.project
+      const project = row.original.project;
       return project ? (
         <Link
           href={`/projects/${project.id}`}
@@ -214,16 +245,16 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
         </Link>
       ) : (
         <span className="text-sm text-muted-foreground">—</span>
-      )
+      );
     },
     sortingFn: 'alphanumeric',
   },
   {
-    accessorKey: "priority",
+    accessorKey: 'priority',
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4"
       >
         Priority
@@ -231,17 +262,20 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
       </Button>
     ),
     cell: ({ row }) => (
-      <Badge variant={getPriorityBadgeVariant(row.original.priority)} className="capitalize whitespace-nowrap text-xs font-medium">
+      <Badge
+        variant={getPriorityBadgeVariant(row.original.priority)}
+        className="capitalize whitespace-nowrap text-xs font-medium"
+      >
         {row.original.priority}
       </Badge>
     ),
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: 'dueDate',
     header: ({ column }) => (
       <Button
         variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         className="-ml-4 hidden md:inline-flex"
       >
         Due Date
@@ -249,21 +283,19 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
       </Button>
     ),
     cell: ({ row }) => {
-      const dueDate = row.original.dueDate
+      const dueDate = row.original.dueDate;
       return dueDate ? (
-        <span className="text-sm whitespace-nowrap">
-          {new Date(dueDate).toLocaleDateString()}
-        </span>
+        <span className="text-sm whitespace-nowrap">{new Date(dueDate).toLocaleDateString()}</span>
       ) : (
         <span className="text-sm text-muted-foreground">—</span>
-      )
+      );
     },
   },
   {
-    id: "assignees",
-    header: "Assigned To",
+    id: 'assignees',
+    header: 'Assigned To',
     cell: ({ row }) => {
-      const assignees = row.original.assignees
+      const assignees = row.original.assignees;
 
       if (assignees && assignees.length > 0) {
         const displayCount = 3; // Show first 3 avatars overlapping
@@ -272,15 +304,21 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
         const remainingCount = hiddenAssignees.length;
 
         return (
-          <TooltipProvider delayDuration={100}> {/* Wrap in provider */}
-            <div className="flex items-center -space-x-2"> {/* Revert to negative space */}
-              {visibleAssignees.map((assignee) => (
+          <TooltipProvider delayDuration={100}>
+            {' '}
+            {/* Wrap in provider */}
+            <div className="flex items-center -space-x-2">
+              {' '}
+              {/* Revert to negative space */}
+              {visibleAssignees.map(assignee => (
                 <Tooltip key={assignee.id}>
                   <TooltipTrigger asChild>
                     {/* Remove the inner div and name span */}
-                    <Avatar className="h-7 w-7 border-2 border-background cursor-pointer"> {/* Added cursor */}
+                    <Avatar className="h-7 w-7 border-2 border-background cursor-pointer">
+                      {' '}
+                      {/* Added cursor */}
                       {assignee.user.image ? (
-                        <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                        <AvatarImage src={assignee.user.image} alt={assignee.user.name || 'User'} />
                       ) : null}
                       <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
                         {getUserInitials(assignee.user.name)}
@@ -288,37 +326,37 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
                     </Avatar>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{assignee.user.name || "Unnamed User"}</p>
+                    <p>{assignee.user.name || 'Unnamed User'}</p>
                   </TooltipContent>
                 </Tooltip>
               ))}
               {remainingCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                     {/* Tooltip for the count indicator */}
-                     <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium text-muted-foreground z-10 cursor-default">
-                       +{remainingCount}
-                     </div>
+                    {/* Tooltip for the count indicator */}
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium text-muted-foreground z-10 cursor-default">
+                      +{remainingCount}
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>
                     {/* List remaining names */}
-                    {hiddenAssignees.map(a => a.user.name || "Unnamed").join(", ")}
+                    {hiddenAssignees.map(a => a.user.name || 'Unnamed').join(', ')}
                   </TooltipContent>
                 </Tooltip>
               )}
             </div>
           </TooltipProvider>
-        )
-       } else {
-        return <span className="text-sm text-muted-foreground">Unassigned</span>
-       }
+        );
+      } else {
+        return <span className="text-sm text-muted-foreground">Unassigned</span>;
+      }
     },
     enableSorting: false,
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => {
-      const task = row.original
+      const task = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -331,46 +369,52 @@ const columns = (onDelete: (taskId: string) => void, onToggleCompletion?: (taskI
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-               <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
-                 <CheckCircle2 className="mr-2 h-4 w-4" /> View
-               </Link>
-             </DropdownMenuItem>
+              <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                <CheckCircle2 className="mr-2 h-4 w-4" /> View
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
-               <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
-                 <Edit className="mr-2 h-4 w-4" /> Edit
-               </Link>
-             </DropdownMenuItem>
+              <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                <Edit className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem
-               className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
-               onClick={() => onDelete(task.id)}
-             >
-               <Trash className="mr-2 h-4 w-4" /> Delete
-             </DropdownMenuItem>
+              className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
+              onClick={() => onDelete(task.id)}
+            >
+              <Trash className="mr-2 h-4 w-4" /> Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
     enableSorting: false,
   },
-]
+];
 
 // --- Main Component ---
 
 export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
     data: tasks,
-    columns: React.useMemo(() => columns(onDelete, onToggleCompletion), [onDelete, onToggleCompletion]),
+    columns: React.useMemo(
+      () => columns(onDelete, onToggleCompletion),
+      [onDelete, onToggleCompletion]
+    ),
     state: {
       sorting,
     },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+  });
 
-  const columnCount = React.useMemo(() => columns(onDelete, onToggleCompletion).length, [onDelete, onToggleCompletion])
+  const columnCount = React.useMemo(
+    () => columns(onDelete, onToggleCompletion).length,
+    [onDelete, onToggleCompletion]
+  );
 
   return (
     <div className="rounded-md border shadow-xs overflow-hidden">
@@ -378,27 +422,24 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
       <div className="hidden sm:block overflow-x-auto">
         <Table className="w-full">
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground",
-                      header.id === 'project.title' && "hidden lg:table-cell",
-                      header.id === 'dueDate' && "hidden md:table-cell",
-                      header.id === 'assignees' && "hidden md:table-cell",
-                      header.id === 'completed' && "w-10",
-                      header.id === 'status' && "hidden md:table-cell",
-                      header.id === 'priority' && "hidden md:table-cell"
+                      'whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground',
+                      header.id === 'project.title' && 'hidden lg:table-cell',
+                      header.id === 'dueDate' && 'hidden md:table-cell',
+                      header.id === 'assignees' && 'hidden md:table-cell',
+                      header.id === 'completed' && 'w-10',
+                      header.id === 'status' && 'hidden md:table-cell',
+                      header.id === 'priority' && 'hidden md:table-cell'
                     )}
                   >
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -406,23 +447,23 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                   className="group hover:bg-muted/50"
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map(cell => (
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        "px-3 py-2.5 text-sm",
-                        cell.column.id === 'project.title' && "hidden lg:table-cell",
-                        cell.column.id === 'dueDate' && "hidden md:table-cell",
-                        cell.column.id === 'assignees' && "hidden md:table-cell",
-                        cell.column.id === 'completed' && "w-10",
-                        cell.column.id === 'status' && "hidden md:table-cell",
-                        cell.column.id === 'priority' && "hidden md:table-cell"
+                        'px-3 py-2.5 text-sm',
+                        cell.column.id === 'project.title' && 'hidden lg:table-cell',
+                        cell.column.id === 'dueDate' && 'hidden md:table-cell',
+                        cell.column.id === 'assignees' && 'hidden md:table-cell',
+                        cell.column.id === 'completed' && 'w-10',
+                        cell.column.id === 'status' && 'hidden md:table-cell',
+                        cell.column.id === 'priority' && 'hidden md:table-cell'
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -445,10 +486,10 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
       <div className="sm:hidden">
         {table.getRowModel().rows?.length ? (
           <div className="divide-y">
-            {table.getRowModel().rows.map((row) => {
+            {table.getRowModel().rows.map(row => {
               const task = row.original;
               return (
-                <div key={task.id} className={cn("p-4 space-y-3", task.completed && "opacity-70")}>
+                <div key={task.id} className={cn('p-4 space-y-3', task.completed && 'opacity-70')}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-2">
                       {onToggleCompletion && (
@@ -456,11 +497,11 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "h-8 w-8 p-0 shrink-0 mt-0.5",
-                            task.completed && "text-green-500"
+                            'h-8 w-8 p-0 shrink-0 mt-0.5',
+                            task.completed && 'text-green-500'
                           )}
                           onClick={() => onToggleCompletion(task.id)}
-                          aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                          aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                         >
                           {task.completed ? (
                             <CircleCheck className="h-5 w-5" />
@@ -472,8 +513,8 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                       <Link
                         href={`/tasks/${task.id}`}
                         className={cn(
-                          "font-medium hover:text-primary hover:underline break-words line-clamp-2",
-                          task.completed && "line-through text-muted-foreground"
+                          'font-medium hover:text-primary hover:underline break-words line-clamp-2',
+                          task.completed && 'line-through text-muted-foreground'
                         )}
                         title={task.title}
                       >
@@ -491,12 +532,18 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                          <Link
+                            href={`/tasks/${task.id}`}
+                            className="cursor-pointer w-full flex items-center"
+                          >
                             <CheckCircle2 className="mr-2 h-4 w-4" /> View
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/tasks/${task.id}`} className="cursor-pointer w-full flex items-center">
+                          <Link
+                            href={`/tasks/${task.id}`}
+                            className="cursor-pointer w-full flex items-center"
+                          >
                             <Edit className="mr-2 h-4 w-4" /> Edit
                           </Link>
                         </DropdownMenuItem>
@@ -511,35 +558,46 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                   </div>
 
                   {task.description && (
-                    <p className={cn(
-                      "text-xs text-muted-foreground line-clamp-1",
-                      task.completed && "line-through"
-                    )}>
+                    <p
+                      className={cn(
+                        'text-xs text-muted-foreground line-clamp-1',
+                        task.completed && 'line-through'
+                      )}
+                    >
                       {task.description}
                     </p>
                   )}
 
                   <div className="flex flex-wrap gap-2 items-center text-xs">
-                    <Badge variant={getPriorityBadgeVariant(task.priority)} className="capitalize whitespace-nowrap text-xs font-medium">
+                    <Badge
+                      variant={getPriorityBadgeVariant(task.priority)}
+                      className="capitalize whitespace-nowrap text-xs font-medium"
+                    >
                       {task.priority}
                     </Badge>
 
                     {task.status && (
                       <Badge
-                        style={task.status.color ? {
-                          backgroundColor: `${task.status.color}1A`,
-                          borderColor: `${task.status.color}4D`,
-                          color: task.status.color,
-                        } : {}}
-                        variant={!task.status.color ? getStatusBadgeVariant(task.status.name) : null}
+                        style={
+                          task.status.color
+                            ? {
+                                backgroundColor: `${task.status.color}1A`,
+                                borderColor: `${task.status.color}4D`,
+                                color: task.status.color,
+                              }
+                            : {}
+                        }
+                        variant={
+                          !task.status.color ? getStatusBadgeVariant(task.status.name) : null
+                        }
                         className={cn(
-                          "capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border",
-                          !task.status.color && "px-2 py-0.5",
-                          task.status.color && "px-2 py-0.5"
+                          'capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border',
+                          !task.status.color && 'px-2 py-0.5',
+                          task.status.color && 'px-2 py-0.5'
                         )}
                       >
                         {getStatusIcon(task.status.name)}
-                        {task.status.name || "No Status"}
+                        {task.status.name || 'No Status'}
                       </Badge>
                     )}
 
@@ -554,18 +612,26 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                   <div className="flex flex-wrap gap-3 items-center">
                     {task.project && (
                       <div className="text-xs text-muted-foreground">
-                        <span className="font-medium">Project:</span> <Link href={`/projects/${task.project.id}`} className="hover:underline">{task.project.title}</Link>
+                        <span className="font-medium">Project:</span>{' '}
+                        <Link href={`/projects/${task.project.id}`} className="hover:underline">
+                          {task.project.title}
+                        </Link>
                       </div>
                     )}
 
                     {task.assignees && task.assignees.length > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">Assigned to:</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Assigned to:
+                        </span>
                         <div className="flex -space-x-2">
-                          {task.assignees.slice(0, 3).map((assignee) => (
+                          {task.assignees.slice(0, 3).map(assignee => (
                             <Avatar key={assignee.id} className="h-5 w-5 border border-background">
                               {assignee.user.image ? (
-                                <AvatarImage src={assignee.user.image} alt={assignee.user.name || "User"} />
+                                <AvatarImage
+                                  src={assignee.user.image}
+                                  alt={assignee.user.name || 'User'}
+                                />
                               ) : null}
                               <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">
                                 {getUserInitials(assignee.user.name)}
@@ -592,5 +658,5 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,45 +1,41 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import {
-  CheckCircle2,
-  FileText,
-  Layers,
-  Users
-} from "lucide-react"
-import { DashboardStats } from "@/types/dashboard"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, FileText, Layers, Users } from 'lucide-react';
+import { DashboardStats } from '@/types/dashboard';
 import {
   calculateTaskStats,
   calculateTeamMembers,
-  calculateProjectStatusDistribution
-} from "@/utils/dashboard-utils"
-import { StatsCard } from "./stats-card"
+  calculateProjectStatusDistribution,
+} from '@/utils/dashboard-utils';
+import { StatsCard } from './stats-card';
 
 interface ManagerDashboardProps {
-  stats: DashboardStats
+  stats: DashboardStats;
 }
 
 export function ManagerDashboard({ stats }: ManagerDashboardProps) {
   // Get derived stats directly from the API response
-  const totalProjects = stats?.totalProjects || 0
-  const recentProjects = stats?.recentProjects || []
-  const projectGrowth = stats?.projectGrowth || 0
+  const totalProjects = stats?.totalProjects || 0;
+  const recentProjects = stats?.recentProjects || [];
+  const projectGrowth = stats?.projectGrowth || 0;
 
   // Use utility functions for calculations
-  const { totalTasks, completedTasks, pendingTasks, completionRate } = calculateTaskStats(recentProjects)
-  const { teamMembersCount } = calculateTeamMembers(recentProjects)
+  const { totalTasks, completedTasks, pendingTasks, completionRate } =
+    calculateTaskStats(recentProjects);
+  const { teamMembersCount } = calculateTeamMembers(recentProjects);
 
   // Calculate project status distribution
-  const projectStatusDistribution = calculateProjectStatusDistribution(recentProjects)
+  const projectStatusDistribution = calculateProjectStatusDistribution(recentProjects);
 
   // Group projects by status for display
   const projectsByStatus = {
     notStarted: recentProjects.filter(p => p.progress === 0),
     inProgress: recentProjects.filter(p => p.progress > 0 && p.progress < 100),
-    completed: recentProjects.filter(p => p.progress === 100)
-  }
+    completed: recentProjects.filter(p => p.progress === 100),
+  };
 
   return (
     <div className="space-y-4">
@@ -81,9 +77,7 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Team Performance</CardTitle>
-                <CardDescription>
-                  Task completion and project metrics
-                </CardDescription>
+                <CardDescription>Task completion and project metrics</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentProjects.length === 0 ? (
@@ -98,22 +92,22 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
                     </div>
                     <div className="flex justify-between">
                       <span>Projects in Progress</span>
-                      <span className="font-medium">
-                        {projectsByStatus.inProgress.length}
-                      </span>
+                      <span className="font-medium">{projectsByStatus.inProgress.length}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Completed Projects</span>
-                      <span className="font-medium">
-                        {projectsByStatus.completed.length}
-                      </span>
+                      <span className="font-medium">{projectsByStatus.completed.length}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Average Project Progress</span>
                       <span className="font-medium">
                         {recentProjects.length > 0
-                          ? Math.round(recentProjects.reduce((sum, p) => sum + p.progress, 0) / recentProjects.length)
-                          : 0}%
+                          ? Math.round(
+                              recentProjects.reduce((sum, p) => sum + p.progress, 0) /
+                                recentProjects.length
+                            )
+                          : 0}
+                        %
                       </span>
                     </div>
                   </div>
@@ -124,9 +118,7 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Projects</CardTitle>
-                <CardDescription>
-                  Your most recently updated projects
-                </CardDescription>
+                <CardDescription>Your most recently updated projects</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentProjects.length === 0 ? (
@@ -143,7 +135,10 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
                         </p>
                         <div className="flex items-center gap-1 mt-1">
                           {project.team?.slice(0, 3).map(member => (
-                            <div key={member.id} className="w-5 h-5 rounded-full bg-muted overflow-hidden">
+                            <div
+                              key={member.id}
+                              className="w-5 h-5 rounded-full bg-muted overflow-hidden"
+                            >
                               {member.image ? (
                                 <img
                                   src={member.image}
@@ -158,7 +153,9 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
                             </div>
                           ))}
                           {project.team?.length > 3 && (
-                            <span className="text-xs text-muted-foreground">+{project.team.length - 3}</span>
+                            <span className="text-xs text-muted-foreground">
+                              +{project.team.length - 3}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -175,9 +172,7 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Team Management</CardTitle>
-                <CardDescription>
-                  Manage your team members and their assignments
-                </CardDescription>
+                <CardDescription>Manage your team members and their assignments</CardDescription>
               </div>
               <Button variant="outline" size="sm">
                 <Users className="mr-2 h-4 w-4" />
@@ -221,7 +216,9 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
                                     <p className="text-sm font-medium">{member.name}</p>
                                   </div>
                                 </div>
-                                <Button variant="ghost" size="sm">Manage</Button>
+                                <Button variant="ghost" size="sm">
+                                  Manage
+                                </Button>
                               </div>
                             ))}
                             {project.team?.length > 3 && (
@@ -245,9 +242,7 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Project Management</CardTitle>
-                <CardDescription>
-                  Manage your projects and their progress
-                </CardDescription>
+                <CardDescription>Manage your projects and their progress</CardDescription>
               </div>
               <Button variant="outline" size="sm">
                 <Layers className="mr-2 h-4 w-4" />
@@ -290,7 +285,9 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
                           </div>
                         </div>
                         <div className="mt-4 flex justify-end">
-                          <Button variant="ghost" size="sm">View Details</Button>
+                          <Button variant="ghost" size="sm">
+                            View Details
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -302,5 +299,5 @@ export function ManagerDashboard({ stats }: ManagerDashboardProps) {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

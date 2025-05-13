@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
 
 // GET handler to list projects
 export async function GET(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get URL parameters
@@ -30,10 +30,7 @@ export async function GET(req: NextRequest) {
 
     // Validate pagination parameters
     if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
-      return NextResponse.json(
-        { error: "Invalid pagination parameters" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid pagination parameters' }, { status: 400 });
     }
 
     // Validate sort parameters
@@ -41,7 +38,7 @@ export async function GET(req: NextRequest) {
     const sortField = validSortFields.includes(sortFieldParam) ? sortFieldParam : 'updatedAt';
     const sortDirection = sortDirectionParam === 'asc' ? 'asc' : 'desc';
 
-    let where: any = {};
+    const where: any = {};
 
     // Add status filter if provided
     if (statusIdParam) {
@@ -51,9 +48,9 @@ export async function GET(req: NextRequest) {
       const status = await prisma.projectStatus.findFirst({
         where: {
           name: {
-            equals: statusParam
-          }
-        }
+            equals: statusParam,
+          },
+        },
       });
 
       if (status) {
@@ -65,7 +62,7 @@ export async function GET(req: NextRequest) {
     if (titleParam) {
       where.title = {
         contains: titleParam,
-        mode: 'insensitive' // Case-insensitive search
+        mode: 'insensitive', // Case-insensitive search
       };
     }
 
@@ -74,10 +71,10 @@ export async function GET(req: NextRequest) {
       try {
         const startDate = new Date(startDateParam);
         where.startDate = {
-          gte: startDate
+          gte: startDate,
         };
       } catch (error) {
-        console.error("Invalid start date format:", error);
+        console.error('Invalid start date format:', error);
       }
     }
 
@@ -85,10 +82,10 @@ export async function GET(req: NextRequest) {
       try {
         const endDate = new Date(endDateParam);
         where.endDate = {
-          lte: endDate
+          lte: endDate,
         };
       } catch (error) {
-        console.error("Invalid end date format:", error);
+        console.error('Invalid end date format:', error);
       }
     }
 
@@ -99,9 +96,9 @@ export async function GET(req: NextRequest) {
         where.teamMembers = {
           some: {
             userId: {
-              in: teamMemberIds
-            }
-          }
+              in: teamMemberIds,
+            },
+          },
         };
       }
     }
@@ -111,10 +108,7 @@ export async function GET(req: NextRequest) {
     const userRole = session.user.role;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID not found in session" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'User ID not found in session' }, { status: 401 });
     }
 
     try {
@@ -130,7 +124,7 @@ export async function GET(req: NextRequest) {
               id: true,
               name: true,
               email: true,
-            }
+            },
           },
           statuses: true, // Project-specific statuses
           teamMembers: {
@@ -141,8 +135,8 @@ export async function GET(req: NextRequest) {
                   name: true,
                   email: true,
                   image: true,
-                }
-              }
+                },
+              },
             },
             take: 10, // Limit to 10 team members per project for performance
           },
@@ -150,11 +144,11 @@ export async function GET(req: NextRequest) {
             select: {
               tasks: true,
               teamMembers: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          [sortField]: sortDirection
+          [sortField]: sortDirection,
         },
         take: limit,
         skip: skip,
@@ -173,19 +167,16 @@ export async function GET(req: NextRequest) {
           page,
           limit,
           totalPages: Math.ceil(total / limit),
-        }
+        },
       });
     } catch (dbError) {
-      console.error("Database error:", dbError);
-      return NextResponse.json(
-        { error: "Database operation failed" },
-        { status: 500 }
-      );
+      console.error('Database error:', dbError);
+      return NextResponse.json({ error: 'Database operation failed' }, { status: 500 });
     }
   } catch (error) {
-    console.error("Error in projects API:", error);
+    console.error('Error in projects API:', error);
     return NextResponse.json(
-      { error: "An error occurred while fetching projects" },
+      { error: 'An error occurred while fetching projects' },
       { status: 500 }
     );
   }
@@ -193,29 +184,36 @@ export async function GET(req: NextRequest) {
 
 // Validation schema for creating a project
 const createProjectSchema = z.object({
-  title: z.string()
-    .min(3, "Project title must be at least 3 characters long")
-    .max(100, "Project title cannot exceed 100 characters"),
+  title: z
+    .string()
+    .min(3, 'Project title must be at least 3 characters long')
+    .max(100, 'Project title cannot exceed 100 characters'),
   description: z.string().optional().nullable(),
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   // Handle estimatedTime as string or number
   estimatedTime: z.union([
-    z.string().optional().nullable().transform(val => {
-      if (!val) return null;
-      const parsed = parseFloat(val);
-      return isNaN(parsed) ? null : parsed;
-    }),
-    z.number().optional().nullable()
+    z
+      .string()
+      .optional()
+      .nullable()
+      .transform(val => {
+        if (!val) return null;
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? null : parsed;
+      }),
+    z.number().optional().nullable(),
   ]),
-  initialStatuses: z.array(
-    z.object({
-      name: z.string().min(1).max(50),
-      color: z.string().optional(),
-      description: z.string().optional().nullable(),
-      isDefault: z.boolean().optional(),
-    })
-  ).optional(),
+  initialStatuses: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(50),
+        color: z.string().optional(),
+        description: z.string().optional().nullable(),
+        isDefault: z.boolean().optional(),
+      })
+    )
+    .optional(),
 });
 
 // POST handler to create a project
@@ -224,10 +222,13 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({
-        error: "Unauthorized - Please log in again",
-        details: { session: false }
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: 'Unauthorized - Please log in again',
+          details: { session: false },
+        },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
@@ -237,45 +238,52 @@ export async function POST(req: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
 
     // Verify user exists before creating project
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: "User not found in database", details: { userId: session.user.id } },
+        { error: 'User not found in database', details: { userId: session.user.id } },
         { status: 404 }
       );
     }
 
     // Log the validated data for debugging
-    console.log("Validated project data:", JSON.stringify(validationResult.data, null, 2));
+    console.log('Validated project data:', JSON.stringify(validationResult.data, null, 2));
 
     // Create project with user association
     const project = await prisma.project.create({
       data: {
         title: validationResult.data.title,
         description: validationResult.data.description,
-        startDate: validationResult.data.startDate && typeof validationResult.data.startDate === 'string' && validationResult.data.startDate.trim() !== ""
-          ? new Date(validationResult.data.startDate)
-          : null,
-        endDate: validationResult.data.endDate && typeof validationResult.data.endDate === 'string' && validationResult.data.endDate.trim() !== ""
-          ? new Date(validationResult.data.endDate)
-          : null,
-        estimatedTime: validationResult.data.estimatedTime !== undefined
-          ? validationResult.data.estimatedTime
-          : null,
+        startDate:
+          validationResult.data.startDate &&
+          typeof validationResult.data.startDate === 'string' &&
+          validationResult.data.startDate.trim() !== ''
+            ? new Date(validationResult.data.startDate)
+            : null,
+        endDate:
+          validationResult.data.endDate &&
+          typeof validationResult.data.endDate === 'string' &&
+          validationResult.data.endDate.trim() !== ''
+            ? new Date(validationResult.data.endDate)
+            : null,
+        estimatedTime:
+          validationResult.data.estimatedTime !== undefined
+            ? validationResult.data.estimatedTime
+            : null,
         createdById: user.id,
         teamMembers: {
           create: {
             userId: user.id,
-          }
+          },
         },
       },
       include: {
@@ -284,7 +292,7 @@ export async function POST(req: NextRequest) {
             id: true,
             name: true,
             email: true,
-          }
+          },
         },
         teamMembers: {
           include: {
@@ -293,12 +301,12 @@ export async function POST(req: NextRequest) {
                 id: true,
                 name: true,
                 email: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
-        statuses: true
-      }
+        statuses: true,
+      },
     });
 
     // Create initial statuses if provided
@@ -306,7 +314,9 @@ export async function POST(req: NextRequest) {
       const statuses = [];
 
       // Find if there's a default status in the initial statuses
-      const hasDefaultStatus = validationResult.data.initialStatuses.some(status => status.isDefault);
+      const hasDefaultStatus = validationResult.data.initialStatuses.some(
+        status => status.isDefault
+      );
 
       // Create each status
       for (let i = 0; i < validationResult.data.initialStatuses.length; i++) {
@@ -318,12 +328,12 @@ export async function POST(req: NextRequest) {
         const status = await prisma.projectStatus.create({
           data: {
             name: statusData.name,
-            color: statusData.color || "#6E56CF", // Default color if not provided
+            color: statusData.color || '#6E56CF', // Default color if not provided
             description: statusData.description,
             order: i,
             isDefault,
             projectId: project.id,
-          }
+          },
         });
 
         statuses.push(status);
@@ -338,7 +348,7 @@ export async function POST(req: NextRequest) {
               id: true,
               name: true,
               email: true,
-            }
+            },
           },
           teamMembers: {
             include: {
@@ -347,21 +357,21 @@ export async function POST(req: NextRequest) {
                   id: true,
                   name: true,
                   email: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
-          statuses: true
-        }
+          statuses: true,
+        },
       });
 
       return NextResponse.json({ project: updatedProject });
     } else {
       // Create default statuses if none provided
       const defaultStatuses = [
-        { name: "To Do", color: "#3498db", isDefault: true, order: 0 },
-        { name: "In Progress", color: "#f39c12", isDefault: false, order: 1 },
-        { name: "Done", color: "#2ecc71", isDefault: false, order: 2 }
+        { name: 'To Do', color: '#3498db', isDefault: true, order: 0 },
+        { name: 'In Progress', color: '#f39c12', isDefault: false, order: 1 },
+        { name: 'Done', color: '#2ecc71', isDefault: false, order: 2 },
       ];
 
       for (const statusData of defaultStatuses) {
@@ -369,7 +379,7 @@ export async function POST(req: NextRequest) {
           data: {
             ...statusData,
             projectId: project.id,
-          }
+          },
         });
       }
 
@@ -382,7 +392,7 @@ export async function POST(req: NextRequest) {
               id: true,
               name: true,
               email: true,
-            }
+            },
           },
           teamMembers: {
             include: {
@@ -391,29 +401,32 @@ export async function POST(req: NextRequest) {
                   id: true,
                   name: true,
                   email: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
-          statuses: true
-        }
+          statuses: true,
+        },
       });
 
       return NextResponse.json({ project: updatedProject });
     }
   } catch (error) {
-    console.error("Error creating project:", error);
+    console.error('Error creating project:', error);
 
     // Check if it's a Prisma error
-    if (error instanceof Error &&
-        (error.name === 'PrismaClientKnownRequestError' || error.name === 'PrismaClientValidationError')) {
+    if (
+      error instanceof Error &&
+      (error.name === 'PrismaClientKnownRequestError' ||
+        error.name === 'PrismaClientValidationError')
+    ) {
       return NextResponse.json(
         {
-          error: "Database validation error",
+          error: 'Database validation error',
           details: {
             message: error.message,
             code: (error as any).code,
-          }
+          },
         },
         { status: 400 }
       );
@@ -421,11 +434,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        error: "An error occurred while creating the project",
+        error: 'An error occurred while creating the project',
         details: {
           message: error instanceof Error ? error.message : String(error),
-          stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
-        }
+          stack:
+            process.env.NODE_ENV === 'development' && error instanceof Error
+              ? error.stack
+              : undefined,
+        },
       },
       { status: 500 }
     );

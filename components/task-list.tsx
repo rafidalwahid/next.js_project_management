@@ -1,12 +1,19 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MoreHorizontal, Clock, Search, Filter } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { MoreHorizontal, Clock, Search, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,19 +21,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useTasks } from "@/hooks/use-data"
-import { Input } from "@/components/ui/input"
-import { taskApi } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/components/ui/spinner"
+} from '@/components/ui/dropdown-menu';
+import { useTasks } from '@/hooks/use-data';
+import { Input } from '@/components/ui/input';
+import { taskApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
 
 export function TaskList() {
-  const [page, setPage] = useState(1)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filter, setFilter] = useState({})
-  const { tasks, isLoading, isError, mutate, pagination } = useTasks(page, 10, filter)
-  const { toast } = useToast()
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState({});
+  const { tasks, isLoading, isError, mutate, pagination } = useTasks(page, 10, filter);
+  const { toast } = useToast();
 
   // Handle task completion update
   const handleCompletionChange = async (taskId: string, completed: boolean) => {
@@ -34,41 +41,45 @@ export function TaskList() {
       // Instead of updating status, we would update a different field
       // For now, we'll just show a toast and refresh the data
       toast({
-        title: "Task updated",
-        description: `Task marked as ${completed ? "completed" : "pending"}`,
-      })
-      mutate() // Refresh the data
+        title: 'Task updated',
+        description: `Task marked as ${completed ? 'completed' : 'pending'}`,
+      });
+      mutate(); // Refresh the data
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update task completion",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to update task completion',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   // Function to handle search
   const handleSearch = () => {
-    setPage(1)
-    setFilter(prev => ({ ...prev, title: searchQuery }))
-  }
+    setPage(1);
+    setFilter(prev => ({ ...prev, title: searchQuery }));
+  };
 
   // Get priority badge style based on priority
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
-      case "high":
-        return "bg-red-50 text-red-700 border-red-200"
-      case "medium":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200"
-      case "low":
-        return "bg-green-50 text-green-700 border-green-200"
+      case 'high':
+        return 'bg-red-50 text-red-700 border-red-200';
+      case 'medium':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'low':
+        return 'bg-green-50 text-green-700 border-green-200';
       default:
-        return "bg-blue-50 text-blue-700 border-blue-200"
+        return 'bg-blue-50 text-blue-700 border-blue-200';
     }
-  }
+  };
 
   if (isError) {
-    return <div className="p-8 text-center text-red-500">Error loading tasks. Please try again later.</div>
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error loading tasks. Please try again later.
+      </div>
+    );
   }
 
   return (
@@ -81,8 +92,8 @@ export function TaskList() {
             placeholder="Search tasks..."
             className="pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
           />
         </div>
         <Button variant="outline" size="icon" title="Filter">
@@ -117,17 +128,17 @@ export function TaskList() {
               </TableCell>
             </TableRow>
           ) : (
-            tasks.map((task) => (
+            tasks.map(task => (
               <TableRow key={task.id}>
                 <TableCell>
                   <Checkbox
                     id={`task-${task.id}`}
-                    checked={task.project?.status?.name === "completed"}
-                    onCheckedChange={(checked) => handleCompletionChange(task.id, checked as boolean)}
+                    checked={task.project?.status?.name === 'completed'}
+                    onCheckedChange={checked => handleCompletionChange(task.id, checked as boolean)}
                   />
                 </TableCell>
                 <TableCell className="font-medium">{task.title}</TableCell>
-                <TableCell>{task.project?.title || "—"}</TableCell>
+                <TableCell>{task.project?.title || '—'}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className={getPriorityBadge(task.priority)}>
                     {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
@@ -137,9 +148,7 @@ export function TaskList() {
                   {task.dueDate ? (
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm">
-                        {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
+                      <span className="text-sm">{new Date(task.dueDate).toLocaleDateString()}</span>
                     </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">No deadline</span>
@@ -149,12 +158,18 @@ export function TaskList() {
                   {task.assignedToId ? (
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={task.assignedTo?.image || ""} alt={task.assignedTo?.name || ""} />
+                        <AvatarImage
+                          src={task.assignedTo?.image || ''}
+                          alt={task.assignedTo?.name || ''}
+                        />
                         <AvatarFallback>
-                          {task.assignedTo?.name?.split(" ").map(n => n[0]).join("") || "?"}
+                          {task.assignedTo?.name
+                            ?.split(' ')
+                            .map(n => n[0])
+                            .join('') || '?'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{task.assignedTo?.name || "Unknown"}</span>
+                      <span className="text-sm">{task.assignedTo?.name || 'Unknown'}</span>
                     </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">Unassigned</span>
@@ -206,5 +221,5 @@ export function TaskList() {
         </div>
       )}
     </div>
-  )
+  );
 }

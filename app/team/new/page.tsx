@@ -1,72 +1,85 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { PermissionGuard } from "@/components/permission-guard"
-import Link from "next/link"
-import { BarChart3, Save, X, AlertCircle } from "lucide-react"
-import { SYSTEM_ROLES, getRoleOptions } from "@/lib/roles"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { PermissionGuard } from '@/components/permission-guard';
+import Link from 'next/link';
+import { BarChart3, Save, X, AlertCircle } from 'lucide-react';
+import { SYSTEM_ROLES, getRoleOptions } from '@/lib/roles';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DashboardNav } from "@/components/dashboard-nav"
-import { UserNav } from "@/components/user-nav"
-import { useProjects } from "@/hooks/use-data"
-import { useUsers } from "@/hooks/use-users"
-import { teamManagementApi } from "@/lib/api"
-import { useAddTeamMember } from "@/hooks/use-team-management"
-import { useToast } from "@/hooks/use-toast"
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DashboardNav } from '@/components/dashboard-nav';
+import { UserNav } from '@/components/user-nav';
+import { useProjects } from '@/hooks/use-data';
+import { useUsers } from '@/hooks/use-users';
+import { teamManagementApi } from '@/lib/api';
+import { useAddTeamMember } from '@/hooks/use-team-management';
+import { useToast } from '@/hooks/use-toast';
 
 export default function NewTeamMemberPage() {
-  const router = useRouter()
-  const { data: session } = useSession()
-  const { projects, isLoading: projectsLoading, isError: projectsError } = useProjects(1, 100)
-  const { users } = useUsers()
-  const { toast } = useToast()
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { projects, isLoading: projectsLoading, isError: projectsError } = useProjects(1, 100);
+  const { users } = useUsers();
+  const { toast } = useToast();
 
   // Debug projects data
   useEffect(() => {
-    console.log("Projects data:", projects);
-    console.log("Projects loading:", projectsLoading);
-    console.log("Projects error:", projectsError);
-  }, [projects, projectsLoading, projectsError])
+    console.log('Projects data:', projects);
+    console.log('Projects loading:', projectsLoading);
+    console.log('Projects error:', projectsError);
+  }, [projects, projectsLoading, projectsError]);
 
   // Check if user has permission to add team members
   useEffect(() => {
-    if (session?.user?.role !== "admin" && session?.user?.role !== "manager") {
+    if (session?.user?.role !== 'admin' && session?.user?.role !== 'manager') {
       toast({
-        title: "Access Denied",
+        title: 'Access Denied',
         description: "You don't have permission to add team members",
-        variant: "destructive"
-      })
-      router.push("/team")
+        variant: 'destructive',
+      });
+      router.push('/team');
     }
-  }, [session, router, toast])
+  }, [session, router, toast]);
   const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "user",
-    projectId: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    projectId: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{
     name?: string;
     email?: string;
     password?: string;
     projectId?: string;
-  }>({})
+  }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setUserData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setUserData(prev => ({ ...prev, [name]: value }));
+  };
 
   const validateForm = () => {
     const newErrors: {
@@ -78,26 +91,26 @@ export default function NewTeamMemberPage() {
 
     // Validate name
     if (!userData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = 'Name is required';
     }
 
     // Validate email
     if (!userData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = 'Please enter a valid email address';
     }
 
     // Validate password
     if (!userData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     } else if (userData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     // Validate project
     if (!userData.projectId) {
-      newErrors.projectId = "Please select a project";
+      newErrors.projectId = 'Please select a project';
     }
 
     setErrors(newErrors);
@@ -108,7 +121,7 @@ export default function NewTeamMemberPage() {
   const { addTeamMember, isAdding, error: addTeamMemberError } = useAddTeamMember();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Clear previous errors
     setErrors({});
@@ -133,43 +146,43 @@ export default function NewTeamMemberPage() {
           password: userData.password,
           role: userData.role,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create user')
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create user');
       }
 
-      const createdUser = await response.json()
+      const createdUser = await response.json();
 
       // Now add the newly created user to the team using the new API
       await addTeamMember({
         userId: createdUser.id,
         projectId: userData.projectId,
-      })
+      });
 
       toast({
-        title: "Team Member Created",
+        title: 'Team Member Created',
         description: `${userData.name} has been created and added to the project successfully.`,
-        variant: "default"
-      })
+        variant: 'default',
+      });
 
-      router.push("/team")
+      router.push('/team');
     } catch (error: any) {
       // Handle specific error cases
-      if (error.message.includes("email already exists")) {
-        setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+      if (error.message.includes('email already exists')) {
+        setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
       } else {
         toast({
-          title: "Error",
-          description: error.message || "Failed to add team member",
-          variant: "destructive",
+          title: 'Error',
+          description: error.message || 'Failed to add team member',
+          variant: 'destructive',
         });
       }
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -197,12 +210,10 @@ export default function NewTeamMemberPage() {
                     value={userData.name}
                     onChange={handleInputChange}
                     placeholder="Enter user's full name"
-                    className={`w-full ${errors.name ? "border-red-500" : ""}`}
+                    className={`w-full ${errors.name ? 'border-red-500' : ''}`}
                     disabled={isSubmitting}
                   />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
+                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email Address</Label>
@@ -213,12 +224,10 @@ export default function NewTeamMemberPage() {
                     value={userData.email}
                     onChange={handleInputChange}
                     placeholder="Enter user's email address"
-                    className={`w-full ${errors.email ? "border-red-500" : ""}`}
+                    className={`w-full ${errors.email ? 'border-red-500' : ''}`}
                     disabled={isSubmitting}
                   />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email}</p>
-                  )}
+                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                 </div>
               </div>
 
@@ -232,12 +241,10 @@ export default function NewTeamMemberPage() {
                     value={userData.password}
                     onChange={handleInputChange}
                     placeholder="Create a secure password"
-                    className={`w-full ${errors.password ? "border-red-500" : ""}`}
+                    className={`w-full ${errors.password ? 'border-red-500' : ''}`}
                     disabled={isSubmitting}
                   />
-                  {errors.password && (
-                    <p className="text-sm text-red-500">{errors.password}</p>
-                  )}
+                  {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                   <p className="text-xs text-muted-foreground">
                     Password must be at least 6 characters long
                   </p>
@@ -247,7 +254,7 @@ export default function NewTeamMemberPage() {
                   <Select
                     name="role"
                     defaultValue="user"
-                    onValueChange={(value) => setUserData(prev => ({ ...prev, role: value }))}
+                    onValueChange={value => setUserData(prev => ({ ...prev, role: value }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger>
@@ -271,11 +278,13 @@ export default function NewTeamMemberPage() {
                 <Label htmlFor="projectId">Assign to Project</Label>
                 <Select
                   name="projectId"
-                  onValueChange={(value) => setUserData(prev => ({ ...prev, projectId: value }))}
+                  onValueChange={value => setUserData(prev => ({ ...prev, projectId: value }))}
                   disabled={isSubmitting || projectsLoading}
                 >
-                  <SelectTrigger className={errors.projectId ? "border-red-500" : ""}>
-                    <SelectValue placeholder={projectsLoading ? "Loading projects..." : "Select a project"} />
+                  <SelectTrigger className={errors.projectId ? 'border-red-500' : ''}>
+                    <SelectValue
+                      placeholder={projectsLoading ? 'Loading projects...' : 'Select a project'}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {projectsLoading ? (
@@ -287,7 +296,7 @@ export default function NewTeamMemberPage() {
                         Error loading projects
                       </SelectItem>
                     ) : Array.isArray(projects) && projects.length > 0 ? (
-                      projects.map((project) => (
+                      projects.map(project => (
                         <SelectItem key={project.id} value={project.id}>
                           {project.title}
                         </SelectItem>
@@ -299,28 +308,41 @@ export default function NewTeamMemberPage() {
                     )}
                   </SelectContent>
                 </Select>
-                {errors.projectId && (
-                  <p className="text-sm text-red-500">{errors.projectId}</p>
-                )}
+                {errors.projectId && <p className="text-sm text-red-500">{errors.projectId}</p>}
                 <p className="text-sm text-muted-foreground mt-1">
                   The user will be added as a team member to this project.
                 </p>
-                {!projectsLoading && !projectsError &&
-                  (Array.isArray(projects) ? projects.length === 0 : !projects || !projects.projects || projects.projects.length === 0) && (
-                  <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
-                    <p>No projects are available. Please create a project first before adding team members.</p>
-                    <Button variant="link" className="p-0 h-auto text-amber-800 underline" asChild>
-                      <Link href="/projects/new">Create a project</Link>
-                    </Button>
-                  </div>
-                )}
+                {!projectsLoading &&
+                  !projectsError &&
+                  (Array.isArray(projects)
+                    ? projects.length === 0
+                    : !projects || !projects.projects || projects.projects.length === 0) && (
+                    <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
+                      <p>
+                        No projects are available. Please create a project first before adding team
+                        members.
+                      </p>
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-amber-800 underline"
+                        asChild
+                      >
+                        <Link href="/projects/new">Create a project</Link>
+                      </Button>
+                    </div>
+                  )}
               </div>
             </div>
             {/* Project role selection removed as we now only use system roles */}
           </CardContent>
           <CardFooter className="flex justify-end">
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:justify-end">
-              <Button variant="outline" asChild disabled={isSubmitting} className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                asChild
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
                 <Link href="/team">
                   <X className="mr-2 h-4 w-4" />
                   Cancel
@@ -348,5 +370,5 @@ export default function NewTeamMemberPage() {
         </form>
       </Card>
     </div>
-  )
+  );
 }

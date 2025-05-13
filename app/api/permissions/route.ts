@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import prisma from '@/lib/prisma';
 
 // GET /api/permissions - Get all permissions
 export async function GET(req: NextRequest) {
@@ -10,10 +10,7 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get all permissions
@@ -36,18 +33,12 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // For now, allow any authenticated admin to access this endpoint
     if (session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     // Parse request body
@@ -56,10 +47,7 @@ export async function POST(req: NextRequest) {
 
     // Validate permission data
     if (!name) {
-      return NextResponse.json(
-        { error: 'Permission name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Permission name is required' }, { status: 400 });
     }
 
     // Create the permission in the database
@@ -68,8 +56,8 @@ export async function POST(req: NextRequest) {
         data: {
           name,
           description,
-          category
-        }
+          category,
+        },
       });
 
       // Clear the permission cache
@@ -77,7 +65,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         message: 'Permission created successfully',
-        permission: { name, description, category }
+        permission: { name, description, category },
       });
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -103,18 +91,12 @@ export async function DELETE(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // For now, allow any authenticated admin to access this endpoint
     if (session.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     // Get permission name from query params
@@ -122,10 +104,7 @@ export async function DELETE(req: NextRequest) {
     const name = url.searchParams.get('name');
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Permission name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Permission name is required' }, { status: 400 });
     }
 
     // Delete the permission from the database
@@ -133,14 +112,11 @@ export async function DELETE(req: NextRequest) {
       // First check if the permission exists
       const permission = await prisma.permission.findUnique({
         where: { name },
-        include: { roles: true }
+        include: { roles: true },
       });
 
       if (!permission) {
-        return NextResponse.json(
-          { error: 'Permission not found' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Permission not found' }, { status: 404 });
       }
 
       // Check if the permission is assigned to any roles
@@ -148,7 +124,7 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'Cannot delete permission that is assigned to roles',
-            message: 'Remove this permission from all roles first'
+            message: 'Remove this permission from all roles first',
           },
           { status: 400 }
         );
@@ -156,14 +132,14 @@ export async function DELETE(req: NextRequest) {
 
       // Delete the permission
       await prisma.permission.delete({
-        where: { name }
+        where: { name },
       });
 
       // Clear the permission cache
       PermissionService.clearCache();
 
       return NextResponse.json({
-        message: 'Permission deleted successfully'
+        message: 'Permission deleted successfully',
       });
     } catch (error: any) {
       throw error;

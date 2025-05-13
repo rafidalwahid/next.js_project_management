@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { withAuth, withPermission } from "@/lib/api-middleware";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { logActivity } from "@/lib/activity-logger";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { withAuth, withPermission } from '@/lib/api-middleware';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { logActivity } from '@/lib/activity-logger';
 
 // Validation schema for creating team members
 const teamMemberSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  projectId: z.string().min(1, "Project ID is required"),
+  userId: z.string().min(1, 'User ID is required'),
+  projectId: z.string().min(1, 'Project ID is required'),
 });
 
 /**
@@ -52,10 +52,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       });
 
       if (!project) {
-        return NextResponse.json(
-          { error: "Project not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Project not found' }, { status: 404 });
       }
 
       // Check if user has permission to view this project's team
@@ -63,16 +60,16 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       const isProjectCreator = project.createdById === session.user.id;
       const hasTeamViewPermission = await PermissionService.hasPermissionById(
         session.user.id,
-        "team_view"
+        'team_view'
       );
 
       // Log permission check details for debugging
-      console.log("Team permission check:", {
+      console.log('Team permission check:', {
         projectId,
         userId: session.user.id,
         isTeamMember,
         isProjectCreator,
-        hasTeamViewPermission
+        hasTeamViewPermission,
       });
 
       if (!isTeamMember && !isProjectCreator && !hasTeamViewPermission) {
@@ -90,11 +87,11 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       if (userId !== session.user.id) {
         const hasUserManagementPermission = await PermissionService.hasPermissionById(
           session.user.id,
-          "user_management"
+          'user_management'
         );
         const hasTeamViewPermission = await PermissionService.hasPermissionById(
           session.user.id,
-          "team_view"
+          'team_view'
         );
         const hasPermission = hasUserManagementPermission || hasTeamViewPermission;
 
@@ -161,7 +158,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
 
     if (projectId) {
       teamMembersWithTaskCount = await Promise.all(
-        teamMembers.map(async (member) => {
+        teamMembers.map(async member => {
           const taskCount = await prisma.taskAssignee.count({
             where: {
               userId: member.userId,
@@ -189,9 +186,9 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       },
     });
   } catch (error) {
-    console.error("Error fetching team members:", error);
+    console.error('Error fetching team members:', error);
     return NextResponse.json(
-      { error: "An error occurred while fetching team members" },
+      { error: 'An error occurred while fetching team members' },
       { status: 500 }
     );
   }
@@ -202,7 +199,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
  * Add a team member to a project
  */
 export const POST = withPermission(
-  "team_add",
+  'team_add',
   async (req: NextRequest, context: any, session: any) => {
     try {
       // Parse request body
@@ -212,7 +209,7 @@ export const POST = withPermission(
       const validationResult = teamMemberSchema.safeParse(body);
       if (!validationResult.success) {
         return NextResponse.json(
-          { error: "Validation error", details: validationResult.error.format() },
+          { error: 'Validation error', details: validationResult.error.format() },
           { status: 400 }
         );
       }
@@ -226,10 +223,7 @@ export const POST = withPermission(
       });
 
       if (!user) {
-        return NextResponse.json(
-          { error: "User not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
       // Check if the project exists
@@ -243,10 +237,7 @@ export const POST = withPermission(
       });
 
       if (!project) {
-        return NextResponse.json(
-          { error: "Project not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Project not found' }, { status: 404 });
       }
 
       // Check if user has permission to add team members to this project
@@ -254,7 +245,7 @@ export const POST = withPermission(
       const isProjectCreator = project.createdById === session.user.id;
       const hasTeamAddPermission = await PermissionService.hasPermissionById(
         session.user.id,
-        "team_add"
+        'team_add'
       );
 
       if (!isTeamMember && !isProjectCreator && !hasTeamAddPermission) {
@@ -276,7 +267,7 @@ export const POST = withPermission(
 
       if (existingTeamMember) {
         return NextResponse.json(
-          { error: "User is already a team member of this project" },
+          { error: 'User is already a team member of this project' },
           { status: 409 }
         );
       }
@@ -308,8 +299,8 @@ export const POST = withPermission(
 
       // Log the activity
       await logActivity({
-        action: "added_team_member",
-        entityType: "project",
+        action: 'added_team_member',
+        entityType: 'project',
         entityId: projectId,
         description: `Added ${user.name || user.email} to the project team`,
         userId: session.user.id,
@@ -318,9 +309,9 @@ export const POST = withPermission(
 
       return NextResponse.json(teamMember, { status: 201 });
     } catch (error) {
-      console.error("Error adding team member:", error);
+      console.error('Error adding team member:', error);
       return NextResponse.json(
-        { error: "An error occurred while adding the team member" },
+        { error: 'An error occurred while adding the team member' },
         { status: 500 }
       );
     }

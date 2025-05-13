@@ -1,6 +1,6 @@
 /**
  * Service Worker Type Definitions
- * 
+ *
  * This file contains type definitions for service workers and background sync.
  */
 
@@ -24,7 +24,7 @@ interface ExtendedServiceWorkerRegistration extends ServiceWorkerRegistration {
 /**
  * Service worker message types
  */
-export type ServiceWorkerMessageType = 
+export type ServiceWorkerMessageType =
   | 'SYNC_SUCCESS'
   | 'SYNC_COMPLETED'
   | 'SYNC_FAILURE'

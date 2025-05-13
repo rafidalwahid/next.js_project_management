@@ -1,19 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { getLocationName } from "@/lib/geo-utils";
-import { AttendanceCheckInDTO, AttendanceResponse } from "@/types/attendance";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { getLocationName } from '@/lib/geo-utils';
+import { AttendanceCheckInDTO, AttendanceResponse } from '@/types/attendance';
 
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Parse request body
@@ -34,8 +31,8 @@ export async function POST(req: NextRequest) {
     if (existingAttendance) {
       return NextResponse.json(
         {
-          error: "You are already checked in",
-          attendance: existingAttendance
+          error: 'You are already checked in',
+          attendance: existingAttendance,
         },
         { status: 400 }
       );
@@ -47,7 +44,7 @@ export async function POST(req: NextRequest) {
       try {
         locationName = await getLocationName(latitude, longitude);
       } catch (error) {
-        console.error("Error getting location name:", error);
+        console.error('Error getting location name:', error);
       }
     }
 
@@ -58,8 +55,8 @@ export async function POST(req: NextRequest) {
         checkInLatitude: latitude || null,
         checkInLongitude: longitude || null,
         checkInLocationName: locationName,
-        checkInIpAddress: req.headers.get("x-forwarded-for") || null,
-        checkInDeviceInfo: req.headers.get("user-agent") || null,
+        checkInIpAddress: req.headers.get('x-forwarded-for') || null,
+        checkInDeviceInfo: req.headers.get('user-agent') || null,
         projectId: projectId || null,
         taskId: taskId || null,
         notes: notes || null,
@@ -69,25 +66,22 @@ export async function POST(req: NextRequest) {
     // Log activity
     await prisma.activity.create({
       data: {
-        action: "checked-in",
-        entityType: "attendance",
+        action: 'checked-in',
+        entityType: 'attendance',
         entityId: attendance.id,
-        description: "User checked in",
+        description: 'User checked in',
         userId: session.user.id,
       },
     });
 
     // Return response with proper type
     const response: AttendanceResponse = {
-      attendance
+      attendance,
     };
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Check-in error:", error);
-    return NextResponse.json(
-      { error: "Failed to check in" },
-      { status: 500 }
-    );
+    console.error('Check-in error:', error);
+    return NextResponse.json({ error: 'Failed to check in' }, { status: 500 });
   }
 }

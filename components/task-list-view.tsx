@@ -1,58 +1,64 @@
-"use client"
+'use client';
 
-import type { Column, Task } from "@/types"
-import { ChevronRight, Plus, Check, X } from "lucide-react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Column, Task } from '@/types';
+import { ChevronRight, Plus, Check, X } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
-  columns: Column[]
-  onAddTask: (columnId: string, task: Partial<Task>) => void
+  columns: Column[];
+  onAddTask: (columnId: string, task: Partial<Task>) => void;
 }
 
 interface NewTask {
-  columnId: string
-  title: string
-  description: string
-  priority: "low" | "medium" | "high"
+  columnId: string;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
 }
 
 export default function TaskListView({ columns, onAddTask }: Props) {
-  const [newTask, setNewTask] = useState<NewTask | null>(null)
+  const [newTask, setNewTask] = useState<NewTask | null>(null);
 
   const startNewTask = (columnId: string) => {
     setNewTask({
       columnId,
-      title: "",
-      description: "",
-      priority: "medium",
-    })
-  }
+      title: '',
+      description: '',
+      priority: 'medium',
+    });
+  };
 
   const handleNewTaskSubmit = () => {
-    if (!newTask || !newTask.title.trim()) return
+    if (!newTask || !newTask.title.trim()) return;
 
     onAddTask(newTask.columnId, {
       title: newTask.title,
       description: newTask.description,
       priority: newTask.priority,
-    })
+    });
 
-    setNewTask(null)
-  }
+    setNewTask(null);
+  };
 
   const priorityColors = {
-    low: "bg-blue-100 text-blue-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    high: "bg-red-100 text-red-800",
-  }
+    low: 'bg-blue-100 text-blue-800',
+    medium: 'bg-yellow-100 text-yellow-800',
+    high: 'bg-red-100 text-red-800',
+  };
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xs">
-      {columns.map((column) => (
+      {columns.map(column => (
         <div key={column.id} className="border-b last:border-b-0">
           <div className="px-6 py-4 bg-gray-50 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-700">{column.title}</h2>
@@ -75,41 +81,41 @@ export default function TaskListView({ columns, onAddTask }: Props) {
                     <Input
                       type="text"
                       value={newTask.title}
-                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      onChange={e => setNewTask({ ...newTask, title: e.target.value })}
                       placeholder="Task title"
                       className="w-full"
                       autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          handleNewTaskSubmit()
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleNewTaskSubmit();
                         }
-                        if (e.key === "Escape") {
-                          setNewTask(null)
+                        if (e.key === 'Escape') {
+                          setNewTask(null);
                         }
                       }}
                     />
                     <Textarea
                       value={newTask.description}
-                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      onChange={e => setNewTask({ ...newTask, description: e.target.value })}
                       placeholder="Task description"
                       className="w-full"
                       rows={2}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && e.ctrlKey) {
-                          e.preventDefault()
-                          handleNewTaskSubmit()
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && e.ctrlKey) {
+                          e.preventDefault();
+                          handleNewTaskSubmit();
                         }
-                        if (e.key === "Escape") {
-                          setNewTask(null)
+                        if (e.key === 'Escape') {
+                          setNewTask(null);
                         }
                       }}
                     />
                     <div className="flex items-center justify-between">
                       <Select
                         value={newTask.priority}
-                        onValueChange={(value) =>
-                          setNewTask({ ...newTask, priority: value as "low" | "medium" | "high" })
+                        onValueChange={value =>
+                          setNewTask({ ...newTask, priority: value as 'low' | 'medium' | 'high' })
                         }
                       >
                         <SelectTrigger className="w-[180px]">
@@ -126,7 +132,11 @@ export default function TaskListView({ columns, onAddTask }: Props) {
                           <Check size={16} />
                           Save
                         </Button>
-                        <Button variant="outline" onClick={() => setNewTask(null)} className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          onClick={() => setNewTask(null)}
+                          className="flex items-center gap-1"
+                        >
                           <X size={16} />
                           Cancel
                         </Button>
@@ -136,7 +146,7 @@ export default function TaskListView({ columns, onAddTask }: Props) {
                 </div>
               </div>
             )}
-            {column.tasks.map((task) => (
+            {column.tasks.map(task => (
               <div key={task.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-4">
                   <ChevronRight size={16} className="text-gray-400 shrink-0" />
@@ -148,15 +158,15 @@ export default function TaskListView({ columns, onAddTask }: Props) {
                     className={`
                       px-2 py-1 rounded-full text-xs font-medium
                       ${
-                        task.priority === "high"
+                        task.priority === 'high'
                           ? priorityColors.high
-                          : task.priority === "low"
+                          : task.priority === 'low'
                             ? priorityColors.low
                             : priorityColors.medium
                       }
                     `}
                   >
-                    {task.priority || "medium"}
+                    {task.priority || 'medium'}
                   </span>
                 </div>
               </div>
@@ -170,5 +180,5 @@ export default function TaskListView({ columns, onAddTask }: Props) {
         </div>
       ))}
     </div>
-  )
+  );
 }

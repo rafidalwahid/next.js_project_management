@@ -9,7 +9,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
   // Set default headers for JSON requests if not provided
   options.headers = {
     'Content-Type': 'application/json',
-    ...(options.headers || {})
+    ...(options.headers || {}),
   };
 
   try {
@@ -25,7 +25,10 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
     if (!textResponse || textResponse.trim() === '') {
       console.warn('Empty response received from API');
       data = {};
-    } else if (textResponse.trim().startsWith('<!DOCTYPE') || textResponse.trim().startsWith('<html')) {
+    } else if (
+      textResponse.trim().startsWith('<!DOCTYPE') ||
+      textResponse.trim().startsWith('<html')
+    ) {
       // Handle HTML responses (likely an error page)
       console.error('Received HTML response instead of JSON:', textResponse.substring(0, 200));
 
@@ -36,14 +39,16 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
           projects: [],
           tasks: [],
           activities: [],
-          stats: { projectCount: 0, taskCount: 0, teamCount: 0, completionRate: '0%' }
+          stats: { projectCount: 0, taskCount: 0, teamCount: 0, completionRate: '0%' },
         };
       } else if (url.includes('/api/team/user/')) {
         // For team memberships, return an empty array
         return [];
       }
 
-      throw new Error(`Received HTML response instead of JSON. The API endpoint may not exist or returned an error page.`);
+      throw new Error(
+        `Received HTML response instead of JSON. The API endpoint may not exist or returned an error page.`
+      );
     } else {
       try {
         // Try to parse as JSON
@@ -57,7 +62,9 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
           return [];
         }
 
-        throw new Error(`Failed to parse API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+        throw new Error(
+          `Failed to parse API response: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        );
       }
     }
 
@@ -74,7 +81,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
         statusText: response.statusText,
         message: data?.error || `Request failed with status ${response.status}`,
         details: data?.details || {},
-        rawBody: textResponse.substring(0, 500) // Include start of raw body for context
+        rawBody: textResponse.substring(0, 500), // Include start of raw body for context
       };
 
       console.error('API Error:', errorDetails);
@@ -84,11 +91,13 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
         ...errorDetails,
         url,
         requestMethod: options.method || 'GET',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       // Use a more descriptive error message that includes the status code and message
-      throw new Error(`API request failed: ${errorDetails.status} ${errorDetails.statusText} - ${errorDetails.message}`);
+      throw new Error(
+        `API request failed: ${errorDetails.status} ${errorDetails.statusText} - ${errorDetails.message}`
+      );
     }
 
     return data;
@@ -100,7 +109,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       console.error('API request failed:', {
         url,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       // Use the original error message
@@ -109,7 +118,7 @@ export async function fetchAPI(url: string, options: RequestInit = {}) {
       // Handle non-Error objects
       console.error('API request failed with non-Error:', {
         url,
-        error: String(error)
+        error: String(error),
       });
 
       errorMessage = `${errorMessage}: ${String(error)}`;
@@ -174,7 +183,14 @@ export const userApi = {
   },
 
   uploadProfileImage: async (userId: string, file: File) => {
-    console.log('Uploading profile image for user:', userId, 'File:', file.name, file.type, file.size);
+    console.log(
+      'Uploading profile image for user:',
+      userId,
+      'File:',
+      file.name,
+      file.type,
+      file.size
+    );
     const formData = new FormData();
     formData.append('image', file);
 
@@ -202,7 +218,7 @@ export const userApi = {
 
   deleteUser: async (userId: string) => {
     return fetchAPI(`/api/users/${userId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
 };
@@ -271,13 +287,13 @@ export const projectApi = {
       });
     }
 
-    console.log("Fetching projects with URL:", `/api/projects?${params.toString()}`);
+    console.log('Fetching projects with URL:', `/api/projects?${params.toString()}`);
     try {
       const result = await fetchAPI(`/api/projects?${params.toString()}`);
-      console.log("Projects API response:", result);
+      console.log('Projects API response:', result);
       return result;
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error('Error fetching projects:', error);
       throw error;
     }
   },
@@ -334,10 +350,12 @@ export const taskApi = {
 
     // Add any additional filters with better validation
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null &&
-          value !== undefined &&
-          value !== '[object Object]' &&
-          String(value).trim() !== '') {
+      if (
+        value !== null &&
+        value !== undefined &&
+        value !== '[object Object]' &&
+        String(value).trim() !== ''
+      ) {
         params.append(key, value.toString());
       }
     });
@@ -348,7 +366,7 @@ export const taskApi = {
 
   getTask: async (id: string) => {
     // Skip API call for "new" route
-    if (!id || id === "new") {
+    if (!id || id === 'new') {
       console.warn('API client: getTask called with invalid ID:', id);
       return { task: null };
     }
@@ -368,7 +386,7 @@ export const taskApi = {
       // Instead of rethrowing, return a structured error response
       return {
         task: null,
-        error: error instanceof Error ? error.message : 'Unknown error fetching task'
+        error: error instanceof Error ? error.message : 'Unknown error fetching task',
       };
     }
   },
@@ -378,10 +396,10 @@ export const taskApi = {
     try {
       // Ensure we have required fields
       if (!task.title) {
-        throw new Error("Task title is required");
+        throw new Error('Task title is required');
       }
       if (!task.projectId) {
-        throw new Error("Project ID is required");
+        throw new Error('Project ID is required');
       }
 
       // Remove status if present (it should be statusId instead)
@@ -431,8 +449,20 @@ export const taskApi = {
     }
   },
 
-  reorderTask: async (taskId: string, newParentId: string | null, oldParentId: string | null, targetTaskId?: string, isSameParentReorder?: boolean) => {
-    console.log('Calling reorderTask API with:', { taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder });
+  reorderTask: async (
+    taskId: string,
+    newParentId: string | null,
+    oldParentId: string | null,
+    targetTaskId?: string,
+    isSameParentReorder?: boolean
+  ) => {
+    console.log('Calling reorderTask API with:', {
+      taskId,
+      newParentId,
+      oldParentId,
+      targetTaskId,
+      isSameParentReorder,
+    });
 
     // Add a small delay to ensure the UI updates before making the API call
     // This helps with the perceived performance
@@ -443,7 +473,13 @@ export const taskApi = {
     try {
       const result = await fetchAPI('/api/tasks/reorder', {
         method: 'POST',
-        body: JSON.stringify({ taskId, newParentId, oldParentId, targetTaskId, isSameParentReorder }),
+        body: JSON.stringify({
+          taskId,
+          newParentId,
+          oldParentId,
+          targetTaskId,
+          isSameParentReorder,
+        }),
       });
       console.log('reorderTask API response:', result);
       return result;
@@ -453,8 +489,6 @@ export const taskApi = {
     }
   },
 };
-
-
 
 /**
  * Team Management API functions
@@ -555,5 +589,3 @@ export const eventApi = {
     });
   },
 };
-
-

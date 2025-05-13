@@ -1,25 +1,25 @@
-"use client"
+'use client';
 
-import { useState, useRef } from "react"
-import { Camera, Check, X, Mail, Calendar, Edit2 } from "lucide-react"
-import { UserProfile } from "@/hooks/use-user-profile"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
+import { useState, useRef } from 'react';
+import { Camera, Check, X, Mail, Calendar, Edit2 } from 'lucide-react';
+import { UserProfile } from '@/hooks/use-user-profile';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/lib/utils';
 
 interface UserProfileHeaderProps {
-  user: UserProfile
-  canEdit: boolean
-  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>
-  onUploadImage: (file: File) => Promise<string | null>
+  user: UserProfile;
+  canEdit: boolean;
+  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  onUploadImage: (file: File) => Promise<string | null>;
   stats?: {
-    projectCount: number
-    taskCount: number
-    teamCount: number
-    completionRate: string
-  }
+    projectCount: number;
+    taskCount: number;
+    teamCount: number;
+    completionRate: string;
+  };
 }
 
 export function UserProfileHeader({
@@ -31,59 +31,59 @@ export function UserProfileHeader({
     projectCount: 0,
     taskCount: 0,
     teamCount: 0,
-    completionRate: '0%'
-  }
+    completionRate: '0%',
+  },
 }: UserProfileHeaderProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [name, setName] = useState(user.name || "")
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(user.name || '');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getUserInitials = () => {
-    if (!user.name) return "U"
+    if (!user.name) return 'U';
 
-    const nameParts = user.name.split(" ")
+    const nameParts = user.name.split(' ');
     if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
 
-    return nameParts[0].substring(0, 2).toUpperCase()
-  }
+    return nameParts[0].substring(0, 2).toUpperCase();
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancel editing
-      setName(user.name || "")
+      setName(user.name || '');
     }
-    setIsEditing(!isEditing)
-  }
+    setIsEditing(!isEditing);
+  };
 
   const handleSave = async () => {
-    await onUpdateProfile({ name })
-    setIsEditing(false)
-  }
+    await onUpdateProfile({ name });
+    setIsEditing(false);
+  };
 
   const handleImageClick = () => {
     if (canEdit && !isUploading) {
-      fileInputRef.current?.click()
+      fileInputRef.current?.click();
     }
-  }
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      await onUploadImage(file)
+      await onUploadImage(file);
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
       // Clear the input value so the same file can be selected again
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = '';
       }
     }
-  }
+  };
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
@@ -92,8 +92,10 @@ export function UserProfileHeader({
         {/* Profile Header */}
         <div className="relative h-24 w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500">
           {/* Overlay pattern for visual interest */}
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle,transparent_20%,#fff_20%,#fff_30%,transparent_30%,transparent_70%,#fff_70%,#fff_80%,transparent_80%)]" style={{ backgroundSize: '20px 20px' }}>
-          </div>
+          <div
+            className="absolute inset-0 opacity-20 mix-blend-overlay bg-[radial-gradient(circle,transparent_20%,#fff_20%,#fff_30%,transparent_30%,transparent_70%,#fff_70%,#fff_80%,transparent_80%)]"
+            style={{ backgroundSize: '20px 20px' }}
+          ></div>
         </div>
 
         {/* Profile Content */}
@@ -105,9 +107,7 @@ export function UserProfileHeader({
                 className="h-24 w-24 border-4 border-background ring-1 ring-black/10 cursor-pointer shadow-md"
                 onClick={handleImageClick}
               >
-                {user.image ? (
-                  <AvatarImage src={user.image} alt={user.name || "User"} />
-                ) : null}
+                {user.image ? <AvatarImage src={user.image} alt={user.name || 'User'} /> : null}
                 <AvatarFallback className="bg-linear-to-br from-indigo-500 to-purple-600 text-white text-3xl font-semibold">
                   {getUserInitials()}
                 </AvatarFallback>
@@ -139,7 +139,7 @@ export function UserProfileHeader({
               <div className="flex items-center gap-2 mb-3 justify-center">
                 <Input
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   className="h-9 w-full max-w-[250px]"
                   placeholder="Enter your name"
                 />
@@ -152,9 +152,7 @@ export function UserProfileHeader({
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-3 justify-center">
-                <h2 className="text-xl font-bold">
-                  {user.name || "Unnamed User"}
-                </h2>
+                <h2 className="text-xl font-bold">{user.name || 'Unnamed User'}</h2>
                 {canEdit && (
                   <Button
                     size="sm"
@@ -168,7 +166,9 @@ export function UserProfileHeader({
               </div>
             )}
 
-            <div className="text-sm text-muted-foreground mb-1">{user.jobTitle || "Project Manager"}</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              {user.jobTitle || 'Project Manager'}
+            </div>
 
             <Badge variant="secondary" className="capitalize px-2 py-1 text-xs mb-4">
               {user.role}
@@ -224,7 +224,8 @@ export function UserProfileHeader({
         <div className="rounded-xl border bg-card p-6 shadow-xs">
           <h3 className="text-lg font-semibold mb-4">About Me</h3>
           <p className="text-muted-foreground">
-            {user.bio || "No bio information available. Add a description about yourself, your skills, and experience."}
+            {user.bio ||
+              'No bio information available. Add a description about yourself, your skills, and experience.'}
           </p>
 
           {canEdit && !user.bio && (
@@ -253,5 +254,5 @@ export function UserProfileHeader({
         </div>
       </div>
     </div>
-  )
+  );
 }

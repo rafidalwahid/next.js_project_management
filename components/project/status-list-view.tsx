@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   KeyboardSensor,
@@ -13,15 +13,11 @@ import {
   DragStartEvent,
   rectIntersection,
   DragOverEvent,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { useDroppable } from "@dnd-kit/core"
-import { CSS } from "@dnd-kit/utilities"
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import {
   ChevronDown,
   ChevronRight,
@@ -32,28 +28,24 @@ import {
   Check,
   X,
   Plus,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Spinner } from "@/components/ui/spinner"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import { TaskCard } from "./task-card"
-import { useTaskContext } from "./task-context"
-import { Task } from "@/types/task"
-import { ProjectStatus } from "@/types/project"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { TaskCard } from './task-card';
+import { useTaskContext } from './task-context';
+import { Task } from '@/types/task';
+import { ProjectStatus } from '@/types/project';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from '@/components/ui/dropdown-menu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,8 +55,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { QuickTaskDialogNew } from "@/components/project/quick-task-dialog"
+} from '@/components/ui/alert-dialog';
+import { QuickTaskDialogNew } from '@/components/project/quick-task-dialog';
 
 interface StatusListViewProps {
   projectId: string;
@@ -99,12 +91,7 @@ function DraggableTaskItem({
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      className="touch-manipulation"
-    >
+    <div ref={setNodeRef} style={style} {...attributes} className="touch-manipulation">
       <div className="flex items-start gap-2">
         <div {...listeners} className="mt-1 cursor-grab">
           <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -183,14 +170,11 @@ function StatusSection({
     <Collapsible
       open={isOpen}
       onOpenChange={onToggle}
-      className={cn(
-        "mb-4",
-        isOver && "ring-2 ring-primary ring-offset-2"
-      )}
+      className={cn('mb-4', isOver && 'ring-2 ring-primary ring-offset-2')}
     >
       <div
         className="flex items-center justify-between rounded-t-md p-3"
-        style={{ backgroundColor: status.color + "20" }}
+        style={{ backgroundColor: status.color + '20' }}
       >
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="p-1">
@@ -208,30 +192,20 @@ function StatusSection({
               <Input
                 ref={statusInputRef}
                 value={editingName}
-                onChange={(e) => onEditingNameChange(e.target.value)}
+                onChange={e => onEditingNameChange(e.target.value)}
                 className="h-7 w-[120px] py-1 px-2 text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
                     onSaveEdit();
-                  } else if (e.key === "Escape") {
+                  } else if (e.key === 'Escape') {
                     onCancelEdit();
                   }
                 }}
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={onSaveEdit}
-              >
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSaveEdit}>
                 <Check className="h-3 w-3" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={onCancelEdit}
-              >
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCancelEdit}>
                 <X className="h-3 w-3" />
               </Button>
             </div>
@@ -279,28 +253,38 @@ function StatusSection({
         <div
           ref={setNodeRef}
           className={cn(
-            "rounded-b-md border border-t-0 p-2 min-h-[100px] transition-colors duration-200",
-            isOver ? "bg-primary/10 border-primary/30 border-2" :
-                    tasks.length === 0 ? "bg-muted/20 border-dashed border-2" : ""
+            'rounded-b-md border border-t-0 p-2 min-h-[100px] transition-colors duration-200',
+            isOver
+              ? 'bg-primary/10 border-primary/30 border-2'
+              : tasks.length === 0
+                ? 'bg-muted/20 border-dashed border-2'
+                : ''
           )}
           data-status-id={status.id}
           data-droppable="true"
         >
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-sm">
-              <div className={cn(
-                "p-4 rounded-md border-2",
-                isOver ? "border-primary bg-primary/5" : "border-dashed border-muted-foreground/30"
-              )}>
-                <p className={isOver ? "text-primary font-medium" : "text-muted-foreground"}>
+              <div
+                className={cn(
+                  'p-4 rounded-md border-2',
+                  isOver
+                    ? 'border-primary bg-primary/5'
+                    : 'border-dashed border-muted-foreground/30'
+                )}
+              >
+                <p className={isOver ? 'text-primary font-medium' : 'text-muted-foreground'}>
                   No tasks in this status
                 </p>
               </div>
             </div>
           ) : (
-            <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext
+              items={tasks.map(task => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
               <div className="space-y-2">
-                {tasks.map((task) => (
+                {tasks.map(task => (
                   <DraggableTaskItem
                     key={task.id}
                     task={task}
@@ -328,7 +312,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
     toggleTaskCompletion,
     deleteTask,
     updateTaskAssignees,
-    moveTask
+    moveTask,
   } = useTaskContext();
 
   const [openStatuses, setOpenStatuses] = useState<Record<string, boolean>>({});
@@ -336,7 +320,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [activeStatusId, setActiveStatusId] = useState<string | null>(null);
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
-  const [editingStatusName, setEditingStatusName] = useState<string>("");
+  const [editingStatusName, setEditingStatusName] = useState<string>('');
   const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null);
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
 
@@ -376,7 +360,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
         setOpenStatuses(initialState);
       }
     } catch (e) {
-      console.error("Error loading saved status states:", e);
+      console.error('Error loading saved status states:', e);
       // Fallback to all open
       const initialState: Record<string, boolean> = {};
       statuses.forEach(status => {
@@ -389,10 +373,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
   // Save open states to localStorage when changed
   useEffect(() => {
     if (Object.keys(openStatuses).length > 0) {
-      localStorage.setItem(
-        `project-${projectId}-open-statuses`,
-        JSON.stringify(openStatuses)
-      );
+      localStorage.setItem(`project-${projectId}-open-statuses`, JSON.stringify(openStatuses));
     }
   }, [openStatuses, projectId]);
 
@@ -421,9 +402,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
 
   // Group tasks by status
   const getTasksByStatus = (statusId: string) => {
-    return tasks
-      .filter(task => task.statusId === statusId)
-      .sort((a, b) => a.order - b.order);
+    return tasks.filter(task => task.statusId === statusId).sort((a, b) => a.order - b.order);
   };
 
   // Handle drag start
@@ -513,13 +492,13 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
 
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses/${editingStatusId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editingStatusName }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update status");
+        throw new Error('Failed to update status');
       }
 
       // Refresh tasks to get updated status
@@ -527,16 +506,16 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
 
       // Reset editing state
       setEditingStatusId(null);
-      setEditingStatusName("");
+      setEditingStatusName('');
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error('Error updating status:', error);
     }
   };
 
   // Cancel editing
   const handleCancelEdit = () => {
     setEditingStatusId(null);
-    setEditingStatusName("");
+    setEditingStatusName('');
   };
 
   // Delete status
@@ -553,17 +532,17 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
       }
 
       const response = await fetch(`/api/projects/${projectId}/statuses/${deleteStatusId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete status");
+        throw new Error('Failed to delete status');
       }
 
       // Refresh tasks to get updated statuses
       await refreshTasks();
     } catch (error) {
-      console.error("Error deleting status:", error);
+      console.error('Error deleting status:', error);
     } finally {
       setDeleteStatusId(null);
     }
@@ -592,12 +571,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex justify-between items-center mb-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleAllStatuses}
-          className="text-xs"
-        >
+        <Button variant="outline" size="sm" onClick={toggleAllStatuses} className="text-xs">
           {expandAll ? (
             <>
               <ChevronDown className="h-3.5 w-3.5 mr-1" />
@@ -624,27 +598,29 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        {statuses.sort((a, b) => a.order - b.order).map((status) => (
-          <StatusSection
-            key={status.id}
-            status={status}
-            tasks={getTasksByStatus(status.id)}
-            onToggleComplete={toggleTaskCompletion}
-            onEdit={onEditTask}
-            onCreateTask={refreshTasks}
-            isOpen={!!openStatuses[status.id]}
-            onToggle={() => toggleStatus(status.id)}
-            onEditStatus={handleEditStatus}
-            onDeleteStatus={(statusId) => setDeleteStatusId(statusId)}
-            onDeleteTask={(taskId) => setDeleteTaskId(taskId)}
-            isEditing={editingStatusId === status.id}
-            editingName={editingStatusName}
-            onEditingNameChange={setEditingStatusName}
-            onSaveEdit={handleSaveStatusName}
-            onCancelEdit={handleCancelEdit}
-            onUpdateAssignees={updateTaskAssignees}
-          />
-        ))}
+        {statuses
+          .sort((a, b) => a.order - b.order)
+          .map(status => (
+            <StatusSection
+              key={status.id}
+              status={status}
+              tasks={getTasksByStatus(status.id)}
+              onToggleComplete={toggleTaskCompletion}
+              onEdit={onEditTask}
+              onCreateTask={refreshTasks}
+              isOpen={!!openStatuses[status.id]}
+              onToggle={() => toggleStatus(status.id)}
+              onEditStatus={handleEditStatus}
+              onDeleteStatus={statusId => setDeleteStatusId(statusId)}
+              onDeleteTask={taskId => setDeleteTaskId(taskId)}
+              isEditing={editingStatusId === status.id}
+              editingName={editingStatusName}
+              onEditingNameChange={setEditingStatusName}
+              onSaveEdit={handleSaveStatusName}
+              onCancelEdit={handleCancelEdit}
+              onUpdateAssignees={updateTaskAssignees}
+            />
+          ))}
 
         {/* Drag overlay for the currently dragged task */}
         <DragOverlay>
@@ -652,7 +628,11 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
             <div className="rounded-md border bg-background p-3 shadow-md w-full max-w-md opacity-90">
               <div className="flex items-center gap-2">
                 <Checkbox checked={activeTask.completed} />
-                <span className={activeTask.completed ? "line-through text-muted-foreground" : "font-medium"}>
+                <span
+                  className={
+                    activeTask.completed ? 'line-through text-muted-foreground' : 'font-medium'
+                  }
+                >
                   {activeTask.title}
                 </span>
               </div>
@@ -703,9 +683,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTask}>
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteTask}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

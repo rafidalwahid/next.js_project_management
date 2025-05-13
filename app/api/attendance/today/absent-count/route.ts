@@ -10,21 +10,18 @@ export async function GET() {
     // Authenticate the user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has attendance management permission
     const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "attendance_management"
+      'attendance_management'
     );
 
     if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: You do not have permission to access attendance statistics" },
+        { error: 'Forbidden: You do not have permission to access attendance statistics' },
         { status: 403 }
       );
     }
@@ -44,15 +41,15 @@ export async function GET() {
       include: {
         permissions: {
           include: {
-            permission: true
-          }
-        }
-      }
+            permission: true,
+          },
+        },
+      },
     });
 
     // Filter roles that don't have attendance management permission
     const nonManagerRoles = roles
-      .filter(role => !role.permissions.some(rp => rp.permission.name === "attendance_management"))
+      .filter(role => !role.permissions.some(rp => rp.permission.name === 'attendance_management'))
       .map(role => role.name);
 
     // Count active users with non-manager roles
@@ -83,7 +80,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching absent count:', error);
     return new NextResponse(JSON.stringify({ error: 'Failed to fetch absent count' }), {
-      status: 500
+      status: 500,
     });
   }
 }

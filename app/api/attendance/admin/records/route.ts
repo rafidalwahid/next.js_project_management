@@ -1,42 +1,39 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 export async function GET(req: NextRequest) {
   try {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has attendance management permission
     const hasAttendanceManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
-      "attendance_management"
+      'attendance_management'
     );
 
     if (!hasAttendanceManagementPermission) {
       return NextResponse.json(
-        { error: "Forbidden: You do not have permission to access attendance records" },
+        { error: 'Forbidden: You do not have permission to access attendance records' },
         { status: 403 }
       );
     }
 
     // Get query parameters
     const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get("limit") || "50");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const page = parseInt(url.searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
-    const userId = url.searchParams.get("userId");
-    const projectId = url.searchParams.get("projectId");
-    const startDate = url.searchParams.get("startDate");
-    const endDate = url.searchParams.get("endDate");
+    const userId = url.searchParams.get('userId');
+    const projectId = url.searchParams.get('projectId');
+    const startDate = url.searchParams.get('startDate');
+    const endDate = url.searchParams.get('endDate');
 
     // Build the where clause
     const where: any = {};
@@ -100,13 +97,13 @@ export async function GET(req: NextRequest) {
         },
         correctionRequests: {
           where: {
-            status: "pending"
+            status: 'pending',
           },
           select: {
             id: true,
             status: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -142,9 +139,6 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to retrieve attendance records" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retrieve attendance records' }, { status: 500 });
   }
 }

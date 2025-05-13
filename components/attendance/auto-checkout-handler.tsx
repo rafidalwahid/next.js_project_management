@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import { useToast } from "@/components/ui/use-toast"
-import { AttendanceSettings } from "@/types/attendance"
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useToast } from '@/components/ui/use-toast';
+import { AttendanceSettings } from '@/types/attendance';
 import {
   isBackgroundSyncSupported,
   registerAutoCheckoutSync,
-  listenForServiceWorkerMessages
-} from "@/lib/service-worker"
+  listenForServiceWorkerMessages,
+} from '@/lib/service-worker';
 
 /**
  * AutoCheckoutHandler component
@@ -17,38 +17,38 @@ import {
  * It periodically checks if the user should be automatically checked out based on their settings.
  */
 export function AutoCheckoutHandler() {
-  const { data: session } = useSession()
-  const { toast } = useToast()
-  const [settings, setSettings] = useState<AttendanceSettings | null>(null)
-  const [nextCheckTime, setNextCheckTime] = useState<Date | null>(null)
-  const [isCheckedIn, setIsCheckedIn] = useState(false)
+  const { data: session } = useSession();
+  const { toast } = useToast();
+  const [settings, setSettings] = useState<AttendanceSettings | null>(null);
+  const [nextCheckTime, setNextCheckTime] = useState<Date | null>(null);
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
 
   // Fetch attendance settings
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) return;
 
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/attendance/settings')
+        const response = await fetch('/api/attendance/settings');
         if (response.ok) {
-          const data = await response.json()
-          setSettings(data.settings)
+          const data = await response.json();
+          setSettings(data.settings);
         }
       } catch (error) {
-        console.error("Error fetching attendance settings:", error)
+        console.error('Error fetching attendance settings:', error);
       }
-    }
+    };
 
-    fetchSettings()
+    fetchSettings();
     // Refresh settings every 30 minutes
-    const interval = setInterval(fetchSettings, 30 * 60 * 1000)
+    const interval = setInterval(fetchSettings, 30 * 60 * 1000);
 
-    return () => clearInterval(interval)
-  }, [session?.user?.id])
+    return () => clearInterval(interval);
+  }, [session?.user?.id]);
 
   // Check if user is currently checked in
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) return;
 
     const checkAttendanceStatus = async () => {
       try {
@@ -56,112 +56,112 @@ export function AutoCheckoutHandler() {
           cache: 'no-cache',
           headers: {
             'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        })
+            Pragma: 'no-cache',
+          },
+        });
 
         if (response.ok) {
-          const data = await response.json()
-          setIsCheckedIn(!!data.attendance && !data.attendance.checkOutTime)
+          const data = await response.json();
+          setIsCheckedIn(!!data.attendance && !data.attendance.checkOutTime);
         }
       } catch (error) {
-        console.error("Error checking attendance status:", error)
+        console.error('Error checking attendance status:', error);
       }
-    }
+    };
 
-    checkAttendanceStatus()
+    checkAttendanceStatus();
     // Check status every 5 minutes
-    const interval = setInterval(checkAttendanceStatus, 5 * 60 * 1000)
+    const interval = setInterval(checkAttendanceStatus, 5 * 60 * 1000);
 
-    return () => clearInterval(interval)
-  }, [session?.user?.id])
+    return () => clearInterval(interval);
+  }, [session?.user?.id]);
 
   // Set up auto-checkout timer
   useEffect(() => {
     if (!settings?.autoCheckoutEnabled || !isCheckedIn || !settings.autoCheckoutTime) {
-      setNextCheckTime(null)
-      return
+      setNextCheckTime(null);
+      return;
     }
 
     // Parse auto-checkout time
-    const [hours, minutes] = settings.autoCheckoutTime.split(':').map(Number)
-    const now = new Date()
-    const checkoutTime = new Date()
-    checkoutTime.setHours(hours, minutes, 0, 0)
+    const [hours, minutes] = settings.autoCheckoutTime.split(':').map(Number);
+    const now = new Date();
+    const checkoutTime = new Date();
+    checkoutTime.setHours(hours, minutes, 0, 0);
 
     // If the checkout time has already passed today, don't schedule
     if (now > checkoutTime) {
-      return
+      return;
     }
 
-    setNextCheckTime(checkoutTime)
+    setNextCheckTime(checkoutTime);
 
     // Calculate milliseconds until checkout time
-    const timeUntilCheckout = checkoutTime.getTime() - now.getTime()
+    const timeUntilCheckout = checkoutTime.getTime() - now.getTime();
 
     // Set timeout for auto-checkout
     const timeoutId = setTimeout(() => {
-      performAutoCheckout()
-    }, timeUntilCheckout)
+      performAutoCheckout();
+    }, timeUntilCheckout);
 
     // Also register for background sync as a backup
     if (isBackgroundSyncSupported()) {
       registerAutoCheckoutSync().catch(err => {
-        console.error("Failed to register auto-checkout sync:", err)
-      })
+        console.error('Failed to register auto-checkout sync:', err);
+      });
     }
 
-    return () => clearTimeout(timeoutId)
-  }, [settings, isCheckedIn])
+    return () => clearTimeout(timeoutId);
+  }, [settings, isCheckedIn]);
 
   // Perform the actual auto-checkout
   const performAutoCheckout = async () => {
-    if (!session?.user?.id || !isCheckedIn) return
+    if (!session?.user?.id || !isCheckedIn) return;
 
     try {
       const response = await fetch('/api/attendance/auto-checkout', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({})
-      })
+        body: JSON.stringify({}),
+      });
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
 
         if (data.checked_out) {
-          setIsCheckedIn(false)
+          setIsCheckedIn(false);
           toast({
-            title: "Auto-checkout completed",
+            title: 'Auto-checkout completed',
             description: `You've been automatically checked out at ${settings?.autoCheckoutTime}`,
-            duration: 5000
-          })
+            duration: 5000,
+          });
         }
       }
     } catch (error) {
-      console.error("Error performing auto-checkout:", error)
+      console.error('Error performing auto-checkout:', error);
     }
-  }
+  };
 
   // Listen for service worker messages
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) return;
 
-    const cleanup = listenForServiceWorkerMessages((data) => {
+    const cleanup = listenForServiceWorkerMessages(data => {
       if (data.type === 'AUTO_CHECKOUT_COMPLETED') {
-        setIsCheckedIn(false)
+        setIsCheckedIn(false);
         toast({
-          title: "Auto-checkout completed",
+          title: 'Auto-checkout completed',
           description: `You've been automatically checked out by the system`,
-          duration: 5000
-        })
+          duration: 5000,
+        });
       }
-    })
+    });
 
-    return cleanup
-  }, [session?.user?.id, toast])
+    return cleanup;
+  }, [session?.user?.id, toast]);
 
   // This component doesn't render anything visible
-  return null
+  return null;
 }

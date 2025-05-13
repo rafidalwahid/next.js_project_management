@@ -1,32 +1,55 @@
-"use client"
+'use client';
 
-import { useState, useRef } from "react"
-import { Pencil, Shield, Clock, Calendar, FileText, Upload, User, CalendarClock, X, File, Clock4, Save, Camera, Phone, MapPin } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { formatDate } from "@/lib/utils/date-utils"
-import type { UserProfile } from "@/hooks/use-user-profile"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { RoleBadge } from "@/components/ui/role-badge.simplified"
-import { Spinner } from "@/components/ui/spinner"
+import { useState, useRef } from 'react';
+import {
+  Pencil,
+  Shield,
+  Clock,
+  Calendar,
+  FileText,
+  Upload,
+  User,
+  CalendarClock,
+  X,
+  File,
+  Clock4,
+  Save,
+  Camera,
+  Phone,
+  MapPin,
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { formatDate } from '@/lib/utils/date-utils';
+import type { UserProfile } from '@/hooks/use-user-profile';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RoleBadge } from '@/components/ui/role-badge.simplified';
+import { Spinner } from '@/components/ui/spinner';
 
 interface UserProfileViewProps {
-  profile: UserProfile
+  profile: UserProfile;
   stats: {
-    projectCount: number
-    taskCount: number
-    completionRate: number
-  }
-  isCurrentUser: boolean
-  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>
-  onUpdateImage: (file: File) => Promise<void>
+    projectCount: number;
+    taskCount: number;
+    completionRate: number;
+  };
+  isCurrentUser: boolean;
+  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  onUpdateImage: (file: File) => Promise<void>;
 }
 
 export function UserProfileView({
@@ -34,97 +57,107 @@ export function UserProfileView({
   stats,
   isCurrentUser,
   onUpdateProfile,
-  onUpdateImage
+  onUpdateImage,
 }: UserProfileViewProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    name: profile.name || "",
-    bio: profile.bio || "",
-    jobTitle: profile.jobTitle || "",
-    department: profile.department || "",
-    location: profile.location || "",
-    phone: profile.phone || "",
-    skills: typeof profile.skills === 'string' ? profile.skills : Array.isArray(profile.skills) ? profile.skills.join(', ') : ""
-  })
+    name: profile.name || '',
+    bio: profile.bio || '',
+    jobTitle: profile.jobTitle || '',
+    department: profile.department || '',
+    location: profile.location || '',
+    phone: profile.phone || '',
+    skills:
+      typeof profile.skills === 'string'
+        ? profile.skills
+        : Array.isArray(profile.skills)
+          ? profile.skills.join(', ')
+          : '',
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancel editing
       setFormData({
-        name: profile.name || "",
-        bio: profile.bio || "",
-        jobTitle: profile.jobTitle || "",
-        department: profile.department || "",
-        location: profile.location || "",
-        phone: profile.phone || "",
-        skills: typeof profile.skills === 'string' ? profile.skills : Array.isArray(profile.skills) ? profile.skills.join(', ') : ""
-      })
+        name: profile.name || '',
+        bio: profile.bio || '',
+        jobTitle: profile.jobTitle || '',
+        department: profile.department || '',
+        location: profile.location || '',
+        phone: profile.phone || '',
+        skills:
+          typeof profile.skills === 'string'
+            ? profile.skills
+            : Array.isArray(profile.skills)
+              ? profile.skills.join(', ')
+              : '',
+      });
     }
-    setIsEditing(!isEditing)
-  }
+    setIsEditing(!isEditing);
+  };
 
   const handleSaveProfile = async () => {
     try {
-      await onUpdateProfile(formData)
-      setIsEditing(false)
+      await onUpdateProfile(formData);
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error saving profile:", error)
+      console.error('Error saving profile:', error);
     }
-  }
+  };
 
   const handleImageClick = () => {
     if (isCurrentUser) {
-      setIsImageDialogOpen(true)
+      setIsImageDialogOpen(true);
     }
-  }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     try {
-      setIsUploading(true)
-      await onUpdateImage(file)
+      setIsUploading(true);
+      await onUpdateImage(file);
     } catch (error) {
-      console.error("Error uploading image:", error)
+      console.error('Error uploading image:', error);
     } finally {
-      setIsUploading(false)
-      setIsImageDialogOpen(false)
+      setIsUploading(false);
+      setIsImageDialogOpen(false);
     }
-  }
+  };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   // Format dates
   const formattedCreatedDate = profile.createdAt
     ? formatDate(new Date(profile.createdAt))
-    : "Not available"
+    : 'Not available';
 
   const lastLoginDate = profile.lastLogin
     ? formatDate(new Date(profile.lastLogin))
-    : "Not available"
+    : 'Not available';
 
   // Get user initials for avatar fallback
   const getUserInitials = (name?: string | null) => {
-    if (!name) return "U"
+    if (!name) return 'U';
     return name
-      .split(" ")
+      .split(' ')
       .map(part => part[0])
-      .join("")
+      .join('')
       .toUpperCase()
-      .substring(0, 2)
-  }
+      .substring(0, 2);
+  };
 
   return (
     <div className="space-y-6">
@@ -139,7 +172,7 @@ export function UserProfileView({
             >
               <Avatar className="h-32 w-32 border-2 border-black/10">
                 {profile.image ? (
-                  <AvatarImage src={profile.image} alt={profile.name || "User"} />
+                  <AvatarImage src={profile.image} alt={profile.name || 'User'} />
                 ) : null}
                 <AvatarFallback className="text-4xl">
                   {getUserInitials(profile.name)}
@@ -151,24 +184,17 @@ export function UserProfileView({
                 </div>
               )}
             </div>
-            <h2 className="mt-4 text-2xl font-bold">{profile.name || "Unnamed User"}</h2>
+            <h2 className="mt-4 text-2xl font-bold">{profile.name || 'Unnamed User'}</h2>
             <p className="text-sm text-muted-foreground">{profile.email}</p>
 
-            {profile.jobTitle && (
-              <p className="mt-1 text-sm font-medium">{profile.jobTitle}</p>
-            )}
+            {profile.jobTitle && <p className="mt-1 text-sm font-medium">{profile.jobTitle}</p>}
 
             <div className="mt-4 flex items-center gap-2">
               <RoleBadge role={profile.role} />
             </div>
 
             {isCurrentUser && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={handleEditToggle}
-              >
+              <Button variant="outline" size="sm" className="mt-4" onClick={handleEditToggle}>
                 {isEditing ? (
                   <>
                     <X className="mr-2 h-4 w-4" />
@@ -184,12 +210,7 @@ export function UserProfileView({
             )}
 
             {isEditing && (
-              <Button
-                variant="default"
-                size="sm"
-                className="mt-2"
-                onClick={handleSaveProfile}
-              >
+              <Button variant="default" size="sm" className="mt-2" onClick={handleSaveProfile}>
                 <Save className="mr-2 h-4 w-4" />
                 Save Changes
               </Button>
@@ -217,7 +238,10 @@ export function UserProfileView({
                   <div className="flex flex-col items-center gap-2">
                     <p className="text-sm text-muted-foreground">Status</p>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8"
+                      >
                         Active
                       </Badge>
                     </div>
@@ -293,10 +317,12 @@ export function UserProfileView({
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Full Name</h3>
-                    <p>{profile.name || "Admin User"}</p>
+                    <p>{profile.name || 'Admin User'}</p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Email Address</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      Email Address
+                    </h3>
                     <p>{profile.email}</p>
                   </div>
                   <div>
@@ -316,9 +342,13 @@ export function UserProfileView({
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Login</h3>
                     <p>
-                      {lastLoginDate === 'Not available'
-                        ? <span className="text-sm text-muted-foreground">Not tracked in this application</span>
-                        : lastLoginDate}
+                      {lastLoginDate === 'Not available' ? (
+                        <span className="text-sm text-muted-foreground">
+                          Not tracked in this application
+                        </span>
+                      ) : (
+                        lastLoginDate
+                      )}
                     </p>
                   </div>
                 </div>
@@ -387,9 +417,7 @@ export function UserProfileView({
                   />
                 ) : (
                   <p className="text-sm">
-                    {profile.bio || (
-                      <span className="text-muted-foreground">No bio available</span>
-                    )}
+                    {profile.bio || <span className="text-muted-foreground">No bio available</span>}
                   </p>
                 )}
               </CardContent>
@@ -438,14 +466,10 @@ export function UserProfileView({
           <Card>
             <CardHeader>
               <CardTitle>Projects</CardTitle>
-              <CardDescription>
-                Projects the user is involved in
-              </CardDescription>
+              <CardDescription>Projects the user is involved in</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Project list will be displayed here
-              </p>
+              <p className="text-sm text-muted-foreground">Project list will be displayed here</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -454,14 +478,10 @@ export function UserProfileView({
           <Card>
             <CardHeader>
               <CardTitle>Tasks</CardTitle>
-              <CardDescription>
-                Tasks assigned to the user
-              </CardDescription>
+              <CardDescription>Tasks assigned to the user</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Task list will be displayed here
-              </p>
+              <p className="text-sm text-muted-foreground">Task list will be displayed here</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -470,14 +490,10 @@ export function UserProfileView({
           <Card>
             <CardHeader>
               <CardTitle>Activity</CardTitle>
-              <CardDescription>
-                Recent user activity
-              </CardDescription>
+              <CardDescription>Recent user activity</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Activity log will be displayed here
-              </p>
+              <p className="text-sm text-muted-foreground">Activity log will be displayed here</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -496,7 +512,7 @@ export function UserProfileView({
             <div className="flex justify-center">
               <Avatar className="h-24 w-24 border-2 border-black/10">
                 {profile.image ? (
-                  <AvatarImage src={profile.image} alt={profile.name || "User"} />
+                  <AvatarImage src={profile.image} alt={profile.name || 'User'} />
                 ) : null}
                 <AvatarFallback className="text-2xl">
                   {getUserInitials(profile.name)}
@@ -532,5 +548,5 @@ export function UserProfileView({
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

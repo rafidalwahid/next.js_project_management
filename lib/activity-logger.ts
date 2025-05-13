@@ -35,7 +35,10 @@ export async function logActivity(params: ActivityLogParams): Promise<any | null
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getUserActivities(userId: string, limit = 10): Promise<ActivityWithRelations[]> {
+export async function getUserActivities(
+  userId: string,
+  limit = 10
+): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {
@@ -73,7 +76,10 @@ export async function getUserActivities(userId: string, limit = 10): Promise<Act
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getProjectActivities(projectId: string, limit = 20): Promise<ActivityWithRelations[]> {
+export async function getProjectActivities(
+  projectId: string,
+  limit = 20
+): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {
@@ -114,7 +120,11 @@ export async function getProjectActivities(projectId: string, limit = 20): Promi
  * @param limit Number of activities to return
  * @returns List of recent activities
  */
-export async function getEntityActivities(entityType: string, entityId: string, limit = 10): Promise<ActivityWithRelations[]> {
+export async function getEntityActivities(
+  entityType: string,
+  entityId: string,
+  limit = 10
+): Promise<ActivityWithRelations[]> {
   try {
     const activities = await prisma.activity.findMany({
       where: {

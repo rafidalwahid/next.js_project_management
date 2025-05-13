@@ -1,42 +1,65 @@
-"use client"
+'use client';
 
-import { useState, useRef } from "react"
-import { Pencil, Shield, Clock, Calendar, FileText, Upload, User, CalendarClock, X, File, Clock4, Save, Camera, Phone, MapPin } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { formatDate } from "@/lib/utils"
-import type { UserProfile } from "@/hooks/use-user-profile"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { RoleBadge } from "@/components/ui/role-badge"
-import { UserProjectRoles } from "@/components/profile/user-project-roles"
-import { UserAttendanceSummary } from "@/components/profile/user-attendance-summary"
-import { UserDocumentList } from "@/components/profile/user-document-list"
-import { UserProfileProjects } from "@/components/profile/user-profile-projects"
-import { UserProfileTasks } from "@/components/profile/user-profile-tasks"
+import { useState, useRef } from 'react';
+import {
+  Pencil,
+  Shield,
+  Clock,
+  Calendar,
+  FileText,
+  Upload,
+  User,
+  CalendarClock,
+  X,
+  File,
+  Clock4,
+  Save,
+  Camera,
+  Phone,
+  MapPin,
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { formatDate } from '@/lib/utils';
+import type { UserProfile } from '@/hooks/use-user-profile';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RoleBadge } from '@/components/ui/role-badge';
+import { UserProjectRoles } from '@/components/profile/user-project-roles';
+import { UserAttendanceSummary } from '@/components/profile/user-attendance-summary';
+import { UserDocumentList } from '@/components/profile/user-document-list';
+import { UserProfileProjects } from '@/components/profile/user-profile-projects';
+import { UserProfileTasks } from '@/components/profile/user-profile-tasks';
 
 interface UserProfileViewProps {
-  profile: UserProfile
-  projects: any[]
-  tasks: any[]
-  activities: any[]
-  teamMemberships?: any[]
+  profile: UserProfile;
+  projects: any[];
+  tasks: any[];
+  activities: any[];
+  teamMemberships?: any[];
   stats: {
-    projectCount: number
-    taskCount: number
-    teamCount: number
-    completionRate: string
-  }
-  canEdit: boolean
-  isOwnProfile: boolean
-  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>
-  onUploadImage: (file: File) => Promise<string | null>
+    projectCount: number;
+    taskCount: number;
+    teamCount: number;
+    completionRate: string;
+  };
+  canEdit: boolean;
+  isOwnProfile: boolean;
+  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  onUploadImage: (file: File) => Promise<string | null>;
 }
 
 export function UserProfileView({
@@ -49,33 +72,33 @@ export function UserProfileView({
   canEdit,
   isOwnProfile,
   onUpdateProfile,
-  onUploadImage
+  onUploadImage,
 }: UserProfileViewProps) {
-  const [activeTab, setActiveTab] = useState("overview")
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: profile.name || "",
-    bio: profile.bio || "",
-    jobTitle: profile.jobTitle || "",
-    location: profile.location || "",
-    phone: profile.phone || "",
-    department: profile.department || ""
-  })
+    name: profile.name || '',
+    bio: profile.bio || '',
+    jobTitle: profile.jobTitle || '',
+    location: profile.location || '',
+    phone: profile.phone || '',
+    department: profile.department || '',
+  });
 
   const getUserInitials = () => {
-    if (!profile.name) return "U"
+    if (!profile.name) return 'U';
 
-    const nameParts = profile.name.split(" ")
+    const nameParts = profile.name.split(' ');
     if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
 
-    return nameParts[0].substring(0, 2).toUpperCase()
-  }
+    return nameParts[0].substring(0, 2).toUpperCase();
+  };
 
   // Format dates in a more readable way
-  const formattedCreatedDate = formatDate(profile.createdAt, "MMM d, yyyy");
+  const formattedCreatedDate = formatDate(profile.createdAt, 'MMM d, yyyy');
 
   // Format last login date if available
   const lastLoginDate = formatDate(profile.lastLogin);
@@ -91,40 +114,40 @@ export function UserProfileView({
     if (files && files.length > 0) {
       try {
         const file = files[0];
-        console.log("File selected:", file.name);
+        console.log('File selected:', file.name);
 
         // Create form data
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         // Upload the file
         const response = await fetch(`/api/users/${profile.id}/documents`, {
-          method: "POST",
+          method: 'POST',
           body: formData,
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to upload document");
+          throw new Error(errorData.error || 'Failed to upload document');
         }
 
         // Refresh the documents list
-        setActiveTab("documents");
+        setActiveTab('documents');
 
         // Show success message
-        alert("Document uploaded successfully!");
+        alert('Document uploaded successfully!');
 
         // Reset the input
         if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+          fileInputRef.current.value = '';
         }
       } catch (error) {
-        console.error("Error uploading document:", error);
-        alert("Failed to upload document. Please try again.");
+        console.error('Error uploading document:', error);
+        alert('Failed to upload document. Please try again.');
 
         // Reset the input
         if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+          fileInputRef.current.value = '';
         }
       }
     }
@@ -134,12 +157,12 @@ export function UserProfileView({
   const handleEditProfileClick = () => {
     // Reset form data to current profile values
     setProfileData({
-      name: profile.name || "",
-      bio: profile.bio || "",
-      jobTitle: profile.jobTitle || "",
-      location: profile.location || "",
-      phone: profile.phone || "",
-      department: profile.department || ""
+      name: profile.name || '',
+      bio: profile.bio || '',
+      jobTitle: profile.jobTitle || '',
+      location: profile.location || '',
+      phone: profile.phone || '',
+      department: profile.department || '',
     });
     setEditDialogOpen(true);
   };
@@ -161,9 +184,7 @@ export function UserProfileView({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Update your profile information below.
-            </DialogDescription>
+            <DialogDescription>Update your profile information below.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -173,7 +194,7 @@ export function UserProfileView({
               <Input
                 id="name"
                 value={profileData.name}
-                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, name: e.target.value })}
                 className="col-span-3"
               />
             </div>
@@ -184,7 +205,7 @@ export function UserProfileView({
               <Input
                 id="jobTitle"
                 value={profileData.jobTitle}
-                onChange={(e) => setProfileData({ ...profileData, jobTitle: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, jobTitle: e.target.value })}
                 className="col-span-3"
               />
             </div>
@@ -195,7 +216,7 @@ export function UserProfileView({
               <Input
                 id="department"
                 value={profileData.department}
-                onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, department: e.target.value })}
                 className="col-span-3"
               />
             </div>
@@ -206,7 +227,7 @@ export function UserProfileView({
               <Input
                 id="location"
                 value={profileData.location}
-                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, location: e.target.value })}
                 className="col-span-3"
               />
             </div>
@@ -217,7 +238,7 @@ export function UserProfileView({
               <Input
                 id="phone"
                 value={profileData.phone}
-                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
                 className="col-span-3"
               />
             </div>
@@ -228,7 +249,7 @@ export function UserProfileView({
               <Textarea
                 id="bio"
                 value={profileData.bio}
-                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                onChange={e => setProfileData({ ...profileData, bio: e.target.value })}
                 className="col-span-3"
                 rows={4}
               />
@@ -247,9 +268,7 @@ export function UserProfileView({
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             {isOwnProfile ? 'My Profile' : `${profile.name || 'User'}'s Profile`}
           </h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
+          <p className="text-muted-foreground">Manage your account settings and preferences</p>
         </div>
 
         {canEdit && (
@@ -261,12 +280,24 @@ export function UserProfileView({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full flex flex-wrap">
-          <TabsTrigger value="overview" className="flex-1 min-w-[100px]">Overview</TabsTrigger>
-          <TabsTrigger value="attendance" className="flex-1 min-w-[100px]">Attendance</TabsTrigger>
-          <TabsTrigger value="documents" className="flex-1 min-w-[100px]">Documents</TabsTrigger>
-          <TabsTrigger value="projects" className="flex-1 min-w-[100px]">Projects</TabsTrigger>
-          <TabsTrigger value="tasks" className="flex-1 min-w-[100px]">Tasks</TabsTrigger>
-          <TabsTrigger value="activity" className="flex-1 min-w-[100px]">Activity</TabsTrigger>
+          <TabsTrigger value="overview" className="flex-1 min-w-[100px]">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="flex-1 min-w-[100px]">
+            Attendance
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 min-w-[100px]">
+            Documents
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="flex-1 min-w-[100px]">
+            Projects
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="flex-1 min-w-[100px]">
+            Tasks
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex-1 min-w-[100px]">
+            Activity
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendance" className="mt-6">
@@ -287,7 +318,7 @@ export function UserProfileView({
                   <div className="relative">
                     <Avatar className="h-24 w-24 mb-4">
                       {profile.image ? (
-                        <AvatarImage src={profile.image} alt={profile.name || "User"} />
+                        <AvatarImage src={profile.image} alt={profile.name || 'User'} />
                       ) : (
                         <AvatarFallback className="text-lg font-semibold">
                           {getUserInitials()}
@@ -295,22 +326,24 @@ export function UserProfileView({
                       )}
                     </Avatar>
                     {canEdit && (
-                      <div className="absolute bottom-4 right-0 bg-primary text-white rounded-full p-1 cursor-pointer"
-                           onClick={() => fileInputRef.current?.click()}>
+                      <div
+                        className="absolute bottom-4 right-0 bg-primary text-white rounded-full p-1 cursor-pointer"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
                         <Camera className="h-4 w-4" />
                         <input
                           type="file"
                           ref={fileInputRef}
                           className="hidden"
                           accept="image/*"
-                          onChange={async (e) => {
+                          onChange={async e => {
                             const file = e.target.files?.[0];
                             if (file) {
                               try {
                                 await onUploadImage(file);
                                 // Clear the input value so the same file can be selected again
                                 if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
+                                  fileInputRef.current.value = '';
                                 }
                               } catch (error) {
                                 console.error('Error uploading image:', error);
@@ -321,7 +354,7 @@ export function UserProfileView({
                       </div>
                     )}
                   </div>
-                  <h2 className="text-xl font-bold">{profile.name || "Admin User"}</h2>
+                  <h2 className="text-xl font-bold">{profile.name || 'Admin User'}</h2>
                   <p className="text-sm text-muted-foreground">{profile.email}</p>
                 </div>
 
@@ -378,7 +411,10 @@ export function UserProfileView({
                     <div className="flex flex-col items-center gap-2">
                       <p className="text-sm text-muted-foreground">Status</p>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8">
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200 text-xl font-bold h-8"
+                        >
                           Active
                         </Badge>
                       </div>
@@ -392,9 +428,13 @@ export function UserProfileView({
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <p className="text-xl font-bold">
-                          {profile.lastLogin
-                            ? formatDate(profile.lastLogin)
-                            : <span className="text-sm font-normal text-muted-foreground">Not tracked</span>}
+                          {profile.lastLogin ? (
+                            formatDate(profile.lastLogin)
+                          ) : (
+                            <span className="text-sm font-normal text-muted-foreground">
+                              Not tracked
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -414,14 +454,18 @@ export function UserProfileView({
                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Full Name</h3>
-                      <p>{profile.name || "Admin User"}</p>
+                      <p>{profile.name || 'Admin User'}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Email Address</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                        Email Address
+                      </h3>
                       <p className="break-words">{profile.email}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">System Role</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                        System Role
+                      </h3>
                       <div className="mt-1">
                         <RoleBadge role={profile.role} type="system" />
                       </div>
@@ -437,9 +481,11 @@ export function UserProfileView({
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Login</h3>
                       <p>
-                        {profile.lastLogin
-                          ? formatDate(profile.lastLogin)
-                          : <span className="text-sm text-muted-foreground">Not tracked</span>}
+                        {profile.lastLogin ? (
+                          formatDate(profile.lastLogin)
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Not tracked</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -453,9 +499,15 @@ export function UserProfileView({
                   <div className="mt-6 pt-6 border-t">
                     <h3 className="text-sm font-medium mb-4">Account Actions</h3>
                     <div className="flex flex-wrap gap-3">
-                      <Button variant="outline" size="sm">Change Password</Button>
-                      <Button variant="outline" size="sm">Update Email</Button>
-                      <Button variant="outline" size="sm">Two-Factor Authentication</Button>
+                      <Button variant="outline" size="sm">
+                        Change Password
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Update Email
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Two-Factor Authentication
+                      </Button>
                     </div>
                   </div>
 
@@ -520,7 +572,10 @@ export function UserProfileView({
               ) : (
                 <div className="space-y-6">
                   {activities.map(activity => (
-                    <div key={activity.id} className="flex items-start gap-3 border-b pb-4 last:border-0 last:pb-0">
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 border-b pb-4 last:border-0 last:pb-0"
+                    >
                       <div className="rounded-full bg-slate-100 p-2 mt-0.5 shrink-0">
                         <CalendarClock className="h-4 w-4 text-slate-600" />
                       </div>
@@ -530,7 +585,9 @@ export function UserProfileView({
                           {new Date(activity.createdAt).toLocaleString()}
                         </p>
                         {activity.description && (
-                          <p className="text-sm text-muted-foreground mt-1 break-words">{activity.description}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">
+                            {activity.description}
+                          </p>
                         )}
                         {activity.project && (
                           <Badge variant="outline" className="mt-2">
@@ -547,5 +604,5 @@ export function UserProfileView({
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

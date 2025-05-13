@@ -72,7 +72,7 @@ const DEFAULT_STATS = {
   projectCount: 0,
   taskCount: 0,
   teamCount: 0,
-  completionRate: '0%'
+  completionRate: '0%',
 };
 
 export function useUserProfile(userId: string, initialUser?: UserProfile) {
@@ -80,20 +80,17 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Create a proper fallback with the right structure
-  const fallbackData = initialUser ? {
-    user: initialUser,
-    projects: [],
-    tasks: [],
-    activities: [],
-    stats: DEFAULT_STATS
-  } : undefined;
+  const fallbackData = initialUser
+    ? {
+        user: initialUser,
+        projects: [],
+        tasks: [],
+        activities: [],
+        stats: DEFAULT_STATS,
+      }
+    : undefined;
 
-  const {
-    data,
-    error,
-    isLoading,
-    mutate
-  } = useSWR<UserProfileData>(
+  const { data, error, isLoading, mutate } = useSWR<UserProfileData>(
     userId ? `/api/users/${userId}?profile=true` : null,
     async () => {
       try {
@@ -119,19 +116,14 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
           tasksData = Array.isArray(response.tasks) ? response.tasks : [];
           activitiesData = Array.isArray(response.activities) ? response.activities : [];
           statsData = response.stats || DEFAULT_STATS;
-          const teamMembershipsData = Array.isArray(response.teamMemberships) ? response.teamMemberships : [];
+          const teamMembershipsData = Array.isArray(response.teamMemberships)
+            ? response.teamMemberships
+            : [];
         }
         // Case 2: Response is the user object itself with projects, tasks as properties
         else if (response.id) {
           // Extract user data from the response
-          const {
-            projects,
-            tasks,
-            activities,
-            stats,
-            teamMemberships,
-            ...userObject
-          } = response;
+          const { projects, tasks, activities, stats, teamMemberships, ...userObject } = response;
 
           userData = userObject as UserProfile;
           projectsData = Array.isArray(projects) ? projects : [];
@@ -168,9 +160,9 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
-          title: "Error",
-          description: "Failed to load user profile. Please try again.",
-          variant: "destructive",
+          title: 'Error',
+          description: 'Failed to load user profile. Please try again.',
+          variant: 'destructive',
         });
         throw error;
       }
@@ -179,7 +171,7 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
       errorRetryCount: 2,
-      fallbackData
+      fallbackData,
     }
   );
 
@@ -191,15 +183,15 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
       await userApi.updateUserProfile(userId, profileData);
       await mutate();
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully.',
       });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update profile. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsUpdating(false);
@@ -220,9 +212,9 @@ export function useUserProfile(userId: string, initialUser?: UserProfile) {
     } catch (error) {
       console.error('Error uploading profile image:', error);
       toast({
-        title: "Error",
-        description: "Failed to upload profile image. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to upload profile image. Please try again.',
+        variant: 'destructive',
       });
       return null;
     } finally {

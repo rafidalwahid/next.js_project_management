@@ -9,17 +9,15 @@ const prisma = new PrismaClient();
 
 async function updateEdgePermissions() {
   try {
-
-
     // Get all roles with their permissions
     const roles = await prisma.role.findMany({
       include: {
         permissions: {
           include: {
-            permission: true
-          }
-        }
-      }
+            permission: true,
+          },
+        },
+      },
     });
 
     // Create a mapping of role names to permission names
@@ -79,8 +77,6 @@ async function updateEdgePermissions() {
 
     // Write the updated file
     fs.writeFileSync(filePath, newContent);
-
-
   } catch (error) {
     process.exit(1);
   } finally {

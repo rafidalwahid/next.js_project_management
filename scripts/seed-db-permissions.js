@@ -7,68 +7,68 @@ const prisma = new PrismaClient();
 // Define permissions directly in this script to avoid importing TypeScript files
 const PERMISSIONS = {
   // User management
-  USER_MANAGEMENT: "user_management",
-  MANAGE_ROLES: "manage_roles",
-  MANAGE_PERMISSIONS: "manage_permissions",
+  USER_MANAGEMENT: 'user_management',
+  MANAGE_ROLES: 'manage_roles',
+  MANAGE_PERMISSIONS: 'manage_permissions',
 
   // Project management
-  PROJECT_CREATION: "project_creation",
-  PROJECT_MANAGEMENT: "project_management",
-  PROJECT_DELETION: "project_deletion",
+  PROJECT_CREATION: 'project_creation',
+  PROJECT_MANAGEMENT: 'project_management',
+  PROJECT_DELETION: 'project_deletion',
 
   // Team management
-  TEAM_MANAGEMENT: "team_management",
-  TEAM_ADD: "team_add",
-  TEAM_REMOVE: "team_remove",
-  TEAM_VIEW: "team_view",
+  TEAM_MANAGEMENT: 'team_management',
+  TEAM_ADD: 'team_add',
+  TEAM_REMOVE: 'team_remove',
+  TEAM_VIEW: 'team_view',
 
   // Task management
-  TASK_CREATION: "task_creation",
-  TASK_ASSIGNMENT: "task_assignment",
-  TASK_MANAGEMENT: "task_management",
-  TASK_DELETION: "task_deletion",
+  TASK_CREATION: 'task_creation',
+  TASK_ASSIGNMENT: 'task_assignment',
+  TASK_MANAGEMENT: 'task_management',
+  TASK_DELETION: 'task_deletion',
 
   // General permissions
-  VIEW_PROJECTS: "view_projects",
-  EDIT_PROFILE: "edit_profile",
-  SYSTEM_SETTINGS: "system_settings",
-  VIEW_DASHBOARD: "view_dashboard",
+  VIEW_PROJECTS: 'view_projects',
+  EDIT_PROFILE: 'edit_profile',
+  SYSTEM_SETTINGS: 'system_settings',
+  VIEW_DASHBOARD: 'view_dashboard',
 
   // Attendance
-  ATTENDANCE_MANAGEMENT: "attendance_management",
-  VIEW_TEAM_ATTENDANCE: "view_team_attendance",
+  ATTENDANCE_MANAGEMENT: 'attendance_management',
+  VIEW_TEAM_ATTENDANCE: 'view_team_attendance',
 };
 
 // Define roles
 const ROLES = {
-  ADMIN: "admin",
-  MANAGER: "manager",
-  USER: "user",
-  GUEST: "guest",
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  USER: 'user',
+  GUEST: 'guest',
 };
 
 // Define system roles with additional metadata
 const SYSTEM_ROLES = {
   admin: {
-    name: "Administrator",
-    description: "Full access to all system features",
-    color: "bg-purple-500" // Purple
+    name: 'Administrator',
+    description: 'Full access to all system features',
+    color: 'bg-purple-500', // Purple
   },
   manager: {
-    name: "Manager",
-    description: "Can manage projects, tasks, and team members",
-    color: "bg-blue-500" // Blue
+    name: 'Manager',
+    description: 'Can manage projects, tasks, and team members',
+    color: 'bg-blue-500', // Blue
   },
   user: {
-    name: "User",
-    description: "Regular user with limited permissions",
-    color: "bg-green-500" // Green
+    name: 'User',
+    description: 'Regular user with limited permissions',
+    color: 'bg-green-500', // Green
   },
   guest: {
-    name: "Guest",
-    description: "View-only access to projects",
-    color: "bg-gray-500" // Gray
-  }
+    name: 'Guest',
+    description: 'View-only access to projects',
+    color: 'bg-gray-500', // Gray
+  },
 };
 
 // Permission matrix - which roles have which permissions
@@ -119,9 +119,7 @@ const PERMISSION_MATRIX = {
     PERMISSIONS.VIEW_DASHBOARD,
     PERMISSIONS.TEAM_VIEW,
   ],
-  [ROLES.GUEST]: [
-    PERMISSIONS.VIEW_PROJECTS,
-  ],
+  [ROLES.GUEST]: [PERMISSIONS.VIEW_PROJECTS],
 };
 
 // Helper function to get all permissions with metadata
@@ -153,7 +151,7 @@ function getAllPermissionsWithMetadata() {
       id: value,
       name,
       description: `Permission to ${value.replace(/_/g, ' ')}`,
-      category
+      category,
     };
   });
 }
@@ -166,10 +164,10 @@ async function main() {
 
   // Seed roles
   const roles = await seedRoles();
-  
+
   // Seed permissions
   const permissions = await seedPermissions();
-  
+
   // Seed role-permission relationships
   await seedRolePermissions(roles, permissions);
 
@@ -182,7 +180,7 @@ async function clearExistingPermissionData() {
 
   // Delete role-permission relationships first
   await prisma.rolePermission.deleteMany({});
-  
+
   // Then delete permissions and roles
   await prisma.permission.deleteMany({});
   await prisma.role.deleteMany({});
@@ -202,8 +200,8 @@ async function seedRoles() {
       data: {
         name: roleId,
         description: roleData.description,
-        color: roleData.color
-      }
+        color: roleData.color,
+      },
     });
 
     roleMap[roleId] = role;
@@ -228,8 +226,8 @@ async function seedPermissions() {
       data: {
         name: permission.id,
         description: permission.description,
-        category: permission.category
-      }
+        category: permission.category,
+      },
     });
 
     permissionMap[permission.id] = createdPermission;
@@ -265,8 +263,8 @@ async function seedRolePermissions(roles, permissions) {
       await prisma.rolePermission.create({
         data: {
           roleId: role.id,
-          permissionId: permission.id
-        }
+          permissionId: permission.id,
+        },
       });
 
       console.log(`Assigned permission ${permissionKey} to role ${roleKey}`);
@@ -276,7 +274,7 @@ async function seedRolePermissions(roles, permissions) {
 
 // Run the main function
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error(e);
     process.exit(1);
   })

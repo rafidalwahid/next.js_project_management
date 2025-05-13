@@ -1,27 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { ActivityWhereInput, PaginationParams, PaginationResult } from "@/types";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { ActivityWhereInput, PaginationParams, PaginationResult } from '@/types';
 
 export async function GET(req: NextRequest) {
   try {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters
     const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get("limit") || "5");
-    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get('limit') || '5');
+    const page = parseInt(url.searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
-    const projectId = url.searchParams.get("projectId");
-    const userId = url.searchParams.get("userId");
+    const projectId = url.searchParams.get('projectId');
+    const userId = url.searchParams.get('userId');
 
     // Build the where clause
     const where: ActivityWhereInput = {};
@@ -51,21 +48,21 @@ export async function GET(req: NextRequest) {
             name: true,
             email: true,
             image: true,
-          }
+          },
         },
         project: {
           select: {
             id: true,
             title: true,
-          }
+          },
         },
         task: {
           select: {
             id: true,
             title: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     // Get total count for pagination
@@ -83,13 +80,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       activities,
-      pagination
+      pagination,
     });
   } catch (error) {
-    console.error("Get activities error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve activities" },
-      { status: 500 }
-    );
+    console.error('Get activities error:', error);
+    return NextResponse.json({ error: 'Failed to retrieve activities' }, { status: 500 });
   }
 }

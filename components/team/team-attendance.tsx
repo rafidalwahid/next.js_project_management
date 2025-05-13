@@ -1,48 +1,54 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Clock, Filter, Search, Users } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { format } from "date-fns"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { RoleBadge } from "@/components/ui/role-badge"
-import { AttendanceWithRelations, AttendanceSummary } from "@/types/attendance"
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, Clock, Filter, Search, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { RoleBadge } from '@/components/ui/role-badge';
+import { AttendanceWithRelations, AttendanceSummary } from '@/types/attendance';
 
 interface TeamAttendanceProps {
-  projectId: string
+  projectId: string;
 }
 
 export function TeamAttendance({ projectId }: TeamAttendanceProps) {
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceWithRelations[]>([])
-  const [summary, setSummary] = useState<AttendanceSummary | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [groupBy, setGroupBy] = useState("user")
-  const [timeRange, setTimeRange] = useState("all")
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceWithRelations[]>([]);
+  const [summary, setSummary] = useState<AttendanceSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [groupBy, setGroupBy] = useState('user');
+  const [timeRange, setTimeRange] = useState('all');
 
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        setIsLoading(true)
+        setIsLoading(true);
 
         // Build query parameters
         const params = new URLSearchParams();
         params.append('projectId', projectId);
 
-        if (timeRange === "today") {
+        if (timeRange === 'today') {
           const today = new Date().toISOString().split('T')[0];
           params.append('startDate', today);
-        } else if (timeRange === "week") {
+        } else if (timeRange === 'week') {
           const today = new Date();
           const weekAgo = new Date(today);
           weekAgo.setDate(today.getDate() - 7);
           params.append('startDate', weekAgo.toISOString().split('T')[0]);
-        } else if (timeRange === "month") {
+        } else if (timeRange === 'month') {
           const today = new Date();
           const monthAgo = new Date(today);
           monthAgo.setMonth(today.getMonth() - 1);
@@ -63,19 +69,19 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
         const summary: AttendanceSummary = {
           totalRecords: data.summary.totalRecords,
           totalHours: data.summary.totalHours,
-          userCount: data.summary.uniqueUsers
+          userCount: data.summary.uniqueUsers,
         };
 
         setSummary(summary);
       } catch (error) {
-        console.error("Error fetching team attendance:", error)
+        console.error('Error fetching team attendance:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchAttendance()
-  }, [projectId, timeRange])
+    fetchAttendance();
+  }, [projectId, timeRange]);
 
   // Filter records based on search
   const filteredRecords = attendanceRecords.filter(record => {
@@ -91,29 +97,32 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
   });
 
   // Group records based on selection
-  const groupedRecords = filteredRecords.reduce((groups, record) => {
-    let key: string = 'unknown';
+  const groupedRecords = filteredRecords.reduce(
+    (groups, record) => {
+      let key: string = 'unknown';
 
-    if (groupBy === "user") {
-      key = record.user?.id || 'unknown';
-    } else if (groupBy === "date") {
-      key = format(new Date(record.checkInTime), "yyyy-MM-dd");
-    } else if (groupBy === "location") {
-      key = record.checkInLocationName || "Unknown";
-    }
+      if (groupBy === 'user') {
+        key = record.user?.id || 'unknown';
+      } else if (groupBy === 'date') {
+        key = format(new Date(record.checkInTime), 'yyyy-MM-dd');
+      } else if (groupBy === 'location') {
+        key = record.checkInLocationName || 'Unknown';
+      }
 
-    if (!groups[key]) {
-      groups[key] = [];
-    }
+      if (!groups[key]) {
+        groups[key] = [];
+      }
 
-    groups[key].push(record);
-    return groups;
-  }, {} as Record<string, AttendanceWithRelations[]>);
+      groups[key].push(record);
+      return groups;
+    },
+    {} as Record<string, AttendanceWithRelations[]>
+  );
 
   // Get user names for user grouping
   const getUserName = (userId: string) => {
     const record = attendanceRecords.find(r => r.user?.id === userId);
-    return record?.user?.name || record?.user?.email || "Unknown User";
+    return record?.user?.name || record?.user?.email || 'Unknown User';
   };
 
   return (
@@ -134,7 +143,7 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
                 placeholder="Search by name, email, or location..."
                 className="pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
 
@@ -187,33 +196,34 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
             <Skeleton className="h-24 w-full" />
           </div>
         ) : Object.keys(groupedRecords).length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No attendance records found
-          </div>
+          <div className="text-center py-8 text-muted-foreground">No attendance records found</div>
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedRecords).map(([key, records]) => (
               <div key={key} className="border rounded-md p-4">
                 <div className="font-medium text-lg mb-3 flex items-center">
-                  {groupBy === "user" && (
+                  {groupBy === 'user' && (
                     <>
                       <Avatar className="h-6 w-6 mr-2">
                         <AvatarImage src={records[0].user?.image || undefined} />
                         <AvatarFallback>
-                          {((records[0].user?.name || records[0].user?.email || "??").substring(0, 2))}
+                          {(records[0].user?.name || records[0].user?.email || '??').substring(
+                            0,
+                            2
+                          )}
                         </AvatarFallback>
                       </Avatar>
                       {getUserName(key)}
-                      <RoleBadge role={records[0].user?.role || "user"} className="ml-2" />
+                      <RoleBadge role={records[0].user?.role || 'user'} className="ml-2" />
                     </>
                   )}
-                  {groupBy === "date" && (
+                  {groupBy === 'date' && (
                     <>
                       <Calendar className="mr-2 h-5 w-5" />
-                      {format(new Date(records[0].checkInTime), "EEEE, MMMM d, yyyy")}
+                      {format(new Date(records[0].checkInTime), 'EEEE, MMMM d, yyyy')}
                     </>
                   )}
-                  {groupBy === "location" && (
+                  {groupBy === 'location' && (
                     <>
                       <Clock className="mr-2 h-5 w-5" />
                       {key}
@@ -223,27 +233,34 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
 
                 <div className="space-y-3">
                   {records.map(record => (
-                    <div key={record.id} className="flex justify-between items-center border-b pb-2 last:border-0">
+                    <div
+                      key={record.id}
+                      className="flex justify-between items-center border-b pb-2 last:border-0"
+                    >
                       <div>
-                        {groupBy !== "user" && record.user && (
-                          <div className="font-medium">{record.user.name || record.user.email || "Unknown User"}</div>
+                        {groupBy !== 'user' && record.user && (
+                          <div className="font-medium">
+                            {record.user.name || record.user.email || 'Unknown User'}
+                          </div>
                         )}
-                        {groupBy !== "date" && (
+                        {groupBy !== 'date' && (
                           <div className="text-sm text-muted-foreground">
-                            {format(new Date(record.checkInTime), "EEEE, MMMM d, yyyy")}
+                            {format(new Date(record.checkInTime), 'EEEE, MMMM d, yyyy')}
                           </div>
                         )}
                         <div className="text-sm text-muted-foreground flex items-center mt-1">
                           <Clock className="h-3 w-3 mr-1" />
-                          {format(new Date(record.checkInTime), "h:mm a")} -
-                          {record.checkOutTime ? format(new Date(record.checkOutTime), " h:mm a") : " Present"}
+                          {format(new Date(record.checkInTime), 'h:mm a')} -
+                          {record.checkOutTime
+                            ? format(new Date(record.checkOutTime), ' h:mm a')
+                            : ' Present'}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-medium">
-                          {record.totalHours ? `${record.totalHours.toFixed(1)} hrs` : "Active"}
+                          {record.totalHours ? `${record.totalHours.toFixed(1)} hrs` : 'Active'}
                         </div>
-                        {groupBy !== "location" && record.checkInLocationName && (
+                        {groupBy !== 'location' && record.checkInLocationName && (
                           <div className="text-sm text-muted-foreground">
                             {record.checkInLocationName}
                           </div>
@@ -258,5 +275,5 @@ export function TeamAttendance({ projectId }: TeamAttendanceProps) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

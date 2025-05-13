@@ -1,19 +1,19 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { format, parseISO } from "date-fns"
-import { Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/components/ui/spinner"
-import { MultiSelect } from "@/components/ui/multi-select"
+import * as React from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { format, parseISO } from 'date-fns';
+import { Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Form,
   FormControl,
@@ -22,76 +22,90 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
-import { ProjectStatus } from "@/types/project"
+} from '@/components/ui/command';
+import { ProjectStatus } from '@/types/project';
 
 interface User {
-  id: string
-  name: string | null
-  email: string
-  image: string | null
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
 }
 
 interface TaskFormProps {
-  projectId: string
-  taskId?: string
-  parentId?: string | null
-  onSuccess?: () => void
-  onCancel?: () => void
+  projectId: string;
+  taskId?: string;
+  parentId?: string | null;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 const taskFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, 'Title is required'),
   description: z.string().optional().nullable(),
-  priority: z.enum(["low", "medium", "high"]),
-  startDate: z.string().optional().nullable().transform(val => val ? val : null),
-  endDate: z.string().optional().nullable().transform(val => val ? val : null),
-  dueDate: z.string().optional().nullable().transform(val => val ? val : null),
-  estimatedTime: z.union([
-    z.coerce.number().min(0).optional().nullable(),
-    z.literal("")
-  ]).optional().nullable().transform(val => val === "" ? null : val),
-  timeSpent: z.union([
-    z.coerce.number().min(0).optional().nullable(),
-    z.literal("")
-  ]).optional().nullable().transform(val => val === "" ? null : val),
+  priority: z.enum(['low', 'medium', 'high']),
+  startDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform(val => (val ? val : null)),
+  endDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform(val => (val ? val : null)),
+  dueDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform(val => (val ? val : null)),
+  estimatedTime: z
+    .union([z.coerce.number().min(0).optional().nullable(), z.literal('')])
+    .optional()
+    .nullable()
+    .transform(val => (val === '' ? null : val)),
+  timeSpent: z
+    .union([z.coerce.number().min(0).optional().nullable(), z.literal('')])
+    .optional()
+    .nullable()
+    .transform(val => (val === '' ? null : val)),
   statusId: z.string().optional().nullable(),
   // assignedToId is completely deprecated - not included in the schema
   // Use assigneeIds as the primary way to assign tasks
   assigneeIds: z.array(z.string()).optional(),
   parentId: z.string().optional().nullable(),
-})
+});
 
-type TaskFormValues = z.infer<typeof taskFormSchema>
+type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: TaskFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(!!taskId)
-  const [statuses, setStatuses] = useState<ProjectStatus[]>([])
-  const [teamMembers, setTeamMembers] = useState<User[]>([])
-  const [parentTasks, setParentTasks] = useState<{ id: string; title: string }[]>([])
-  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!!taskId);
+  const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
+  const [parentTasks, setParentTasks] = useState<{ id: string; title: string }[]>([]);
+  const { toast } = useToast();
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      priority: "medium",
+      title: '',
+      description: '',
+      priority: 'medium',
       startDate: null,
       endDate: null,
       dueDate: null,
@@ -101,45 +115,45 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
       assigneeIds: [],
       parentId: parentId || null,
     },
-  })
+  });
 
   // Fetch project statuses
   useEffect(() => {
     const fetchStatuses = async () => {
       try {
-        const response = await fetch(`/api/projects/${projectId}/statuses`)
-        if (!response.ok) throw new Error("Failed to fetch statuses")
+        const response = await fetch(`/api/projects/${projectId}/statuses`);
+        if (!response.ok) throw new Error('Failed to fetch statuses');
 
-        const data = await response.json()
-        setStatuses(data.statuses || [])
+        const data = await response.json();
+        setStatuses(data.statuses || []);
 
         // Set default status if available and creating a new task
         if (!taskId && data.statuses && data.statuses.length > 0) {
-          const defaultStatus = data.statuses.find((s: ProjectStatus) => s.isDefault)
-          form.setValue("statusId", defaultStatus ? defaultStatus.id : data.statuses[0].id)
+          const defaultStatus = data.statuses.find((s: ProjectStatus) => s.isDefault);
+          form.setValue('statusId', defaultStatus ? defaultStatus.id : data.statuses[0].id);
         }
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to fetch project statuses",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch project statuses',
+          variant: 'destructive',
+        });
       }
-    }
+    };
 
     if (projectId) {
-      fetchStatuses()
+      fetchStatuses();
     }
-  }, [projectId, taskId, form, toast])
+  }, [projectId, taskId, form, toast]);
 
   // Fetch team members
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch(`/api/team-management?projectId=${projectId}`)
-        if (!response.ok) throw new Error("Failed to fetch team members")
+        const response = await fetch(`/api/team-management?projectId=${projectId}`);
+        if (!response.ok) throw new Error('Failed to fetch team members');
 
-        const data = await response.json()
+        const data = await response.json();
 
         if (data.teamMembers && Array.isArray(data.teamMembers)) {
           // Extract user data from team members and filter out any null values
@@ -150,70 +164,72 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
           console.log(`Fetched ${users.length} team members for task assignment`);
           setTeamMembers(users);
         } else {
-          console.error("No team members data found:", data);
+          console.error('No team members data found:', data);
           setTeamMembers([]);
         }
       } catch (error) {
-        console.error("Error fetching team members:", error);
+        console.error('Error fetching team members:', error);
         toast({
-          title: "Error",
-          description: "Failed to fetch team members",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch team members',
+          variant: 'destructive',
+        });
       }
-    }
+    };
 
     if (projectId) {
-      fetchTeamMembers()
+      fetchTeamMembers();
     }
-  }, [projectId, toast])
+  }, [projectId, toast]);
 
   // Fetch parent tasks (top-level tasks for this project)
   useEffect(() => {
     const fetchParentTasks = async () => {
       try {
-        const response = await fetch(`/api/tasks?projectId=${projectId}&parentId=null`)
-        if (!response.ok) throw new Error("Failed to fetch tasks")
+        const response = await fetch(`/api/tasks?projectId=${projectId}&parentId=null`);
+        if (!response.ok) throw new Error('Failed to fetch tasks');
 
-        const data = await response.json()
+        const data = await response.json();
         // Filter out the current task if editing
         const filteredTasks = taskId
           ? data.tasks.filter((t: { id: string; title: string }) => t.id !== taskId)
-          : data.tasks
+          : data.tasks;
 
-        setParentTasks(filteredTasks.map((t: { id: string; title: string }) => ({ id: t.id, title: t.title })))
+        setParentTasks(
+          filteredTasks.map((t: { id: string; title: string }) => ({ id: t.id, title: t.title }))
+        );
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to fetch potential parent tasks",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch potential parent tasks',
+          variant: 'destructive',
+        });
       }
-    }
+    };
 
     if (projectId) {
-      fetchParentTasks()
+      fetchParentTasks();
     }
-  }, [projectId, taskId, toast])
+  }, [projectId, taskId, toast]);
 
   // Fetch task data if editing
   useEffect(() => {
     const fetchTask = async () => {
-      if (!taskId) return
+      if (!taskId) return;
 
       try {
-        setIsFetching(true)
-        const response = await fetch(`/api/tasks/${taskId}`)
-        if (!response.ok) throw new Error("Failed to fetch task")
+        setIsFetching(true);
+        const response = await fetch(`/api/tasks/${taskId}`);
+        if (!response.ok) throw new Error('Failed to fetch task');
 
-        const data = await response.json()
-        const task = data.task
+        const data = await response.json();
+        const task = data.task;
 
-        console.log("Fetched task data:", task);
+        console.log('Fetched task data:', task);
 
         // Extract assignee IDs from the task
         const assigneeIds = task.assignees?.map((a: { userId: string }) => a.userId) || [];
-        console.log("Extracted assignee IDs:", assigneeIds);
+        console.log('Extracted assignee IDs:', assigneeIds);
 
         if (task) {
           // Format dates as YYYY-MM-DD for HTML date inputs
@@ -225,7 +241,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
 
           form.reset({
             title: task.title,
-            description: task.description || "",
+            description: task.description || '',
             priority: task.priority,
             startDate: formatDateForInput(task.startDate),
             endDate: formatDateForInput(task.endDate),
@@ -235,35 +251,33 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
             statusId: task.statusId,
             assigneeIds: assigneeIds,
             parentId: task.parentId,
-          })
+          });
         }
       } catch (error) {
-        console.error("Error fetching task:", error);
+        console.error('Error fetching task:', error);
         toast({
-          title: "Error",
-          description: "Failed to fetch task details",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to fetch task details',
+          variant: 'destructive',
+        });
       } finally {
-        setIsFetching(false)
+        setIsFetching(false);
       }
-    }
+    };
 
     if (taskId) {
-      fetchTask()
+      fetchTask();
     }
-  }, [taskId, form, toast])
+  }, [taskId, form, toast]);
 
   const onSubmit = async (values: TaskFormValues): Promise<void> => {
     try {
-      setIsLoading(true)
-      console.log("Form submission started with values:", values);
+      setIsLoading(true);
+      console.log('Form submission started with values:', values);
 
-      const endpoint = taskId
-        ? `/api/tasks/${taskId}`
-        : "/api/tasks"
+      const endpoint = taskId ? `/api/tasks/${taskId}` : '/api/tasks';
 
-      const method = taskId ? "PATCH" : "POST"
+      const method = taskId ? 'PATCH' : 'POST';
 
       // Format data for submission
       const payload: {
@@ -272,88 +286,93 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         ...values,
         projectId: !taskId ? projectId : undefined,
         // Ensure these are properly formatted for the API
-        estimatedTime: values.estimatedTime === "" ? null : values.estimatedTime,
-        timeSpent: values.timeSpent === "" ? null : values.timeSpent,
+        estimatedTime: values.estimatedTime === '' ? null : values.estimatedTime,
+        timeSpent: values.timeSpent === '' ? null : values.timeSpent,
         // Make sure assigneeIds is an array
         assigneeIds: Array.isArray(values.assigneeIds) ? values.assigneeIds : [],
         // Format dates - ensure they're properly formatted ISO strings
         startDate: values.startDate ? new Date(values.startDate).toISOString() : null,
         endDate: values.endDate ? new Date(values.endDate).toISOString() : null,
         dueDate: values.dueDate ? new Date(values.dueDate).toISOString() : null,
-      }
+      };
 
-      console.log("Submitting task with dates:", {
+      console.log('Submitting task with dates:', {
         startDate: payload.startDate,
         endDate: payload.endDate,
-        dueDate: payload.dueDate
+        dueDate: payload.dueDate,
       });
 
       // Log assignee information
-      console.log("Assignee IDs being submitted:", values.assigneeIds);
-      console.log("Team members available:", teamMembers.map(m => ({ id: m.id, name: m.name || m.email })));
-      console.log("Submitting task data:", payload);
+      console.log('Assignee IDs being submitted:', values.assigneeIds);
+      console.log(
+        'Team members available:',
+        teamMembers.map(m => ({ id: m.id, name: m.name || m.email }))
+      );
+      console.log('Submitting task data:', payload);
 
       const response = await fetch(endpoint, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
-      console.log("Response status:", response.status);
+      console.log('Response status:', response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Failed to parse error response" }));
-        console.error("Error response:", errorData);
-        throw new Error(errorData.error || "Failed to save task");
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Failed to parse error response' }));
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || 'Failed to save task');
       }
 
       const result = await response.json();
-      console.log("Task form submission result:", result);
+      console.log('Task form submission result:', result);
 
       // Try to refresh the task context if we're in a project context
       try {
         // Find the TaskContext and refresh tasks
         const taskContextRefreshEvent = new CustomEvent('refreshTasks', {
-          detail: { projectId }
+          detail: { projectId },
         });
         if (typeof window !== 'undefined') {
           window.dispatchEvent(taskContextRefreshEvent);
-          console.log("Dispatched refreshTasks event");
+          console.log('Dispatched refreshTasks event');
         }
       } catch (refreshError) {
-        console.warn("Could not refresh task context:", refreshError);
+        console.warn('Could not refresh task context:', refreshError);
       }
 
       toast({
-        title: taskId ? "Task updated" : "Task created",
+        title: taskId ? 'Task updated' : 'Task created',
         description: taskId
-          ? "The task has been updated successfully"
-          : "The task has been created successfully",
-      })
+          ? 'The task has been updated successfully'
+          : 'The task has been created successfully',
+      });
 
       if (onSuccess) {
         onSuccess();
       }
     } catch (error: unknown) {
-      console.error("Error during form submission:", error);
+      console.error('Error during form submission:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save task",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to save task',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isFetching) {
     return (
       <div className="flex justify-center py-8">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   return (
@@ -384,7 +403,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                   placeholder="Task description"
                   className="min-h-[100px]"
                   {...field}
-                  value={field.value || ""}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />
@@ -437,7 +456,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {statuses.map((status) => (
+                    {statuses.map(status => (
                       <SelectItem key={status.id} value={status.id}>
                         <div className="flex items-center gap-2">
                           <div
@@ -467,8 +486,8 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                   <Input
                     type="date"
                     {...field}
-                    value={field.value || ""}
-                    onChange={(e) => {
+                    value={field.value || ''}
+                    onChange={e => {
                       field.onChange(e.target.value);
                     }}
                   />
@@ -488,8 +507,8 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                   <Input
                     type="date"
                     {...field}
-                    value={field.value || ""}
-                    onChange={(e) => {
+                    value={field.value || ''}
+                    onChange={e => {
                       field.onChange(e.target.value);
                     }}
                   />
@@ -509,8 +528,8 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                   <Input
                     type="date"
                     {...field}
-                    value={field.value || ""}
-                    onChange={(e) => {
+                    value={field.value || ''}
+                    onChange={e => {
                       field.onChange(e.target.value);
                     }}
                   />
@@ -536,7 +555,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                       step="0.5"
                       placeholder="0"
                       {...field}
-                      value={field.value === null ? "" : field.value}
+                      value={field.value === null ? '' : field.value}
                     />
                     <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
                   </div>
@@ -560,7 +579,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                       step="0.5"
                       placeholder="0"
                       {...field}
-                      value={field.value === null ? "" : field.value}
+                      value={field.value === null ? '' : field.value}
                     />
                     <Clock className="ml-2 h-4 w-4 text-muted-foreground" />
                   </div>
@@ -579,7 +598,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
               <FormLabel>Assignees</FormLabel>
               <FormControl>
                 <MultiSelect
-                  options={teamMembers.map((member) => ({
+                  options={teamMembers.map(member => ({
                     label: member.name || member.email,
                     value: member.id,
                   }))}
@@ -613,7 +632,7 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="">None (Top-level task)</SelectItem>
-                    {parentTasks.map((task) => (
+                    {parentTasks.map(task => (
                       <SelectItem key={task.id} value={task.id}>
                         {task.title}
                       </SelectItem>
@@ -630,24 +649,15 @@ export function TaskForm({ projectId, taskId, parentId, onSuccess, onCancel }: T
         )}
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="w-full sm:w-auto"
-          >
+          <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full sm:w-auto"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading && <Spinner className="mr-2 h-4 w-4" />}
-            {taskId ? "Update Task" : "Create Task"}
+            {taskId ? 'Update Task' : 'Create Task'}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

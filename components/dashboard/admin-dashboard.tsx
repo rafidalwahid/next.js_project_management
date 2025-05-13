@@ -1,21 +1,15 @@
-"use client"
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import {
-  BarChart3,
-  CheckCircle2,
-  FileText,
-  Layers,
-  Users
-} from "lucide-react"
-import { DashboardStats, ProjectSummary, SystemStats } from "@/types/dashboard"
-import { calculateProjectStatusDistribution } from "@/utils/dashboard-utils"
-import { StatsCard } from "./stats-card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { BarChart3, CheckCircle2, FileText, Layers, Users } from 'lucide-react';
+import { DashboardStats, ProjectSummary, SystemStats } from '@/types/dashboard';
+import { calculateProjectStatusDistribution } from '@/utils/dashboard-utils';
+import { StatsCard } from './stats-card';
 
 interface AdminDashboardProps {
-  stats: DashboardStats
+  stats: DashboardStats;
 }
 
 export function AdminDashboard({ stats }: AdminDashboardProps) {
@@ -25,16 +19,16 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
     usersByRole: { admin: 0, manager: 0, user: 0 },
     totalTasks: 0,
     completedTasks: 0,
-    completionRate: 0
-  }
+    completionRate: 0,
+  };
 
   // Get derived stats directly from the API response
-  const totalProjects = stats?.totalProjects || 0
-  const recentProjects = stats?.recentProjects || []
-  const projectGrowth = stats?.projectGrowth || 0
+  const totalProjects = stats?.totalProjects || 0;
+  const recentProjects = stats?.recentProjects || [];
+  const projectGrowth = stats?.projectGrowth || 0;
 
   // Calculate project status distribution
-  const projectStatusDistribution = calculateProjectStatusDistribution(recentProjects)
+  const projectStatusDistribution = calculateProjectStatusDistribution(recentProjects);
 
   return (
     <div className="space-y-4">
@@ -50,7 +44,13 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <StatsCard
               title="Total Projects"
               value={totalProjects}
-              description={projectGrowth > 0 ? `+${projectGrowth}% growth` : projectGrowth < 0 ? `${projectGrowth}% decline` : "No change"}
+              description={
+                projectGrowth > 0
+                  ? `+${projectGrowth}% growth`
+                  : projectGrowth < 0
+                    ? `${projectGrowth}% decline`
+                    : 'No change'
+              }
               icon={<Layers className="h-4 w-4 text-muted-foreground" />}
             />
             <StatsCard
@@ -77,9 +77,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Projects</CardTitle>
-                <CardDescription>
-                  Most recently updated projects
-                </CardDescription>
+                <CardDescription>Most recently updated projects</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentProjects.length === 0 ? (
@@ -96,7 +94,10 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                         </p>
                         <div className="flex items-center gap-1 mt-1">
                           {project.team?.slice(0, 3).map(member => (
-                            <div key={member.id} className="w-5 h-5 rounded-full bg-muted overflow-hidden">
+                            <div
+                              key={member.id}
+                              className="w-5 h-5 rounded-full bg-muted overflow-hidden"
+                            >
                               {member.image ? (
                                 <img
                                   src={member.image}
@@ -111,7 +112,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                             </div>
                           ))}
                           {project.team?.length > 3 && (
-                            <span className="text-xs text-muted-foreground">+{project.team.length - 3}</span>
+                            <span className="text-xs text-muted-foreground">
+                              +{project.team.length - 3}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -124,9 +127,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Project Distribution</CardTitle>
-                <CardDescription>
-                  Project completion status
-                </CardDescription>
+                <CardDescription>Project completion status</CardDescription>
               </CardHeader>
               <CardContent>
                 {recentProjects.length === 0 ? (
@@ -163,9 +164,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>User Distribution</CardTitle>
-                <CardDescription>
-                  Users by role in the system
-                </CardDescription>
+                <CardDescription>Users by role in the system</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -178,7 +177,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500"
-                          style={{ width: `${systemStats.totalUsers ? (systemStats.usersByRole.admin / systemStats.totalUsers) * 100 : 0}%` }}
+                          style={{
+                            width: `${systemStats.totalUsers ? (systemStats.usersByRole.admin / systemStats.totalUsers) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -190,7 +191,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-green-500"
-                          style={{ width: `${systemStats.totalUsers ? (systemStats.usersByRole.manager / systemStats.totalUsers) * 100 : 0}%` }}
+                          style={{
+                            width: `${systemStats.totalUsers ? (systemStats.usersByRole.manager / systemStats.totalUsers) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -202,7 +205,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-amber-500"
-                          style={{ width: `${systemStats.totalUsers ? (systemStats.usersByRole.user / systemStats.totalUsers) * 100 : 0}%` }}
+                          style={{
+                            width: `${systemStats.totalUsers ? (systemStats.usersByRole.user / systemStats.totalUsers) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -214,9 +219,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Project Status</CardTitle>
-                <CardDescription>
-                  Distribution of project statuses
-                </CardDescription>
+                <CardDescription>Distribution of project statuses</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -229,7 +232,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gray-500"
-                          style={{ width: `${recentProjects.length ? (projectStatusDistribution.notStarted / recentProjects.length) * 100 : 0}%` }}
+                          style={{
+                            width: `${recentProjects.length ? (projectStatusDistribution.notStarted / recentProjects.length) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -241,7 +246,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500"
-                          style={{ width: `${recentProjects.length ? (projectStatusDistribution.inProgress / recentProjects.length) * 100 : 0}%` }}
+                          style={{
+                            width: `${recentProjects.length ? (projectStatusDistribution.inProgress / recentProjects.length) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -253,7 +260,9 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-green-500"
-                          style={{ width: `${recentProjects.length ? (projectStatusDistribution.completed / recentProjects.length) * 100 : 0}%` }}
+                          style={{
+                            width: `${recentProjects.length ? (projectStatusDistribution.completed / recentProjects.length) * 100 : 0}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -266,9 +275,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
           <Card>
             <CardHeader>
               <CardTitle>System Performance</CardTitle>
-              <CardDescription>
-                Overall system metrics and statistics
-              </CardDescription>
+              <CardDescription>Overall system metrics and statistics</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -298,7 +305,10 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
                           style={{ width: `${Math.min(Math.abs(projectGrowth), 100)}%` }}
                         />
                       </div>
-                      <span className="text-sm font-medium">{projectGrowth >= 0 ? '+' : ''}{projectGrowth}%</span>
+                      <span className="text-sm font-medium">
+                        {projectGrowth >= 0 ? '+' : ''}
+                        {projectGrowth}%
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Project growth rate compared to last month
@@ -315,9 +325,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>System Reports</CardTitle>
-                <CardDescription>
-                  Generate and view system reports
-                </CardDescription>
+                <CardDescription>Generate and view system reports</CardDescription>
               </div>
               <Button variant="outline" size="sm">
                 <FileText className="mr-2 h-4 w-4" />
@@ -367,5 +375,5 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

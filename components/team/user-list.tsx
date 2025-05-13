@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { Edit, Trash, User as UserIcon, MoreHorizontal, ShieldCheck } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { RoleBadge } from "@/components/ui/role-badge"
-import { useHasPermission } from "@/hooks/use-has-permission"
+import Link from 'next/link';
+import { Edit, Trash, User as UserIcon, MoreHorizontal, ShieldCheck } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { RoleBadge } from '@/components/ui/role-badge';
+import { useHasPermission } from '@/hooks/use-has-permission';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,35 +15,42 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UserSummary } from "@/types/user"
+} from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { UserSummary } from '@/types/user';
 
 interface UserListProps {
-  users: UserSummary[]
-  onDelete: (userId: string) => void
+  users: UserSummary[];
+  onDelete: (userId: string) => void;
 }
 
 export function UserList({ users, onDelete }: UserListProps) {
-  const { data: session } = useSession()
-  const currentUserId = session?.user?.id
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
 
   // Use permission-based checks instead of role-based checks
-  const { hasPermission: canEditUsers } = useHasPermission("user_edit")
-  const { hasPermission: canManageRoles } = useHasPermission("manage_roles")
-  const { hasPermission: canDeleteUsers } = useHasPermission("user_delete")
+  const { hasPermission: canEditUsers } = useHasPermission('user_edit');
+  const { hasPermission: canManageRoles } = useHasPermission('manage_roles');
+  const { hasPermission: canDeleteUsers } = useHasPermission('user_delete');
 
   // Get user initials for avatar fallback
   const getUserInitials = (name: string | null) => {
-    if (!name) return "U"
+    if (!name) return 'U';
 
-    const nameParts = name.split(" ")
+    const nameParts = name.split(' ');
     if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
 
-    return name.substring(0, 2).toUpperCase()
-  }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   if (users.length === 0) {
     return (
@@ -66,7 +73,7 @@ export function UserList({ users, onDelete }: UserListProps) {
           </TableBody>
         </Table>
       </div>
-    )
+    );
   }
 
   return (
@@ -81,14 +88,12 @@ export function UserList({ users, onDelete }: UserListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {users.map(user => (
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-3 py-1">
                   <Avatar className="h-9 w-9 border border-black/10">
-                    {user.image ? (
-                      <AvatarImage src={user.image} alt={user.name || "User"} />
-                    ) : null}
+                    {user.image ? <AvatarImage src={user.image} alt={user.name || 'User'} /> : null}
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
                       {getUserInitials(user.name)}
                     </AvatarFallback>
@@ -97,7 +102,7 @@ export function UserList({ users, onDelete }: UserListProps) {
                     href={`/profile/${user.id}`}
                     className="font-medium hover:text-primary hover:underline"
                   >
-                    {user.name || "Unnamed User"}
+                    {user.name || 'Unnamed User'}
                   </Link>
                 </div>
               </TableCell>
@@ -157,5 +162,5 @@ export function UserList({ users, onDelete }: UserListProps) {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

@@ -1,97 +1,97 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   // Check if we're on a small screen
-  const [isSmallScreen, setIsSmallScreen] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   // Update screen size state on mount and resize
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 640) // sm breakpoint
-    }
+      setIsSmallScreen(window.innerWidth < 640); // sm breakpoint
+    };
 
     // Initial check
-    checkScreenSize()
+    checkScreenSize();
 
     // Add resize listener
-    window.addEventListener('resize', checkScreenSize)
+    window.addEventListener('resize', checkScreenSize);
 
     // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Generate page numbers to display
   const getPageNumbers = () => {
-    const pages = []
+    const pages = [];
 
     // For very small screens, show a more compact pagination
     if (isSmallScreen) {
       // Always show current page
-      pages.push(currentPage)
+      pages.push(currentPage);
 
       // If we're not at the start or end, show ellipsis
       if (currentPage > 2) {
-        pages.unshift(-1) // ellipsis before
+        pages.unshift(-1); // ellipsis before
       }
 
       // Always show first page if we're not on it
       if (currentPage > 1) {
-        pages.unshift(1)
+        pages.unshift(1);
       }
 
       // Always show last page if we're not on it
       if (currentPage < totalPages) {
-        pages.push(totalPages)
+        pages.push(totalPages);
       }
 
       // If we're not at the start or end, show ellipsis
       if (currentPage < totalPages - 1) {
-        pages.splice(pages.length - 1, 0, -2) // ellipsis after
+        pages.splice(pages.length - 1, 0, -2); // ellipsis after
       }
     } else {
       // Desktop pagination - show more pages
       // Always show first page
-      pages.push(1)
+      pages.push(1);
 
       // Calculate range around current page
-      let rangeStart = Math.max(2, currentPage - 1)
-      let rangeEnd = Math.min(totalPages - 1, currentPage + 1)
+      const rangeStart = Math.max(2, currentPage - 1);
+      const rangeEnd = Math.min(totalPages - 1, currentPage + 1);
 
       // Add ellipsis if needed before range
       if (rangeStart > 2) {
-        pages.push(-1) // -1 represents ellipsis
+        pages.push(-1); // -1 represents ellipsis
       }
 
       // Add pages in range
       for (let i = rangeStart; i <= rangeEnd; i++) {
-        pages.push(i)
+        pages.push(i);
       }
 
       // Add ellipsis if needed after range
       if (rangeEnd < totalPages - 1) {
-        pages.push(-2) // -2 represents ellipsis
+        pages.push(-2); // -2 represents ellipsis
       }
 
       // Always show last page if more than 1 page
       if (totalPages > 1) {
-        pages.push(totalPages)
+        pages.push(totalPages);
       }
     }
 
-    return pages
-  }
+    return pages;
+  };
 
-  const pageNumbers = getPageNumbers()
+  const pageNumbers = getPageNumbers();
 
   return (
     <div className="flex items-center justify-center space-x-1 sm:space-x-2 py-4 sm:py-6 mt-2">
@@ -107,7 +107,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       >
         <ChevronLeft className="h-4 w-4" />
         <span className="sr-only sm:not-sr-only sm:ml-1 sm:inline-block">
-          {isSmallScreen ? "" : "Previous"}
+          {isSmallScreen ? '' : 'Previous'}
         </span>
       </Button>
 
@@ -127,23 +127,23 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
                 <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="sr-only">More Pages</span>
               </Button>
-            )
+            );
           }
 
           // Render page number
           return (
             <Button
               key={page}
-              variant={currentPage === page ? "default" : "outline"}
+              variant={currentPage === page ? 'default' : 'outline'}
               size="sm"
               onClick={() => onPageChange(page)}
               className="h-8 w-6 sm:w-8 p-0 text-xs sm:text-sm"
               aria-label={`Page ${page}`}
-              aria-current={currentPage === page ? "page" : undefined}
+              aria-current={currentPage === page ? 'page' : undefined}
             >
               {page}
             </Button>
-          )
+          );
         })}
       </div>
 
@@ -159,7 +159,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       >
         <ChevronRight className="h-4 w-4" />
         <span className="sr-only sm:not-sr-only sm:ml-1 sm:inline-block">
-          {isSmallScreen ? "" : "Next"}
+          {isSmallScreen ? '' : 'Next'}
         </span>
       </Button>
 
@@ -168,5 +168,5 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         Page {currentPage} of {totalPages}
       </div>
     </div>
-  )
+  );
 }

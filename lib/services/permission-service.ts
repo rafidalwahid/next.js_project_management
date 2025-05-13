@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 
 /**
  * Service for managing user roles and permissions
@@ -22,7 +22,7 @@ export class PermissionService {
       // Update the user's role
       await prisma.user.update({
         where: { id: userId },
-        data: { role: roleName }
+        data: { role: roleName },
       });
 
       return true;
@@ -36,13 +36,13 @@ export class PermissionService {
    * Get all available roles in the system
    * @returns An array of role objects
    */
-  static async getAllRoles(): Promise<{ id: string, name: string }[]> {
+  static async getAllRoles(): Promise<{ id: string; name: string }[]> {
     // Since we're using a simplified role system, we'll return the hardcoded roles
     return [
       { id: 'admin', name: 'Administrator' },
       { id: 'manager', name: 'Manager' },
       { id: 'user', name: 'User' },
-      { id: 'guest', name: 'Guest' }
+      { id: 'guest', name: 'Guest' },
     ];
   }
 
@@ -57,32 +57,51 @@ export class PermissionService {
     switch (roleName) {
       case 'admin':
         return [
-          'user:read', 'user:create', 'user:update', 'user:delete',
-          'project:read', 'project:create', 'project:update', 'project:delete',
-          'task:read', 'task:create', 'task:update', 'task:delete',
-          'attendance:read', 'attendance:create', 'attendance:update', 'attendance:delete',
-          'settings:read', 'settings:update'
+          'user:read',
+          'user:create',
+          'user:update',
+          'user:delete',
+          'project:read',
+          'project:create',
+          'project:update',
+          'project:delete',
+          'task:read',
+          'task:create',
+          'task:update',
+          'task:delete',
+          'attendance:read',
+          'attendance:create',
+          'attendance:update',
+          'attendance:delete',
+          'settings:read',
+          'settings:update',
         ];
       case 'manager':
         return [
           'user:read',
-          'project:read', 'project:create', 'project:update',
-          'task:read', 'task:create', 'task:update', 'task:delete',
-          'attendance:read', 'attendance:create',
-          'settings:read'
+          'project:read',
+          'project:create',
+          'project:update',
+          'task:read',
+          'task:create',
+          'task:update',
+          'task:delete',
+          'attendance:read',
+          'attendance:create',
+          'settings:read',
         ];
       case 'user':
         return [
           'user:read',
           'project:read',
-          'task:read', 'task:create', 'task:update',
-          'attendance:read', 'attendance:create'
+          'task:read',
+          'task:create',
+          'task:update',
+          'attendance:read',
+          'attendance:create',
         ];
       case 'guest':
-        return [
-          'project:read',
-          'task:read'
-        ];
+        return ['project:read', 'task:read'];
       default:
         return [];
     }

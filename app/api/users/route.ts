@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
 import { getUsers, createUser } from '@/lib/queries/user-queries';
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { z } from "zod";
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { z } from 'zod';
 
 // GET /api/users - Get all users with pagination and filtering
 export async function GET(req: NextRequest) {
@@ -12,10 +12,7 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters
@@ -41,13 +38,11 @@ export async function GET(req: NextRequest) {
     // For regular users, only return team members they work with
     // Get user role and check permissions
     const userRole = session.user.role;
-    const hasTeamViewPermission = await PermissionService.hasPermission(userRole, "team_view");
+    const hasTeamViewPermission = await PermissionService.hasPermission(userRole, 'team_view');
 
     // If user has team_view permission, they can see all users
     // If not and no specific project is requested, limit to users in the same projects
     if (!hasTeamViewPermission && !projectId) {
-
-
       // Get projects the user is part of
       const userProjects = await prisma.teamMember.findMany({
         where: {
@@ -69,7 +64,6 @@ export async function GET(req: NextRequest) {
         },
       };
     } else if (hasTeamViewPermission) {
-
     }
 
     if (role && role !== 'all') {
@@ -77,23 +71,20 @@ export async function GET(req: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search } },
-        { email: { contains: search } },
-      ];
+      where.OR = [{ name: { contains: search } }, { email: { contains: search } }];
     }
 
     // Add project filtering if projectId is provided
     if (projectId) {
       where.teams = {
         some: {
-          projectId
-        }
+          projectId,
+        },
       };
     }
 
     // Build the orderBy clause
-    let orderByClause: any = { [orderBy]: direction };
+    const orderByClause: any = { [orderBy]: direction };
 
     // Fetch users with our enhanced getUsers function
     const result = await getUsers({
@@ -104,7 +95,7 @@ export async function GET(req: NextRequest) {
       includeProjects,
       includeTasks,
       includeTeams,
-      includeCounts
+      includeCounts,
     });
 
     // Return in the format expected by the client
@@ -114,9 +105,9 @@ export async function GET(req: NextRequest) {
         page,
         limit,
         totalCount: result.pagination.totalCount,
-        totalPages: Math.ceil(result.pagination.totalCount / limit)
+        totalPages: Math.ceil(result.pagination.totalCount / limit),
       },
-      ...(result.counts ? { counts: result.counts } : {})
+      ...(result.counts ? { counts: result.counts } : {}),
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -128,9 +119,9 @@ export async function GET(req: NextRequest) {
 
 // Define validation schema for registration
 const userSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.string().optional(),
   image: z.string().optional(),
   isRegistration: z.boolean().optional(),
@@ -144,10 +135,7 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch (parseError) {
-      return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
 
     // Check if this is a registration request (public) or user creation (admin)
@@ -157,10 +145,7 @@ export async function POST(req: NextRequest) {
     if (!isRegistration) {
       const session = await getServerSession(authOptions);
       if (!session) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
       // Only admins can set roles other than 'user'
@@ -176,7 +161,7 @@ export async function POST(req: NextRequest) {
     const validationResult = userSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -192,10 +177,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'User with this email already exists' }, { status: 409 });
     }
 
     // Create user
@@ -209,14 +191,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error: any) {
-
-
     // Handle duplicate email
     if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
-      return NextResponse.json(
-        { error: 'A user with this email already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });
     }
 
     return NextResponse.json(

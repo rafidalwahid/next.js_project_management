@@ -81,8 +81,6 @@ async function main() {
         updatedCount++;
       }
     }
-
-
   } catch (error) {
     process.exit(1);
   }

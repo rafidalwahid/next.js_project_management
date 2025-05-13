@@ -1,5 +1,5 @@
-import { ComponentType } from "react"
-import { PermissionGuard } from "@/components/permission-guard"
+import { ComponentType } from 'react';
+import { PermissionGuard } from '@/components/permission-guard';
 
 /**
  * Higher Order Component that wraps a component with a permission guard
@@ -17,6 +17,6 @@ export function withPermission<P extends object>(
       <PermissionGuard permission={permission} fallback={fallback}>
         <Component {...props} />
       </PermissionGuard>
-    )
-  }
+    );
+  };
 }

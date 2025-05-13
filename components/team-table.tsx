@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { RoleBadge } from "@/components/ui/role-badge"
+import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { RoleBadge } from '@/components/ui/role-badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,80 +12,95 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from "lucide-react"
-import { useTeamMembers, useRemoveTeamMember } from "@/hooks/use-team-management"
-import { Input } from "@/components/ui/input"
-import { teamManagementApi } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/components/ui/spinner"
-import { RoleManagementDialog } from "@/components/team/role-management-dialog"
+} from '@/components/ui/dropdown-menu';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from 'lucide-react';
+import { useTeamMembers, useRemoveTeamMember } from '@/hooks/use-team-management';
+import { Input } from '@/components/ui/input';
+import { teamManagementApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
+import { RoleManagementDialog } from '@/components/team/role-management-dialog';
 
 interface TeamTableProps {
-  projectId?: string
+  projectId?: string;
 }
 
 export function TeamTable({ projectId }: TeamTableProps) {
-  const [page, setPage] = useState(1)
-  const [searchQuery, setSearchQuery] = useState("")
-  const { teamMembers, isLoading, isError, mutate, pagination } = useTeamMembers(projectId, page, 10)
-  const { toast } = useToast()
-  const [roleDialogOpen, setRoleDialogOpen] = useState(false)
-  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null)
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { teamMembers, isLoading, isError, mutate, pagination } = useTeamMembers(
+    projectId,
+    page,
+    10
+  );
+  const { toast } = useToast();
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
 
   // Define TeamMember type to match the one in RoleManagementDialog
   type TeamMember = {
-    id: string
-    projectId: string
-    userId: string
+    id: string;
+    projectId: string;
+    userId: string;
     user: {
-      id: string
-      name: string | null
-      email: string
-      role: string
-    }
+      id: string;
+      name: string | null;
+      email: string;
+      role: string;
+    };
     project: {
-      id: string
-      title: string
-    }
-    createdAt: string | Date
-    taskCount?: number
-  }
+      id: string;
+      title: string;
+    };
+    createdAt: string | Date;
+    taskCount?: number;
+  };
 
   // Use the removeTeamMember hook
-  const { removeTeamMember, isRemoving, error: removeError } = useRemoveTeamMember()
+  const { removeTeamMember, isRemoving, error: removeError } = useRemoveTeamMember();
 
   // Handle member removal
   const handleRemoveMember = async (memberId: string) => {
-    if (confirm("Are you sure you want to remove this team member?")) {
+    if (confirm('Are you sure you want to remove this team member?')) {
       try {
-        await removeTeamMember(memberId)
+        await removeTeamMember(memberId);
         toast({
-          title: "Team member removed",
-          description: "The team member has been removed from the project",
-        })
-        mutate() // Refresh the data
+          title: 'Team member removed',
+          description: 'The team member has been removed from the project',
+        });
+        mutate(); // Refresh the data
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to remove team member",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to remove team member',
+          variant: 'destructive',
+        });
       }
     }
-  }
+  };
 
   // Function to handle search (for a complete implementation, this would need backend support)
   const handleSearch = () => {
     // In a real implementation, you'd pass this to the API
-    console.log("Searching for:", searchQuery)
-  }
+    console.log('Searching for:', searchQuery);
+  };
 
   // Role badge styling is now handled by the RoleBadge component
 
   if (isError) {
-    return <div className="p-8 text-center text-red-500">Error loading team members. Please try again later.</div>
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error loading team members. Please try again later.
+      </div>
+    );
   }
 
   return (
@@ -99,8 +114,8 @@ export function TeamTable({ projectId }: TeamTableProps) {
               placeholder="Search team members..."
               className="pl-8"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
             />
           </div>
           <Button variant="outline" size="icon" title="Filter">
@@ -141,28 +156,35 @@ export function TeamTable({ projectId }: TeamTableProps) {
               </TableCell>
             </TableRow>
           ) : (
-            teamMembers.map((member) => (
+            teamMembers.map(member => (
               <TableRow key={member.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={member.user?.image || ""} alt={member.user?.name || ""} />
-                      <AvatarFallback>{member.user?.name?.split(" ").map(n => n[0]).join("") || "?"}</AvatarFallback>
+                      <AvatarImage src={member.user?.image || ''} alt={member.user?.name || ''} />
+                      <AvatarFallback>
+                        {member.user?.name
+                          ?.split(' ')
+                          .map(n => n[0])
+                          .join('') || '?'}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-semibold">{member.user?.name || "Unknown"}</div>
+                      <div className="font-semibold">{member.user?.name || 'Unknown'}</div>
                       <div className="text-sm text-muted-foreground">{member.user?.id}</div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{member.user?.email || "No email"}</TableCell>
+                <TableCell>{member.user?.email || 'No email'}</TableCell>
                 <TableCell>
-                  <RoleBadge role={member.user?.role || "user"} />
+                  <RoleBadge role={member.user?.role || 'user'} />
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm">{new Date(member.createdAt).toLocaleDateString()}</span>
+                    <span className="text-sm">
+                      {new Date(member.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>{member.taskCount || 0} tasks</TableCell>
@@ -182,15 +204,13 @@ export function TeamTable({ projectId }: TeamTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
-                          setSelectedTeamMember(member)
-                          setRoleDialogOpen(true)
+                          setSelectedTeamMember(member);
+                          setRoleDialogOpen(true);
                         }}
                       >
                         View Role
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        Assign Tasks
-                      </DropdownMenuItem>
+                      <DropdownMenuItem>Assign Tasks</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive"
@@ -239,5 +259,5 @@ export function TeamTable({ projectId }: TeamTableProps) {
         onSuccess={mutate}
       />
     </div>
-  )
+  );
 }

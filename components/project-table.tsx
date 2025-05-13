@@ -1,84 +1,102 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Progress } from "@/components/ui/progress"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Spinner } from "@/components/ui/spinner"
-import { useToast } from "@/components/ui/use-toast"
-import { Clock, Search, Filter, MoreHorizontal, Edit, CheckCircle2, Trash } from "lucide-react"
-import { useProjects } from "@/hooks/use-projects"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { projectApi } from "@/lib/api"
-import { Project, ProjectWithRelations } from "@/types/project"
+import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
+import { useToast } from '@/components/ui/use-toast';
+import { Clock, Search, Filter, MoreHorizontal, Edit, CheckCircle2, Trash } from 'lucide-react';
+import { useProjects } from '@/hooks/use-projects';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { projectApi } from '@/lib/api';
+import { Project, ProjectWithRelations } from '@/types/project';
 
 export function ProjectTable() {
-  const [page, setPage] = useState(1)
-  const [limit] = useState(10)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filters, setFilters] = useState<Record<string, string>>({})
-  const { projects, isLoading, isError, mutate, pagination } = useProjects(page, limit, filters)
-  const { toast } = useToast()
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const { projects, isLoading, isError, mutate, pagination } = useProjects(page, limit, filters);
+  const { toast } = useToast();
 
   // Calculate project progress based on completed tasks vs total tasks
   const calculateProgress = (project: ProjectWithRelations) => {
-    if (!project._count) return 0
-    const totalTasks = project._count.tasks || 0
-    if (totalTasks === 0) return 0
+    if (!project._count) return 0;
+    const totalTasks = project._count.tasks || 0;
+    if (totalTasks === 0) return 0;
 
-    return Math.round((project.completedTasks || 0) / totalTasks * 100)
-  }
+    return Math.round(((project.completedTasks || 0) / totalTasks) * 100);
+  };
 
   // Handle project deletion
   const handleDeleteProject = async (projectId: string) => {
-    if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+    if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
       try {
-        await projectApi.deleteProject(projectId)
+        await projectApi.deleteProject(projectId);
         toast({
-          title: "Project deleted",
-          description: "Project has been successfully deleted",
-        })
-        mutate() // Refresh the data
+          title: 'Project deleted',
+          description: 'Project has been successfully deleted',
+        });
+        mutate(); // Refresh the data
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to delete project",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: 'Failed to delete project',
+          variant: 'destructive',
+        });
       }
     }
-  }
+  };
 
   // Function to handle search
   const handleSearch = () => {
-    setPage(1)
-    setFilters(prev => ({ ...prev, title: searchQuery }))
-  }
+    setPage(1);
+    setFilters(prev => ({ ...prev, title: searchQuery }));
+  };
 
   // Get status badge style based on status name
   const getStatusBadge = (status: ProjectStatus | undefined | null) => {
-    if (!status) return "bg-gray-50 text-gray-700 border-gray-200"
+    if (!status) return 'bg-gray-50 text-gray-700 border-gray-200';
 
     switch (status.name?.toLowerCase()) {
-      case "completed":
-        return "bg-green-50 text-green-700 border-green-200"
-      case "in progress":
-        return "bg-blue-50 text-blue-700 border-blue-200"
-      case "planning":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200"
-      case "on hold":
-        return "bg-orange-50 text-orange-700 border-orange-200"
-      case "cancelled":
-        return "bg-red-50 text-red-700 border-red-200"
+      case 'completed':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'in progress':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'planning':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'on hold':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'cancelled':
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200"
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
-  }
+  };
 
   if (isError) {
-    return <div className="p-8 text-center text-red-500">Error loading projects. Please try again later.</div>
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error loading projects. Please try again later.
+      </div>
+    );
   }
 
   return (
@@ -91,8 +109,8 @@ export function ProjectTable() {
             placeholder="Search projects..."
             className="pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
           />
         </div>
         <Button variant="outline" size="icon" title="Filter">
@@ -126,8 +144,8 @@ export function ProjectTable() {
               </TableCell>
             </TableRow>
           ) : (
-            projects.map((project) => {
-              const progress = calculateProgress(project)
+            projects.map(project => {
+              const progress = calculateProgress(project);
 
               return (
                 <TableRow key={project.id}>
@@ -136,23 +154,25 @@ export function ProjectTable() {
                     <div className="flex flex-wrap gap-1">
                       {/* Primary status */}
                       <Badge variant="outline" className={getStatusBadge(project.status)}>
-                        {project.status?.name || "Unknown"}
+                        {project.status?.name || 'Unknown'}
                       </Badge>
 
                       {/* Additional statuses */}
-                      {project.statuses?.filter((link: any) => !link.isPrimary).map((link: any) => (
-                        <Badge
-                          key={link.id}
-                          variant="outline"
-                          style={{
-                            backgroundColor: `${link.status.color}15`,
-                            color: link.status.color,
-                            borderColor: link.status.color
-                          }}
-                        >
-                          {link.status.name}
-                        </Badge>
-                      ))}
+                      {project.statuses
+                        ?.filter((link: any) => !link.isPrimary)
+                        .map((link: any) => (
+                          <Badge
+                            key={link.id}
+                            variant="outline"
+                            style={{
+                              backgroundColor: `${link.status.color}15`,
+                              color: link.status.color,
+                              borderColor: link.status.color,
+                            }}
+                          >
+                            {link.status.name}
+                          </Badge>
+                        ))}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -165,7 +185,9 @@ export function ProjectTable() {
                     {project.endDate ? (
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm">{new Date(project.endDate).toLocaleDateString()}</span>
+                        <span className="text-sm">
+                          {new Date(project.endDate).toLocaleDateString()}
+                        </span>
                       </div>
                     ) : (
                       <span className="text-sm text-muted-foreground">No deadline</span>
@@ -205,7 +227,7 @@ export function ProjectTable() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              )
+              );
             })
           )}
         </TableBody>
@@ -235,6 +257,5 @@ export function ProjectTable() {
         </div>
       )}
     </div>
-  )
+  );
 }
-

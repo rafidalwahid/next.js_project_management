@@ -1,39 +1,48 @@
-"use client"
+'use client';
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 const data = [
   {
-    name: "Jan",
+    name: 'Jan',
     utilization: 65,
     efficiency: 78,
   },
   {
-    name: "Feb",
+    name: 'Feb',
     utilization: 70,
     efficiency: 82,
   },
   {
-    name: "Mar",
+    name: 'Mar',
     utilization: 75,
     efficiency: 85,
   },
   {
-    name: "Apr",
+    name: 'Apr',
     utilization: 80,
     efficiency: 88,
   },
   {
-    name: "May",
+    name: 'May',
     utilization: 85,
     efficiency: 90,
   },
   {
-    name: "Jun",
+    name: 'Jun',
     utilization: 82,
     efficiency: 87,
   },
-]
+];
 
 export function ResourceMetricsChart() {
   return (
@@ -58,5 +67,5 @@ export function ResourceMetricsChart() {
         </BarChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

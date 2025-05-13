@@ -1,7 +1,7 @@
-import { Session } from "next-auth";
-import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
-import { logActivity } from "@/lib/activity-logger";
+import { Session } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
+import { logActivity } from '@/lib/activity-logger';
 
 /**
  * Check if a user has permission to access a team member
@@ -21,7 +21,7 @@ export async function checkTeamMemberPermission(
 }> {
   // If no session, no permission
   if (!session || !session.user?.id) {
-    return { hasPermission: false, teamMember: null, error: "Unauthorized" };
+    return { hasPermission: false, teamMember: null, error: 'Unauthorized' };
   }
 
   // Get the team member with project and user details
@@ -46,7 +46,7 @@ export async function checkTeamMemberPermission(
   });
 
   if (!teamMember) {
-    return { hasPermission: false, teamMember: null, error: "Team member not found" };
+    return { hasPermission: false, teamMember: null, error: 'Team member not found' };
   }
 
   // Check if user is part of the same project
@@ -73,12 +73,14 @@ export async function checkTeamMemberPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check team_view permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermissionById(userId, "team_view");
+    const hasViewPermission = await PermissionService.hasPermissionById(userId, 'team_view');
     hasPermission = hasViewPermission || isProjectCreator || !!userTeamMember || isSelf;
-  }
-  else if (action === 'update') {
+  } else if (action === 'update') {
     // For update actions, check team_management permission or project creator status
-    const hasManagementPermission = await PermissionService.hasPermissionById(userId, "team_management");
+    const hasManagementPermission = await PermissionService.hasPermissionById(
+      userId,
+      'team_management'
+    );
     hasPermission = hasManagementPermission || isProjectCreator;
 
     // Special case: can't update project creator's membership
@@ -86,13 +88,12 @@ export async function checkTeamMemberPermission(
       return {
         hasPermission: false,
         teamMember,
-        error: "Cannot update the project creator's membership"
+        error: "Cannot update the project creator's membership",
       };
     }
-  }
-  else if (action === 'delete') {
+  } else if (action === 'delete') {
     // For delete actions, check team_remove permission or project creator status or self
-    const hasRemovePermission = await PermissionService.hasPermissionById(userId, "team_remove");
+    const hasRemovePermission = await PermissionService.hasPermissionById(userId, 'team_remove');
     hasPermission = hasRemovePermission || isProjectCreator || isSelf;
 
     // Special case: can't remove project creator
@@ -100,7 +101,7 @@ export async function checkTeamMemberPermission(
       return {
         hasPermission: false,
         teamMember,
-        error: "Cannot remove the project creator from the team"
+        error: 'Cannot remove the project creator from the team',
       };
     }
   }
@@ -109,12 +110,14 @@ export async function checkTeamMemberPermission(
   const result = {
     hasPermission,
     teamMember,
-    error: hasPermission ? null : `You don't have permission to ${action} this team member`
+    error: hasPermission ? null : `You don't have permission to ${action} this team member`,
   };
 
   // Log permission checks for audit purposes (only log failures)
   if (!hasPermission) {
-    console.warn(`Permission denied: User ${session.user.id} attempted to ${action} team member ${teamMemberId}`);
+    console.warn(
+      `Permission denied: User ${session.user.id} attempted to ${action} team member ${teamMemberId}`
+    );
 
     try {
       await logActivity({
@@ -123,7 +126,7 @@ export async function checkTeamMemberPermission(
         entityType: 'TeamMember',
         entityId: teamMemberId,
         description: `Permission denied: User attempted to ${action} team member ${teamMember.user.name || teamMember.user.email}`,
-        projectId: teamMember.projectId
+        projectId: teamMember.projectId,
       });
     } catch (error) {
       console.error('Failed to log permission denial:', error);
@@ -151,7 +154,7 @@ export async function checkProjectTeamPermission(
 }> {
   // If no session, no permission
   if (!session || !session.user?.id) {
-    return { hasPermission: false, project: null, error: "Unauthorized" };
+    return { hasPermission: false, project: null, error: 'Unauthorized' };
   }
 
   // Get the project
@@ -160,7 +163,7 @@ export async function checkProjectTeamPermission(
   });
 
   if (!project) {
-    return { hasPermission: false, project: null, error: "Project not found" };
+    return { hasPermission: false, project: null, error: 'Project not found' };
   }
 
   // Get user ID
@@ -174,9 +177,9 @@ export async function checkProjectTeamPermission(
     where: {
       projectId_userId: {
         projectId: projectId,
-        userId: userId
-      }
-    }
+        userId: userId,
+      },
+    },
   });
 
   const isTeamMember = !!teamMember;
@@ -186,23 +189,26 @@ export async function checkProjectTeamPermission(
   // Determine permission based on action
   if (action === 'view') {
     // For view actions, check team_view permission or direct involvement
-    const hasViewPermission = await PermissionService.hasPermissionById(userId, "team_view");
+    const hasViewPermission = await PermissionService.hasPermissionById(userId, 'team_view');
     hasPermission = hasViewPermission || isProjectCreator || isTeamMember;
-  }
-  else if (action === 'add') {
+  } else if (action === 'add') {
     // For add actions, check team_add permission or project creator status
-    const hasAddPermission = await PermissionService.hasPermissionById(userId, "team_add");
+    const hasAddPermission = await PermissionService.hasPermissionById(userId, 'team_add');
     hasPermission = hasAddPermission || isProjectCreator;
-  }
-  else if (action === 'manage') {
+  } else if (action === 'manage') {
     // For manage actions, check team_management permission or project creator status
-    const hasManagementPermission = await PermissionService.hasPermissionById(userId, "team_management");
+    const hasManagementPermission = await PermissionService.hasPermissionById(
+      userId,
+      'team_management'
+    );
     hasPermission = hasManagementPermission || isProjectCreator;
   }
 
   return {
     hasPermission,
     project,
-    error: hasPermission ? null : `You don't have permission to ${action} team members in this project`
+    error: hasPermission
+      ? null
+      : `You don't have permission to ${action} team members in this project`,
   };
 }

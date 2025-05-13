@@ -17,8 +17,8 @@ export * from './date';
  */
 export function safeFormat(
   date: Date | string | null | undefined,
-  formatString: string = "MMM d, yyyy",
-  fallback: string = "N/A"
+  formatString: string = 'MMM d, yyyy',
+  fallback: string = 'N/A'
 ): string {
   // Use the formatDate function from date.ts
   return formatDate(date, formatString, fallback);

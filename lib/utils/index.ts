@@ -1,6 +1,6 @@
 /**
  * Utils Index
- * 
+ *
  * This file exports all utility functions from the utils directory.
  * It provides a centralized import point for all utilities.
  */

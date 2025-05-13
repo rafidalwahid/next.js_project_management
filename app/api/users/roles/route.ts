@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 // GET /api/users/roles?userId={userId} - Get roles for a user
 export async function GET(req: NextRequest) {
@@ -10,10 +10,7 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get userId from query params
@@ -22,10 +19,13 @@ export async function GET(req: NextRequest) {
 
     // If requesting roles for another user, check if the current user has permission
     if (userId !== session.user.id) {
-      const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
+      const hasPermission = await PermissionService.hasPermissionById(
+        session.user.id,
+        'user_management'
+      );
       if (!hasPermission) {
         return NextResponse.json(
-          { error: 'Forbidden: Insufficient permissions to view other users\' roles' },
+          { error: "Forbidden: Insufficient permissions to view other users' roles" },
           { status: 403 }
         );
       }
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Get the user to check their role
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true }
+      select: { role: true },
     });
 
     // Return the user's role as an array for backward compatibility
@@ -57,19 +57,16 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'user_management'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     // Parse request body
@@ -78,23 +75,20 @@ export async function POST(req: NextRequest) {
 
     // Validate request data
     if (!userId || !roleName) {
-      return NextResponse.json(
-        { error: 'User ID and role name are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID and role name are required' }, { status: 400 });
     }
 
     // Update the user's role
-    const success = await prisma.user.update({
-      where: { id: userId },
-      data: { role: roleName }
-    }).then(() => true).catch(() => false);
+    const success = await prisma.user
+      .update({
+        where: { id: userId },
+        data: { role: roleName },
+      })
+      .then(() => true)
+      .catch(() => false);
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'Failed to update user role' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to update user role' }, { status: 500 });
     }
 
     // Return success
@@ -116,19 +110,16 @@ export async function DELETE(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "user_management");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'user_management'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     // Get query params
@@ -138,24 +129,21 @@ export async function DELETE(req: NextRequest) {
 
     // Validate request data
     if (!userId || !roleName) {
-      return NextResponse.json(
-        { error: 'User ID and role name are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID and role name are required' }, { status: 400 });
     }
 
     // We can't remove a role, only update it to a different role
     // For backward compatibility, we'll set the role to 'user' when removing a role
-    const success = await prisma.user.update({
-      where: { id: userId },
-      data: { role: 'user' }
-    }).then(() => true).catch(() => false);
+    const success = await prisma.user
+      .update({
+        where: { id: userId },
+        data: { role: 'user' },
+      })
+      .then(() => true)
+      .catch(() => false);
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'Failed to update user role' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to update user role' }, { status: 500 });
     }
 
     // Return success

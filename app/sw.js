@@ -1,5 +1,5 @@
 // Service Worker for Background Sync and Offline Support
-const CACHE_NAME = 'attendance-cache-v3'; 
+const CACHE_NAME = 'attendance-cache-v3';
 const STATIC_CACHE_NAME = 'attendance-static-v3';
 const DYNAMIC_CACHE_NAME = 'attendance-dynamic-v3';
 const ATTENDANCE_SYNC_QUEUE = 'attendance-sync-queue';

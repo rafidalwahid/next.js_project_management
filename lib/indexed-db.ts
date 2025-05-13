@@ -29,7 +29,7 @@ export function openDatabase(): Promise<IDBDatabase> {
 
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = event => {
       const db = (event.target as IDBOpenDBRequest).result;
 
       // Create object store if it doesn't exist
@@ -38,18 +38,20 @@ export function openDatabase(): Promise<IDBDatabase> {
       }
     };
 
-    request.onsuccess = (event) => {
+    request.onsuccess = event => {
       resolve((event.target as IDBOpenDBRequest).result);
     };
 
-    request.onerror = (event) => {
+    request.onerror = event => {
       reject(new Error('Error opening IndexedDB'));
     };
   });
 }
 
 // Add a record to the queue
-export async function addToSyncQueue(record: Omit<AttendanceRecord, 'id'>): Promise<AttendanceRecord> {
+export async function addToSyncQueue(
+  record: Omit<AttendanceRecord, 'id'>
+): Promise<AttendanceRecord> {
   try {
     const db = await openDatabase();
 
@@ -58,7 +60,7 @@ export async function addToSyncQueue(record: Omit<AttendanceRecord, 'id'>): Prom
       ...record,
       id: generateId(),
       retryCount: 0,
-      lastAttempt: null
+      lastAttempt: null,
     };
 
     return new Promise((resolve, reject) => {
@@ -94,7 +96,7 @@ export async function getSyncQueue(): Promise<AttendanceRecord[]> {
       const store = transaction.objectStore(ATTENDANCE_SYNC_QUEUE);
       const request = store.getAll();
 
-      request.onsuccess = (event) => {
+      request.onsuccess = event => {
         resolve((event.target as IDBRequest).result);
       };
 

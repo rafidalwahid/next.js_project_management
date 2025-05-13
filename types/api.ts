@@ -5,8 +5,8 @@
  * Following Next.js 15 documentation standards for type definitions.
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { Session } from "next-auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { Session } from 'next-auth';
 
 /**
  * Permission Check function type
@@ -15,7 +15,7 @@ export type PermissionCheckFn = (
   resourceId: string,
   session: Session | null,
   action: string
-) => Promise<{ hasPermission: boolean, error?: string }>;
+) => Promise<{ hasPermission: boolean; error?: string }>;
 
 /**
  * Pagination parameters

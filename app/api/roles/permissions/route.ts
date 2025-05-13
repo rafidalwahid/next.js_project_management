@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 // GET /api/roles/permissions - Get all role permissions
 export async function GET(req: NextRequest) {
@@ -9,19 +9,16 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'manage_roles'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     // Get all roles
@@ -53,19 +50,13 @@ export async function PUT(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermission(session.user.role, "manage_roles");
+    const hasPermission = await PermissionService.hasPermission(session.user.role, 'manage_roles');
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Insufficient permissions' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
     }
 
     // Parse request body
@@ -74,25 +65,19 @@ export async function PUT(req: NextRequest) {
 
     // Validate permissions
     if (!permissions || typeof permissions !== 'object') {
-      return NextResponse.json(
-        { error: 'Invalid permissions data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid permissions data' }, { status: 400 });
     }
 
     // Update the permissions in the database
     const success = await PermissionService.updateAllRolePermissions(permissions);
 
     if (!success) {
-      return NextResponse.json(
-        { error: 'Failed to update role permissions' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to update role permissions' }, { status: 500 });
     }
 
     // Return success
     return NextResponse.json({
-      message: 'Role permissions updated successfully'
+      message: 'Role permissions updated successfully',
     });
   } catch (error: any) {
     console.error('Error updating role permissions:', error);

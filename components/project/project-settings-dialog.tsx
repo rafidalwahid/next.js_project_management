@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Calendar, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Calendar, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,22 +11,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProjectStatusManager } from "@/components/project/project-status-manager"
-import { Project, ProjectStatus } from "@/types/project"
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProjectStatusManager } from '@/components/project/project-status-manager';
+import { Project, ProjectStatus } from '@/types/project';
 
 interface ProjectSettingsDialogProps {
-  projectId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess?: () => void
-  project: Project
-  statuses: ProjectStatus[]
+  projectId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+  project: Project;
+  statuses: ProjectStatus[];
 }
 
 export function ProjectSettingsDialog({
@@ -35,47 +35,47 @@ export function ProjectSettingsDialog({
   onOpenChange,
   onSuccess,
   project,
-  statuses
+  statuses,
 }: ProjectSettingsDialogProps) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("general")
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
 
   const [formData, setFormData] = useState({
     title: project.title,
-    description: project.description || "",
-    startDate: project.startDate ? new Date(project.startDate).toISOString().split("T")[0] : "",
-    endDate: project.endDate ? new Date(project.endDate).toISOString().split("T")[0] : "",
-    dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split("T")[0] : "",
+    description: project.description || '',
+    startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
+    endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
+    dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split('T')[0] : '',
     estimatedTime: project.estimatedTime || 0,
-  })
+  });
 
   // Update form data when project changes
   useEffect(() => {
     setFormData({
       title: project.title,
-      description: project.description || "",
-      startDate: project.startDate ? new Date(project.startDate).toISOString().split("T")[0] : "",
-      endDate: project.endDate ? new Date(project.endDate).toISOString().split("T")[0] : "",
-      dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split("T")[0] : "",
+      description: project.description || '',
+      startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
+      endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
+      dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split('T')[0] : '',
       estimatedTime: project.estimatedTime || 0,
-    })
-  }, [project])
+    });
+  }, [project]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch(`/api/projects/${projectId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: formData.title,
           description: formData.description || null,
@@ -84,32 +84,32 @@ export function ProjectSettingsDialog({
           dueDate: formData.dueDate || null,
           estimatedTime: formData.estimatedTime ? Number(formData.estimatedTime) : null,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update project")
+        throw new Error('Failed to update project');
       }
 
       toast({
-        title: "Project updated",
-        description: "Project settings have been updated successfully",
-      })
+        title: 'Project updated',
+        description: 'Project settings have been updated successfully',
+      });
 
       if (onSuccess) {
-        onSuccess()
+        onSuccess();
       }
 
-      onOpenChange(false)
+      onOpenChange(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update project",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update project',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,14 +123,20 @@ export function ProjectSettingsDialog({
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2 sm:mt-4">
           <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10">
-            <TabsTrigger value="general" className="text-xs sm:text-sm">General</TabsTrigger>
-            <TabsTrigger value="statuses" className="text-xs sm:text-sm">Statuses</TabsTrigger>
+            <TabsTrigger value="general" className="text-xs sm:text-sm">
+              General
+            </TabsTrigger>
+            <TabsTrigger value="statuses" className="text-xs sm:text-sm">
+              Statuses
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
             <form id="project-form" onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div className="space-y-1 sm:space-y-2">
-                <Label htmlFor="title" className="text-sm sm:text-base">Project Title</Label>
+                <Label htmlFor="title" className="text-sm sm:text-base">
+                  Project Title
+                </Label>
                 <Input
                   id="title"
                   name="title"
@@ -142,7 +148,9 @@ export function ProjectSettingsDialog({
               </div>
 
               <div className="space-y-1 sm:space-y-2">
-                <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
+                <Label htmlFor="description" className="text-sm sm:text-base">
+                  Description
+                </Label>
                 <Textarea
                   id="description"
                   name="description"
@@ -155,7 +163,9 @@ export function ProjectSettingsDialog({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-1 sm:space-y-2">
-                  <Label htmlFor="startDate" className="text-sm sm:text-base">Start Date</Label>
+                  <Label htmlFor="startDate" className="text-sm sm:text-base">
+                    Start Date
+                  </Label>
                   <div className="flex">
                     <div className="bg-muted p-1 sm:p-2 rounded-l-md flex items-center">
                       <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -172,7 +182,9 @@ export function ProjectSettingsDialog({
                 </div>
 
                 <div className="space-y-1 sm:space-y-2">
-                  <Label htmlFor="endDate" className="text-sm sm:text-base">End Date</Label>
+                  <Label htmlFor="endDate" className="text-sm sm:text-base">
+                    End Date
+                  </Label>
                   <div className="flex">
                     <div className="bg-muted p-1 sm:p-2 rounded-l-md flex items-center">
                       <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -191,7 +203,9 @@ export function ProjectSettingsDialog({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-1 sm:space-y-2">
-                  <Label htmlFor="dueDate" className="text-sm sm:text-base">Due Date</Label>
+                  <Label htmlFor="dueDate" className="text-sm sm:text-base">
+                    Due Date
+                  </Label>
                   <div className="flex">
                     <div className="bg-muted p-1 sm:p-2 rounded-l-md flex items-center">
                       <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -208,7 +222,9 @@ export function ProjectSettingsDialog({
                 </div>
 
                 <div className="space-y-1 sm:space-y-2">
-                  <Label htmlFor="estimatedTime" className="text-sm sm:text-base">Estimated Hours</Label>
+                  <Label htmlFor="estimatedTime" className="text-sm sm:text-base">
+                    Estimated Hours
+                  </Label>
                   <div className="flex">
                     <div className="bg-muted p-1 sm:p-2 rounded-l-md flex items-center">
                       <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -241,29 +257,29 @@ export function ProjectSettingsDialog({
           >
             Cancel
           </Button>
-          {activeTab === "general" ? (
+          {activeTab === 'general' ? (
             <Button
               type="submit"
               form="project-form"
               disabled={isLoading}
               className="w-full sm:w-auto order-1 sm:order-2 h-9 sm:h-10 text-sm"
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           ) : (
             <Button
               onClick={() => {
-                const saveButton = document.getElementById("status-save-button");
+                const saveButton = document.getElementById('status-save-button');
                 if (saveButton) saveButton.click();
               }}
               disabled={isLoading}
               className="w-full sm:w-auto order-1 sm:order-2 h-9 sm:h-10 text-sm"
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

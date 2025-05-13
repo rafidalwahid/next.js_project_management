@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { signOut } from "next-auth/react"
-import { toast } from "@/components/ui/use-toast"
+import { signOut } from 'next-auth/react';
+import { toast } from '@/components/ui/use-toast';
 
 /**
  * Checks out the user (if currently checked in) and then logs them out
@@ -21,8 +21,8 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
       cache: 'no-cache',
       headers: {
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+        Pragma: 'no-cache',
+      },
     });
 
     if (!response.ok) {
@@ -42,7 +42,7 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
         });
 
         // Set a timeout for position acquisition to avoid hanging the logout process
-        const timeoutPromise = new Promise<null>((resolve) => {
+        const timeoutPromise = new Promise<null>(resolve => {
           setTimeout(() => resolve(null), 3000); // 3 second timeout
         });
 
@@ -67,7 +67,7 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(checkOutData),
-            signal: controller.signal
+            signal: controller.signal,
           });
 
           clearTimeout(timeoutId);
@@ -76,7 +76,7 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
             const checkoutData = await checkoutResponse.json();
             if (checkoutData.checked_out) {
               toast({
-                title: "Checked Out",
+                title: 'Checked Out',
                 description: "You've been checked out as part of the logout process.",
               });
             }
@@ -92,10 +92,10 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
     }
 
     // Finally, log the user out
-    await signOut({ callbackUrl })
+    await signOut({ callbackUrl });
   } catch (error) {
     // If anything fails, still try to log the user out
-    await signOut({ callbackUrl })
+    await signOut({ callbackUrl });
   }
 }
 
@@ -109,30 +109,30 @@ export async function checkOutAndLogout(callbackUrl: string = '/login') {
 function getCurrentPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported by your browser"));
+      reject(new Error('Geolocation is not supported by your browser'));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => resolve(position),
-      (error) => {
+      position => resolve(position),
+      error => {
         // Provide more helpful error messages based on error code
-        let errorMessage = "Unable to retrieve your location.";
+        let errorMessage = 'Unable to retrieve your location.';
 
         switch (error.code) {
           case 1: // PERMISSION_DENIED
-            errorMessage = "Location permission denied. Please check your browser settings.";
+            errorMessage = 'Location permission denied. Please check your browser settings.';
             break;
           case 2: // POSITION_UNAVAILABLE
-            errorMessage = "Your location is currently unavailable. Try again later.";
+            errorMessage = 'Your location is currently unavailable. Try again later.';
             break;
           case 3: // TIMEOUT
-            errorMessage = "Location request timed out. Check your connection.";
+            errorMessage = 'Location request timed out. Check your connection.';
             break;
         }
 
         const enhancedError = new Error(errorMessage);
-        enhancedError.name = "GeolocationError";
+        enhancedError.name = 'GeolocationError';
         // @ts-ignore - Add the original error code for reference
         enhancedError.code = error.code;
 
@@ -140,8 +140,8 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
       },
       {
         enableHighAccuracy: false, // Use lower accuracy for faster response during logout
-        timeout: 3000,            // Shorter timeout for logout context
-        maximumAge: 60000         // Accept positions up to 1 minute old
+        timeout: 3000, // Shorter timeout for logout context
+        maximumAge: 60000, // Accept positions up to 1 minute old
       }
     );
   });

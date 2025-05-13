@@ -1,22 +1,22 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Save } from "lucide-react"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Save } from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { DatePicker } from "@/components/date-picker"
-import { MultiSelect } from "@/components/ui/multi-select"
-import { useProjects } from "@/hooks/use-data"
-import { taskApi } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
-import { useUsers } from "@/hooks/use-users"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CreateTaskValues, createTaskSchema } from "@/lib/validations/task"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/date-picker';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { useProjects } from '@/hooks/use-data';
+import { taskApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { useUsers } from '@/hooks/use-users';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreateTaskValues, createTaskSchema } from '@/lib/validations/task';
 import {
   Dialog,
   DialogContent,
@@ -24,40 +24,46 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Spinner } from "@/components/ui/spinner"
+} from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 
 interface TaskCreateModalProps {
-  isOpen: boolean
-  onClose: () => void
-  projectId?: string
-  parentId?: string
-  onSuccess?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  projectId?: string;
+  parentId?: string;
+  onSuccess?: () => void;
 }
 
-export function TaskCreateModal({ isOpen, onClose, projectId, parentId, onSuccess }: TaskCreateModalProps) {
-  const router = useRouter()
-  const { projects } = useProjects(1, 100)
-  const { users } = useUsers("", 100)
-  const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [parentTask, setParentTask] = useState<any>(null)
-  const [loadingParent, setLoadingParent] = useState(false)
+export function TaskCreateModal({
+  isOpen,
+  onClose,
+  projectId,
+  parentId,
+  onSuccess,
+}: TaskCreateModalProps) {
+  const router = useRouter();
+  const { projects } = useProjects(1, 100);
+  const { users } = useUsers('', 100);
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [parentTask, setParentTask] = useState<any>(null);
+  const [loadingParent, setLoadingParent] = useState(false);
 
   const form = useForm<CreateTaskValues>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
-      title: "",
-      projectId: projectId || "",
-      priority: "medium",
-      description: "",
+      title: '',
+      projectId: projectId || '',
+      priority: 'medium',
+      description: '',
       assigneeIds: [],
       dueDate: null,
       startDate: null,
@@ -74,24 +80,24 @@ export function TaskCreateModal({ isOpen, onClose, projectId, parentId, onSucces
     if (parentId) {
       const fetchParentTask = async () => {
         try {
-          setLoadingParent(true)
-          const response = await taskApi.getTask(parentId)
-          setParentTask(response.task)
+          setLoadingParent(true);
+          const response = await taskApi.getTask(parentId);
+          setParentTask(response.task);
 
           // Set project ID to match parent task's project
           if (response.task?.projectId) {
-            form.setValue('projectId', response.task.projectId)
-            form.setValue('parentId', parentId)
+            form.setValue('projectId', response.task.projectId);
+            form.setValue('parentId', parentId);
           }
         } catch (err) {
-          console.error("Failed to load parent task details:", err)
+          console.error('Failed to load parent task details:', err);
         } finally {
-          setLoadingParent(false)
+          setLoadingParent(false);
         }
-      }
-      fetchParentTask()
+      };
+      fetchParentTask();
     }
-  }, [parentId, form])
+  }, [parentId, form]);
 
   const onSubmit = async (data: CreateTaskValues) => {
     // Format date fields before sending to API
@@ -103,90 +109,88 @@ export function TaskCreateModal({ isOpen, onClose, projectId, parentId, onSucces
     };
 
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       const result = await taskApi.createTask(dataToSend);
 
       toast({
-        title: "Success",
-        description: "Task has been created successfully",
-      })
+        title: 'Success',
+        description: 'Task has been created successfully',
+      });
 
       // Reset form and close modal
-      form.reset()
-      onClose()
+      form.reset();
+      onClose();
 
       // Call the success callback if provided
       if (onSuccess) {
-        onSuccess()
+        onSuccess();
       }
     } catch (error) {
-      console.error("Task creation error:", error)
+      console.error('Task creation error:', error);
 
-      let errorMessage = "Failed to create task"
+      let errorMessage = 'Failed to create task';
 
       if (error instanceof Error) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
       toast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        variant: "destructive",
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{parentTask ? "Create Subtask" : "New Task"}</DialogTitle>
+          <DialogTitle>{parentTask ? 'Create Subtask' : 'New Task'}</DialogTitle>
           <DialogDescription>
             {parentTask
               ? `Add a subtask to "${parentTask.title}"`
-              : "Enter the details of the new task"}
+              : 'Enter the details of the new task'}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Task Title</Label>
-            <Input
-              id="title"
-              placeholder="Enter the task title"
-              {...form.register("title")}
-            />
+            <Input id="title" placeholder="Enter the task title" {...form.register('title')} />
             {form.formState.errors.title && (
               <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
             )}
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               placeholder="Describe the task"
-              {...form.register("description")}
+              {...form.register('description')}
             />
             {form.formState.errors.description && (
-              <p className="text-sm text-destructive">{form.formState.errors.description.message}</p>
+              <p className="text-sm text-destructive">
+                {form.formState.errors.description.message}
+              </p>
             )}
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="projectId">Project</Label>
             <Select
-              onValueChange={(value) => form.setValue("projectId", value)}
-              value={form.watch("projectId")}
+              onValueChange={value => form.setValue('projectId', value)}
+              value={form.watch('projectId')}
               disabled={!!parentTask}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a project" />
               </SelectTrigger>
               <SelectContent>
-                {projects.map((project) => (
+                {projects.map(project => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.title}
                   </SelectItem>
@@ -199,36 +203,36 @@ export function TaskCreateModal({ isOpen, onClose, projectId, parentId, onSucces
               </p>
             )}
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="assigneeIds">Assigned to</Label>
             <MultiSelect
-              options={users.map((user) => ({
+              options={users.map(user => ({
                 label: user.name || user.email,
                 value: user.id,
               }))}
-              selected={form.watch("assigneeIds")}
-              onChange={(value) => form.setValue("assigneeIds", value)}
+              selected={form.watch('assigneeIds')}
+              onChange={value => form.setValue('assigneeIds', value)}
               placeholder="Select team members..."
             />
             <p className="text-xs text-muted-foreground mt-1">
               You can assign multiple users to this task
             </p>
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="dueDate">Due Date</Label>
-            <DatePicker 
-              onSelect={(date) => form.setValue("dueDate", date)} 
-              selected={form.watch("dueDate")}
+            <DatePicker
+              onSelect={date => form.setValue('dueDate', date)}
+              selected={form.watch('dueDate')}
             />
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="priority">Priority</Label>
             <Select
-              onValueChange={(value) => form.setValue("priority", value)}
-              value={form.watch("priority")}
+              onValueChange={value => form.setValue('priority', value)}
+              value={form.watch('priority')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select priority" />
@@ -268,5 +272,5 @@ export function TaskCreateModal({ isOpen, onClose, projectId, parentId, onSucces
         </form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

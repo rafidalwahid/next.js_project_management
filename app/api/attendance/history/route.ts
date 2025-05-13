@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
 import {
   startOfWeek,
   endOfWeek,
@@ -10,14 +10,14 @@ import {
   format,
   parseISO,
   isSameDay,
-  addDays
-} from "date-fns";
+  addDays,
+} from 'date-fns';
 import {
   AttendanceFilterOptions,
   AttendanceHistoryResponse,
   AttendanceGroup,
-  AttendanceWithRelations
-} from "@/types/attendance";
+  AttendanceWithRelations,
+} from '@/types/attendance';
 
 // Constants - keep consistent with other attendance endpoints
 const MAX_WORKING_HOURS_PER_DAY = 12;
@@ -27,21 +27,18 @@ export async function GET(req: NextRequest) {
     // Get the authenticated user
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get query parameters
     const url = new URL(req.url);
     const filterOptions: AttendanceFilterOptions = {
-      period: url.searchParams.get("period") as 'day' | 'week' | 'month' | 'custom' | undefined,
-      startDate: url.searchParams.get("startDate") || undefined,
-      endDate: url.searchParams.get("endDate") || undefined,
-      limit: parseInt(url.searchParams.get("limit") || "30"),
-      page: parseInt(url.searchParams.get("page") || "1"),
-      groupBy: url.searchParams.get("groupBy") as 'day' | 'week' | 'month' | undefined
+      period: url.searchParams.get('period') as 'day' | 'week' | 'month' | 'custom' | undefined,
+      startDate: url.searchParams.get('startDate') || undefined,
+      endDate: url.searchParams.get('endDate') || undefined,
+      limit: parseInt(url.searchParams.get('limit') || '30'),
+      page: parseInt(url.searchParams.get('page') || '1'),
+      groupBy: url.searchParams.get('groupBy') as 'day' | 'week' | 'month' | undefined,
     };
 
     const { period, startDate, endDate, limit = 30, page = 1, groupBy } = filterOptions;
@@ -57,13 +54,13 @@ export async function GET(req: NextRequest) {
       const now = new Date();
       let periodStartDate, periodEndDate;
 
-      if (period === "week") {
+      if (period === 'week') {
         periodStartDate = startOfWeek(now, { weekStartsOn: 1 }); // Start week on Monday for consistency
         periodEndDate = endOfWeek(now, { weekStartsOn: 1 });
-      } else if (period === "month") {
+      } else if (period === 'month') {
         periodStartDate = startOfMonth(now);
         periodEndDate = endOfMonth(now);
-      } else if (period === "day") {
+      } else if (period === 'day') {
         periodStartDate = new Date(now.setHours(0, 0, 0, 0));
         periodEndDate = new Date(now.setHours(23, 59, 59, 999));
       }
@@ -109,16 +106,16 @@ export async function GET(req: NextRequest) {
             id: true,
             title: true,
             description: true,
-          }
+          },
         },
         task: {
           select: {
             id: true,
             title: true,
             description: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     // Process records for individual view (apply pagination when not grouping)
@@ -132,7 +129,6 @@ export async function GET(req: NextRequest) {
     const groupMap = new Map();
 
     if (groupBy) {
-
       // Process each record for grouping
       attendanceRecords.forEach(record => {
         try {
@@ -150,21 +146,18 @@ export async function GET(req: NextRequest) {
             // Format: 2023-04-22
             groupKey = format(date, 'yyyy-MM-dd');
             displayLabel = format(date, 'EEEE, MMMM d, yyyy');
-          }
-          else if (groupBy === 'week') {
+          } else if (groupBy === 'week') {
             // Get the start and end of the week (starting Monday)
             const weekStart = startOfWeek(date, { weekStartsOn: 1 });
             const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
             // Format: 2023-04-17 to 2023-04-23
             groupKey = format(weekStart, 'yyyy-MM-dd');
             displayLabel = `Week of ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
-          }
-          else if (groupBy === 'month') {
+          } else if (groupBy === 'month') {
             // Format: 2023-04 (Year-Month)
             groupKey = format(date, 'yyyy-MM');
             displayLabel = format(date, 'MMMM yyyy');
-          }
-          else {
+          } else {
             // Default fallback
             groupKey = 'unknown';
             displayLabel = 'Unknown Period';
@@ -195,8 +188,7 @@ export async function GET(req: NextRequest) {
           }
 
           group.checkInCount += 1;
-        }
-        catch (error) {
+        } catch (error) {
           // Skip this record on error
         }
       });
@@ -206,9 +198,7 @@ export async function GET(req: NextRequest) {
         const uniqueDaysCount = group.uniqueDates.size;
 
         // Calculate average hours per day based on unique days with activity
-        const averageHoursPerDay = uniqueDaysCount > 0
-          ? group.totalHours / uniqueDaysCount
-          : 0;
+        const averageHoursPerDay = uniqueDaysCount > 0 ? group.totalHours / uniqueDaysCount : 0;
 
         // Clean up the group object before returning
         const { uniqueDates, ...cleanGroup } = group;
@@ -217,7 +207,7 @@ export async function GET(req: NextRequest) {
           ...cleanGroup,
           uniqueDaysCount,
           totalHours: parseFloat(group.totalHours.toFixed(2)),
-          averageHoursPerDay: parseFloat(averageHoursPerDay.toFixed(2))
+          averageHoursPerDay: parseFloat(averageHoursPerDay.toFixed(2)),
         };
       });
 
@@ -233,13 +223,11 @@ export async function GET(req: NextRequest) {
 
     // Calculate summary statistics
     const summary = {
-      totalHours: attendanceRecords.reduce((sum, record) =>
-        sum + (record.totalHours || 0), 0),
+      totalHours: attendanceRecords.reduce((sum, record) => sum + (record.totalHours || 0), 0),
       averageHoursPerDay: 0,
       uniqueDaysCount: new Set(
-        attendanceRecords.map(record =>
-          format(new Date(record.checkInTime), 'yyyy-MM-dd'))
-      ).size
+        attendanceRecords.map(record => format(new Date(record.checkInTime), 'yyyy-MM-dd'))
+      ).size,
     };
 
     // Calculate average if we have unique days
@@ -257,7 +245,7 @@ export async function GET(req: NextRequest) {
         limit,
         totalPages: Math.ceil(totalCount / limit),
       },
-      summary
+      summary,
     };
 
     // Return the response with both individual and grouped records
@@ -269,13 +257,10 @@ export async function GET(req: NextRequest) {
       dateRange: {
         start: startDate,
         end: endDate,
-      }
+      },
     });
   } catch (error) {
-    console.error("Get attendance history error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve attendance history" },
-      { status: 500 }
-    );
+    console.error('Get attendance history error:', error);
+    return NextResponse.json({ error: 'Failed to retrieve attendance history' }, { status: 500 });
   }
 }

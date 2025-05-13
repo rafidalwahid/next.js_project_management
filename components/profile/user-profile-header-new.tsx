@@ -1,25 +1,25 @@
-"use client"
+'use client';
 
-import { useState, useRef } from "react"
-import { Camera, CalendarClock, Mail, User, Shield, Clock } from "lucide-react"
-import { UserProfile } from "@/hooks/use-user-profile"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatDate } from "@/lib/utils"
+import { useState, useRef } from 'react';
+import { Camera, CalendarClock, Mail, User, Shield, Clock } from 'lucide-react';
+import { UserProfile } from '@/hooks/use-user-profile';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDate } from '@/lib/utils';
 
 interface UserProfileHeaderNewProps {
-  user: UserProfile
-  canEdit: boolean
-  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>
-  onUploadImage: (file: File) => Promise<string | null>
+  user: UserProfile;
+  canEdit: boolean;
+  onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  onUploadImage: (file: File) => Promise<string | null>;
   stats?: {
-    projectCount: number
-    taskCount: number
-    teamCount: number
-    completionRate: string
-  }
+    projectCount: number;
+    taskCount: number;
+    teamCount: number;
+    completionRate: string;
+  };
 }
 
 export function UserProfileHeaderNew({
@@ -31,54 +31,54 @@ export function UserProfileHeaderNew({
     projectCount: 0,
     taskCount: 0,
     teamCount: 0,
-    completionRate: '0%'
-  }
+    completionRate: '0%',
+  },
 }: UserProfileHeaderNewProps) {
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getUserInitials = () => {
-    if (!user.name) return "U"
+    if (!user.name) return 'U';
 
-    const nameParts = user.name.split(" ")
+    const nameParts = user.name.split(' ');
     if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
 
-    return nameParts[0].substring(0, 2).toUpperCase()
-  }
+    return nameParts[0].substring(0, 2).toUpperCase();
+  };
 
   const handleImageClick = () => {
     if (canEdit && !isUploading) {
-      fileInputRef.current?.click()
+      fileInputRef.current?.click();
     }
-  }
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      await onUploadImage(file)
+      await onUploadImage(file);
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
       // Clear the input value so the same file can be selected again
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = '';
       }
     }
-  }
+  };
 
   // Format dates in a more readable way
   const formattedCreatedDate = new Date(user.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 
   // Last login date (mock - would come from the user profile in a real app)
-  const lastLoginDate = "4/20/2023";
+  const lastLoginDate = '4/20/2023';
 
   return (
     <div className="space-y-8">
@@ -93,9 +93,7 @@ export function UserProfileHeaderNew({
                   className="h-24 w-24 cursor-pointer shadow-xs border border-border"
                   onClick={handleImageClick}
                 >
-                  {user.image ? (
-                    <AvatarImage src={user.image} alt={user.name || "User"} />
-                  ) : null}
+                  {user.image ? <AvatarImage src={user.image} alt={user.name || 'User'} /> : null}
                   <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
                     {getUserInitials()}
                   </AvatarFallback>
@@ -121,14 +119,17 @@ export function UserProfileHeaderNew({
               </div>
               <div className="text-center md:text-left space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">{user.name || "Admin User"}</h2>
+                  <h2 className="text-xl font-bold">{user.name || 'Admin User'}</h2>
                 </div>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
                 <div className="flex items-center space-x-2 mt-2">
                   <Badge variant="secondary" className="px-2 py-0.5">
                     {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </Badge>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-2 py-0.5">
+                  <Badge
+                    variant="outline"
+                    className="bg-green-50 text-green-700 border-green-200 px-2 py-0.5"
+                  >
                     Active
                   </Badge>
                 </div>
@@ -139,11 +140,13 @@ export function UserProfileHeaderNew({
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Full Name</h3>
-                <p className="font-medium">{user.name || "Admin User"}</p>
+                <p className="font-medium">{user.name || 'Admin User'}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Role</h3>
-                <p className="font-medium">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
+                <p className="font-medium">
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Created On</h3>
@@ -211,5 +214,5 @@ export function UserProfileHeaderNew({
         </Card>
       </div>
     </div>
-  )
+  );
 }

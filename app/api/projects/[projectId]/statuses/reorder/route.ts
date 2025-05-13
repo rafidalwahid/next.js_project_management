@@ -1,19 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
 
 // POST: Reorder statuses
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { projectId: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { projectId } = params;
@@ -29,14 +26,11 @@ export async function POST(
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Only project team members can reorder statuses
-    if (project.teamMembers.length === 0 && session.user.role !== "admin") {
+    if (project.teamMembers.length === 0 && session.user.role !== 'admin') {
       return NextResponse.json(
         { error: "You don't have permission to reorder statuses for this project" },
         { status: 403 }
@@ -55,7 +49,7 @@ export async function POST(
     const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation error", details: validationResult.error.format() },
+        { error: 'Validation error', details: validationResult.error.format() },
         { status: 400 }
       );
     }
@@ -68,24 +62,18 @@ export async function POST(
     });
 
     if (!status || status.projectId !== projectId) {
-      return NextResponse.json(
-        { error: "Status not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Status not found' }, { status: 404 });
     }
 
     // Get all statuses for the project, ordered by their current order
     const statuses = await prisma.projectStatus.findMany({
       where: { projectId },
-      orderBy: { order: "asc" },
+      orderBy: { order: 'asc' },
     });
 
     // Validate indices
     if (sourceIndex >= statuses.length || destinationIndex >= statuses.length) {
-      return NextResponse.json(
-        { error: "Invalid source or destination index" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid source or destination index' }, { status: 400 });
     }
 
     // Reorder the statuses
@@ -106,8 +94,8 @@ export async function POST(
     // Create activity record
     await prisma.activity.create({
       data: {
-        action: "reordered",
-        entityType: "project_status",
+        action: 'reordered',
+        entityType: 'project_status',
         entityId: statusId,
         description: `Status "${status.name}" was reordered`,
         userId: session.user.id,
@@ -117,9 +105,9 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error reordering project statuses:", error);
+    console.error('Error reordering project statuses:', error);
     return NextResponse.json(
-      { error: "An error occurred while reordering project statuses" },
+      { error: 'An error occurred while reordering project statuses' },
       { status: 500 }
     );
   }

@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Plus } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Spinner } from "@/components/ui/spinner"
-import { useTaskContext } from "./task-context"
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
+import { useTaskContext } from './task-context';
 import {
   Dialog,
   DialogContent,
@@ -18,87 +18,84 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 
 interface CreateStatusDialogProps {
-  projectId: string
-  trigger?: React.ReactNode
+  projectId: string;
+  trigger?: React.ReactNode;
 }
 
-export function CreateStatusDialogNew({
-  projectId,
-  trigger
-}: CreateStatusDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function CreateStatusDialogNew({ projectId, trigger }: CreateStatusDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    color: "#6E56CF",
-    description: "",
-    isDefault: false
-  })
-  const { toast } = useToast()
+    name: '',
+    color: '#6E56CF',
+    description: '',
+    isDefault: false,
+  });
+  const { toast } = useToast();
   const { refreshTasks } = useTaskContext();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, isDefault: checked }))
-  }
+    setFormData(prev => ({ ...prev, isDefault: checked }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formData.name.trim()) {
-      return
+      return;
     }
 
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       const response = await fetch(`/api/projects/${projectId}/statuses`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create status")
+        throw new Error(data.error || 'Failed to create status');
       }
 
       toast({
-        title: "Status created",
+        title: 'Status created',
         description: `Status "${formData.name}" has been created successfully`,
-      })
+      });
 
       // Reset form and close dialog
       setFormData({
-        name: "",
-        color: "#6E56CF",
-        description: "",
-        isDefault: false
-      })
-      setOpen(false)
+        name: '',
+        color: '#6E56CF',
+        description: '',
+        isDefault: false,
+      });
+      setOpen(false);
 
       // Refresh tasks to get updated statuses
       await refreshTasks();
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create status",
-        variant: "destructive"
-      })
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create status',
+        variant: 'destructive',
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -113,9 +110,7 @@ export function CreateStatusDialogNew({
       <DialogContent className="sm:max-w-[425px]" style={{ zIndex: 100 }}>
         <DialogHeader>
           <DialogTitle>Create New Status</DialogTitle>
-          <DialogDescription>
-            Add a new status column to organize your tasks
-          </DialogDescription>
+          <DialogDescription>Add a new status column to organize your tasks</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -173,16 +168,21 @@ export function CreateStatusDialogNew({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting || !formData.name.trim()}>
               {isSubmitting ? <Spinner className="mr-2" /> : null}
-              {isSubmitting ? "Creating..." : "Create Status"}
+              {isSubmitting ? 'Creating...' : 'Create Status'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

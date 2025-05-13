@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth-options";
-import { withAuth } from "@/lib/api-middleware";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth-options';
+import { withAuth } from '@/lib/api-middleware';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 /**
  * GET /api/team-management/membership?projectId={projectId}
@@ -16,10 +16,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
     const projectId = searchParams.get('projectId');
 
     if (!projectId) {
-      return NextResponse.json(
-        { error: "Project ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     // Check if project exists
@@ -29,10 +26,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
     // Check if user is a team member of the project
@@ -49,7 +43,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
     // Check if user has permission to view all projects
     const hasViewAllProjectsPermission = await PermissionService.hasPermission(
       session.user.role,
-      "view_projects"
+      'view_projects'
     );
 
     // Return membership status
@@ -57,9 +51,9 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
       isMember: !!teamMember || hasViewAllProjectsPermission,
     });
   } catch (error) {
-    console.error("Error checking project membership:", error);
+    console.error('Error checking project membership:', error);
     return NextResponse.json(
-      { error: "An error occurred while checking project membership" },
+      { error: 'An error occurred while checking project membership' },
       { status: 500 }
     );
   }

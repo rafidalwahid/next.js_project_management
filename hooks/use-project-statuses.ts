@@ -10,7 +10,7 @@ export function useProjectStatusesByProjectId(projectId: string) {
   );
 
   return {
-    statuses: data?.statuses as ProjectStatus[] || [],
+    statuses: (data?.statuses as ProjectStatus[]) || [],
     isLoading,
     isError: error,
     mutate,
@@ -26,7 +26,7 @@ export function useProjectStatuses() {
   );
 
   return {
-    statuses: data?.statuses as ProjectStatus[] || [],
+    statuses: (data?.statuses as ProjectStatus[]) || [],
     isLoading,
     isError: error,
     mutate,

@@ -18,7 +18,7 @@ import {
   endOfDay,
   addMinutes,
   setHours,
-  setMinutes
+  setMinutes,
 } from 'date-fns';
 import { GRACE_PERIODS, WORK_DAY, DATE_FORMATS } from '@/lib/constants/attendance';
 
@@ -95,8 +95,8 @@ export function safeParseISO(dateString: string): Date {
  */
 export function formatDate(
   date: Date | string | null | undefined,
-  formatString = "MMM d, yyyy",
-  fallback = "Not available"
+  formatString = 'MMM d, yyyy',
+  fallback = 'Not available'
 ): string {
   // Handle null and undefined
   if (date === null || date === undefined) {
@@ -119,38 +119,34 @@ export function formatDate(
 /**
  * Format a date for HTML date input (YYYY-MM-DD)
  */
-export function formatDateForInput(
-  date: Date | string | null | undefined
-): string {
+export function formatDateForInput(date: Date | string | null | undefined): string {
   const dateObj = ensureDate(date);
 
   if (!dateObj) {
-    return "";
+    return '';
   }
 
   try {
-    return format(dateObj, "yyyy-MM-dd");
+    return format(dateObj, 'yyyy-MM-dd');
   } catch (error) {
-    return "";
+    return '';
   }
 }
 
 /**
  * Format a date for HTML datetime-local input (YYYY-MM-DDThh:mm)
  */
-export function formatDateTimeForInput(
-  date: Date | string | null | undefined
-): string {
+export function formatDateTimeForInput(date: Date | string | null | undefined): string {
   const dateObj = ensureDate(date);
 
   if (!dateObj) {
-    return "";
+    return '';
   }
 
   try {
     return format(dateObj, "yyyy-MM-dd'T'HH:mm");
   } catch (error) {
-    return "";
+    return '';
   }
 }
 
@@ -200,9 +196,7 @@ export function formatDateRangeParams(startDate: string, endDate: string): strin
 /**
  * Convert a string or Date to a Date object
  */
-export function toDate(
-  date: Date | string | null | undefined
-): Date | null {
+export function toDate(date: Date | string | null | undefined): Date | null {
   return ensureDate(date);
 }
 
@@ -217,10 +211,7 @@ export function dateToApiFormat(date: Date | string | null | undefined): string 
 /**
  * Converts a date from any format to a consistent format for API requests
  */
-export function prepareApiDates<T extends Record<string, any>>(
-  obj: T,
-  dateFields: (keyof T)[]
-): T {
+export function prepareApiDates<T extends Record<string, any>>(obj: T, dateFields: (keyof T)[]): T {
   const result = { ...obj } as T;
 
   for (const field of dateFields) {
@@ -237,10 +228,7 @@ export function prepareApiDates<T extends Record<string, any>>(
 /**
  * Converts dates in an API response to Date objects
  */
-export function processApiDates<T extends Record<string, any>>(
-  obj: T,
-  dateFields: (keyof T)[]
-): T {
+export function processApiDates<T extends Record<string, any>>(obj: T, dateFields: (keyof T)[]): T {
   const result = { ...obj } as T;
 
   for (const field of dateFields) {
@@ -281,25 +269,25 @@ export function calculateDuration(
   checkIn: Date | string,
   checkOut: Date | string | null | undefined
 ): string {
-  if (!checkOut) return "In progress";
+  if (!checkOut) return 'In progress';
 
   const start = ensureDate(checkIn);
   const end = ensureDate(checkOut);
 
   if (!start || !end) {
-    return "Invalid time";
+    return 'Invalid time';
   }
 
   try {
     const diffMs = end.getTime() - start.getTime();
-    if (diffMs <= 0) return "0h 0m";
+    if (diffMs <= 0) return '0h 0m';
 
     const hours = Math.floor(diffMs / (1000 * 60 * 60));
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
     return `${hours}h ${minutes}m`;
   } catch (error) {
-    return "Error";
+    return 'Error';
   }
 }
 
@@ -370,7 +358,7 @@ export function isLateCheckIn(checkInTime: Date): boolean {
 export function getDayBoundaries(date: Date): { start: Date; end: Date } {
   return {
     start: startOfDay(date),
-    end: endOfDay(date)
+    end: endOfDay(date),
   };
 }
 
@@ -405,7 +393,7 @@ export function calculateTotalHours(
   const {
     maxHoursPerDay = WORK_DAY.MAX_HOURS_PER_DAY,
     applyWorkdayBounds = true,
-    isAutoCheckout = false
+    isAutoCheckout = false,
   } = options;
 
   // Ensure we're working with Date objects
@@ -470,9 +458,9 @@ export function isWithinWorkHours(date: Date): boolean {
   const minutes = date.getMinutes();
 
   // Convert to total minutes for easier comparison
-  const timeInMinutes = (hours * 60) + minutes;
-  const startInMinutes = (WORK_DAY.START_HOUR * 60) + WORK_DAY.START_MINUTE;
-  const endInMinutes = (WORK_DAY.END_HOUR * 60) + WORK_DAY.END_MINUTE;
+  const timeInMinutes = hours * 60 + minutes;
+  const startInMinutes = WORK_DAY.START_HOUR * 60 + WORK_DAY.START_MINUTE;
+  const endInMinutes = WORK_DAY.END_HOUR * 60 + WORK_DAY.END_MINUTE;
 
   return timeInMinutes >= startInMinutes && timeInMinutes < endInMinutes;
 }
@@ -494,9 +482,6 @@ export function isWorkDay(date: Date): boolean {
  * @deprecated Use formatDate instead
  * Legacy compatibility function with the same signature as the old formatDate
  */
-export function formatDateLegacy(
-  date: string | null,
-  formatString = "MMM d, yyyy"
-): string {
+export function formatDateLegacy(date: string | null, formatString = 'MMM d, yyyy'): string {
   return formatDate(date, formatString);
 }

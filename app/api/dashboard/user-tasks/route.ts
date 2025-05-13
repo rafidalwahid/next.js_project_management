@@ -16,14 +16,14 @@ const getUserTasks = unstable_cache(
       where: {
         teamMembers: {
           some: {
-            userId
-          }
-        }
+            userId,
+          },
+        },
       },
       select: {
         id: true,
-        title: true
-      }
+        title: true,
+      },
     });
 
     const projectIds = userProjects.map(project => project.id);
@@ -32,32 +32,32 @@ const getUserTasks = unstable_cache(
     const assignedTasks = await prisma.task.findMany({
       where: {
         projectId: {
-          in: projectIds
+          in: projectIds,
         },
         assignees: {
           some: {
-            userId
-          }
-        }
+            userId,
+          },
+        },
       },
       include: {
         project: {
           select: {
             id: true,
-            title: true
-          }
+            title: true,
+          },
         },
         status: {
           select: {
             id: true,
             name: true,
-            color: true
-          }
-        }
+            color: true,
+          },
+        },
       },
       orderBy: {
-        dueDate: 'asc'
-      }
+        dueDate: 'asc',
+      },
     });
 
     // Transform tasks to match the expected format
@@ -69,11 +69,13 @@ const getUserTasks = unstable_cache(
       completed: task.completed,
       dueDate: task.dueDate?.toISOString() || null,
       priority: task.priority,
-      status: task.status ? {
-        id: task.status.id,
-        name: task.status.name,
-        color: task.status.color
-      } : null
+      status: task.status
+        ? {
+            id: task.status.id,
+            name: task.status.name,
+            color: task.status.color,
+          }
+        : null,
     }));
   },
   ['user-tasks'],
@@ -98,10 +100,13 @@ export async function GET() {
       console.error('Database error in user tasks:', dbError);
 
       // Return a minimal response with empty tasks to prevent UI from breaking
-      return NextResponse.json({
-        tasks: [],
-        error: 'Database error occurred'
-      }, { status: 200 });
+      return NextResponse.json(
+        {
+          tasks: [],
+          error: 'Database error occurred',
+        },
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error('User tasks error:', error);

@@ -43,7 +43,7 @@ async function main() {
   for (const role of roles) {
     const rolePermissions = await prisma.rolePermission.findMany({
       where: { roleId: role.id },
-      include: { permission: true }
+      include: { permission: true },
     });
 
     console.log(`\nRole "${role.name}" has ${rolePermissions.length} permissions:`);
@@ -73,7 +73,7 @@ async function main() {
 
     // Find the role
     const roleRecord = await prisma.role.findUnique({
-      where: { name: role }
+      where: { name: role },
     });
 
     if (!roleRecord) {
@@ -83,14 +83,16 @@ async function main() {
 
     // Find the permission
     const permissionRecord = await prisma.permission.findUnique({
-      where: { name: permission }
+      where: { name: permission },
     });
 
     // For nonexistent permissions, we expect false
     if (!permissionRecord) {
       const result = false;
       const passed = result === expected;
-      console.log(`${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`);
+      console.log(
+        `${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`
+      );
       continue;
     }
 
@@ -98,13 +100,15 @@ async function main() {
     const rolePermission = await prisma.rolePermission.findFirst({
       where: {
         roleId: roleRecord.id,
-        permissionId: permissionRecord.id
-      }
+        permissionId: permissionRecord.id,
+      },
     });
 
     const result = !!rolePermission;
     const passed = result === expected;
-    console.log(`${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`);
+    console.log(
+      `${passed ? '✅' : '❌'} ${role} has permission "${permission}": ${result} (expected: ${expected})`
+    );
   }
 
   console.log('\nPermission system testing completed!');
@@ -112,7 +116,7 @@ async function main() {
 
 // Run the main function
 main()
-  .catch((e) => {
+  .catch(e => {
     process.exit(1);
   })
   .finally(async () => {

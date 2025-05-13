@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { Calendar, Clock, MoreHorizontal, Plus } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { formatDate } from "@/lib/utils"
+import Link from 'next/link';
+import { Calendar, Clock, MoreHorizontal, Plus } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { formatDate } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +13,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Task } from "@/types/task"
+} from '@/components/ui/dropdown-menu';
+import { Task } from '@/types/task';
 
 interface UserProfileTasksProps {
-  tasks: Task[]
+  tasks: Task[];
 }
 
 export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
@@ -49,7 +49,7 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -62,9 +62,7 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
           </div>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href="/app/tasks">
-                View All
-              </Link>
+              <Link href="/app/tasks">View All</Link>
             </Button>
             <Button size="sm" variant="default" asChild>
               <Link href="/app/tasks/new">
@@ -77,20 +75,20 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
-          {tasks.map((task) => (
+          {tasks.map(task => (
             <Card key={task.id} className="overflow-hidden border bg-background">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
                     <Badge
                       variant={
-                        task.status === "completed"
-                          ? "success"
-                          : task.status === "in-progress"
-                          ? "default"
-                          : task.status === "pending"
-                          ? "secondary"
-                          : "outline"
+                        task.status === 'completed'
+                          ? 'success'
+                          : task.status === 'in-progress'
+                            ? 'default'
+                            : task.status === 'pending'
+                              ? 'secondary'
+                              : 'outline'
                       }
                       className="capitalize"
                     >
@@ -98,11 +96,11 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                     </Badge>
                     <Badge
                       variant={
-                        task.priority === "high"
-                          ? "destructive"
-                          : task.priority === "medium"
-                          ? "default"
-                          : "secondary"
+                        task.priority === 'high'
+                          ? 'destructive'
+                          : task.priority === 'medium'
+                            ? 'default'
+                            : 'secondary'
                       }
                       className="capitalize"
                     >
@@ -144,7 +142,10 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
                   {task.project && (
                     <div className="flex items-center">
                       <Clock className="mr-2 h-4 w-4" />
-                      <Link href={`/app/projects/${task.project.id}`} className="hover:text-primary hover:underline">
+                      <Link
+                        href={`/app/projects/${task.project.id}`}
+                        className="hover:text-primary hover:underline"
+                      >
                         {task.project.title}
                       </Link>
                     </div>
@@ -162,5 +163,5 @@ export function UserProfileTasks({ tasks }: UserProfileTasksProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

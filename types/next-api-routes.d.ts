@@ -1,7 +1,7 @@
 // Custom type declarations for Next.js API route parameters
 // This file helps resolve type conflicts in dynamic route parameters in App Router
 
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
 // Interface that accommodates both Promise-based and direct params
 interface RouteParams<T = any> {

@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { AttendanceSettingsForm } from "@/components/attendance/attendance-settings-form"
-import { Settings } from "lucide-react"
+import { AttendanceSettingsForm } from '@/components/attendance/attendance-settings-form';
+import { Settings } from 'lucide-react';
 
 export default function AttendanceSettingsPage() {
   return (
@@ -17,5 +17,5 @@ export default function AttendanceSettingsPage() {
 
       <AttendanceSettingsForm />
     </div>
-  )
+  );
 }

@@ -41,15 +41,14 @@ export class ClientPermissionService {
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
         return this.permissionCache[cacheKey];
       }
 
       // Fetch from API
-      const response = await fetch(`/api/roles/check-permission?role=${encodeURIComponent(role)}&permission=${encodeURIComponent(permission)}`);
+      const response = await fetch(
+        `/api/roles/check-permission?role=${encodeURIComponent(role)}&permission=${encodeURIComponent(permission)}`
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to check permission: ${response.status} ${response.statusText}`);
@@ -83,15 +82,14 @@ export class ClientPermissionService {
       const now = Date.now();
 
       // If cache is valid and has this permission check, return it
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
         return this.permissionCache[cacheKey];
       }
 
       // Fetch from API
-      const response = await fetch(`/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`);
+      const response = await fetch(
+        `/api/users/check-permission?userId=${encodeURIComponent(userId)}&permission=${encodeURIComponent(permission)}`
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to check permission: ${response.status} ${response.statusText}`);
@@ -125,10 +123,7 @@ export class ClientPermissionService {
     const now = Date.now();
 
     // If cache is valid and has this permission check, return it
-    if (
-      now - this.cacheTimestamp < this.CACHE_TTL &&
-      cacheKey in this.permissionCache
-    ) {
+    if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
       return this.permissionCache[cacheKey];
     }
 
@@ -151,10 +146,7 @@ export class ClientPermissionService {
     const now = Date.now();
 
     // If cache is valid and has this permission check, return it
-    if (
-      now - this.cacheTimestamp < this.CACHE_TTL &&
-      cacheKey in this.permissionCache
-    ) {
+    if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
       return this.permissionCache[cacheKey];
     }
 
@@ -177,10 +169,7 @@ export class ClientPermissionService {
       const now = Date.now();
 
       // If cache is valid and has this role's permissions, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionListCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionListCache) {
         return this.permissionListCache[cacheKey];
       }
 
@@ -188,7 +177,9 @@ export class ClientPermissionService {
       const response = await fetch(`/api/roles/permissions?role=${encodeURIComponent(role)}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to get permissions for role: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to get permissions for role: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -217,10 +208,7 @@ export class ClientPermissionService {
       const now = Date.now();
 
       // If cache is valid and has this user's permissions, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        cacheKey in this.permissionListCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionListCache) {
         return this.permissionListCache[cacheKey];
       }
 
@@ -228,7 +216,9 @@ export class ClientPermissionService {
       const response = await fetch(`/api/users/permissions?userId=${encodeURIComponent(userId)}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to get permissions for user: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to get permissions for user: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -257,10 +247,7 @@ export class ClientPermissionService {
     const now = Date.now();
 
     // If cache is valid and has this role's permissions, return them
-    if (
-      now - this.cacheTimestamp < this.CACHE_TTL &&
-      cacheKey in this.permissionListCache
-    ) {
+    if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionListCache) {
       return this.permissionListCache[cacheKey];
     }
 
@@ -281,10 +268,7 @@ export class ClientPermissionService {
     const now = Date.now();
 
     // If cache is valid and has this user's permissions, return them
-    if (
-      now - this.cacheTimestamp < this.CACHE_TTL &&
-      cacheKey in this.permissionListCache
-    ) {
+    if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionListCache) {
       return this.permissionListCache[cacheKey];
     }
 
@@ -293,23 +277,20 @@ export class ClientPermissionService {
     return [];
   }
 
-
-
   /**
    * Get all available permissions
    *
    * @returns A promise that resolves to an array of permission objects
    */
-  static async getAllPermissions(): Promise<{ id: string; name: string; description: string; category?: string }[]> {
+  static async getAllPermissions(): Promise<
+    { id: string; name: string; description: string; category?: string }[]
+  > {
     try {
       // Check cache first
       const now = Date.now();
 
       // If cache is valid and has permissions, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        'permissions' in this.roleCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && 'permissions' in this.roleCache) {
         return this.roleCache['permissions'];
       }
 
@@ -338,16 +319,15 @@ export class ClientPermissionService {
    *
    * @returns A promise that resolves to an array of role objects
    */
-  static async getAllRoles(): Promise<{ id: string; name: string; description: string; color: string }[]> {
+  static async getAllRoles(): Promise<
+    { id: string; name: string; description: string; color: string }[]
+  > {
     try {
       // Check cache first
       const now = Date.now();
 
       // If cache is valid and has roles, return them
-      if (
-        now - this.cacheTimestamp < this.CACHE_TTL &&
-        'roles' in this.roleCache
-      ) {
+      if (now - this.cacheTimestamp < this.CACHE_TTL && 'roles' in this.roleCache) {
         return this.roleCache['roles'];
       }
 
@@ -386,7 +366,7 @@ export class ClientPermissionService {
   ): Promise<{ hasPermission: boolean; error?: string }> {
     // If no user ID, no permission
     if (!userId) {
-      return { hasPermission: false, error: "Unauthorized" };
+      return { hasPermission: false, error: 'Unauthorized' };
     }
 
     // Check if user is the owner of the resource
@@ -401,7 +381,7 @@ export class ClientPermissionService {
     const hasPermission = await this.hasPermissionById(userId, requiredPermission);
     return {
       hasPermission,
-      error: hasPermission ? undefined : `Forbidden: ${requiredPermission} permission required`
+      error: hasPermission ? undefined : `Forbidden: ${requiredPermission} permission required`,
     };
   }
 
@@ -421,7 +401,7 @@ export class ClientPermissionService {
   ): { hasPermission: boolean; error?: string } {
     // If no user ID, no permission
     if (!userId) {
-      return { hasPermission: false, error: "Unauthorized" };
+      return { hasPermission: false, error: 'Unauthorized' };
     }
 
     // Check if user is the owner of the resource
@@ -443,7 +423,7 @@ export class ClientPermissionService {
     // Return false and let the async version update the UI
     return {
       hasPermission: false,
-      error: "Checking permissions..."
+      error: 'Checking permissions...',
     };
   }
 
@@ -460,7 +440,7 @@ export class ClientPermissionService {
   ): Promise<{ hasPermission: boolean; error?: string }> {
     // If no user ID, no permission
     if (!userId) {
-      return { hasPermission: false, error: "Unauthorized" };
+      return { hasPermission: false, error: 'Unauthorized' };
     }
 
     // Check if user is the owner of the resource
@@ -476,14 +456,14 @@ export class ClientPermissionService {
       const hasPermission = await this.hasPermission(userRole, requiredPermission);
       return {
         hasPermission,
-        error: hasPermission ? undefined : `Forbidden: ${requiredPermission} permission required`
+        error: hasPermission ? undefined : `Forbidden: ${requiredPermission} permission required`,
       };
     }
 
     // If no role is provided, deny access
     return {
       hasPermission: false,
-      error: "Forbidden: Insufficient permissions"
+      error: 'Forbidden: Insufficient permissions',
     };
   }
 }

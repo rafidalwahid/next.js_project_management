@@ -1,31 +1,31 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { Spinner } from "@/components/ui/spinner"
-import { UserProfileView } from "@/components/profile/user-profile-view"
-import { useUserProfile } from "@/hooks/use-user-profile"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { Spinner } from '@/components/ui/spinner';
+import { UserProfileView } from '@/components/profile/user-profile-view';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UserProfilePage() {
-  const params = useParams()
-  const router = useRouter()
-  const { data: session, status } = useSession()
-  const { toast } = useToast()
-  const userId = params.userId as string
+  const params = useParams();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { toast } = useToast();
+  const userId = params.userId as string;
 
   // Check if this is the current user's profile
-  const isOwnProfile = session?.user?.id === userId
+  const isOwnProfile = session?.user?.id === userId;
 
   // State for permission check
-  const [canEdit, setCanEdit] = useState(isOwnProfile)
+  const [canEdit, setCanEdit] = useState(isOwnProfile);
 
   // Check if the current user can edit this profile
   useEffect(() => {
     if (isOwnProfile) {
-      setCanEdit(true)
-      return
+      setCanEdit(true);
+      return;
     }
 
     if (session?.user?.id) {
@@ -33,14 +33,14 @@ export default function UserProfilePage() {
       fetch(`/api/users/check-permission?userId=${session.user.id}&permission=user_management`)
         .then(res => res.json())
         .then(data => {
-          setCanEdit(data.hasPermission)
+          setCanEdit(data.hasPermission);
         })
         .catch(err => {
-          console.error("Error checking permission:", err)
-          setCanEdit(false)
-        })
+          console.error('Error checking permission:', err);
+          setCanEdit(false);
+        });
     }
-  }, [isOwnProfile, session?.user?.id])
+  }, [isOwnProfile, session?.user?.id]);
 
   // Use the user profile hook to fetch profile data
   const {
@@ -53,34 +53,34 @@ export default function UserProfilePage() {
     isLoading,
     isError,
     updateProfile,
-    uploadProfileImage
-  } = useUserProfile(userId)
+    uploadProfileImage,
+  } = useUserProfile(userId);
 
   // Handle errors
   useEffect(() => {
     if (isError) {
       toast({
-        title: "Error",
-        description: "Failed to load user profile. The user may not exist.",
-        variant: "destructive",
-      })
-      router.push("/team")
+        title: 'Error',
+        description: 'Failed to load user profile. The user may not exist.',
+        variant: 'destructive',
+      });
+      router.push('/team');
     }
-  }, [isError, router, toast])
+  }, [isError, router, toast]);
 
   // Show loading state
-  if (status === "loading" || isLoading) {
+  if (status === 'loading' || isLoading) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
         <Spinner size="lg" />
       </div>
-    )
+    );
   }
 
   // If not authenticated, redirect to login
-  if (status === "unauthenticated") {
-    router.push("/login")
-    return null
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
   }
 
   // If profile data is not available, show error
@@ -89,14 +89,11 @@ export default function UserProfilePage() {
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center flex-col gap-4">
         <h1 className="text-2xl font-bold">User not found</h1>
         <p className="text-muted-foreground">The requested user profile does not exist.</p>
-        <button
-          onClick={() => router.push("/team")}
-          className="text-primary hover:underline"
-        >
+        <button onClick={() => router.push('/team')} className="text-primary hover:underline">
           Go back to team
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -114,5 +111,5 @@ export default function UserProfilePage() {
         onUploadImage={uploadProfileImage}
       />
     </div>
-  )
+  );
 }

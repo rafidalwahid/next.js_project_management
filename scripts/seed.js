@@ -6,68 +6,68 @@ const prisma = new PrismaClient();
 // Define permissions directly in this script to avoid importing TypeScript files
 const PERMISSIONS = {
   // User management
-  USER_MANAGEMENT: "user_management",
-  MANAGE_ROLES: "manage_roles",
-  MANAGE_PERMISSIONS: "manage_permissions",
+  USER_MANAGEMENT: 'user_management',
+  MANAGE_ROLES: 'manage_roles',
+  MANAGE_PERMISSIONS: 'manage_permissions',
 
   // Project management
-  PROJECT_CREATION: "project_creation",
-  PROJECT_MANAGEMENT: "project_management",
-  PROJECT_DELETION: "project_deletion",
+  PROJECT_CREATION: 'project_creation',
+  PROJECT_MANAGEMENT: 'project_management',
+  PROJECT_DELETION: 'project_deletion',
 
   // Team management
-  TEAM_MANAGEMENT: "team_management",
-  TEAM_ADD: "team_add",
-  TEAM_REMOVE: "team_remove",
-  TEAM_VIEW: "team_view",
+  TEAM_MANAGEMENT: 'team_management',
+  TEAM_ADD: 'team_add',
+  TEAM_REMOVE: 'team_remove',
+  TEAM_VIEW: 'team_view',
 
   // Task management
-  TASK_CREATION: "task_creation",
-  TASK_ASSIGNMENT: "task_assignment",
-  TASK_MANAGEMENT: "task_management",
-  TASK_DELETION: "task_deletion",
+  TASK_CREATION: 'task_creation',
+  TASK_ASSIGNMENT: 'task_assignment',
+  TASK_MANAGEMENT: 'task_management',
+  TASK_DELETION: 'task_deletion',
 
   // General permissions
-  VIEW_PROJECTS: "view_projects",
-  EDIT_PROFILE: "edit_profile",
-  SYSTEM_SETTINGS: "system_settings",
-  VIEW_DASHBOARD: "view_dashboard",
+  VIEW_PROJECTS: 'view_projects',
+  EDIT_PROFILE: 'edit_profile',
+  SYSTEM_SETTINGS: 'system_settings',
+  VIEW_DASHBOARD: 'view_dashboard',
 
   // Attendance
-  ATTENDANCE_MANAGEMENT: "attendance_management",
-  VIEW_TEAM_ATTENDANCE: "view_team_attendance",
+  ATTENDANCE_MANAGEMENT: 'attendance_management',
+  VIEW_TEAM_ATTENDANCE: 'view_team_attendance',
 };
 
 // Define roles
 const ROLES = {
-  ADMIN: "admin",
-  MANAGER: "manager",
-  USER: "user",
-  GUEST: "guest",
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  USER: 'user',
+  GUEST: 'guest',
 };
 
 // Define system roles with additional metadata
 const SYSTEM_ROLES = {
   admin: {
-    name: "Administrator",
-    description: "Full access to all system features",
-    color: "bg-purple-500" // Purple
+    name: 'Administrator',
+    description: 'Full access to all system features',
+    color: 'bg-purple-500', // Purple
   },
   manager: {
-    name: "Manager",
-    description: "Can manage projects, tasks, and team members",
-    color: "bg-blue-500" // Blue
+    name: 'Manager',
+    description: 'Can manage projects, tasks, and team members',
+    color: 'bg-blue-500', // Blue
   },
   user: {
-    name: "User",
-    description: "Regular user with limited permissions",
-    color: "bg-green-500" // Green
+    name: 'User',
+    description: 'Regular user with limited permissions',
+    color: 'bg-green-500', // Green
   },
   guest: {
-    name: "Guest",
-    description: "View-only access to projects",
-    color: "bg-gray-500" // Gray
-  }
+    name: 'Guest',
+    description: 'View-only access to projects',
+    color: 'bg-gray-500', // Gray
+  },
 };
 
 // Permission matrix - which roles have which permissions
@@ -118,9 +118,7 @@ const PERMISSION_MATRIX = {
     PERMISSIONS.VIEW_DASHBOARD,
     PERMISSIONS.TEAM_VIEW,
   ],
-  [ROLES.GUEST]: [
-    PERMISSIONS.VIEW_PROJECTS,
-  ],
+  [ROLES.GUEST]: [PERMISSIONS.VIEW_PROJECTS],
 };
 
 async function main() {
@@ -167,8 +165,6 @@ async function main() {
 
   // Create task attachments
   await seedTaskAttachments(tasks, users);
-
-
 }
 
 // Clear existing data - be careful with this in production!
@@ -193,14 +189,10 @@ async function clearExistingData() {
   await prisma.account.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.verificationToken.deleteMany({});
-
-
 }
 
 // Seed roles
 async function seedRoles() {
-
-
   const roleMap = {};
 
   // Create roles from the SYSTEM_ROLES object
@@ -209,12 +201,11 @@ async function seedRoles() {
       data: {
         name: roleId,
         description: roleData.description,
-        color: roleData.color
-      }
+        color: roleData.color,
+      },
     });
 
     roleMap[roleId] = role;
-
   }
 
   return roleMap;
@@ -222,8 +213,6 @@ async function seedRoles() {
 
 // Seed permissions
 async function seedPermissions() {
-
-
   const permissionMap = {};
 
   // Get all permissions with metadata
@@ -235,12 +224,11 @@ async function seedPermissions() {
       data: {
         name: permission.id,
         description: permission.description,
-        category: permission.category
-      }
+        category: permission.category,
+      },
     });
 
     permissionMap[permission.id] = createdPermission;
-
   }
 
   return permissionMap;
@@ -248,8 +236,6 @@ async function seedPermissions() {
 
 // Seed role-permission relationships
 async function seedRolePermissions(roles, permissions) {
-
-
   // For each role in the permission matrix
   for (const [roleKey, permissionList] of Object.entries(PERMISSION_MATRIX)) {
     const role = roles[roleKey.toLowerCase()];
@@ -263,18 +249,16 @@ async function seedRolePermissions(roles, permissions) {
       const permission = permissions[permissionKey];
 
       if (!permission) {
-          continue;
+        continue;
       }
 
       // Create the role-permission relationship
       await prisma.rolePermission.create({
         data: {
           roleId: role.id,
-          permissionId: permission.id
-        }
+          permissionId: permission.id,
+        },
       });
-
-
     }
   }
 }
@@ -308,15 +292,13 @@ function getAllPermissionsWithMetadata() {
       id: value,
       name,
       description: `Permission to ${value.replace(/_/g, ' ')}`,
-      category
+      category,
     };
   });
 }
 
 // Seed users
 async function seedUsers() {
-
-
   const hashedPassword = await hash('password123', 10);
 
   const usersToCreate = [
@@ -330,7 +312,7 @@ async function seedUsers() {
       bio: 'System administrator with full access to all features',
       location: 'New York',
       phone: '555-123-4567',
-      skills: 'System Administration, Security, DevOps'
+      skills: 'System Administration, Security, DevOps',
     },
     {
       name: 'Project Manager',
@@ -342,7 +324,7 @@ async function seedUsers() {
       bio: 'Experienced project manager specializing in software delivery',
       location: 'San Francisco',
       phone: '555-234-5678',
-      skills: 'Agile, Scrum, Team Leadership, Risk Management'
+      skills: 'Agile, Scrum, Team Leadership, Risk Management',
     },
     {
       name: 'Regular User',
@@ -354,7 +336,7 @@ async function seedUsers() {
       bio: 'Full-stack developer with 5 years of experience',
       location: 'Chicago',
       phone: '555-345-6789',
-      skills: 'JavaScript, React, Node.js, TypeScript'
+      skills: 'JavaScript, React, Node.js, TypeScript',
     },
     {
       name: 'UI Designer',
@@ -366,7 +348,7 @@ async function seedUsers() {
       bio: 'Creative designer focused on user experience',
       location: 'Los Angeles',
       phone: '555-456-7890',
-      skills: 'Figma, Adobe XD, UI Design, Prototyping'
+      skills: 'Figma, Adobe XD, UI Design, Prototyping',
     },
     {
       name: 'QA Tester',
@@ -378,8 +360,8 @@ async function seedUsers() {
       bio: 'Detail-oriented tester with automation experience',
       location: 'Boston',
       phone: '555-567-8901',
-      skills: 'Manual Testing, Automated Testing, Selenium, Jest'
-    }
+      skills: 'Manual Testing, Automated Testing, Selenium, Jest',
+    },
   ];
 
   const users = {};
@@ -389,14 +371,13 @@ async function seedUsers() {
 
     // Create user without role field first
     const user = await prisma.user.create({
-      data: userDataWithoutRole
+      data: userDataWithoutRole,
     });
 
     // Then update the role using a direct SQL query
     await prisma.$executeRaw`UPDATE user SET role = ${role} WHERE id = ${user.id}`;
 
     users[role === 'user' ? userData.jobTitle.toLowerCase().replace(/\s+/g, '_') : role] = user;
-
   }
 
   // Create additional users for team diversity
@@ -413,15 +394,14 @@ async function seedUsers() {
         bio: `User with various skills and experience`,
         location: 'Remote',
         phone: `555-${i}00-${i}${i}${i}${i}`,
-        skills: 'JavaScript, Python, React, Node.js'
-      }
+        skills: 'JavaScript, Python, React, Node.js',
+      },
     });
 
     // Then update the role using a direct SQL query
     await prisma.$executeRaw`UPDATE user SET role = 'user' WHERE id = ${extraUser.id}`;
 
     extraUsers.push(extraUser);
-
   }
 
   users.extraUsers = extraUsers;
@@ -430,8 +410,6 @@ async function seedUsers() {
 
 // Seed projects
 async function seedProjects(users) {
-
-
   const now = new Date();
   const projectsToCreate = [
     {
@@ -444,11 +422,36 @@ async function seedProjects(users) {
       totalTimeSpent: 280,
       createdById: users.manager.id,
       statuses: [
-        { name: 'To Do', color: '#E5E5E5', description: 'Tasks not yet started', isDefault: true, order: 1 },
-        { name: 'In Progress', color: '#3498DB', description: 'Tasks currently being worked on', isDefault: false, order: 2 },
-        { name: 'Review', color: '#F39C12', description: 'Tasks ready for review', isDefault: false, order: 3 },
-        { name: 'Done', color: '#2ECC71', description: 'Completed tasks', isDefault: false, order: 4, isCompletedStatus: true }
-      ]
+        {
+          name: 'To Do',
+          color: '#E5E5E5',
+          description: 'Tasks not yet started',
+          isDefault: true,
+          order: 1,
+        },
+        {
+          name: 'In Progress',
+          color: '#3498DB',
+          description: 'Tasks currently being worked on',
+          isDefault: false,
+          order: 2,
+        },
+        {
+          name: 'Review',
+          color: '#F39C12',
+          description: 'Tasks ready for review',
+          isDefault: false,
+          order: 3,
+        },
+        {
+          name: 'Done',
+          color: '#2ECC71',
+          description: 'Completed tasks',
+          isDefault: false,
+          order: 4,
+          isCompletedStatus: true,
+        },
+      ],
     },
     {
       title: 'Mobile App Development',
@@ -460,13 +463,44 @@ async function seedProjects(users) {
       totalTimeSpent: 320,
       createdById: users.manager.id,
       statuses: [
-        { name: 'Backlog', color: '#E5E5E5', description: 'Tasks in the backlog', isDefault: true, order: 1 },
-        { name: 'In Development', color: '#3498DB', description: 'Tasks in active development', isDefault: false, order: 2 },
-        { name: 'Testing', color: '#F39C12', description: 'Tasks in QA testing', isDefault: false, order: 3 },
-        { name: 'Ready for Release', color: '#2ECC71', description: 'Tasks ready for production', isDefault: false, order: 4 },
-        { name: 'Released', color: '#27AE60', description: 'Tasks in production', isDefault: false, order: 5, isCompletedStatus: true }
-      ]
-    }
+        {
+          name: 'Backlog',
+          color: '#E5E5E5',
+          description: 'Tasks in the backlog',
+          isDefault: true,
+          order: 1,
+        },
+        {
+          name: 'In Development',
+          color: '#3498DB',
+          description: 'Tasks in active development',
+          isDefault: false,
+          order: 2,
+        },
+        {
+          name: 'Testing',
+          color: '#F39C12',
+          description: 'Tasks in QA testing',
+          isDefault: false,
+          order: 3,
+        },
+        {
+          name: 'Ready for Release',
+          color: '#2ECC71',
+          description: 'Tasks ready for production',
+          isDefault: false,
+          order: 4,
+        },
+        {
+          name: 'Released',
+          color: '#27AE60',
+          description: 'Tasks in production',
+          isDefault: false,
+          order: 5,
+          isCompletedStatus: true,
+        },
+      ],
+    },
   ];
 
   const projects = [];
@@ -475,7 +509,7 @@ async function seedProjects(users) {
     const { statuses, ...projectDataWithoutStatuses } = projectData;
 
     const project = await prisma.project.create({
-      data: projectDataWithoutStatuses
+      data: projectDataWithoutStatuses,
     });
 
     // Create status columns for each project
@@ -483,13 +517,12 @@ async function seedProjects(users) {
       await prisma.projectStatus.create({
         data: {
           ...statusData,
-          projectId: project.id
-        }
+          projectId: project.id,
+        },
       });
     }
 
     projects.push(project);
-
   }
 
   return projects;
@@ -497,8 +530,6 @@ async function seedProjects(users) {
 
 // Seed team members
 async function seedTeamMembers(projects, users) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -514,7 +545,13 @@ async function seedTeamMembers(projects, users) {
   }
 
   const regularUsers = [usersByRole.software_developer, ...users.extraUsers].filter(Boolean);
-  const allUsers = [users.admin, users.manager, ...regularUsers, usersByRole.ui_ux_designer, usersByRole.qa_engineer].filter(Boolean);
+  const allUsers = [
+    users.admin,
+    users.manager,
+    ...regularUsers,
+    usersByRole.ui_ux_designer,
+    usersByRole.qa_engineer,
+  ].filter(Boolean);
 
   for (const project of projects) {
     // Add all users to the first project (Website Redesign)
@@ -523,10 +560,9 @@ async function seedTeamMembers(projects, users) {
         await prisma.teamMember.create({
           data: {
             projectId: project.id,
-            userId: user.id
-          }
+            userId: user.id,
+          },
         });
-
       }
     }
     // Add only some users to the second project (Mobile App)
@@ -536,17 +572,16 @@ async function seedTeamMembers(projects, users) {
         usersByRole.software_developer,
         usersByRole.ui_ux_designer,
         usersByRole.qa_engineer,
-        users.extraUsers[0]
+        users.extraUsers[0],
       ].filter(Boolean);
 
       for (const user of mobileAppTeam) {
         await prisma.teamMember.create({
           data: {
             projectId: project.id,
-            userId: user.id
-          }
+            userId: user.id,
+          },
         });
-
       }
     }
   }
@@ -554,8 +589,6 @@ async function seedTeamMembers(projects, users) {
 
 // Seed tasks
 async function seedTasks(projects, users) {
-
-
   const tasks = [];
   const now = new Date();
 
@@ -564,7 +597,7 @@ async function seedTasks(projects, users) {
   if (websiteProject) {
     const websiteStatuses = await prisma.projectStatus.findMany({
       where: { projectId: websiteProject.id },
-      orderBy: { order: 'asc' }
+      orderBy: { order: 'asc' },
     });
 
     const todoStatus = websiteStatuses.find(s => s.name === 'To Do');
@@ -584,8 +617,8 @@ async function seedTasks(projects, users) {
         order: 1,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5),
         estimatedTime: 40,
-        timeSpent: 25
-      }
+        timeSpent: 25,
+      },
     });
     tasks.push(designTask);
 
@@ -603,7 +636,7 @@ async function seedTasks(projects, users) {
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5),
         estimatedTime: 16,
         timeSpent: 14,
-        completed: true
+        completed: true,
       },
       {
         title: 'Create high-fidelity mockups',
@@ -616,14 +649,13 @@ async function seedTasks(projects, users) {
         order: 2,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2),
         estimatedTime: 24,
-        timeSpent: 11
-      }
+        timeSpent: 11,
+      },
     ];
 
     for (const subtaskData of designSubtasks) {
       const subtask = await prisma.task.create({ data: subtaskData });
       tasks.push(subtask);
-
     }
 
     // Create more parent tasks
@@ -637,8 +669,8 @@ async function seedTasks(projects, users) {
         statusId: todoStatus?.id,
         order: 2,
         estimatedTime: 80,
-        timeSpent: 0
-      }
+        timeSpent: 0,
+      },
     });
     tasks.push(developmentTask);
 
@@ -652,12 +684,10 @@ async function seedTasks(projects, users) {
         statusId: todoStatus?.id,
         order: 3,
         estimatedTime: 30,
-        timeSpent: 0
-      }
+        timeSpent: 0,
+      },
     });
     tasks.push(contentTask);
-
-
   }
 
   // Mobile App Development project tasks
@@ -665,7 +695,7 @@ async function seedTasks(projects, users) {
   if (mobileProject) {
     const mobileStatuses = await prisma.projectStatus.findMany({
       where: { projectId: mobileProject.id },
-      orderBy: { order: 'asc' }
+      orderBy: { order: 'asc' },
     });
 
     const backlogStatus = mobileStatuses.find(s => s.name === 'Backlog');
@@ -684,8 +714,8 @@ async function seedTasks(projects, users) {
         order: 1,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3),
         estimatedTime: 20,
-        timeSpent: 15
-      }
+        timeSpent: 15,
+      },
     });
     tasks.push(requirementsTask);
 
@@ -699,8 +729,8 @@ async function seedTasks(projects, users) {
         statusId: backlogStatus?.id,
         order: 2,
         estimatedTime: 60,
-        timeSpent: 0
-      }
+        timeSpent: 0,
+      },
     });
     tasks.push(uiDesignTask);
 
@@ -714,8 +744,8 @@ async function seedTasks(projects, users) {
         statusId: backlogStatus?.id,
         order: 3,
         estimatedTime: 40,
-        timeSpent: 0
-      }
+        timeSpent: 0,
+      },
     });
     tasks.push(apiTask);
 
@@ -730,12 +760,10 @@ async function seedTasks(projects, users) {
         order: 4,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1),
         estimatedTime: 16,
-        timeSpent: 4
-      }
+        timeSpent: 4,
+      },
     });
     tasks.push(testingTask);
-
-
   }
 
   return tasks;
@@ -743,8 +771,6 @@ async function seedTasks(projects, users) {
 
 // Seed task assignees
 async function seedTaskAssignees(tasks, users) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -760,7 +786,13 @@ async function seedTaskAssignees(tasks, users) {
   }
 
   const regularUsers = [usersByRole.software_developer, ...users.extraUsers].filter(Boolean);
-  const allUsers = [users.admin, users.manager, ...regularUsers, usersByRole.ui_ux_designer, usersByRole.qa_engineer].filter(Boolean);
+  const allUsers = [
+    users.admin,
+    users.manager,
+    ...regularUsers,
+    usersByRole.ui_ux_designer,
+    usersByRole.qa_engineer,
+  ].filter(Boolean);
 
   for (const task of tasks) {
     // Assign 1-3 users to each task
@@ -772,29 +804,26 @@ async function seedTaskAssignees(tasks, users) {
       await prisma.taskAssignee.create({
         data: {
           taskId: task.id,
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
-
     }
   }
 }
 
 // Seed comments
 async function seedComments(tasks, users) {
-
-
   const commentTemplates = [
     "I've started working on this task. Will update progress soon.",
-    "Need some clarification on the requirements. Can we discuss?",
-    "This is taking longer than expected due to some technical challenges.",
+    'Need some clarification on the requirements. Can we discuss?',
+    'This is taking longer than expected due to some technical challenges.',
     "I've completed the first part of this task. Moving on to the next step.",
-    "Just pushed my changes. Please review when you have a chance.",
-    "Found a bug that needs to be fixed before we can proceed.",
+    'Just pushed my changes. Please review when you have a chance.',
+    'Found a bug that needs to be fixed before we can proceed.',
     "Great progress so far! Let's keep up the momentum.",
-    "I suggest we change the approach slightly to improve performance.",
-    "This is now ready for testing. Let me know if you find any issues.",
-    "All requested changes have been implemented. This should be good to go."
+    'I suggest we change the approach slightly to improve performance.',
+    'This is now ready for testing. Let me know if you find any issues.',
+    'All requested changes have been implemented. This should be good to go.',
   ];
 
   // Map user job titles to keys
@@ -817,7 +846,7 @@ async function seedComments(tasks, users) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   for (const task of tasks) {
@@ -833,19 +862,15 @@ async function seedComments(tasks, users) {
           content: randomComment,
           taskId: task.id,
           userId: randomUser.id,
-          createdAt: new Date(Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000) // Random date within last week
-        }
+          createdAt: new Date(Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000), // Random date within last week
+        },
       });
     }
-
-
   }
 }
 
 // Seed attendance records
 async function seedAttendanceRecords(users, projects, tasks) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -867,7 +892,7 @@ async function seedAttendanceRecords(users, projects, tasks) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   const now = new Date();
@@ -905,9 +930,10 @@ async function seedAttendanceRecords(users, projects, tasks) {
         // Randomly assign to a project and task
         const randomProject = projects[Math.floor(Math.random() * projects.length)];
         const projectTasks = tasks.filter(t => t.projectId === randomProject.id);
-        const randomTask = projectTasks.length > 0 ?
-          projectTasks[Math.floor(Math.random() * projectTasks.length)] :
-          null;
+        const randomTask =
+          projectTasks.length > 0
+            ? projectTasks[Math.floor(Math.random() * projectTasks.length)]
+            : null;
 
         await prisma.attendance.create({
           data: {
@@ -926,19 +952,21 @@ async function seedAttendanceRecords(users, projects, tasks) {
             checkInLocationName: 'Office',
             checkOutLocationName: 'Office',
             projectId: randomProject.id,
-            taskId: randomTask?.id
-          }
+            taskId: randomTask?.id,
+          },
         });
       }
     }
-
-
   }
 
   // Create some attendance records with notes
   for (let i = 0; i < 10; i++) {
     const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
-    const adjustmentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - Math.floor(Math.random() * 30));
+    const adjustmentDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - Math.floor(Math.random() * 30)
+    );
 
     await prisma.attendance.create({
       data: {
@@ -948,16 +976,14 @@ async function seedAttendanceRecords(users, projects, tasks) {
         totalHours: 8,
         checkInLocationName: 'Office',
         checkOutLocationName: 'Office',
-        notes: 'Manual adjustment approved by HR'
-      }
+        notes: 'Manual adjustment approved by HR',
+      },
     });
   }
 }
 
 // Seed attendance settings
 async function seedAttendanceSettings(users) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -979,7 +1005,7 @@ async function seedAttendanceSettings(users) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   for (const user of allUsers) {
@@ -991,18 +1017,14 @@ async function seedAttendanceSettings(users) {
         reminderEnabled: Math.random() > 0.3,
         reminderTime: '09:00',
         autoCheckoutEnabled: Math.random() > 0.7,
-        autoCheckoutTime: '17:30'
-      }
+        autoCheckoutTime: '17:30',
+      },
     });
-
-
   }
 }
 
 // Seed events
 async function seedEvents(projects) {
-
-
   const now = new Date();
   const eventTypes = [
     'Team Meeting',
@@ -1013,7 +1035,7 @@ async function seedEvents(projects) {
     'Milestone',
     'Deployment',
     'Design Review',
-    'Kickoff Meeting'
+    'Kickoff Meeting',
   ];
 
   for (const project of projects) {
@@ -1031,19 +1053,15 @@ async function seedEvents(projects) {
           title: `${project.title} - ${eventType}`,
           description: `${eventType} for ${project.title} project`,
           date: eventDate,
-          projectId: project.id
-        }
+          projectId: project.id,
+        },
       });
     }
-
-
   }
 }
 
 // Seed documents
 async function seedDocuments(users) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -1065,7 +1083,7 @@ async function seedDocuments(users) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   const documentTypes = [
@@ -1076,7 +1094,7 @@ async function seedDocuments(users) {
     { name: 'Project Plan', fileType: 'xlsx', fileSize: 512 * 1024 },
     { name: 'Budget Report', fileType: 'xlsx', fileSize: 256 * 1024 },
     { name: 'Meeting Minutes', fileType: 'docx', fileSize: 128 * 1024 },
-    { name: 'Research Findings', fileType: 'pptx', fileSize: 4096 * 1024 }
+    { name: 'Research Findings', fileType: 'pptx', fileSize: 4096 * 1024 },
   ];
 
   for (const user of allUsers) {
@@ -1093,19 +1111,15 @@ async function seedDocuments(users) {
           fileType: docTemplate.fileType,
           fileSize: docTemplate.fileSize,
           filePath: `/uploads/documents/${Date.now()}_${docTemplate.name.toLowerCase().replace(/\s+/g, '-')}.${docTemplate.fileType}`,
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
     }
-
-
   }
 }
 
 // Seed activities
 async function seedActivities(users, projects, tasks) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -1127,7 +1141,7 @@ async function seedActivities(users, projects, tasks) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   // Create project creation activities
@@ -1140,8 +1154,8 @@ async function seedActivities(users, projects, tasks) {
         description: `created project "${project.title}"`,
         userId: project.createdById,
         projectId: project.id,
-        createdAt: project.createdAt
-      }
+        createdAt: project.createdAt,
+      },
     });
   }
 
@@ -1157,8 +1171,8 @@ async function seedActivities(users, projects, tasks) {
         userId: allUsers[Math.floor(Math.random() * allUsers.length)].id,
         projectId: task.projectId,
         taskId: task.id,
-        createdAt: task.createdAt
-      }
+        createdAt: task.createdAt,
+      },
     });
 
     // Create task update activities (50% chance)
@@ -1175,8 +1189,8 @@ async function seedActivities(users, projects, tasks) {
           userId: allUsers[Math.floor(Math.random() * allUsers.length)].id,
           projectId: task.projectId,
           taskId: task.id,
-          createdAt: updateDate
-        }
+          createdAt: updateDate,
+        },
       });
     }
 
@@ -1195,19 +1209,15 @@ async function seedActivities(users, projects, tasks) {
           userId: randomUser.id,
           projectId: task.projectId,
           taskId: task.id,
-          createdAt: completeDate
-        }
+          createdAt: completeDate,
+        },
       });
     }
   }
-
-
 }
 
 // Seed task attachments
 async function seedTaskAttachments(tasks, users) {
-
-
   // Map user job titles to keys
   const usersByRole = {};
   for (const [key, user] of Object.entries(users)) {
@@ -1229,7 +1239,7 @@ async function seedTaskAttachments(tasks, users) {
     usersByRole.software_developer,
     usersByRole.ui_ux_designer,
     usersByRole.qa_engineer,
-    ...users.extraUsers
+    ...users.extraUsers,
   ].filter(Boolean);
 
   const attachmentTypes = [
@@ -1238,7 +1248,7 @@ async function seedTaskAttachments(tasks, users) {
     { name: 'Code Snippet', fileType: 'js', fileSize: 10 * 1024 },
     { name: 'Test Results', fileType: 'pdf', fileSize: 1024 * 1024 },
     { name: 'Mockup', fileType: 'jpg', fileSize: 1536 * 1024 },
-    { name: 'Documentation', fileType: 'pdf', fileSize: 768 * 1024 }
+    { name: 'Documentation', fileType: 'pdf', fileSize: 768 * 1024 },
   ];
 
   // Add attachments to 30% of tasks
@@ -1258,12 +1268,10 @@ async function seedTaskAttachments(tasks, users) {
             fileSize: attachmentType.fileSize,
             fileType: attachmentType.fileType,
             taskId: task.id,
-            userId: randomUser.id
-          }
+            userId: randomUser.id,
+          },
         });
       }
-
-
     }
   }
 }

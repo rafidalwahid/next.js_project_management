@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -30,7 +30,7 @@ const TaskContext = createContext<TaskContextType | null>(null);
 
 export function TaskProvider({
   children,
-  projectId
+  projectId,
 }: {
   children: React.ReactNode;
   projectId: string;
@@ -41,7 +41,7 @@ export function TaskProvider({
   const [isTasksLoading, setIsTasksLoading] = useState(true);
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [filters, setFilters] = useState<TaskFilters>({
-    search: "",
+    search: '',
     statusIds: [],
     assigneeIds: [],
     priority: null,
@@ -53,15 +53,15 @@ export function TaskProvider({
   const fetchStatuses = async () => {
     try {
       const response = await fetch(`/api/projects/${projectId}/statuses`);
-      if (!response.ok) throw new Error("Failed to fetch statuses");
+      if (!response.ok) throw new Error('Failed to fetch statuses');
       const data = await response.json();
       setStatuses(data.statuses || []);
     } catch (error) {
-      console.error("Error fetching statuses:", error);
+      console.error('Error fetching statuses:', error);
       toast({
-        title: "Error",
-        description: "Failed to load project statuses",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load project statuses',
+        variant: 'destructive',
       });
     }
   };
@@ -71,15 +71,15 @@ export function TaskProvider({
     try {
       setIsTasksLoading(true);
       const response = await fetch(`/api/tasks?projectId=${projectId}&limit=100`);
-      if (!response.ok) throw new Error("Failed to fetch tasks");
+      if (!response.ok) throw new Error('Failed to fetch tasks');
       const data = await response.json();
       setTasks(data.tasks || []);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error('Error fetching tasks:', error);
       toast({
-        title: "Error",
-        description: "Failed to load tasks",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load tasks',
+        variant: 'destructive',
       });
     } finally {
       setIsTasksLoading(false);
@@ -90,7 +90,7 @@ export function TaskProvider({
   const fetchUsers = async () => {
     try {
       const response = await fetch(`/api/team-management?projectId=${projectId}`);
-      if (!response.ok) throw new Error("Failed to fetch team members");
+      if (!response.ok) throw new Error('Failed to fetch team members');
       const data = await response.json();
 
       // Extract user data from team members
@@ -104,9 +104,9 @@ export function TaskProvider({
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch team members",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to fetch team members',
+        variant: 'destructive',
       });
     }
   };
@@ -114,11 +114,7 @@ export function TaskProvider({
   // Fetch all data
   const fetchData = async () => {
     setIsLoading(true);
-    await Promise.all([
-      fetchStatuses(),
-      fetchTasks(),
-      fetchUsers()
-    ]);
+    await Promise.all([fetchStatuses(), fetchTasks(), fetchUsers()]);
     setIsLoading(false);
   };
 
@@ -133,7 +129,11 @@ export function TaskProvider({
       }
 
       // Status filter
-      if (filters.statusIds.length > 0 && task.statusId && !filters.statusIds.includes(task.statusId)) {
+      if (
+        filters.statusIds.length > 0 &&
+        task.statusId &&
+        !filters.statusIds.includes(task.statusId)
+      ) {
         return false;
       }
 
@@ -162,29 +162,27 @@ export function TaskProvider({
   // Task operations
   const updateTask = async (taskId: string, data: Partial<Task>) => {
     // Optimistic update
-    setTasks(prev => prev.map(task =>
-      task.id === taskId ? { ...task, ...data } : task
-    ));
+    setTasks(prev => prev.map(task => (task.id === taskId ? { ...task, ...data } : task)));
 
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error("Failed to update task");
+      if (!response.ok) throw new Error('Failed to update task');
 
       toast({
-        title: "Task updated",
-        description: "Task has been updated successfully",
+        title: 'Task updated',
+        description: 'Task has been updated successfully',
       });
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error('Error updating task:', error);
       toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update task',
+        variant: 'destructive',
       });
       // Revert optimistic update on error
       await fetchTasks();
@@ -203,9 +201,7 @@ export function TaskProvider({
     // Update the task in the local state
     setTasks(prev => {
       // Create a new array with the task moved to its new position
-      const newTasks = prev.map(task =>
-        task.id === taskId ? { ...task, statusId } : task
-      );
+      const newTasks = prev.map(task => (task.id === taskId ? { ...task, statusId } : task));
 
       // If we're just reordering within the same status and have a target task,
       // we can also update the order optimistically
@@ -219,7 +215,7 @@ export function TaskProvider({
         // will be determined by the server)
         if (targetIndex !== -1) {
           // This is a simplified approach - in reality, the server will handle the actual ordering
-          console.log("Optimistically reordering tasks");
+          console.log('Optimistically reordering tasks');
         }
       }
 
@@ -229,20 +225,24 @@ export function TaskProvider({
     try {
       // If the status changed, update the task status
       if (isStatusChange) {
-        console.log("Updating task status:", { taskId, oldStatusId, newStatusId: statusId });
+        console.log('Updating task status:', { taskId, oldStatusId, newStatusId: statusId });
 
         const statusResponse = await fetch(`/api/tasks/${taskId}/status`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ statusId })
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statusId }),
         });
 
-        if (!statusResponse.ok) throw new Error("Failed to update task status");
+        if (!statusResponse.ok) throw new Error('Failed to update task status');
       }
 
       // If there's a target task or we're changing status, reorder
       if (targetTaskId || isStatusChange) {
-        console.log("Reordering task:", { taskId, targetTaskId, isSameParentReorder: !isStatusChange });
+        console.log('Reordering task:', {
+          taskId,
+          targetTaskId,
+          isSameParentReorder: !isStatusChange,
+        });
 
         await taskApi.reorderTask(
           taskId,
@@ -256,24 +256,24 @@ export function TaskProvider({
       // Show appropriate toast message
       if (isStatusChange) {
         toast({
-          title: "Task moved",
+          title: 'Task moved',
           description: `Task moved to ${statuses.find(s => s.id === statusId)?.name || 'new status'}`,
         });
       } else {
         toast({
-          title: "Task reordered",
-          description: "Task position updated",
+          title: 'Task reordered',
+          description: 'Task position updated',
         });
       }
 
       // Refresh to get the updated order
       await fetchTasks();
     } catch (error) {
-      console.error("Error moving task:", error);
+      console.error('Error moving task:', error);
       toast({
-        title: "Error",
-        description: "Failed to move task",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to move task',
+        variant: 'destructive',
       });
       // Revert optimistic update on error
       await fetchTasks();
@@ -286,28 +286,30 @@ export function TaskProvider({
     if (!task) return;
 
     // Optimistic update - just toggle the completed field
-    setTasks(prev => prev.map(t => {
-      if (t.id === taskId) {
-        // Toggle completed state
-        const newCompleted = !t.completed;
-        return {
-          ...t,
-          completed: newCompleted
-        };
-      }
-      return t;
-    }));
+    setTasks(prev =>
+      prev.map(t => {
+        if (t.id === taskId) {
+          // Toggle completed state
+          const newCompleted = !t.completed;
+          return {
+            ...t,
+            completed: newCompleted,
+          };
+        }
+        return t;
+      })
+    );
 
     try {
       // Use the toggle-completion endpoint
       const response = await fetch(`/api/tasks/${taskId}/toggle-completion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to update task");
+        throw new Error(errorData.error || 'Failed to update task');
       }
 
       // Get the updated task
@@ -315,18 +317,18 @@ export function TaskProvider({
       const isCompleted = data.task?.completed || false;
 
       toast({
-        title: `Task marked as ${isCompleted ? "completed" : "incomplete"}`,
-        description: "Task status updated successfully",
+        title: `Task marked as ${isCompleted ? 'completed' : 'incomplete'}`,
+        description: 'Task status updated successfully',
       });
 
       // Refresh tasks to ensure UI is in sync with server
       await fetchTasks();
     } catch (error) {
-      console.error("Error toggling task completion:", error);
+      console.error('Error toggling task completion:', error);
       toast({
-        title: "Error",
-        description: "Failed to update task status",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update task status',
+        variant: 'destructive',
       });
       // Revert optimistic update on error
       await fetchTasks();
@@ -339,21 +341,21 @@ export function TaskProvider({
 
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error("Failed to delete task");
+      if (!response.ok) throw new Error('Failed to delete task');
 
       toast({
-        title: "Task deleted",
-        description: "Task has been deleted successfully",
+        title: 'Task deleted',
+        description: 'Task has been deleted successfully',
       });
     } catch (error) {
-      console.error("Error deleting task:", error);
+      console.error('Error deleting task:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
       });
       // Revert optimistic update on error
       await fetchTasks();
@@ -363,26 +365,26 @@ export function TaskProvider({
   const updateTaskAssignees = async (taskId: string, assigneeIds: string[]) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assigneeIds })
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigneeIds }),
       });
 
-      if (!response.ok) throw new Error("Failed to update task assignees");
+      if (!response.ok) throw new Error('Failed to update task assignees');
 
       // Refresh tasks to get updated assignees
       await fetchTasks();
 
       toast({
-        title: "Assignees updated",
-        description: "Task assignees have been updated",
+        title: 'Assignees updated',
+        description: 'Task assignees have been updated',
       });
     } catch (error) {
-      console.error("Error updating assignees:", error);
+      console.error('Error updating assignees:', error);
       toast({
-        title: "Error",
-        description: "Failed to update assignees",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update assignees',
+        variant: 'destructive',
       });
     }
   };
@@ -390,25 +392,25 @@ export function TaskProvider({
   const createTask = async (data: any) => {
     try {
       const response = await fetch(`/api/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error("Failed to create task");
+      if (!response.ok) throw new Error('Failed to create task');
 
       // Refresh tasks
       await fetchTasks();
 
       toast({
-        title: "Task created",
-        description: "New task has been created",
+        title: 'Task created',
+        description: 'New task has been created',
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create task",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to create task',
+        variant: 'destructive',
       });
     }
   };
@@ -431,7 +433,7 @@ export function TaskProvider({
     const handleRefreshTasks = (event: any) => {
       // Check if this event is for our project
       if (event.detail?.projectId === projectId) {
-        console.log("TaskContext received refresh event for project:", projectId);
+        console.log('TaskContext received refresh event for project:', projectId);
         fetchTasks();
       }
     };
@@ -446,24 +448,26 @@ export function TaskProvider({
   }, [projectId]);
 
   return (
-    <TaskContext.Provider value={{
-      tasks,
-      statuses,
-      isLoading,
-      isTasksLoading,
-      filteredTasks,
-      filters,
-      setFilters,
-      refreshTasks: fetchTasks,
-      updateTask,
-      moveTask,
-      toggleTaskCompletion,
-      deleteTask,
-      updateTaskAssignees,
-      createTask,
-      editTask,
-      users,
-    }}>
+    <TaskContext.Provider
+      value={{
+        tasks,
+        statuses,
+        isLoading,
+        isTasksLoading,
+        filteredTasks,
+        filters,
+        setFilters,
+        refreshTasks: fetchTasks,
+        updateTask,
+        moveTask,
+        toggleTaskCompletion,
+        deleteTask,
+        updateTaskAssignees,
+        createTask,
+        editTask,
+        users,
+      }}
+    >
       {children}
     </TaskContext.Provider>
   );
@@ -472,7 +476,7 @@ export function TaskProvider({
 export function useTaskContext() {
   const context = useContext(TaskContext);
   if (!context) {
-    throw new Error("useTaskContext must be used within a TaskProvider");
+    throw new Error('useTaskContext must be used within a TaskProvider');
   }
   return context;
 }

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
 
 /**
  * API endpoint to get the complete permission matrix
@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
   try {
     // Check for middleware authorization header
     const authHeader = req.headers.get('authorization');
-    const isMiddlewareRequest = authHeader &&
+    const isMiddlewareRequest =
+      authHeader &&
       authHeader.startsWith('Bearer ') &&
       authHeader.split(' ')[1] === process.env.NEXTAUTH_SECRET;
 
@@ -19,10 +20,7 @@ export async function GET(req: NextRequest) {
     if (!isMiddlewareRequest) {
       const session = await getServerSession(authOptions);
       if (!session) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
 
@@ -36,8 +34,8 @@ export async function GET(req: NextRequest) {
     const rolePermissions = await prisma.rolePermission.findMany({
       include: {
         role: true,
-        permission: true
-      }
+        permission: true,
+      },
     });
 
     // Initialize matrix with empty arrays for each role

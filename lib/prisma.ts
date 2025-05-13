@@ -18,9 +18,10 @@ if (isServer) {
 
   // Configure Prisma Client options
   const prismaClientOptions: Prisma.PrismaClientOptions = {
-    log: process.env.NODE_ENV === 'development'
-      ? ['query', 'error', 'warn'] as Prisma.LogLevel[]
-      : ['error'] as Prisma.LogLevel[],
+    log:
+      process.env.NODE_ENV === 'development'
+        ? (['query', 'error', 'warn'] as Prisma.LogLevel[])
+        : (['error'] as Prisma.LogLevel[]),
     errorFormat: 'pretty',
   };
 
@@ -61,7 +62,7 @@ if (isServer) {
       }
       throw new Error(
         'PrismaClient is unable to run in this browser environment, or has been bundled for the browser. ' +
-        'If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report'
+          'If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report'
       );
     },
   });

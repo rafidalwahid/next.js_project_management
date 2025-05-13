@@ -17,8 +17,8 @@ export function useUserTasks() {
       revalidateOnMount: true,
       // Provide fallback data to avoid loading state
       fallbackData: {
-        tasks: []
-      }
+        tasks: [],
+      },
     }
   );
 
@@ -39,6 +39,6 @@ export function useUserTasks() {
     upcomingTasks,
     isLoading,
     isError: error,
-    refetch: () => mutate()
+    refetch: () => mutate(),
   };
 }

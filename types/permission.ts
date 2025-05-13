@@ -1,6 +1,6 @@
 /**
  * Permission System Types
- * 
+ *
  * This file contains all type definitions related to roles and permissions in the application.
  * Following Next.js 15 documentation standards for type definitions.
  */
@@ -80,13 +80,13 @@ export interface SystemRoleDefinition {
 /**
  * Permission Category
  */
-export type PermissionCategory = 
-  | 'dashboard' 
-  | 'user_management' 
-  | 'project_management' 
-  | 'task_management' 
-  | 'team_management' 
-  | 'attendance' 
+export type PermissionCategory =
+  | 'dashboard'
+  | 'user_management'
+  | 'project_management'
+  | 'task_management'
+  | 'team_management'
+  | 'attendance'
   | 'settings';
 
 /**

@@ -1,52 +1,52 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Clock, Calendar } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/components/ui/use-toast"
+import { useState, useEffect } from 'react';
+import { Clock, Calendar } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 
 export function AttendanceStats() {
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<any>(null)
-  const [period, setPeriod] = useState("month")
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [period, setPeriod] = useState('month');
 
   useEffect(() => {
-    fetchAttendanceStats()
-  }, [period])
+    fetchAttendanceStats();
+  }, [period]);
 
   const fetchAttendanceStats = async () => {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/attendance/stats?period=${period}`)
-      const data = await response.json()
+      setLoading(true);
+      const response = await fetch(`/api/attendance/stats?period=${period}`);
+      const data = await response.json();
 
       if (response.ok) {
-        setStats(data.stats)
+        setStats(data.stats);
       } else {
         toast({
-          title: "Error",
-          description: data.error || "Failed to load attendance statistics",
-          variant: "destructive",
-        })
+          title: 'Error',
+          description: data.error || 'Failed to load attendance statistics',
+          variant: 'destructive',
+        });
       }
     } catch (err) {
-      console.error("Error fetching attendance stats:", err)
+      console.error('Error fetching attendance stats:', err);
       toast({
-        title: "Error",
-        description: "Failed to load attendance statistics",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to load attendance statistics',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePeriodChange = (value: string) => {
-    setPeriod(value)
-  }
+    setPeriod(value);
+  };
 
   return (
     <div className="space-y-4">
@@ -54,10 +54,18 @@ export function AttendanceStats() {
         <h3 className="text-sm font-medium mb-3">Time Period</h3>
         <Tabs defaultValue="month" onValueChange={handlePeriodChange} className="w-full">
           <TabsList className="w-full grid grid-cols-4">
-            <TabsTrigger value="day" className="text-xs sm:text-sm">Today</TabsTrigger>
-            <TabsTrigger value="week" className="text-xs sm:text-sm">This Week</TabsTrigger>
-            <TabsTrigger value="month" className="text-xs sm:text-sm">This Month</TabsTrigger>
-            <TabsTrigger value="year" className="text-xs sm:text-sm">This Year</TabsTrigger>
+            <TabsTrigger value="day" className="text-xs sm:text-sm">
+              Today
+            </TabsTrigger>
+            <TabsTrigger value="week" className="text-xs sm:text-sm">
+              This Week
+            </TabsTrigger>
+            <TabsTrigger value="month" className="text-xs sm:text-sm">
+              This Month
+            </TabsTrigger>
+            <TabsTrigger value="year" className="text-xs sm:text-sm">
+              This Year
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -68,9 +76,13 @@ export function AttendanceStats() {
           <div className="bg-black text-white p-3">
             <h3 className="text-sm font-medium">Field Attendance Summary</h3>
             <p className="text-xs text-white/70">
-              {period === "day" ? "Today" :
-               period === "week" ? "This week" :
-               period === "month" ? "This month" : "This year"}
+              {period === 'day'
+                ? 'Today'
+                : period === 'week'
+                  ? 'This week'
+                  : period === 'month'
+                    ? 'This month'
+                    : 'This year'}
             </p>
           </div>
           <CardContent className="p-4">
@@ -145,9 +157,13 @@ export function AttendanceStats() {
               {loading ? <Skeleton className="h-8 w-20" /> : `${stats?.totalHours || 0}h`}
             </div>
             <p className="text-xs text-muted-foreground">
-              {period === "day" ? "Today" :
-               period === "week" ? "This week" :
-               period === "month" ? "This month" : "This year"}
+              {period === 'day'
+                ? 'Today'
+                : period === 'week'
+                  ? 'This week'
+                  : period === 'month'
+                    ? 'This month'
+                    : 'This year'}
             </p>
           </CardContent>
         </Card>
@@ -204,5 +220,5 @@ export function AttendanceStats() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

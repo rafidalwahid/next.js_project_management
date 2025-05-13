@@ -7,60 +7,60 @@ const prisma = new PrismaClient();
 // Define all available permissions
 const PERMISSIONS = {
   // User management
-  USER_MANAGEMENT: "user_management",
-  MANAGE_ROLES: "manage_roles",
-  MANAGE_PERMISSIONS: "manage_permissions",
+  USER_MANAGEMENT: 'user_management',
+  MANAGE_ROLES: 'manage_roles',
+  MANAGE_PERMISSIONS: 'manage_permissions',
 
   // Project management
-  PROJECT_CREATION: "project_creation",
-  PROJECT_MANAGEMENT: "project_management",
-  PROJECT_DELETION: "project_deletion",
+  PROJECT_CREATION: 'project_creation',
+  PROJECT_MANAGEMENT: 'project_management',
+  PROJECT_DELETION: 'project_deletion',
 
   // Team management
-  TEAM_MANAGEMENT: "team_management",
-  TEAM_ADD: "team_add",
-  TEAM_REMOVE: "team_remove",
-  TEAM_VIEW: "team_view",
+  TEAM_MANAGEMENT: 'team_management',
+  TEAM_ADD: 'team_add',
+  TEAM_REMOVE: 'team_remove',
+  TEAM_VIEW: 'team_view',
 
   // Task management
-  TASK_CREATION: "task_creation",
-  TASK_ASSIGNMENT: "task_assignment",
-  TASK_MANAGEMENT: "task_management",
-  TASK_DELETION: "task_deletion",
+  TASK_CREATION: 'task_creation',
+  TASK_ASSIGNMENT: 'task_assignment',
+  TASK_MANAGEMENT: 'task_management',
+  TASK_DELETION: 'task_deletion',
 
   // General permissions
-  VIEW_PROJECTS: "view_projects",
-  EDIT_PROFILE: "edit_profile",
-  SYSTEM_SETTINGS: "system_settings",
-  VIEW_DASHBOARD: "view_dashboard",
+  VIEW_PROJECTS: 'view_projects',
+  EDIT_PROFILE: 'edit_profile',
+  SYSTEM_SETTINGS: 'system_settings',
+  VIEW_DASHBOARD: 'view_dashboard',
 
   // Attendance
-  ATTENDANCE_MANAGEMENT: "attendance_management",
-  VIEW_TEAM_ATTENDANCE: "view_team_attendance",
+  ATTENDANCE_MANAGEMENT: 'attendance_management',
+  VIEW_TEAM_ATTENDANCE: 'view_team_attendance',
 };
 
 // Define system roles with additional metadata
 const SYSTEM_ROLES = {
   admin: {
-    name: "Administrator",
-    description: "Full access to all system features",
-    color: "bg-purple-500" // Purple
+    name: 'Administrator',
+    description: 'Full access to all system features',
+    color: 'bg-purple-500', // Purple
   },
   manager: {
-    name: "Manager",
-    description: "Can manage projects, tasks, and team members",
-    color: "bg-blue-500" // Blue
+    name: 'Manager',
+    description: 'Can manage projects, tasks, and team members',
+    color: 'bg-blue-500', // Blue
   },
   user: {
-    name: "User",
-    description: "Regular user with limited permissions",
-    color: "bg-green-500" // Green
+    name: 'User',
+    description: 'Regular user with limited permissions',
+    color: 'bg-green-500', // Green
   },
   guest: {
-    name: "Guest",
-    description: "View-only access to projects",
-    color: "bg-gray-500" // Gray
-  }
+    name: 'Guest',
+    description: 'View-only access to projects',
+    color: 'bg-gray-500', // Gray
+  },
 };
 
 // Define role-permission mappings
@@ -147,13 +147,13 @@ async function seedPermissions() {
         where: { name: value },
         update: {
           description,
-          category
+          category,
         },
         create: {
           name: value,
           description,
-          category
-        }
+          category,
+        },
       });
     }
     console.log('Permissions created successfully');
@@ -165,13 +165,13 @@ async function seedPermissions() {
         where: { name: key },
         update: {
           description: value.description,
-          color: value.color
+          color: value.color,
         },
         create: {
           name: key,
           description: value.description,
-          color: value.color
-        }
+          color: value.color,
+        },
       });
     }
     console.log('Roles created successfully');
@@ -181,7 +181,7 @@ async function seedPermissions() {
     for (const [role, permissions] of Object.entries(ROLE_PERMISSIONS)) {
       // Get the role ID
       const roleRecord = await prisma.role.findUnique({
-        where: { name: role }
+        where: { name: role },
       });
 
       if (!roleRecord) {
@@ -191,14 +191,14 @@ async function seedPermissions() {
 
       // Delete existing role permissions
       await prisma.rolePermission.deleteMany({
-        where: { roleId: roleRecord.id }
+        where: { roleId: roleRecord.id },
       });
 
       // Create new role permissions
       for (const permission of permissions) {
         // Get the permission ID
         const permissionRecord = await prisma.permission.findUnique({
-          where: { name: permission }
+          where: { name: permission },
         });
 
         if (!permissionRecord) {
@@ -210,8 +210,8 @@ async function seedPermissions() {
         await prisma.rolePermission.create({
           data: {
             roleId: roleRecord.id,
-            permissionId: permissionRecord.id
-          }
+            permissionId: permissionRecord.id,
+          },
         });
       }
     }
@@ -226,8 +226,7 @@ async function seedPermissions() {
 }
 
 // Run the seeding function
-seedPermissions()
-  .catch(e => {
-    console.error(e);
-    process.exit(1);
-  });
+seedPermissions().catch(e => {
+  console.error(e);
+  process.exit(1);
+});

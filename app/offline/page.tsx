@@ -1,66 +1,73 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { WifiOff, RefreshCw, Home, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useEffect, useState } from "react"
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { WifiOff, RefreshCw, Home, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
 function OfflineContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
-  )
+  );
 
   // Get the return URL from query params or use a default
-  const returnUrl = searchParams?.get('returnUrl') || '/attendance/dashboard'
+  const returnUrl = searchParams?.get('returnUrl') || '/attendance/dashboard';
 
   // Store the return URL in sessionStorage for persistence across page refreshes
   useEffect(() => {
     if (typeof window !== 'undefined' && returnUrl) {
-      sessionStorage.setItem('offlineReturnUrl', returnUrl)
+      sessionStorage.setItem('offlineReturnUrl', returnUrl);
     }
-  }, [returnUrl])
+  }, [returnUrl]);
 
   // Get the stored return URL or use the default
   const getReturnUrl = () => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('offlineReturnUrl') || '/attendance/dashboard'
+      return sessionStorage.getItem('offlineReturnUrl') || '/attendance/dashboard';
     }
-    return '/attendance/dashboard'
-  }
+    return '/attendance/dashboard';
+  };
 
   useEffect(() => {
     const handleOnline = () => {
-      setIsOnline(true)
+      setIsOnline(true);
       // Redirect after a short delay to allow the browser to establish connection
       setTimeout(() => {
-        const url = getReturnUrl()
-        console.log('Redirecting to:', url)
-        router.push(url)
-      }, 1500)
-    }
+        const url = getReturnUrl();
+        console.log('Redirecting to:', url);
+        router.push(url);
+      }, 1500);
+    };
 
     const handleOffline = () => {
-      setIsOnline(false)
-    }
+      setIsOnline(false);
+    };
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [router])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [router]);
 
   // Function to handle manual navigation
   const handleManualReturn = () => {
-    const url = getReturnUrl()
-    router.push(url)
-  }
+    const url = getReturnUrl();
+    router.push(url);
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-muted/20">
@@ -72,8 +79,8 @@ function OfflineContent() {
           <CardTitle className="text-xl">You're Offline</CardTitle>
           <CardDescription>
             {isOnline
-              ? "Connection restored! Redirecting you back..."
-              : "Your device is currently offline. Some features may be limited."}
+              ? 'Connection restored! Redirecting you back...'
+              : 'Your device is currently offline. Some features may be limited.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center text-sm text-muted-foreground">
@@ -110,11 +117,7 @@ function OfflineContent() {
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
           {!isOnline && (
-            <Button
-              variant="outline"
-              onClick={() => window.location.reload()}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={() => window.location.reload()} className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Try Again
             </Button>
@@ -135,31 +138,33 @@ function OfflineContent() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
 
 // Wrap the component with Suspense to handle useSearchParams
 export default function OfflinePage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center p-4 bg-muted/20">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <WifiOff className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <CardTitle className="text-xl">You're Offline</CardTitle>
-            <CardDescription>
-              Your device is currently offline. Some features may be limited.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p>Loading...</p>
-          </CardContent>
-        </Card>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-4 bg-muted/20">
+          <Card className="w-full max-w-md shadow-lg">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <WifiOff className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <CardTitle className="text-xl">You're Offline</CardTitle>
+              <CardDescription>
+                Your device is currently offline. Some features may be limited.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p>Loading...</p>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
       <OfflineContent />
     </Suspense>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
-import { PermissionService } from "@/lib/permissions/unified-permission-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { PermissionService } from '@/lib/permissions/unified-permission-service';
 
 // GET /api/roles - Get all roles
 export async function GET(req: NextRequest) {
@@ -9,10 +9,7 @@ export async function GET(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get all roles
@@ -35,19 +32,16 @@ export async function POST(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'manage_roles'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     // Parse request body
@@ -56,10 +50,7 @@ export async function POST(req: NextRequest) {
 
     // Validate role data
     if (!name) {
-      return NextResponse.json(
-        { error: 'Role name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role name is required' }, { status: 400 });
     }
 
     // Create the role using the PermissionService
@@ -67,7 +58,7 @@ export async function POST(req: NextRequest) {
       const role = await PermissionService.createRole(name, description || `${name} role`);
       return NextResponse.json({
         message: 'Role created successfully',
-        role
+        role,
       });
     } catch (error: any) {
       return NextResponse.json(
@@ -90,19 +81,16 @@ export async function DELETE(req: NextRequest) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has permission to manage roles
-    const hasPermission = await PermissionService.hasPermissionById(session.user.id, "manage_roles");
+    const hasPermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'manage_roles'
+    );
     if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     // Get role name from query params
@@ -110,33 +98,24 @@ export async function DELETE(req: NextRequest) {
     const name = url.searchParams.get('name');
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Role name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Role name is required' }, { status: 400 });
     }
 
     // Delete the role using the PermissionService
     try {
       // Don't allow deleting built-in roles
       if (['admin', 'manager', 'user', 'guest'].includes(name)) {
-        return NextResponse.json(
-          { error: 'Cannot delete built-in roles' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Cannot delete built-in roles' }, { status: 400 });
       }
 
       const success = await PermissionService.deleteRole(name);
 
       if (!success) {
-        return NextResponse.json(
-          { error: 'Failed to delete role' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Failed to delete role' }, { status: 400 });
       }
 
       return NextResponse.json({
-        message: 'Role deleted successfully'
+        message: 'Role deleted successfully',
       });
     } catch (error: any) {
       return NextResponse.json(

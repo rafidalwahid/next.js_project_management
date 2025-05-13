@@ -1,150 +1,150 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Clock, Play, Pause, Save, Plus, Minus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/components/ui/spinner"
-import { formatDistanceToNow } from "date-fns"
+import { useState, useEffect } from 'react';
+import { Clock, Play, Pause, Save, Plus, Minus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
+import { formatDistanceToNow } from 'date-fns';
 
 interface TimeTrackerProps {
-  taskId: string
-  initialTimeSpent?: number | null
-  onTimeUpdate?: (newTime: number) => void
+  taskId: string;
+  initialTimeSpent?: number | null;
+  onTimeUpdate?: (newTime: number) => void;
 }
 
 export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: TimeTrackerProps) {
-  const [isTracking, setIsTracking] = useState(false)
-  const [timeSpent, setTimeSpent] = useState(initialTimeSpent || 0)
-  const [manualTime, setManualTime] = useState(timeSpent.toString())
-  const [startTime, setStartTime] = useState<Date | null>(null)
-  const [elapsedTime, setElapsedTime] = useState(0)
-  const [isSaving, setIsSaving] = useState(false)
-  const { toast } = useToast()
+  const [isTracking, setIsTracking] = useState(false);
+  const [timeSpent, setTimeSpent] = useState(initialTimeSpent || 0);
+  const [manualTime, setManualTime] = useState(timeSpent.toString());
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   // Initialize time spent when initialTimeSpent changes
   useEffect(() => {
-    setTimeSpent(initialTimeSpent || 0)
-    setManualTime((initialTimeSpent || 0).toString())
-  }, [initialTimeSpent])
+    setTimeSpent(initialTimeSpent || 0);
+    setManualTime((initialTimeSpent || 0).toString());
+  }, [initialTimeSpent]);
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: NodeJS.Timeout | null = null;
 
     if (isTracking && startTime) {
       interval = setInterval(() => {
-        const now = new Date()
-        const elapsed = (now.getTime() - startTime.getTime()) / 1000 / 60 / 60 // Convert to hours
-        setElapsedTime(elapsed)
-      }, 1000)
+        const now = new Date();
+        const elapsed = (now.getTime() - startTime.getTime()) / 1000 / 60 / 60; // Convert to hours
+        setElapsedTime(elapsed);
+      }, 1000);
     } else {
-      setElapsedTime(0)
+      setElapsedTime(0);
     }
 
     return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [isTracking, startTime])
+      if (interval) clearInterval(interval);
+    };
+  }, [isTracking, startTime]);
 
   const handleStartTracking = () => {
-    setStartTime(new Date())
-    setIsTracking(true)
-  }
+    setStartTime(new Date());
+    setIsTracking(true);
+  };
 
   const handleStopTracking = async () => {
-    if (!startTime) return
+    if (!startTime) return;
 
-    setIsTracking(false)
-    
-    const now = new Date()
-    const trackingTimeHours = (now.getTime() - startTime.getTime()) / 1000 / 60 / 60 // Convert to hours
-    const newTimeSpent = timeSpent + trackingTimeHours
-    
-    setTimeSpent(newTimeSpent)
-    setManualTime(newTimeSpent.toFixed(2))
-    setStartTime(null)
-    
+    setIsTracking(false);
+
+    const now = new Date();
+    const trackingTimeHours = (now.getTime() - startTime.getTime()) / 1000 / 60 / 60; // Convert to hours
+    const newTimeSpent = timeSpent + trackingTimeHours;
+
+    setTimeSpent(newTimeSpent);
+    setManualTime(newTimeSpent.toFixed(2));
+    setStartTime(null);
+
     // Save the updated time
-    await saveTimeToServer(newTimeSpent)
-  }
+    await saveTimeToServer(newTimeSpent);
+  };
 
   const handleManualTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setManualTime(e.target.value)
-  }
+    setManualTime(e.target.value);
+  };
 
   const handleManualTimeBlur = async () => {
-    const newTime = parseFloat(manualTime)
+    const newTime = parseFloat(manualTime);
     if (isNaN(newTime) || newTime < 0) {
-      setManualTime(timeSpent.toString())
-      return
+      setManualTime(timeSpent.toString());
+      return;
     }
-    
-    setTimeSpent(newTime)
-    
+
+    setTimeSpent(newTime);
+
     // Save the updated time
-    await saveTimeToServer(newTime)
-  }
+    await saveTimeToServer(newTime);
+  };
 
   const handleIncrement = async () => {
-    const newTime = timeSpent + 0.25 // Add 15 minutes (0.25 hours)
-    setTimeSpent(newTime)
-    setManualTime(newTime.toFixed(2))
-    
+    const newTime = timeSpent + 0.25; // Add 15 minutes (0.25 hours)
+    setTimeSpent(newTime);
+    setManualTime(newTime.toFixed(2));
+
     // Save the updated time
-    await saveTimeToServer(newTime)
-  }
+    await saveTimeToServer(newTime);
+  };
 
   const handleDecrement = async () => {
-    const newTime = Math.max(0, timeSpent - 0.25) // Subtract 15 minutes (0.25 hours), but not below 0
-    setTimeSpent(newTime)
-    setManualTime(newTime.toFixed(2))
-    
+    const newTime = Math.max(0, timeSpent - 0.25); // Subtract 15 minutes (0.25 hours), but not below 0
+    setTimeSpent(newTime);
+    setManualTime(newTime.toFixed(2));
+
     // Save the updated time
-    await saveTimeToServer(newTime)
-  }
+    await saveTimeToServer(newTime);
+  };
 
   const saveTimeToServer = async (newTime: number) => {
     try {
-      setIsSaving(true)
-      
+      setIsSaving(true);
+
       const response = await fetch(`/api/tasks/${taskId}/time`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           timeSpent: newTime,
           updateProjectTotal: true,
         }),
-      })
-      
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to update time")
+        throw new Error('Failed to update time');
       }
-      
+
       if (onTimeUpdate) {
-        onTimeUpdate(newTime)
+        onTimeUpdate(newTime);
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save time tracking data",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to save time tracking data',
+        variant: 'destructive',
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   // Format time as hours and minutes
   const formatTime = (timeInHours: number) => {
-    const hours = Math.floor(timeInHours)
-    const minutes = Math.round((timeInHours - hours) * 60)
-    return `${hours}h ${minutes}m`
-  }
+    const hours = Math.floor(timeInHours);
+    const minutes = Math.round((timeInHours - hours) * 60);
+    return `${hours}h ${minutes}m`;
+  };
 
   return (
     <Card>
@@ -159,16 +159,14 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">Total Time Spent</p>
-              <p className="text-2xl font-bold">
-                {formatTime(timeSpent + elapsedTime)}
-              </p>
+              <p className="text-2xl font-bold">{formatTime(timeSpent + elapsedTime)}</p>
               {isTracking && startTime && (
                 <p className="text-xs text-muted-foreground">
                   Started {formatDistanceToNow(startTime, { addSuffix: true })}
                 </p>
               )}
             </div>
-            
+
             <div>
               {!isTracking ? (
                 <Button onClick={handleStartTracking} size="sm">
@@ -183,17 +181,17 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
               )}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleDecrement}
               disabled={isTracking || timeSpent <= 0}
             >
               <Minus className="h-4 w-4" />
             </Button>
-            
+
             <div className="flex-1">
               <Input
                 type="number"
@@ -207,17 +205,12 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
               />
               <p className="text-xs text-center text-muted-foreground mt-1">Hours</p>
             </div>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleIncrement}
-              disabled={isTracking}
-            >
+
+            <Button variant="outline" size="icon" onClick={handleIncrement} disabled={isTracking}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          
+
           {isSaving && (
             <div className="flex justify-center">
               <Spinner size="sm" />
@@ -226,5 +219,5 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

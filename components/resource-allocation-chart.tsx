@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const data = [
-  { name: "Website Redesign", value: 35 },
-  { name: "Mobile App Development", value: 25 },
-  { name: "API Integration", value: 20 },
-  { name: "Internal Dashboard", value: 15 },
-  { name: "Product Launch", value: 5 },
-]
+  { name: 'Website Redesign', value: 35 },
+  { name: 'Mobile App Development', value: 25 },
+  { name: 'API Integration', value: 20 },
+  { name: 'Internal Dashboard', value: 15 },
+  { name: 'Product Launch', value: 5 },
+];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export function ResourceAllocationChart() {
   return (
@@ -31,10 +31,10 @@ export function ResourceAllocationChart() {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => `${value}%`} />
+          <Tooltip formatter={value => `${value}%`} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
