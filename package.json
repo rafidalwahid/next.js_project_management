@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && node scripts/update-edge-permissions.js && next build",
+    "build": "node scripts/build-fixed.js",
     "start": "next start",
     "server": "node server.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
