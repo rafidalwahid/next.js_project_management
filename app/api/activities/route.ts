@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+// Using singleton Prisma client to avoid initialization issues
 import prisma from '@/lib/prisma';
-import { ActivityWhereInput, PaginationParams, PaginationResult } from '@/types';
+import { ActivityWhereInput, PaginationResult } from '@/types';
 
 export async function GET(req: NextRequest) {
   try {
