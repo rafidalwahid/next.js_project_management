@@ -1,6 +1,12 @@
 // scripts/setup-db.js
-require('dotenv').config();
-const mysql = require('mysql2/promise');
+// Script to set up the database for the project
+/* eslint-disable no-console */
+
+import dotenv from 'dotenv';
+import mysql from 'mysql2/promise';
+
+// Load environment variables
+dotenv.config();
 
 async function main() {
   console.log('Setting up database...');
@@ -58,4 +64,13 @@ async function main() {
   }
 }
 
-main();
+// Run the main function
+main()
+  .then(() => {
+    console.log('Database setup completed successfully');
+    process.exit(0);
+  })
+  .catch(error => {
+    console.error('Error setting up database:', error);
+    process.exit(1);
+  });

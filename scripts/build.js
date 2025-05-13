@@ -1,6 +1,5 @@
-#!/usr/bin/env node
-// scripts/build-with-fixes.js
-// Comprehensive build script with Prisma fixes for Node.js 22 compatibility
+// scripts/build.js
+// Unified build script for Next.js project with Prisma fixes for Node.js 22 compatibility
 /* eslint-disable no-console */
 
 import { spawn } from 'node:child_process';
@@ -199,174 +198,6 @@ async function fixPrismaImports() {
     }
 
     log(`Updated ${updatedCount} files`, colors.green);
-
-    // Specifically check and fix the activities route
-    const activitiesRoutePath = path.join(rootDir, 'app', 'api', 'activities', 'route.ts');
-
-    if (existsSync(activitiesRoutePath)) {
-      log(`Checking activities route at ${activitiesRoutePath}`, colors.cyan);
-      let content = await fs.readFile(activitiesRoutePath, 'utf8');
-
-      // Ensure it has the correct prisma import
-      if (!content.includes("import prisma from '@/lib/prisma';")) {
-        log('Adding prisma import to activities route', colors.yellow);
-
-        // Check if there are any imports
-        if (content.includes('import ')) {
-          // Add after the last import
-          const importLines = content.split('\n').filter(line => line.trim().startsWith('import '));
-          const lastImportLine = importLines[importLines.length - 1];
-          content = content.replace(
-            lastImportLine,
-            `${lastImportLine}\nimport prisma from '@/lib/prisma';`
-          );
-        } else {
-          // Add at the beginning of the file
-          content = `import prisma from '@/lib/prisma';\n${content}`;
-        }
-      }
-
-      // Remove any direct PrismaClient imports
-      if (content.includes("import { PrismaClient }")) {
-        log('Removing direct PrismaClient import from activities route', colors.yellow);
-        content = content.replace(
-          /import\s+{\s*PrismaClient\s*}\s+from\s+['"]@prisma\/client['"]/g,
-          '// Using singleton Prisma client from @/lib/prisma'
-        );
-      }
-
-      // Write the fixed content back
-      await fs.writeFile(activitiesRoutePath, content, 'utf8');
-      log('Fixed activities route', colors.green);
-    } else {
-      log('Activities route not found', colors.yellow);
-
-      // Create the activities route directory if it doesn't exist
-      const activitiesDir = path.join(rootDir, 'app', 'api', 'activities');
-      if (!existsSync(activitiesDir)) {
-        log('Creating activities route directory', colors.yellow);
-        await fs.mkdir(activitiesDir, { recursive: true });
-      }
-
-      // Create a basic activities route file
-      log('Creating basic activities route file', colors.yellow);
-      const basicActivitiesRoute = `import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import prisma from '@/lib/prisma';
-
-export async function GET(req: NextRequest) {
-  try {
-    // Get the authenticated user
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Get query parameters
-    const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const skip = (page - 1) * limit;
-    const projectId = url.searchParams.get('projectId');
-    const userId = url.searchParams.get('userId');
-
-    // Build the where clause
-    const where = {};
-
-    // Filter by project if provided
-    if (projectId) {
-      where.projectId = projectId;
-    }
-
-    // Filter by user if provided
-    if (userId) {
-      where.userId = userId;
-    }
-
-    // Get activities
-    const activities = await prisma.activity.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      skip,
-      take: limit,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          },
-        },
-        project: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        task: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-    });
-
-    // Get total count for pagination
-    const totalCount = await prisma.activity.count({
-      where,
-    });
-
-    // Create pagination result
-    const pagination = {
-      total: totalCount,
-      page,
-      limit,
-      totalPages: Math.ceil(totalCount / limit),
-    };
-
-    return NextResponse.json({
-      activities,
-      pagination,
-    });
-  } catch (error) {
-    console.error('Get activities error:', error);
-    return NextResponse.json({ error: 'Failed to retrieve activities' }, { status: 500 });
-  }
-}`;
-
-      await fs.writeFile(activitiesRoutePath, basicActivitiesRoute, 'utf8');
-      log('Created basic activities route file', colors.green);
-    }
-
-    // Also ensure the client-side activities page exists
-    const activitiesPagePath = path.join(rootDir, 'app', 'activities', 'page.tsx');
-    if (!existsSync(activitiesPagePath)) {
-      log('Creating activities page', colors.yellow);
-
-      // Create the directory if it doesn't exist
-      const activitiesPageDir = path.join(rootDir, 'app', 'activities');
-      if (!existsSync(activitiesPageDir)) {
-        await fs.mkdir(activitiesPageDir, { recursive: true });
-      }
-
-      // Create a basic redirect page
-      const basicActivitiesPage = `import { redirect } from 'next/navigation';
-
-export default function ActivitiesPage() {
-  // Redirect to dashboard or another appropriate page
-  redirect('/dashboard');
-  return null;
-}`;
-
-      await fs.writeFile(activitiesPagePath, basicActivitiesPage, 'utf8');
-      log('Created activities page', colors.green);
-    }
-
     return true;
   } catch (error) {
     logError('Error fixing Prisma imports:', error);
@@ -376,7 +207,7 @@ export default function ActivitiesPage() {
 
 // Main build function
 async function build() {
-  log(`Starting build process with fixes...`, colors.bright);
+  log(`Starting build process...`, colors.bright);
   log(`Node.js version: ${process.version}`, colors.dim);
   log(`Current working directory: ${process.cwd()}`, colors.dim);
 

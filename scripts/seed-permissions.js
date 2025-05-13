@@ -1,7 +1,12 @@
 // scripts/seed-permissions.js
 // Script to seed the database with roles and permissions
 
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
 const prisma = new PrismaClient();
 
 // Define all available permissions
@@ -226,7 +231,12 @@ async function seedPermissions() {
 }
 
 // Run the seeding function
-seedPermissions().catch(e => {
-  console.error(e);
-  process.exit(1);
-});
+seedPermissions()
+  .then(success => {
+    console.log('Permission seeding completed successfully');
+    process.exit(0);
+  })
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
+  });

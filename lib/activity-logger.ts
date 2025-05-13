@@ -10,6 +10,13 @@ export async function logActivity(params: ActivityLogParams): Promise<any | null
   const { userId, action, entityType, entityId, description, projectId, taskId } = params;
 
   try {
+    // Validate required parameters
+    if (!userId || !action || !entityType || !entityId) {
+      console.warn('Activity logging failed: Missing required parameters', { params });
+      return null;
+    }
+
+    // Create the activity record
     const activity = await prisma.activity.create({
       data: {
         userId,
@@ -25,6 +32,7 @@ export async function logActivity(params: ActivityLogParams): Promise<any | null
     return activity;
   } catch (error) {
     // Don't throw the error - logging should never break the main functionality
+    console.error('Activity logging failed:', error, { params });
     return null;
   }
 }
@@ -66,6 +74,7 @@ export async function getUserActivities(
 
     return activities;
   } catch (error) {
+    console.error('Error fetching user activities:', error, { userId });
     return [];
   }
 }
@@ -109,6 +118,7 @@ export async function getProjectActivities(
 
     return activities;
   } catch (error) {
+    console.error('Error fetching project activities:', error, { projectId });
     return [];
   }
 }
@@ -161,6 +171,7 @@ export async function getEntityActivities(
 
     return activities;
   } catch (error) {
+    console.error('Error fetching entity activities:', error, { entityType, entityId });
     return [];
   }
 }

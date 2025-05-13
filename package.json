@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build-fixed.js",
+    "build": "node scripts/build.js",
     "start": "next start",
     "server": "node server.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
@@ -16,11 +16,12 @@
     "setup-db": "node scripts/setup-db.js",
     "seed": "node scripts/seed.js",
     "seed-permissions": "node scripts/seed-permissions.js",
-    "update-edge-permissions": "node scripts/update-edge-permissions.js",
+    "update-edge-permissions": "node scripts/update-edge-permissions-fixed.js",
     "db-reset": "npm run setup-db && npx prisma migrate reset --force && npm run seed && npm run seed-permissions && npm run update-edge-permissions",
     "prisma:generate": "npx prisma generate",
     "postinstall": "npx prisma generate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate-db": "node scripts/validate-db.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

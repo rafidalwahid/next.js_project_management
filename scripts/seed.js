@@ -1,6 +1,14 @@
-// scripts/seed-unified.js
-const { PrismaClient } = require('@prisma/client');
-const { hash } = require('bcrypt');
+// scripts/seed.js
+// Script to seed the database with initial data
+/* eslint-disable no-console */
+
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
 const prisma = new PrismaClient();
 
 // Define permissions directly in this script to avoid importing TypeScript files
