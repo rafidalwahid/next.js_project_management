@@ -14,6 +14,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "type-check": "tsc --noEmit",
     "setup-db": "node scripts/setup-db.js",
+    "setup-production": "node scripts/setup-production.js",
     "seed": "node scripts/seed.js",
     "seed-permissions": "node scripts/seed-permissions.js",
     "update-edge-permissions": "node scripts/update-edge-permissions-fixed.js",
