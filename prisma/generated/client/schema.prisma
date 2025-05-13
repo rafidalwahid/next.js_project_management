@@ -9,27 +9,27 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String     @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String     @default("user")
-  active        Boolean    @default(true)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  lastLogin     DateTime?
-  bio           String?    @db.Text
-  department    String?
-  jobTitle      String?
-  location      String?
-  phone         String?
-  skills        String?    @db.Text
-  accounts      Account[]
-  activities    Activity[]
-
+  id                 String                        @id @default(cuid())
+  name               String?
+  email              String                        @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               String                        @default("user")
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  lastLogin          DateTime?
+  bio                String?                       @db.Text
+  department         String?
+  jobTitle           String?
+  location           String?
+  phone              String?
+  skills             String?                       @db.Text
+  active             Boolean                       @default(true)
+  accounts           Account[]
+  activities         Activity[]
   attendanceRecords  Attendance[]
+  correctionRequests AttendanceCorrectionRequest[]
   attendanceSettings AttendanceSettings?
   comments           Comment[]
   documents          Document[]
@@ -82,10 +82,6 @@ model VerificationToken {
   @@map("verificationtoken")
 }
 
-// Role and permission models have been removed in favor of a simplified role system
-// The User model still has a 'role' field with values like 'admin', 'manager', 'user'
-// Permissions are now managed through code in lib/permissions/permission-system.ts
-
 model Project {
   id             String          @id @default(cuid())
   title          String
@@ -111,17 +107,18 @@ model Project {
 }
 
 model ProjectStatus {
-  id          String   @id @default(cuid())
-  name        String
-  color       String?
-  description String?
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  order       Int      @default(0)
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tasks       Task[]
+  id                String   @id @default(cuid())
+  name              String
+  color             String?
+  description       String?
+  isDefault         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  order             Int      @default(0)
+  projectId         String
+  isCompletedStatus Boolean  @default(false)
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks             Task[]
 
   @@unique([projectId, name])
   @@index([projectId])
@@ -139,12 +136,12 @@ model Task {
   order         Int              @default(0)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  completed     Boolean          @default(false)
   endDate       DateTime?
   estimatedTime Float?
   startDate     DateTime?
   statusId      String?
   timeSpent     Float?
+  completed     Boolean          @default(false)
   activities    Activity[]
   attendances   Attendance[]
   comments      Comment[]
@@ -207,9 +204,9 @@ model Event {
 }
 
 model Attendance {
-  id                   String    @id @default(cuid())
+  id                   String                        @id @default(cuid())
   userId               String
-  checkInTime          DateTime  @default(now())
+  checkInTime          DateTime                      @default(now())
   checkOutTime         DateTime?
   checkInLatitude      Float?
   checkInLongitude     Float?
@@ -217,19 +214,21 @@ model Attendance {
   checkOutLongitude    Float?
   checkInIpAddress     String?
   checkOutIpAddress    String?
-  checkInDeviceInfo    String?   @db.Text
-  checkOutDeviceInfo   String?   @db.Text
+  checkInDeviceInfo    String?                       @db.Text
+  checkOutDeviceInfo   String?                       @db.Text
   totalHours           Float?
-  notes                String?   @db.Text
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  checkInLocationName  String?   @db.Text
-  checkOutLocationName String?   @db.Text
+  notes                String?                       @db.Text
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @updatedAt
+  checkInLocationName  String?                       @db.Text
+  checkOutLocationName String?                       @db.Text
   projectId            String?
   taskId               String?
-  project              Project?  @relation(fields: [projectId], references: [id])
-  task                 Task?     @relation(fields: [taskId], references: [id])
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  autoCheckout         Boolean                       @default(false)
+  project              Project?                      @relation(fields: [projectId], references: [id])
+  task                 Task?                         @relation(fields: [taskId], references: [id])
+  user                 User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  correctionRequests   AttendanceCorrectionRequest[]
 
   @@index([userId])
   @@index([projectId])
@@ -292,6 +291,30 @@ model Document {
   @@map("document")
 }
 
+model AttendanceCorrectionRequest {
+  id                    String     @id @default(cuid())
+  attendanceId          String
+  userId                String
+  originalCheckInTime   DateTime
+  originalCheckOutTime  DateTime?
+  requestedCheckInTime  DateTime
+  requestedCheckOutTime DateTime?
+  reason                String     @db.Text
+  status                String     @default("pending")
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?    @db.Text
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  attendance            Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([attendanceId])
+  @@index([userId])
+  @@index([status])
+  @@map("attendance_correction_request")
+}
+
 model Comment {
   id        String   @id @default(cuid())
   content   String   @db.Text
@@ -323,4 +346,43 @@ model TaskAttachment {
   @@index([taskId])
   @@index([userId])
   @@map("task_attachment")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  color       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+
+  @@map("role")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  category    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+
+  @@map("permission")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permission")
 }
