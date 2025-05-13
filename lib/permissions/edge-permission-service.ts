@@ -95,7 +95,7 @@ export class EdgePermissionService {
    * @param permission The permission to check
    * @returns True if the user has the permission, false otherwise
    */
-  static hasPermissionForToken(token: any, permission: string): boolean {
+  static hasPermissionForToken(token: { role?: string }, permission: string): boolean {
     try {
       if (!token || !token.role) {
         return false;
@@ -134,7 +134,7 @@ export class EdgePermissionService {
    * @param token The user's JWT token with role information
    * @returns An array of permission strings
    */
-  static getPermissionsForToken(token: any): string[] {
+  static getPermissionsForToken(token: { role?: string }): string[] {
     try {
       if (!token || !token.role) {
         return [];

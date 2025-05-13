@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "npx prisma generate && node scripts/update-edge-permissions.js && next build",
     "start": "next start",
+    "server": "node server.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",

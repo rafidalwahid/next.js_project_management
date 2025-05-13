@@ -1,9 +1,16 @@
 // scripts/update-edge-permissions.js
 // Script to update edge-permission-service.ts with current permission data from the database
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-const fs = require('fs');
-const path = require('path');
-const { PrismaClient } = require('@prisma/client');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { PrismaClient } from '@prisma/client';
+
+// Get the directory name using ES modules pattern
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
