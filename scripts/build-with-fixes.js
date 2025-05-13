@@ -51,12 +51,12 @@ function logSection(title) {
 function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
     log(`Running: ${colors.bright}${command} ${args.join(' ')}${colors.reset}`, colors.yellow);
-    
+
     const env = {
       ...process.env,
       ...options.env
     };
-    
+
     const childProcess = spawn(command, args, {
       stdio: 'inherit',
       shell: true,
@@ -91,23 +91,23 @@ async function fileExists(filePath) {
 // Function to fix Prisma imports in API routes
 async function fixPrismaImports() {
   logSection('Fixing Prisma Imports in API Routes');
-  
+
   try {
     // Find all route.ts files in the app directory
     const appDir = path.join(rootDir, 'app');
     log(`Scanning directory: ${appDir}`, colors.dim);
-    
+
     // Function to recursively find all route.ts files
     async function findRouteFiles(dir) {
       const routeFiles = [];
-      
+
       async function scan(directory) {
         const files = await fs.readdir(directory);
-        
+
         for (const file of files) {
           const filePath = path.join(directory, file);
           const stats = await fs.stat(filePath);
-          
+
           if (stats.isDirectory()) {
             await scan(filePath);
           } else if (file === 'route.ts' || file === 'route.js') {
@@ -115,22 +115,22 @@ async function fixPrismaImports() {
           }
         }
       }
-      
+
       await scan(dir);
       return routeFiles;
     }
-    
+
     const routeFiles = await findRouteFiles(appDir);
     log(`Found ${routeFiles.length} route files`, colors.green);
-    
+
     let updatedCount = 0;
-    
+
     // Function to update a route file
     async function updateRouteFile(filePath) {
       try {
         let content = await fs.readFile(filePath, 'utf8');
         let modified = false;
-        
+
         // Check for direct Prisma imports
         const directPrismaImport = /import\s+{\s*PrismaClient\s*}\s+from\s+['"]@prisma\/client['"]/g;
         if (directPrismaImport.test(content)) {
@@ -141,7 +141,7 @@ async function fixPrismaImports() {
           );
           modified = true;
         }
-        
+
         // Check for direct Prisma client instantiation
         const prismaInstantiation = /const\s+prisma\s*=\s*new\s+PrismaClient/g;
         if (prismaInstantiation.test(content)) {
@@ -152,14 +152,14 @@ async function fixPrismaImports() {
           );
           modified = true;
         }
-        
+
         // Check if the file already imports prisma from lib/prisma
         const hasPrismaImport = /import\s+prisma\s+from\s+['"]@\/lib\/prisma['"]/g.test(content);
-        
+
         // If the file doesn't have a prisma import but uses prisma, add the import
         if (!hasPrismaImport && content.includes('prisma.')) {
           log(`Adding prisma import to ${filePath}`, colors.yellow);
-          
+
           // Check if there are any imports
           if (content.includes('import ')) {
             // Add after the last import
@@ -173,22 +173,22 @@ async function fixPrismaImports() {
             // Add at the beginning of the file
             content = `import prisma from '@/lib/prisma';\n${content}`;
           }
-          
+
           modified = true;
         }
-        
+
         if (modified) {
           await fs.writeFile(filePath, content, 'utf8');
           return true;
         }
-        
+
         return false;
       } catch (error) {
         logError(`Error updating ${filePath}:`, error);
         return false;
       }
     }
-    
+
     // Update all route files
     for (const file of routeFiles) {
       const updated = await updateRouteFile(file);
@@ -197,20 +197,20 @@ async function fixPrismaImports() {
         log(`Updated ${file}`, colors.green);
       }
     }
-    
+
     log(`Updated ${updatedCount} files`, colors.green);
-    
+
     // Specifically check and fix the activities route
     const activitiesRoutePath = path.join(rootDir, 'app', 'api', 'activities', 'route.ts');
-    
+
     if (existsSync(activitiesRoutePath)) {
       log(`Checking activities route at ${activitiesRoutePath}`, colors.cyan);
       let content = await fs.readFile(activitiesRoutePath, 'utf8');
-      
+
       // Ensure it has the correct prisma import
       if (!content.includes("import prisma from '@/lib/prisma';")) {
         log('Adding prisma import to activities route', colors.yellow);
-        
+
         // Check if there are any imports
         if (content.includes('import ')) {
           // Add after the last import
@@ -225,7 +225,7 @@ async function fixPrismaImports() {
           content = `import prisma from '@/lib/prisma';\n${content}`;
         }
       }
-      
+
       // Remove any direct PrismaClient imports
       if (content.includes("import { PrismaClient }")) {
         log('Removing direct PrismaClient import from activities route', colors.yellow);
@@ -234,14 +234,14 @@ async function fixPrismaImports() {
           '// Using singleton Prisma client from @/lib/prisma'
         );
       }
-      
+
       // Write the fixed content back
       await fs.writeFile(activitiesRoutePath, content, 'utf8');
       log('Fixed activities route', colors.green);
     } else {
       log('Activities route not found', colors.yellow);
     }
-    
+
     return true;
   } catch (error) {
     logError('Error fixing Prisma imports:', error);
@@ -275,7 +275,7 @@ async function build() {
 
     // Step 4: Update edge permissions
     logSection('Updating Edge Permissions');
-    
+
     // Check if the update-edge-permissions-fixed.js file exists
     const edgePermissionsScript = path.join(rootDir, 'scripts', 'update-edge-permissions-fixed.js');
     if (await fileExists(edgePermissionsScript)) {
@@ -287,7 +287,9 @@ async function build() {
 
     // Step 5: Build Next.js application with NODE_OPTIONS to suppress warnings
     logSection('Building Next.js Application');
-    await runCommand('next', ['build'], {
+
+    // Use npx to run the local next installation
+    await runCommand('npx', ['next', 'build'], {
       env: {
         NODE_OPTIONS: '--no-warnings'
       }
