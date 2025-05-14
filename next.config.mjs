@@ -19,6 +19,7 @@ const nextConfig = {
   },
   typescript: {
     // Set to false once you've fixed all TypeScript errors
+    // For production, you should fix TypeScript errors and set this to false
     ignoreBuildErrors: true
   },
   images: {

@@ -60,18 +60,9 @@ app
     server.listen(port, err => {
       if (err) throw err;
 
-      // Create a .cpanel.yml file if it doesn't exist
-      // This helps with cPanel deployment
-      const cpanelConfigPath = path.join(__dirname, '.cpanel.yml');
-      if (!fs.existsSync(cpanelConfigPath)) {
-        const cpanelConfig = `---
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/username/public_html/
-    - /bin/cp -R * $DEPLOYPATH
-`;
-        fs.writeFileSync(cpanelConfigPath, cpanelConfig);
-      }
+      // PM2 is the preferred deployment method
+      // Log PM2 deployment instructions
+      console.log('> For PM2 deployment, use: pm2 start npm --name "project-management" -- start');
 
       // Log server start
       const address = server.address();
