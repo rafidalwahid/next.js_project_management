@@ -103,25 +103,26 @@ async function setupDatabase() {
     process.exit(1);
   }
 
-  const [, user, password, host, port, dbName] = matches;
-  
+  // Extract connection details from the regex match
+  const [, dbUser, dbPassword, dbHost, dbPort, dbName] = matches;
+
   log(`Database connection details:`, colors.dim);
-  log(`- Host: ${host}`, colors.dim);
-  log(`- Port: ${port}`, colors.dim);
-  log(`- User: ${user}`, colors.dim);
+  log(`- Host: ${dbHost}`, colors.dim);
+  log(`- Port: ${dbPort}`, colors.dim);
+  log(`- User: ${dbUser}`, colors.dim);
   log(`- Database: ${dbName}`, colors.dim);
 
   try {
     // Create connection to MySQL server (without database)
     log('Connecting to MySQL server...', colors.yellow);
     const connection = await mysql.createConnection({
-      host,
-      port,
-      user,
-      password: password || undefined, // Handle empty password
+      host: dbHost,
+      port: dbPort,
+      user: dbUser,
+      password: dbPassword || undefined, // Handle empty password
     });
 
-    log(`Connected to MySQL server at ${host}:${port}`, colors.green);
+    log(`Connected to MySQL server at ${dbHost}:${dbPort}`, colors.green);
 
     // Check if database exists
     const [rows] = await connection.execute(
@@ -171,7 +172,7 @@ async function runMigrations() {
       await fs.mkdir(migrationsDir, { recursive: true });
       log('Created migrations directory', colors.yellow);
     }
-    
+
     // Run prisma db push instead of migrate deploy (safer for production)
     await runCommand('npx', ['prisma', 'db', 'push', '--accept-data-loss']);
     log('Database schema pushed successfully', colors.green);
@@ -188,18 +189,18 @@ async function seedDatabase() {
   try {
     await runCommand('node', ['scripts/seed.js']);
     log('Database seeded successfully', colors.green);
-    
+
     // Run additional seed scripts if they exist
     if (existsSync(path.join(rootDir, 'scripts', 'seed-permissions.js'))) {
       await runCommand('node', ['scripts/seed-permissions.js']);
       log('Permissions seeded successfully', colors.green);
     }
-    
+
     if (existsSync(path.join(rootDir, 'scripts', 'update-edge-permissions-fixed.js'))) {
       await runCommand('node', ['scripts/update-edge-permissions-fixed.js']);
       log('Edge permissions updated successfully', colors.green);
     }
-    
+
     return true;
   } catch (error) {
     logError('Error seeding database:', error);
@@ -212,7 +213,7 @@ async function main() {
   log('Starting production setup...', colors.bright);
   log(`Node.js version: ${process.version}`, colors.dim);
   log(`Current working directory: ${process.cwd()}`, colors.dim);
-  
+
   try {
     // Step 1: Set up the database
     const dbSetup = await setupDatabase();
@@ -220,28 +221,28 @@ async function main() {
       logError('Database setup failed. Aborting.');
       process.exit(1);
     }
-    
+
     // Step 2: Generate Prisma client
     const prismaGenerated = await generatePrismaClient();
     if (!prismaGenerated) {
       logError('Prisma client generation failed. Aborting.');
       process.exit(1);
     }
-    
+
     // Step 3: Run database migrations
     const migrationsRun = await runMigrations();
     if (!migrationsRun) {
       logError('Database migrations failed. Aborting.');
       process.exit(1);
     }
-    
+
     // Step 4: Seed the database
     const databaseSeeded = await seedDatabase();
     if (!databaseSeeded) {
       logError('Database seeding failed. Aborting.');
       process.exit(1);
     }
-    
+
     logSection('Production Setup Completed Successfully');
     return true;
   } catch (error) {
