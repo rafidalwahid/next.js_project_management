@@ -1,4 +1,5 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+// Use the generated Prisma client from the custom path
+import { PrismaClient, Prisma } from '../prisma/generated/client';
 
 // Add prisma to the global type
 declare global {

@@ -5,9 +5,6 @@ import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/prisma';
 import { ActivityWhereInput, PaginationResult } from '@/types';
 
-// Force Prisma client to be fully initialized before use
-prisma.$connect();
-
 export async function GET(req: NextRequest) {
   try {
     // Get the authenticated user

@@ -2,10 +2,10 @@
   "name": "project_management",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "scripts": {
+  "type": "module",  "scripts": {
     "dev": "next dev",
-    "build": "node scripts/build.js",
+    "build": "node scripts/verify-prisma.js && node scripts/build.js",
+    "build:safe": "node scripts/build.js",
     "start": "next start",
     "start:pm2": "pm2 start npm --name \"project-management\" -- start",
     "start:custom": "node server.js",
@@ -107,6 +107,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
+    "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^9.26.0",
     "eslint-config-next": "^15.3.2",
     "eslint-config-prettier": "^10.1.5",

@@ -211,6 +211,9 @@ async function build() {
   log(`Node.js version: ${process.version}`, colors.dim);
   log(`Current working directory: ${process.cwd()}`, colors.dim);
 
+  // Create an array to track temporary files we'll need to clean up
+  const tempFiles = [];
+
   try {
     // Step 1: Clean up any previous build artifacts
     logSection('Cleaning Previous Build Artifacts');
@@ -250,6 +253,42 @@ async function build() {
       await runCommand('npm', ['install'], {});
     }
 
+    // Create a build environment script to ensure Prisma is properly initialized
+    const buildEnvScriptPath = path.join(rootDir, 'scripts', '.build-env.js');
+    // Add this file to our list of temporary files to clean up later
+    tempFiles.push(buildEnvScriptPath);
+    
+    log('Creating temporary build environment script...', colors.yellow);
+    await fs.writeFile(
+      buildEnvScriptPath,
+      `
+      // This is a temporary script to help with proper Prisma initialization
+      import { PrismaClient } from '../prisma/generated/client/index.js';
+      
+      // Create and connect to the Prisma client
+      const prisma = new PrismaClient();
+      
+      async function main() {
+        // Force connection to verify the client works
+        await prisma.$connect();
+        console.log('Prisma client successfully initialized and connected');
+        
+        // Disconnect properly
+        await prisma.$disconnect();
+        console.log('Prisma client disconnected');
+      }
+      
+      main().catch(e => {
+        console.error('Failed to initialize Prisma client:', e);
+        process.exit(1);
+      });
+      `
+    );
+    
+    // Run the build environment script
+    log('Verifying Prisma client initialization...', colors.yellow);
+    await runCommand('node', [buildEnvScriptPath]);
+    
     // Try to find the next executable directly in the local installation
     const nextBinPath = path.join(rootDir, 'node_modules', '.bin', 'next');
     
@@ -258,7 +297,12 @@ async function build() {
       log(`Found Next.js binary at ${nextBinPath}`, colors.green);
       await runCommand(nextBinPath, ['build'], {
         env: {
-          NODE_OPTIONS: '--no-warnings'
+          // Make sure NODE_ENV is production for the build
+          NODE_ENV: 'production',
+          // Add any other needed environment variables
+          NODE_OPTIONS: '--no-warnings',
+          // Ensure Prisma has the right path
+          PRISMA_CLIENT_ENGINE_TYPE: 'binary',
         }
       });
     } else {
@@ -289,6 +333,21 @@ async function build() {
     logSection('Build Failed');
     logError(error.message, error);
     return false;
+  } finally {
+    // Clean up any temporary files we created
+    if (tempFiles.length > 0) {
+      log('Cleaning up temporary build files...', colors.dim);
+      for (const tempFile of tempFiles) {
+        try {
+          if (await fileExists(tempFile)) {
+            await fs.unlink(tempFile);
+            log(`Removed temporary file: ${tempFile}`, colors.dim);
+          }
+        } catch (cleanupError) {
+          log(`Warning: Failed to clean up temporary file ${tempFile}: ${cleanupError.message}`, colors.yellow);
+        }
+      }
+    }
   }
 }
 

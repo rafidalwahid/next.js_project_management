@@ -1,7 +1,7 @@
 // lib/edge-prisma.ts
 // Edge-compatible Prisma client for middleware and edge functions
 
-import { PrismaClient } from '@prisma/client/edge';
+import { PrismaClient } from '../prisma/generated/client/edge';
 
 // Create a new PrismaClient instance for edge environments
 // This will use the edge runtime compatible version of Prisma

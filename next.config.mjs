@@ -2,14 +2,16 @@ let userConfig = undefined
 try {
   // try to import ESM first
   userConfig = await import('./v0-user-next.config.mjs')
-} catch (e) {
+} catch {
   try {
     // fallback to CJS import
     userConfig = await import("./v0-user-next.config");
-  } catch (innerError) {
+  } catch {
     // ignore error
   }
 }
+
+import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -47,8 +49,23 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config) => {
+  // Combined webpack configuration with Prisma path resolution
+  webpack: (config, { isServer }) => {
+    // Enable caching
     config.cache = true;
+    
+    // Handle Prisma client generation for server builds
+    if (isServer) {
+      config.resolve = {
+        ...config.resolve,
+        alias: {
+          ...config.resolve.alias,
+          '@prisma/client': path.resolve('./prisma/generated/client'),
+          '@prisma/client/edge': path.resolve('./prisma/generated/client/edge'),
+        }
+      };
+    }
+    
     return config;
   },
 }
