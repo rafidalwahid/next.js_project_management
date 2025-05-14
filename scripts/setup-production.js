@@ -93,6 +93,10 @@ async function setupDatabase() {
     process.exit(1);
   }
 
+  // Print the DATABASE_URL for debugging (masking the password)
+  const maskedUrl = dbUrl.replace(/(mysql:\/\/[^:]+:)([^@]*)(@.*)/, '$1*****$3');
+  log(`Using database URL: ${maskedUrl}`, colors.dim);
+
   // Parse the database URL to extract connection details
   const matches = dbUrl.match(/mysql:\/\/([^:]+):([^@]*)@([^:]+):(\d+)\/([^?]+)/);
 
@@ -106,20 +110,27 @@ async function setupDatabase() {
   // Extract connection details from the regex match
   const [, dbUser, dbPassword, dbHost, dbPort, dbName] = matches;
 
+  // Decode the password (it's URL encoded in the connection string)
+  const decodedPassword = decodeURIComponent(dbPassword);
+
   log(`Database connection details:`, colors.dim);
   log(`- Host: ${dbHost}`, colors.dim);
   log(`- Port: ${dbPort}`, colors.dim);
   log(`- User: ${dbUser}`, colors.dim);
   log(`- Database: ${dbName}`, colors.dim);
+  log(`- Password (encoded): ${dbPassword}`, colors.dim);
+  log(`- Password (decoded): ${decodedPassword}`, colors.dim);
 
   try {
     // Create connection to MySQL server (without database)
     log('Connecting to MySQL server...', colors.yellow);
+    log('Attempting connection with decoded password...', colors.yellow);
+
     const connection = await mysql.createConnection({
       host: dbHost,
-      port: dbPort,
+      port: parseInt(dbPort, 10),
       user: dbUser,
-      password: dbPassword || undefined, // Handle empty password
+      password: decodedPassword, // Use decoded password
     });
 
     log(`Connected to MySQL server at ${dbHost}:${dbPort}`, colors.green);
