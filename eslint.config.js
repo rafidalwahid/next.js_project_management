@@ -5,8 +5,7 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import prettierPlugin from 'eslint-plugin-prettier';
 
-export default [
-  eslint.configs.recommended,
+export default [  eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -16,6 +15,11 @@ export default [
       'react-hooks': reactHooksPlugin,
       prettier: prettierPlugin,
     },
+    // Define globals for script files
+    globals: {
+      console: 'readonly',
+      process: 'readonly',
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -24,8 +28,12 @@ export default [
           jsx: true,
         },
       },
-    },
-    rules: {
+    },    rules: {
+      // Script file exceptions
+      'scripts/**/*.js': {
+        'no-console': 'off',
+        'no-undef': 'off',
+      },
       // React rules
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
@@ -45,10 +53,8 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
 
       // Prettier rules
-      'prettier/prettier': ['warn'],
-
-      // General rules
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'prettier/prettier': ['warn'],      // General rules
+      'no-console': ['warn', { allow: ['log', 'warn', 'error', 'info'] }],
     },
     settings: {
       react: {
