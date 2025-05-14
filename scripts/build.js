@@ -244,12 +244,43 @@ async function build() {
     // Step 5: Build Next.js application with NODE_OPTIONS to suppress warnings
     logSection('Building Next.js Application');
 
-    // Use npx to run the local next installation
-    await runCommand('npx', ['next', 'build'], {
-      env: {
-        NODE_OPTIONS: '--no-warnings'
+    // Check if node_modules folder exists
+    if (!existsSync(path.join(rootDir, 'node_modules'))) {
+      log('node_modules directory not found. Installing dependencies first...', colors.yellow);
+      await runCommand('npm', ['install'], {});
+    }
+
+    // Try to find the next executable directly in the local installation
+    const nextBinPath = path.join(rootDir, 'node_modules', '.bin', 'next');
+    
+    // Check if the Next.js binary exists
+    if (existsSync(nextBinPath)) {
+      log(`Found Next.js binary at ${nextBinPath}`, colors.green);
+      await runCommand(nextBinPath, ['build'], {
+        env: {
+          NODE_OPTIONS: '--no-warnings'
+        }
+      });
+    } else {
+      // Fallback to npx with full path
+      log('Next.js binary not found in expected location, trying alternative approaches', colors.yellow);
+      
+      try {
+        log('Attempting to use node_modules/.bin/next', colors.dim);
+        await runCommand('node_modules/.bin/next', ['build'], {
+          env: {
+            NODE_OPTIONS: '--no-warnings'
+          }
+        });
+      } catch (error) {
+        log('Failed using node_modules/.bin/next, trying NPM directly', colors.yellow);
+        await runCommand('npm', ['exec', '--', 'next', 'build'], {
+          env: {
+            NODE_OPTIONS: '--no-warnings'
+          }
+        });
       }
-    });
+    }
     log('Next.js application built successfully', colors.green);
 
     logSection('Build Completed Successfully');
