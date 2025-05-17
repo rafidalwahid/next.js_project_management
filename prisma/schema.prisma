@@ -349,24 +349,24 @@ model TaskAttachment {
 }
 
 model Role {
-  id          String          @id @default(cuid())
-  name        String          @unique
+  id          String           @id @default(cuid())
+  name        String           @unique
   description String?
   color       String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   permissions RolePermission[]
 
   @@map("role")
 }
 
 model Permission {
-  id          String          @id @default(cuid())
-  name        String          @unique
+  id          String           @id @default(cuid())
+  name        String           @unique
   description String?
   category    String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   roles       RolePermission[]
 
   @@map("permission")
@@ -378,8 +378,8 @@ model RolePermission {
   permissionId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
   @@index([roleId])

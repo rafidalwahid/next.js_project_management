@@ -12,7 +12,6 @@ import {
   UserPlus,
   UsersRound,
   ShieldCheck,
-  ClipboardCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -47,13 +46,6 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       permission: 'edit_profile',
       // This is a core functionality that all users should have access to
       alwaysShow: true,
-    },
-    {
-      title: 'Team Attendance',
-      href: '/team/attendance',
-      icon: ClipboardCheck,
-      permission: 'view_team_attendance',
-      alwaysShow: false,
     },
     {
       title: 'Add Member',
