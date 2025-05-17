@@ -39,10 +39,8 @@ export class EdgePermissionService {
     "view_team_attendance"
   ],
   "manager": [
-    "user_management",
     "project_creation",
     "project_management",
-    "project_deletion",
     "team_management",
     "team_add",
     "team_remove",
@@ -54,7 +52,6 @@ export class EdgePermissionService {
     "view_projects",
     "edit_profile",
     "view_dashboard",
-    "attendance_management",
     "view_team_attendance"
   ],
   "user": [
@@ -66,8 +63,7 @@ export class EdgePermissionService {
     "team_view"
   ],
   "guest": [
-    "view_projects",
-    "view_dashboard"
+    "view_projects"
   ]
 }
 
