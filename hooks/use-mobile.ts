@@ -1,25 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useBreakpoints } from './use-breakpoints';
 
+/**
+ * Legacy hook for backward compatibility
+ * @deprecated Use useBreakpoints().isMobile instead
+ */
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Function to check if the screen is mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is the standard md breakpoint
-    };
-
-    // Initial check
-    checkMobile();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
+  const { isMobile } = useBreakpoints();
   return isMobile;
 }

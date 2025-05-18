@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { safeFormat } from '@/lib/utils/date-utils';
-import { Calendar, MoreHorizontal, Pencil, Trash, Check, Plus } from 'lucide-react';
+import { safeFormat } from '@/lib/utils/date';
+import { Calendar, MoreHorizontal, Pencil, Trash, Check, Plus, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,6 +23,7 @@ interface TaskCardProps {
   task: Task;
   isDragging?: boolean;
   dragHandleProps?: any;
+  showDragHandle?: boolean;
   onToggleComplete: (taskId: string) => void;
   onEdit?: (taskId: string) => void;
   onDelete?: (taskId: string) => void;
@@ -33,6 +34,7 @@ export function TaskCard({
   task,
   isDragging = false,
   dragHandleProps = {},
+  showDragHandle = true,
   onToggleComplete,
   onEdit,
   onDelete,
@@ -111,10 +113,21 @@ export function TaskCard({
     >
       {/* Header with title and actions */}
       <div className="flex justify-between items-start gap-1 xs:gap-2">
+        {showDragHandle && (
+          <div
+            className="drag-handle flex items-center cursor-grab active:cursor-grabbing touch-none mt-0.5 xs:mt-1 mr-0.5"
+            {...dragHandleProps}
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+          </div>
+        )}
+
         <div className="flex items-start gap-1 xs:gap-2 min-w-0 flex-1">
           <Checkbox
             checked={isCompleted}
-            onCheckedChange={() => onToggleComplete(task.id)}
+            onCheckedChange={() => {
+              onToggleComplete(task.id);
+            }}
             className="mt-0.5 xs:mt-1 shrink-0 h-4 w-4"
             aria-label={`Mark task "${task.title}" as ${isCompleted ? 'incomplete' : 'complete'}`}
           />
@@ -198,7 +211,11 @@ function TaskCardMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+        >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -259,7 +276,10 @@ export function AssigneeAvatars({
     <div className="flex items-center">
       <div className="flex -space-x-2 overflow-hidden">
         {assignees.slice(0, maxDisplay).map(assignee => (
-          <Avatar key={assignee.id} className="h-6 w-6 xs:h-7 xs:w-7 border border-black">
+          <Avatar
+            key={assignee.id}
+            className="h-6 w-6 xs:h-7 xs:w-7 border border-black"
+          >
             {assignee.user.image ? (
               <AvatarImage src={assignee.user.image} alt={assignee.user.name || 'Team member'} />
             ) : (
@@ -271,7 +291,9 @@ export function AssigneeAvatars({
         ))}
 
         {assignees.length > maxDisplay && (
-          <div className="flex items-center justify-center h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black bg-muted text-[10px] xs:text-xs font-medium">
+          <div
+            className="flex items-center justify-center h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black bg-muted text-[10px] xs:text-xs font-medium"
+          >
             +{assignees.length - maxDisplay}
           </div>
         )}

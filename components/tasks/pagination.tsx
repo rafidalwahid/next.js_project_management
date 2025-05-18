@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useBreakpoints } from '@/hooks/use-breakpoints';
 
 interface PaginationProps {
   currentPage: number;
@@ -11,24 +11,9 @@ interface PaginationProps {
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
-  // Check if we're on a small screen
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-
-  // Update screen size state on mount and resize
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 640); // sm breakpoint
-    };
-
-    // Initial check
-    checkScreenSize();
-
-    // Add resize listener
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  // Use the breakpoints hook to check screen size
+  const { isAtMost } = useBreakpoints();
+  const isSmallScreen = isAtMost('sm');
 
   // Generate page numbers to display
   const getPageNumbers = () => {

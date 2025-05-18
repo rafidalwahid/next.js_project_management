@@ -449,43 +449,34 @@ export const taskApi = {
     }
   },
 
-  reorderTask: async (
-    taskId: string,
-    newParentId: string | null,
-    oldParentId: string | null,
-    targetTaskId?: string,
-    isSameParentReorder?: boolean
-  ) => {
-    console.log('Calling reorderTask API with:', {
-      taskId,
-      newParentId,
-      oldParentId,
-      targetTaskId,
-      isSameParentReorder,
+  async reorderTasks(columnId: string, tasks: Task[]): Promise<void> {
+    const response = await fetch(`/api/columns/${columnId}/tasks/reorder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tasks }),
     });
 
-    // Add a small delay to ensure the UI updates before making the API call
-    // This helps with the perceived performance
-    if (isSameParentReorder) {
-      await new Promise(resolve => setTimeout(resolve, 50));
+    if (!response.ok) {
+      throw new Error('Failed to reorder tasks');
     }
+  },
 
-    try {
-      const result = await fetchAPI('/api/tasks/reorder', {
-        method: 'POST',
-        body: JSON.stringify({
-          taskId,
-          newParentId,
-          oldParentId,
-          targetTaskId,
-          isSameParentReorder,
-        }),
-      });
-      console.log('reorderTask API response:', result);
-      return result;
-    } catch (error) {
-      console.error('reorderTask API error:', error);
-      throw error;
+  async moveTask(taskId: string, sourceColumnId: string, targetColumnId: string): Promise<void> {
+    const response = await fetch(`/api/tasks/${taskId}/move`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sourceColumnId,
+        targetColumnId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to move task');
     }
   },
 };

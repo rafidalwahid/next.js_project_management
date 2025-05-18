@@ -117,30 +117,35 @@ export function TaskProvider({
     await Promise.all([fetchStatuses(), fetchTasks(), fetchUsers()]);
     setIsLoading(false);
   };
-
-  // Filter tasks based on current filters
+  // Filter tasks based on current filters with improved performance
   const filteredTasks = useMemo(() => {
     if (tasks.length === 0) return [];
 
+    // Create search terms for faster filtering
+    const searchLower = filters.search ? filters.search.toLowerCase() : '';
+    const statusSet = new Set(filters.statusIds);
+    const assigneeSet = new Set(filters.assigneeIds);
+
+    // Use a single pass through the array for all filters
     return tasks.filter(task => {
-      // Search filter
-      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+      // Search filter - only run this check if we have a search term
+      if (searchLower && !task.title.toLowerCase().includes(searchLower)) {
         return false;
       }
 
-      // Status filter
+      // Status filter - only run this check if we have status filters
       if (
-        filters.statusIds.length > 0 &&
+        statusSet.size > 0 &&
         task.statusId &&
-        !filters.statusIds.includes(task.statusId)
+        !statusSet.has(task.statusId)
       ) {
         return false;
       }
 
-      // Assignee filter
-      if (filters.assigneeIds.length > 0) {
+      // Assignee filter - only run this check if we have assignee filters
+      if (assigneeSet.size > 0) {
         const taskAssigneeIds = task.assignees?.map(a => a.user.id) || [];
-        if (!filters.assigneeIds.some(id => taskAssigneeIds.includes(id))) {
+        if (!taskAssigneeIds.some(id => assigneeSet.has(id))) {
           return false;
         }
       }
@@ -192,64 +197,85 @@ export function TaskProvider({
   const moveTask = async (taskId: string, statusId: string, targetTaskId?: string) => {
     // Find the task being moved
     const taskToMove = tasks.find(t => t.id === taskId);
-    if (!taskToMove) return;
+    if (!taskToMove) {
+      toast({
+        title: 'Error',
+        description: `Task with ID ${taskId} not found`,
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // Optimistic update
+    // Find the target status
+    const targetStatus = statuses.find(s => s.id === statusId);
+    if (!targetStatus) {
+      toast({
+        title: 'Error',
+        description: `Status with ID ${statusId} not found`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Store original state for potential rollback
+    const originalTasks = [...tasks];
+
+    // Determine if this is a status change
     const oldStatusId = taskToMove.statusId;
     const isStatusChange = oldStatusId !== statusId;
 
-    // Update the task in the local state
+    // Calculate order if we have a target task
+    let order: number | undefined = undefined;
+    if (targetTaskId) {
+      const targetTask = tasks.find(t => t.id === targetTaskId);
+      if (targetTask) {
+        // Use the target task's order as a reference
+        order = targetTask.order;
+      }
+    }
+
+    // Optimistic update in the UI
     setTasks(prev => {
       // Create a new array with the task moved to its new position
-      const newTasks = prev.map(task => (task.id === taskId ? { ...task, statusId } : task));
-
-      // If we're just reordering within the same status and have a target task,
-      // we can also update the order optimistically
-      if (!isStatusChange && targetTaskId) {
-        // This is a simplified version of the reordering logic
-        // A more accurate implementation would calculate proper order values
-        const tasksInStatus = newTasks.filter(t => t.statusId === statusId && t.id !== taskId);
-        const targetIndex = tasksInStatus.findIndex(t => t.id === targetTaskId);
-
-        // Reorder the tasks array (this is just for visual feedback, the actual order
-        // will be determined by the server)
-        if (targetIndex !== -1) {
-          // This is a simplified approach - in reality, the server will handle the actual ordering
-          console.log('Optimistically reordering tasks');
+      return prev.map(task => {
+        if (task.id === taskId) {
+          return {
+            ...task,
+            statusId,
+            // Also update the completed state based on the target status
+            completed: targetStatus.isCompletedStatus ?? task.completed
+          };
         }
-      }
-
-      return newTasks;
+        return task;
+      });
     });
 
     try {
-      // If the status changed, update the task status
+      // If the status changed, update the task status with proper order
       if (isStatusChange) {
-        console.log('Updating task status:', { taskId, oldStatusId, newStatusId: statusId });
-
         const statusResponse = await fetch(`/api/tasks/${taskId}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ statusId }),
+          body: JSON.stringify({
+            statusId,
+            order // Include order if we have it
+          }),
         });
 
-        if (!statusResponse.ok) throw new Error('Failed to update task status');
+        if (!statusResponse.ok) {
+          const errorData = await statusResponse.json().catch(() => ({ error: 'Failed to update task status' }));
+          throw new Error(errorData.error || 'Failed to update task status');
+        }
       }
-
-      // If there's a target task or we're changing status, reorder
-      if (targetTaskId || isStatusChange) {
-        console.log('Reordering task:', {
-          taskId,
-          targetTaskId,
-          isSameParentReorder: !isStatusChange,
-        });
-
+      // If just reordering within the same status
+      else if (targetTaskId) {
+        // Handle reordering within the same status
         await taskApi.reorderTask(
           taskId,
           null, // newParentId
           null, // oldParentId
-          targetTaskId, // targetTaskId
-          !isStatusChange // isSameParentReorder - true if we're not changing status
+          targetTaskId,
+          true // isSameParentReorder - true since we're not changing status
         );
       }
 
@@ -257,25 +283,33 @@ export function TaskProvider({
       if (isStatusChange) {
         toast({
           title: 'Task moved',
-          description: `Task moved to ${statuses.find(s => s.id === statusId)?.name || 'new status'}`,
+          description: `Task moved to ${targetStatus.name}`,
         });
-      } else {
+      } else if (targetTaskId) {
         toast({
           title: 'Task reordered',
           description: 'Task position updated',
         });
       }
 
-      // Refresh to get the updated order
+      // Refresh to get the updated order and ensure consistency
       await fetchTasks();
     } catch (error) {
-      console.error('Error moving task:', error);
+      // Detailed error handling
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      console.error('Error moving task:', errorMessage);
+
       toast({
         title: 'Error',
-        description: 'Failed to move task',
+        description: `Failed to move task: ${errorMessage}`,
         variant: 'destructive',
       });
-      // Revert optimistic update on error
+
+      // Revert to original state
+      setTasks(originalTasks);
+
+      // Refresh from server to ensure consistency
       await fetchTasks();
     }
   };
@@ -283,17 +317,35 @@ export function TaskProvider({
   const toggleTaskCompletion = async (taskId: string) => {
     // Find the task
     const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
+    if (!task) {
+      toast({
+        title: 'Error',
+        description: `Task with ID ${taskId} not found`,
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // Optimistic update - just toggle the completed field
+    // Store original state for potential rollback
+    const originalTasks = [...tasks];
+
+    // Optimistic update - toggle the completed field and potentially update status
+    const newCompleted = !task.completed;
+
+    // Find appropriate status based on new completion state
+    const targetStatus = statuses.find(s =>
+      s.isCompletedStatus === newCompleted &&
+      (s.isDefault || (!newCompleted && task.statusId === s.id))
+    );
+
     setTasks(prev =>
       prev.map(t => {
         if (t.id === taskId) {
-          // Toggle completed state
-          const newCompleted = !t.completed;
           return {
             ...t,
             completed: newCompleted,
+            // If we found an appropriate status, update it as well
+            statusId: targetStatus ? targetStatus.id : t.statusId,
           };
         }
         return t;
@@ -314,23 +366,34 @@ export function TaskProvider({
 
       // Get the updated task
       const data = await response.json();
-      const isCompleted = data.task?.completed || false;
+      const updatedTask = data.task;
 
+      // Show success message
       toast({
-        title: `Task marked as ${isCompleted ? 'completed' : 'incomplete'}`,
-        description: 'Task status updated successfully',
+        title: `Task marked as ${updatedTask.completed ? 'completed' : 'incomplete'}`,
+        description: updatedTask.status
+          ? `Task moved to "${updatedTask.status.name}" status`
+          : 'Task status updated successfully',
       });
 
       // Refresh tasks to ensure UI is in sync with server
       await fetchTasks();
     } catch (error) {
-      console.error('Error toggling task completion:', error);
+      // Detailed error handling
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      console.error('Error toggling task completion:', errorMessage);
+
       toast({
         title: 'Error',
-        description: 'Failed to update task status',
+        description: `Failed to update task: ${errorMessage}`,
         variant: 'destructive',
       });
-      // Revert optimistic update on error
+
+      // Revert to original state
+      setTasks(originalTasks);
+
+      // Refresh from server to ensure consistency
       await fetchTasks();
     }
   };

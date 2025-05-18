@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { formatDate } from '@/lib/utils/date-utils';
+import { formatDate } from '@/lib/utils/date';
 import type { UserProfile } from '@/hooks/use-user-profile';
 import {
   Dialog,

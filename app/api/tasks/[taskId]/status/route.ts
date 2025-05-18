@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth-options';
 import { PermissionService } from '@/lib/permissions/unified-permission-service';
 import { Task } from '@/types/task';
 import { ProjectStatus } from '@/types/project';
+import { updateTaskStatus } from '@/lib/utils/task-utils';
 
 // PATCH: Update a task's status
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ taskId: string }> }) {
@@ -56,6 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ta
     // Validate request body
     const schema = z.object({
       statusId: z.string(),
+      order: z.number().optional(), // Optional order parameter
     });
 
     const validationResult = schema.safeParse(body);
@@ -66,7 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ta
       );
     }
 
-    const { statusId } = validationResult.data;
+    const { statusId, order } = validationResult.data;
 
     // Verify the status exists and belongs to the task's project
     const status = await prisma.projectStatus.findFirst({
@@ -91,27 +93,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ta
         })
       : null;
 
-    // Update the task's status
-    const updatedTask = await prisma.task.update({
-      where: { id: taskId },
-      data: { statusId },
-      include: {
-        project: { select: { title: true } },
-        status: true,
-        assignees: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    // Use the updateTaskStatus utility function to ensure consistency
+    // between status and completion state, and handle ordering
+    const updatedTask = await updateTaskStatus(taskId, statusId, order);
 
     // Create activity record
     await prisma.activity.create({

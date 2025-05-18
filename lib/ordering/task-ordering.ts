@@ -48,7 +48,7 @@ export function calculateOrderBetween(
 ): number {
   // If inserting at the beginning
   if (beforeTaskOrder === null && afterTaskOrder !== null) {
-    return afterTaskOrder - ORDER_SPACING;
+    return Math.max(1, afterTaskOrder - ORDER_SPACING);
   }
 
   // If inserting at the end
@@ -58,6 +58,12 @@ export function calculateOrderBetween(
 
   // If inserting between two tasks
   if (beforeTaskOrder !== null && afterTaskOrder !== null) {
+    // Handle the case where the values are too close together
+    if (afterTaskOrder - beforeTaskOrder < 2) {
+      // Not enough space between tasks, return a value slightly higher than beforeTaskOrder
+      return beforeTaskOrder + 1;
+    }
+    
     return Math.floor((beforeTaskOrder + afterTaskOrder) / 2);
   }
 
@@ -74,31 +80,41 @@ export async function rebalanceTaskOrders(
   projectId: string,
   parentId: string | null
 ): Promise<void> {
-  // Get all tasks for the given parent, ordered by their current order
-  const tasks = await prisma.task.findMany({
-    where: {
-      projectId,
-      parentId: parentId || null,
-    },
-    orderBy: { order: 'asc' },
-    select: { id: true },
-  });
-
-  // If there are no tasks or just one task, no need to rebalance
-  if (tasks.length <= 1) {
-    return;
-  }
-
-  // Calculate new order values with even spacing
-  const updates = tasks.map((task, index) => {
-    return prisma.task.update({
-      where: { id: task.id },
-      data: { order: INITIAL_ORDER + index * ORDER_SPACING },
+  try {
+    // Get all tasks for the given parent, ordered by their current order
+    const tasks = await prisma.task.findMany({
+      where: {
+        projectId,
+        parentId: parentId || null,
+      },
+      orderBy: [
+        { order: 'asc' },
+        { createdAt: 'asc' }, // Secondary sort by creation date
+      ],
+      select: { id: true },
     });
-  });
 
-  // Execute all updates in a transaction
-  await prisma.$transaction(updates);
+    // If there are no tasks or just one task, no need to rebalance
+    if (tasks.length <= 1) {
+      return;
+    }
+
+    // Calculate new order values with even spacing
+    const updates = tasks.map((task, index) => {
+      return prisma.task.update({
+        where: { id: task.id },
+        data: { order: INITIAL_ORDER + index * ORDER_SPACING },
+      });
+    });
+
+    // Execute all updates in a transaction
+    await prisma.$transaction(updates);
+    
+    console.log(`Rebalanced ${tasks.length} tasks for project ${projectId}, parent ${parentId || 'none'}`);
+  } catch (error) {
+    console.error('Error rebalancing task orders:', error);
+    // Don't rethrow - we want to continue even if rebalancing fails
+  }
 }
 
 /**
@@ -118,7 +134,7 @@ export async function needsRebalancing(
       parentId: parentId || null,
     },
     orderBy: { order: 'asc' },
-    select: { order: true },
+    select: { id: true, order: true },
   });
 
   // If there are less than 2 tasks, no need to rebalance
@@ -126,10 +142,32 @@ export async function needsRebalancing(
     return false;
   }
 
+  // Check if any task has order = 0 (needs initialization)
+  const hasZeroOrderTask = tasks.some(task => task.order === 0);
+  if (hasZeroOrderTask) {
+    return true;
+  }
+
   // Check if any adjacent tasks have order values that are too close
   for (let i = 1; i < tasks.length; i++) {
     const diff = tasks[i].order - tasks[i - 1].order;
     if (diff < 2) {
+      return true;
+    }
+  }
+  
+  // Check if the spacing between tasks is highly irregular (some are very close, others far apart)
+  const diffs = [];
+  for (let i = 1; i < tasks.length; i++) {
+    diffs.push(tasks[i].order - tasks[i - 1].order);
+  }
+  
+  if (diffs.length > 1) {
+    const maxDiff = Math.max(...diffs);
+    const minDiff = Math.min(...diffs);
+    
+    // If the ratio between max and min diff is too high, we should rebalance
+    if (maxDiff / minDiff > 100) {
       return true;
     }
   }

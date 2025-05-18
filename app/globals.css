@@ -118,6 +118,28 @@
   body {
     font-family: Arial, Helvetica, sans-serif;
   }
+
+  /* Drag and drop styles */
+  .drag-handle {
+    cursor: grab;
+    touch-action: none;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+  }
+
+  .drag-handle:hover {
+    opacity: 1;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+    opacity: 1;
+  }
+
+  /* Improve touch interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
 }
 
 @layer base {

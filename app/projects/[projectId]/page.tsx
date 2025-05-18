@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { KanbanBoard } from '@/components/project/kanban-board';
 import { StatusListView } from '@/components/project/status-list-view';
-import { TaskProvider } from '@/components/project/task-context';
+import { TaskProvider, useTaskContext } from '@/components/project/task-context';
 import { TaskFilterNew } from '@/components/project/task-filter';
 import { TaskFilters } from '@/types/task';
 import { ProjectSettingsDialog } from '@/components/project/project-settings-dialog';
@@ -31,7 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { TaskForm } from '@/components/project/task-form';
 import { AddTeamMemberDialog } from '@/components/project/add-team-member-dialog';
 import { format } from 'date-fns';
-import { safeFormat } from '@/lib/utils/date-utils';
+import { safeFormat } from '@/lib/utils/date';
 import { CreateStatusDialogNew } from '@/components/project/create-status-dialog';
 import {
   AlertDialog,
@@ -412,7 +412,20 @@ export default function ProjectPage() {
         <TabsContent value="board">
           <div className="space-y-4">
             <TaskProvider projectId={projectId}>
-              <KanbanBoard projectId={projectId} onEditTask={handleEditTask} />
+              <KanbanBoard
+                columns={statuses.map(status => ({
+                  id: status.id,
+                  title: status.name,
+                  tasks: tasks.filter(task => task.statusId === status.id),
+                }))}
+                onAddTask={handleCreateTask}
+                onUpdateTask={handleEditTask}
+                onReorderTasks={() => {}}
+                onMoveTask={() => {}}
+                onError={() => {}}
+                showAddButton={true}
+                emptyStateMessage="No tasks in this status"
+              />
             </TaskProvider>
           </div>
         </TabsContent>

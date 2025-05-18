@@ -7,16 +7,44 @@ import { projectApi, taskApi, eventApi } from '@/lib/api';
  * Hook to fetch projects
  */
 export function useProjects(page = 1, limit = 10, filters: Record<string, string> = {}) {
+  // Enhanced filter cleaning to ensure proper handling of team member IDs and dates
   const cleanFilters = Object.fromEntries(
     Object.entries(filters).filter(
-      ([_, value]) =>
-        value !== null &&
-        value !== undefined &&
-        typeof value === 'string' &&
-        value !== '[object Object]'
+      ([key, value]) => {
+        // Skip null, undefined, empty strings, and [object Object]
+        if (
+          value === null ||
+          value === undefined ||
+          value === '' ||
+          value === '[object Object]'
+        ) {
+          return false;
+        }
+
+        // Special handling for teamMemberIds to ensure it's properly formatted
+        if (key === 'teamMemberIds' && typeof value === 'string') {
+          // Make sure it's not an empty list
+          return value.trim() !== '' && value !== ',';
+        }
+
+        // Special handling for date filters
+        if ((key === 'startDate' || key === 'endDate') && typeof value === 'string') {
+          try {
+            // Validate that it's a proper date
+            new Date(value);
+            return true;
+          } catch (e) {
+            console.error(`Invalid date format for ${key}:`, value);
+            return false;
+          }
+        }
+
+        return true;
+      }
     )
   );
 
+  // Create a query string with the cleaned filters
   const queryString = `/api/projects?page=${page}&limit=${limit}${
     Object.keys(cleanFilters).length > 0 ? `&${new URLSearchParams(cleanFilters).toString()}` : ''
   }`;

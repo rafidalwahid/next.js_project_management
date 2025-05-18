@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { TaskForm } from '@/components/project/task-form';
 import { TimeTracker } from '@/components/project/time-tracker';
 import { format } from 'date-fns';
-import { safeFormat } from '@/lib/utils/date-utils';
+import { safeFormat } from '@/lib/utils/date';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Task, TaskAssignee, TaskWithRelations } from '@/types/task';

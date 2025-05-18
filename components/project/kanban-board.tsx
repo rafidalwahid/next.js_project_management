@@ -1,503 +1,418 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useState, useRef, useEffect } from 'react';
 import {
-  Plus,
-  MoreHorizontal,
-  Pencil,
-  Trash,
-  Check,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+  DndContext,
+  DragOverlay,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+  UniqueIdentifier,
+  closestCorners,
+  pointerWithin,
+  getFirstCollision,
+} from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { StatusColumn } from './status-column';
 import { TaskCard } from './task-card';
 import { useTaskContext } from './task-context';
-import { Task } from '@/types/task';
-import { ProjectStatus } from '@/types/project';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { CreateStatusDialogNew } from '@/components/project/create-status-dialog';
-import { QuickTaskDialogNew } from '@/components/project/quick-task-dialog';
+import { Task, ProjectStatus } from '@/types/task';
+import { sortableKeyboardCoordinates, getActivationConstraint } from '@/lib/dnd-utils';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 interface KanbanBoardProps {
   projectId: string;
   onEditTask?: (taskId: string) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onEditStatus?: (status: ProjectStatus) => void;
+  onDeleteStatus?: (statusId: string) => void;
+  onAddTask?: (statusId: string) => void;
 }
 
-export function KanbanBoard({ projectId, onEditTask }: KanbanBoardProps) {
+/**
+ * Kanban board component using @dnd-kit/core for drag and drop
+ * Allows dragging tasks between statuses and reordering within a status
+ */
+export function KanbanBoard({
+  projectId,
+  onEditTask,
+  onDeleteTask,
+  onEditStatus,
+  onDeleteStatus,
+  onAddTask,
+}: KanbanBoardProps) {
   const {
     tasks,
     statuses,
-    isLoading,
-    refreshTasks,
-    toggleTaskCompletion,
-    deleteTask,
-    updateTaskAssignees,
     moveTask,
+    toggleTaskCompletion,
+    updateTaskAssignees,
+    isTasksLoading,
   } = useTaskContext();
 
+  const { toast } = useToast();
+
+  // State for drag operations
+  const [activeTaskId, setActiveTaskId] = useState<UniqueIdentifier | null>(null);
+  const [activeStatusId, setActiveStatusId] = useState<string | null>(null);
+  const [clonedTasks, setClonedTasks] = useState<Task[]>([]);
+
+  // Refs for scrolling
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [showLeftScroll, setShowLeftScroll] = useState(false);
-  const [showRightScroll, setShowRightScroll] = useState(false);
-  const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
-  const [editingStatusName, setEditingStatusName] = useState<string>('');
-  const [deleteStatusId, setDeleteStatusId] = useState<string | null>(null);
-  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
-  const statusInputRef = useRef<HTMLInputElement>(null);
+  const [scrollDirection, setScrollDirection] = useState<'left' | 'right' | null>(null);
+  const scrollSpeed = 10;
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Check if scrolling is needed
-  const checkScrollButtons = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setShowLeftScroll(scrollLeft > 0);
-      setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
-    }
-  };
+  // Configure sensors for drag detection
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      // Require the mouse to move by 5px before activating
+      activationConstraint: getActivationConstraint(),
+    }),
+    useSensor(TouchSensor, {
+      // Press delay of 250ms, with tolerance of 5px of movement
+      activationConstraint: getActivationConstraint(),
+    }),
+    useSensor(KeyboardSensor, {
+      // Customize keyboard shortcuts
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  // Set up scroll checking
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      checkScrollButtons();
-      scrollContainer.addEventListener('scroll', checkScrollButtons);
-      window.addEventListener('resize', checkScrollButtons);
-
-      return () => {
-        scrollContainer.removeEventListener('scroll', checkScrollButtons);
-        window.removeEventListener('resize', checkScrollButtons);
-      };
-    }
-  }, [statuses.length]);
-
-  // Focus input when editing status
-  useEffect(() => {
-    if (editingStatusId && statusInputRef.current) {
-      statusInputRef.current.focus();
-    }
-  }, [editingStatusId]);
-
-  // Scroll functions
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-    }
-  };
-
-  // Group tasks by status
+  // Helper function to get tasks by status
   const getTasksByStatus = (statusId: string) => {
-    return tasks.filter(task => task.statusId === statusId).sort((a, b) => a.order - b.order);
+    // During drag operations, use the cloned tasks to show optimistic updates
+    const tasksToUse = activeTaskId ? clonedTasks : tasks;
+    return tasksToUse.filter(task => task.statusId === statusId);
   };
 
-  // Handle task drag and drop
-  const handleDragEnd = async (result: any) => {
-    const { source, destination, draggableId } = result;
+  // Find the active task being dragged
+  const activeTask = activeTaskId ? tasks.find(task => task.id === activeTaskId.toString()) : null;
 
-    // Dropped outside a droppable area
-    if (!destination) return;
+  // Handle drag start
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
 
-    // Dropped in the same position
-    if (source.droppableId === destination.droppableId && source.index === destination.index)
+    if (active.data.current?.type === 'task') {
+      const task = active.data.current.task as Task;
+      setActiveTaskId(active.id);
+      setActiveStatusId(task.statusId);
+
+      // Clone the tasks array for optimistic updates
+      setClonedTasks([...tasks]);
+    }
+  };
+
+  // Handle drag over
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (!over || !active.data.current) return;
+
+    const activeTask = active.data.current.task as Task;
+
+    // Handle dragging over a status column
+    if (over.data.current?.type === 'status' && activeTask) {
+      const overId = over.id.toString();
+
+      // If dragging over a different status than the task is currently in
+      if (activeTask.statusId !== overId) {
+        setActiveStatusId(overId);
+
+        // Update the cloned tasks for optimistic UI updates
+        setClonedTasks(prev =>
+          prev.map(task =>
+            task.id === activeTask.id
+              ? { ...task, statusId: overId }
+              : task
+          )
+        );
+
+        // Log for debugging
+        console.log(`Dragging over status column: ${overId}`);
+      }
+    }
+
+    // Handle dragging over another task
+    if (over.data.current?.type === 'task' && activeTask) {
+      const overTask = over.data.current.task as Task;
+
+      // If dragging over a task in a different status
+      if (activeTask.statusId !== overTask.statusId) {
+        setActiveStatusId(overTask.statusId);
+
+        // Update the cloned tasks for optimistic UI updates
+        setClonedTasks(prev => {
+          // First, update the status of the active task
+          const updatedTasks = prev.map(task =>
+            task.id === activeTask.id
+              ? { ...task, statusId: overTask.statusId }
+              : task
+          );
+
+          // Then, reorder the tasks within the new status
+          const tasksInStatus = updatedTasks.filter(
+            t => t.statusId === overTask.statusId && t.id !== activeTask.id
+          );
+
+          const overTaskIndex = tasksInStatus.findIndex(t => t.id === overTask.id);
+
+          // Insert the active task at the position of the over task
+          const reorderedTasks = [...updatedTasks];
+          const activeTaskIndex = reorderedTasks.findIndex(t => t.id === activeTask.id);
+
+          if (activeTaskIndex !== -1) {
+            reorderedTasks.splice(activeTaskIndex, 1);
+
+            const targetIndex = reorderedTasks.findIndex(t => t.id === overTask.id);
+            if (targetIndex !== -1) {
+              reorderedTasks.splice(targetIndex, 0, { ...activeTask, statusId: overTask.statusId });
+            }
+          }
+
+          return reorderedTasks;
+        });
+      }
+      // If dragging over a task in the same status (reordering)
+      else if (activeTask.id !== overTask.id) {
+        // Update the cloned tasks for optimistic UI updates
+        setClonedTasks(prev => {
+          const activeTaskIndex = prev.findIndex(t => t.id === activeTask.id);
+          const overTaskIndex = prev.findIndex(t => t.id === overTask.id);
+
+          if (activeTaskIndex !== -1 && overTaskIndex !== -1) {
+            // Create a new array with the task moved to the new position
+            const result = [...prev];
+            const [removed] = result.splice(activeTaskIndex, 1);
+            result.splice(overTaskIndex, 0, removed);
+            return result;
+          }
+
+          return prev;
+        });
+      }
+    }
+  };
+
+  // Handle drag end
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveTaskId(null);
+      setActiveStatusId(null);
+      setClonedTasks([]);
       return;
-
-    // Get the task that was dragged
-    const taskId = draggableId;
-
-    // Get the tasks in the source status
-    const tasksInSourceStatus = getTasksByStatus(source.droppableId);
-
-    // Remove the dragged task from the array for accurate target determination
-    const draggedTask = tasksInSourceStatus.find(t => t.id === taskId);
-    const tasksWithoutDragged = tasksInSourceStatus.filter(t => t.id !== taskId);
-
-    // If the status changed (moved to a different column)
-    if (source.droppableId !== destination.droppableId) {
-      // Get tasks in destination status
-      const tasksInDestination = getTasksByStatus(destination.droppableId);
-
-      // Find target task if any
-      let targetTaskId = null;
-
-      if (destination.index < tasksInDestination.length) {
-        targetTaskId = tasksInDestination[destination.index].id;
-      }
-
-      // Move the task
-      await moveTask(taskId, destination.droppableId, targetTaskId);
     }
-    // Handle reordering within the same column
-    else {
-      // Find the target task based on the destination index
-      let targetTaskId = null;
 
-      if (destination.index < tasksWithoutDragged.length) {
-        // If moving to a position that has a task, use that task's ID as the target
-        targetTaskId = tasksWithoutDragged[destination.index].id;
-      }
-
-      console.log('Reordering within same column:', {
-        taskId,
-        statusId: source.droppableId,
-        sourceIndex: source.index,
-        destinationIndex: destination.index,
-        targetTaskId,
-      });
-
-      // Move the task (same status, just reordering)
-      await moveTask(taskId, source.droppableId, targetTaskId);
+    // Get the active task
+    const activeTaskData = active.data.current?.task as Task;
+    if (!activeTaskData) {
+      setActiveTaskId(null);
+      setActiveStatusId(null);
+      setClonedTasks([]);
+      return;
     }
-  };
-
-  // Start editing a status
-  const handleEditStatus = (status: ProjectStatus) => {
-    setEditingStatusId(status.id);
-    setEditingStatusName(status.name);
-  };
-
-  // Save edited status
-  const handleSaveStatusName = async () => {
-    if (!editingStatusId) return;
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/statuses/${editingStatusId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editingStatusName }),
-      });
+      // If dropping onto a status column
+      if (over.data.current?.type === 'status') {
+        const newStatusId = over.id.toString();
+        console.log(`Dropping onto status column: ${newStatusId}`);
 
-      if (!response.ok) {
-        throw new Error('Failed to update status');
+        // If the status is changing
+        if (activeTaskData.statusId !== newStatusId) {
+          console.log(`Moving task ${activeTaskData.id} to status ${newStatusId}`);
+          // No target task ID needed when dropping onto an empty column
+          await moveTask(activeTaskData.id, newStatusId);
+        }
       }
+      // If dropping onto another task
+      else if (over.data.current?.type === 'task') {
+        const overTaskData = over.data.current.task as Task;
 
-      // Refresh tasks to get updated status
-      await refreshTasks();
-
-      // Reset editing state
-      setEditingStatusId(null);
-      setEditingStatusName('');
+        // If dropping onto a task in a different status
+        if (activeTaskData.statusId !== overTaskData.statusId) {
+          // Moving to different status column AND positioning relative to a specific task
+          await moveTask(activeTaskData.id, overTaskData.statusId, overTaskData.id);
+        }
+        // If dropping onto a task in the same status (reordering)
+        else if (activeTaskData.id !== overTaskData.id) {
+          // Only reordering within the same status
+          await moveTask(activeTaskData.id, activeTaskData.statusId, overTaskData.id);
+        }
+      }
     } catch (error) {
-      console.error('Error updating status:', error);
-    }
-  };
-
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditingStatusId(null);
-    setEditingStatusName('');
-  };
-
-  // Delete status
-  const handleDeleteStatus = async () => {
-    if (!deleteStatusId) return;
-
-    try {
-      // Check if status has tasks
-      const tasksInStatus = tasks.filter(task => task.statusId === deleteStatusId);
-
-      if (tasksInStatus.length > 0) {
-        setDeleteStatusId(null);
-        return;
-      }
-
-      const response = await fetch(`/api/projects/${projectId}/statuses/${deleteStatusId}`, {
-        method: 'DELETE',
+      console.error('Error during drag and drop:', error);
+      toast({
+        title: 'Error moving task',
+        description: 'There was a problem moving the task. Please try again.',
+        variant: 'destructive',
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete status');
+      
+      // Force a complete refresh of tasks to ensure consistency
+      try {
+        if (activeTaskData) {
+          toast({
+            title: 'Refreshing task data',
+            description: 'Synchronizing with the server...',
+          });
+          
+          // Explicitly refresh tasks to recover from the error
+          await fetchTasks();
+        }
+      } catch (refreshError) {
+        console.error('Error refreshing tasks after failed drag and drop:', refreshError);
+        // Last resort - try one more time after a delay
+        setTimeout(() => {
+          fetchTasks().catch(e => 
+            console.error('Final attempt to refresh tasks failed:', e)
+          );
+        }, 2000);
       }
-
-      // Refresh tasks to get updated statuses
-      await refreshTasks();
-    } catch (error) {
-      console.error('Error deleting status:', error);
     } finally {
-      setDeleteStatusId(null);
+      setActiveTaskId(null);
+      setActiveStatusId(null);
+      setClonedTasks([]);
     }
   };
 
-  // Delete task
-  const handleDeleteTask = async () => {
-    if (!deleteTaskId) return;
+  // Handle scrolling during drag
+  const startScrolling = (direction: 'left' | 'right') => {
+    if (scrollInterval.current) return;
 
-    try {
-      await deleteTask(deleteTaskId);
-    } finally {
-      setDeleteTaskId(null);
-    }
+    setScrollDirection(direction);
+    scrollInterval.current = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const scrollAmount = direction === 'left' ? -scrollSpeed : scrollSpeed;
+        scrollContainerRef.current.scrollLeft += scrollAmount;
+      }
+    }, 16); // ~60fps
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const stopScrolling = () => {
+    if (scrollInterval.current) {
+      clearInterval(scrollInterval.current);
+      scrollInterval.current = null;
+    }
+    setScrollDirection(null);
+  };
 
-  if (statuses.length === 0) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground text-center mb-4">
-            No statuses defined for this project. Create statuses to start organizing tasks.
-          </p>
-          <CreateStatusDialogNew projectId={projectId} />
-        </CardContent>
-      </Card>
-    );
-  }
+  // Clean up scroll interval on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollInterval.current) {
+        clearInterval(scrollInterval.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="relative">
-      {/* Left scroll button */}
-      {showLeftScroll && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-xs rounded-full shadow-md"
-          onClick={scrollLeft}
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-      )}
-
-      {/* Right scroll button */}
-      {showRightScroll && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-xs rounded-full shadow-md"
-          onClick={scrollRight}
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      )}
-
-      {/* Scroll indicator */}
-      {showRightScroll && (
-        <div className="absolute right-10 bottom-2 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded-full opacity-70">
-          Scroll for more columns
-        </div>
-      )}
-
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div
-          className="h-auto max-h-[calc(100vh-240px)] min-h-[350px] xs:min-h-[400px] sm:min-h-[500px] overflow-hidden relative"
-          style={{ contain: 'paint' }}
-        >
-          <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto pb-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6 h-full pr-2 sm:pr-4 pl-1 -ml-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent touch-pan-x no-scrollbar"
-            aria-label="Kanban board columns"
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      modifiers={[restrictToWindowEdges]}
+      onDragCancel={() => {
+        setActiveTaskId(null);
+        setActiveStatusId(null);
+        setClonedTasks([]);
+      }}
+    >
+      <div
+        className="h-auto max-h-[calc(100vh-240px)] min-h-[500px] overflow-hidden relative"
+        style={{ contain: 'paint' }}
+      >
+        {/* Mobile navigation buttons for scrolling columns */}
+        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+            onClick={() => {
+              if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollLeft -= 300;
+              }
+            }}
           >
-            {statuses
-              .sort((a, b) => a.order - b.order)
-              .map(status => (
-                <Droppable key={status.id} droppableId={status.id}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={cn(
-                        'shrink-0 w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] h-full flex flex-col rounded-md',
-                        snapshot.isDraggingOver && 'ring-2 ring-primary ring-opacity-50'
-                      )}
-                    >
-                      <div
-                        className="flex items-center justify-between p-3 rounded-t-md"
-                        style={{ backgroundColor: status.color + '20' }}
-                      >
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <div
-                            className="w-3 h-3 rounded-full shrink-0"
-                            style={{ backgroundColor: status.color }}
-                          />
-
-                          {editingStatusId === status.id ? (
-                            <div className="flex items-center gap-1">
-                              <Input
-                                ref={statusInputRef}
-                                value={editingStatusName}
-                                onChange={e => setEditingStatusName(e.target.value)}
-                                className="h-7 w-[120px] py-1 px-2 text-sm"
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter') {
-                                    handleSaveStatusName();
-                                  } else if (e.key === 'Escape') {
-                                    handleCancelEdit();
-                                  }
-                                }}
-                              />
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={handleSaveStatusName}
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={handleCancelEdit}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <h3 className="font-medium truncate">{status.name}</h3>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditStatus(status)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => setDeleteStatusId(status.id)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-
-                          <QuickTaskDialogNew
-                            projectId={projectId}
-                            statusId={status.id}
-                            statusName={status.name}
-                            onTaskCreated={refreshTasks}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex-1 min-h-0 bg-muted/20 rounded-b-md p-2 overflow-y-auto">
-                        <div className="space-y-2">
-                          {getTasksByStatus(status.id).map((task, index) => (
-                            <Draggable key={task.id} draggableId={task.id} index={index}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="touch-manipulation"
-                                >
-                                  <TaskCard
-                                    task={task}
-                                    isDragging={snapshot.isDragging}
-                                    onToggleComplete={toggleTaskCompletion}
-                                    onEdit={onEditTask}
-                                    onDelete={taskId => setDeleteTaskId(taskId)}
-                                    onUpdateAssignees={updateTaskAssignees}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-
-                          {getTasksByStatus(status.id).length === 0 && (
-                            <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-muted-foreground/20 rounded-md p-4">
-                              <p className="text-sm text-muted-foreground text-center">
-                                No tasks in this status
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1 text-center">
-                                Drag tasks here or use the + button to add a new task
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </Droppable>
-              ))}
-          </div>
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Scroll left</span>
+          </Button>
         </div>
-      </DragDropContext>
+        
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+            onClick={() => {
+              if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollLeft += 300;
+              }
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Scroll right</span>
+          </Button>
+        </div>
 
-      {/* Delete status confirmation dialog */}
-      <AlertDialog open={!!deleteStatusId} onOpenChange={() => setDeleteStatusId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Status</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this status? This action cannot be undone.
-              {tasks.some(task => task.statusId === deleteStatusId) && (
-                <p className="text-destructive mt-2 font-medium">
-                  This status contains tasks. Move or delete them first.
-                </p>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteStatus}
-              disabled={tasks.some(task => task.statusId === deleteStatusId)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <div
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto pb-4 gap-3 h-full pr-2 sm:pr-4 pl-1 -ml-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent touch-pan-x"
+          aria-label="Kanban board columns"
+          style={{ paddingBottom: '16px', scrollBehavior: 'smooth' }}
+        >
+          {statuses
+            .sort((a, b) => a.order - b.order)
+            .map(status => (
+              <div
+                key={status.id}
+                className="flex-1 min-w-[300px] bg-gray-50 rounded-lg p-4 w-[300px]"
+              >
+                <StatusColumn
+                  status={status}
+                  tasks={getTasksByStatus(status.id)}
+                  onToggleComplete={toggleTaskCompletion}
+                  onEdit={onEditTask}
+                  onDelete={onDeleteTask}
+                  onUpdateAssignees={updateTaskAssignees}
+                  onEditStatus={onEditStatus}
+                  onDeleteStatus={onDeleteStatus}
+                  onAddTask={onAddTask}
+                />
+              </div>
+            ))}
+        </div>
+      </div>
 
-      {/* Delete task confirmation dialog */}
-      <AlertDialog open={!!deleteTaskId} onOpenChange={() => setDeleteTaskId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this task? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTask}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      {/* Drag overlay for the currently dragged task */}
+      <DragOverlay adjustScale zIndex={100} modifiers={[restrictToWindowEdges]}>
+        {activeTask ? (
+          <div className="w-[220px] xs:w-[260px] sm:w-[300px] md:w-[320px] opacity-90">
+            <TaskCard
+              task={activeTask}
+              isDragging={true}
+              showDragHandle={true}
+              onToggleComplete={toggleTaskCompletion}
+              onEdit={onEditTask}
+              onDelete={onDeleteTask}
+              onUpdateAssignees={updateTaskAssignees}
+              className="h-[100px] w-full"
+            />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }

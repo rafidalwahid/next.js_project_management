@@ -2,18 +2,13 @@
 
 import Link from 'next/link';
 import {
-  Filter,
   Plus,
   Search,
   Edit,
   Trash,
   MoreHorizontal,
   Eye,
-  ChevronLeft,
-  ChevronRight,
   ArrowUpDown,
-  Users,
-  Check,
   X,
   Calendar,
 } from 'lucide-react';
@@ -30,12 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DashboardLayout } from '@/components/dashboard-layout';
 import { useProjects } from '@/hooks/use-data';
 import { projectApi } from '@/lib/api';
-import { teamManagementApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -45,45 +37,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Pagination } from '@/components/tasks/pagination';
-import { Project, TeamMember } from '@/types/project';
+import { Project } from '@/types/project';
 
 export default function ProjectsPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
-  const [showFilters, setShowFilters] = useState(false);
-  const [dateFilter, setDateFilter] = useState<{
-    startDate: string;
-    endDate: string;
-  }>({ startDate: '', endDate: '' });
+  // Date filter removed
   const [sortField, setSortField] = useState<string>('updatedAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [teamMemberFilter, setTeamMemberFilter] = useState<string[]>([]);
-  const [teamMemberOpen, setTeamMemberOpen] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [isLoadingTeamMembers, setIsLoadingTeamMembers] = useState(false);
+  // Team member filter removed
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const isMobile = useIsMobile();
 
-  // Apply filters when search or date filters change
+  // Apply filters
   const activeFilters = {
     ...(searchTerm ? { title: searchTerm } : {}),
-    ...(dateFilter.startDate ? { startDate: dateFilter.startDate } : {}),
-    ...(dateFilter.endDate ? { endDate: dateFilter.endDate } : {}),
-    ...(teamMemberFilter.length > 0 ? { teamMemberIds: teamMemberFilter.join(',') } : {}),
+    // Date filter removed
+    // Team member filter removed
     ...(sortField ? { sortField } : {}),
     ...(sortDirection ? { sortDirection } : {}),
     ...filters,
@@ -92,36 +64,7 @@ export default function ProjectsPage() {
   const { projects, isLoading, isError, mutate, pagination } = useProjects(page, 10, activeFilters);
   const { toast } = useToast();
 
-  // Fetch team members for filtering
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      setIsLoadingTeamMembers(true);
-      try {
-        const response = await teamManagementApi.getTeamMembers(undefined, 1, 100);
-        // Create a unique list of users from team memberships
-        const uniqueUsers = Array.from(
-          new Map(
-            response.teamMembers.map((member: any) => [
-              member.user.id,
-              {
-                id: member.user.id,
-                name: member.user.name,
-                email: member.user.email,
-                image: member.user.image,
-              },
-            ])
-          ).values()
-        );
-        setTeamMembers(uniqueUsers);
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-      } finally {
-        setIsLoadingTeamMembers(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, []);
+  // Team member filter removed
 
   // Handle sorting
   const handleSort = (field: string) => {
@@ -135,12 +78,7 @@ export default function ProjectsPage() {
     }
   };
 
-  // Handle team member filter toggle
-  const toggleTeamMember = (userId: string) => {
-    setTeamMemberFilter(prev =>
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-    );
-  };
+  // Team member filter toggle removed
 
   // Handle pagination
   const handlePageChange = (newPage: number) => {
@@ -165,23 +103,39 @@ export default function ProjectsPage() {
 
   // Handle search input with debounce
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Log the search term for debugging
+    console.log('Search term updated:', value);
+
+    // Debounce the search to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      console.log('Executing search for:', value);
+      mutate();
+    }, 500);
+
+    // Clean up the timeout on next render
+    return () => clearTimeout(timeoutId);
   };
 
-  // Apply date filters
-  const applyDateFilters = () => {
-    mutate();
-    setShowFilters(false);
-  };
+  // Date filter functions removed
 
   // Reset filters
   const resetFilters = () => {
-    setDateFilter({ startDate: '', endDate: '' });
+    // Reset all filter states
     setFilters({});
     setSearchTerm('');
-    setTeamMemberFilter([]);
+    // Date filter reset removed
+    // Team member filter reset removed
     setSortField('updatedAt');
     setSortDirection('desc');
+
+    // Log the reset action for debugging
+    console.log('Filters reset, forcing refresh');
+
+    // Force an immediate refresh with reset filters
+    console.log('Refreshing projects with reset filters');
     mutate();
   };
 
@@ -193,7 +147,8 @@ export default function ProjectsPage() {
         title: 'Project deleted',
         description: 'The project has been deleted successfully',
       });
-    } catch (error) {
+    } catch (err) {
+      console.error('Error deleting project:', err);
       toast({
         title: 'Error',
         description: 'Failed to delete the project',
@@ -217,13 +172,6 @@ export default function ProjectsPage() {
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setIsNewProjectDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span className={isMobile ? 'sr-only' : ''}>New Project</span>
-            {isMobile && <span className="sr-only">Create Project</span>}
-          </Button>
-        </div>
       </div>
 
       {/* Search and Filter Controls - Responsive Layout */}
@@ -242,101 +190,22 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex gap-2">
-            {/* Team Members Filter - Mobile */}
-            <Popover open={teamMemberOpen} onOpenChange={setTeamMemberOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    'h-9 flex-1',
-                    teamMemberFilter.length > 0 && 'bg-primary/10 text-primary'
-                  )}
-                >
-                  <Users className="mr-1 h-4 w-4" />
-                  <span className="truncate">
-                    {teamMemberFilter.length > 0 ? `${teamMemberFilter.length}` : 'Members'}
-                  </span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[250px] p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Search members..." />
-                  <CommandList>
-                    <CommandEmpty>No members found</CommandEmpty>
-                    <CommandGroup>
-                      {isLoadingTeamMembers ? (
-                        <div className="flex items-center justify-center p-4">
-                          <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                        </div>
-                      ) : (
-                        teamMembers.map(member => (
-                          <CommandItem
-                            key={member.id}
-                            onSelect={() => toggleTeamMember(member.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <div className="flex items-center gap-2 flex-1">
-                              <Checkbox
-                                checked={teamMemberFilter.includes(member.id)}
-                                onCheckedChange={() => toggleTeamMember(member.id)}
-                              />
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-6 w-6 border border-black">
-                                  {member.image ? (
-                                    <AvatarImage src={member.image} alt={member.name || ''} />
-                                  ) : (
-                                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                      {getUserInitials(member.name)}
-                                    </AvatarFallback>
-                                  )}
-                                </Avatar>
-                                <span className="text-sm truncate">
-                                  {member.name || member.email}
-                                </span>
-                              </div>
-                            </div>
-                            {teamMemberFilter.includes(member.id) && <Check className="h-4 w-4" />}
-                          </CommandItem>
-                        ))
-                      )}
-                    </CommandGroup>
-                    {teamMemberFilter.length > 0 && (
-                      <div className="border-t p-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-center text-xs"
-                          onClick={() => setTeamMemberFilter([])}
-                        >
-                          Clear selection
-                        </Button>
-                      </div>
-                    )}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            {/* Team Members Filter removed */}
 
-            {/* Date Filter Button - Mobile */}
+            {/* Date Filter Button removed */}
+
+            {/* New Project Button - Mobile */}
             <Button
-              variant="outline"
               size="sm"
-              className={cn(
-                'h-9 flex-1',
-                (dateFilter.startDate || dateFilter.endDate) && 'bg-primary/10 text-primary'
-              )}
-              onClick={() => setShowFilters(!showFilters)}
+              className="h-9 flex-1"
+              onClick={() => setIsNewProjectDialogOpen(true)}
             >
-              <Filter className="mr-1 h-4 w-4" />
-              <span className="truncate">Dates</span>
+              <Plus className="mr-1 h-4 w-4" />
+              <span className="truncate">New Project</span>
             </Button>
 
             {/* Clear Filters Button - Mobile */}
-            {(Object.keys(activeFilters).length > 2 ||
-              teamMemberFilter.length > 0 ||
-              dateFilter.startDate ||
-              dateFilter.endDate) && (
+            {Object.keys(activeFilters).length > 2 && (
               <Button variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={resetFilters}>
                 <X className="h-4 w-4" />
                 <span className="sr-only">Clear Filters</span>
@@ -346,178 +215,41 @@ export default function ProjectsPage() {
         </div>
 
         {/* Desktop View: Row Layout */}
-        <div className="hidden sm:flex sm:flex-row gap-2 items-center">
-          {/* Search Bar - Reduced Width on Desktop */}
-          <div className="relative sm:w-1/3">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search projects..."
-              className="pl-8 h-9"
-              value={searchTerm}
-              onChange={handleSearch}
-            />
+        <div className="hidden sm:flex sm:flex-row gap-2 items-center justify-between">
+          <div className="flex items-center gap-2">
+            {/* Search Bar - Reduced Width on Desktop */}
+            <div className="relative w-[280px]">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search projects..."
+                className="pl-8 h-9"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>
+
+            {/* Team Members Filter removed */}
+
+            {/* Date Filter Button removed */}
+
+            {/* Clear Filters Button - Desktop */}
+            {Object.keys(activeFilters).length > 2 && (
+              <Button variant="ghost" size="sm" className="h-9" onClick={resetFilters}>
+                <X className="mr-2 h-4 w-4" />
+                <span className="truncate">Clear Filters</span>
+              </Button>
+            )}
           </div>
 
-          {/* Team Members Filter - Desktop */}
-          <Popover open={teamMemberOpen} onOpenChange={setTeamMemberOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  'h-9 w-[150px]',
-                  teamMemberFilter.length > 0 && 'bg-primary/10 text-primary'
-                )}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                <span className="truncate">
-                  {teamMemberFilter.length > 0
-                    ? `${teamMemberFilter.length} Member${teamMemberFilter.length > 1 ? 's' : ''}`
-                    : 'Team Members'}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search members..." />
-                <CommandList>
-                  <CommandEmpty>No members found</CommandEmpty>
-                  <CommandGroup>
-                    {isLoadingTeamMembers ? (
-                      <div className="flex items-center justify-center p-4">
-                        <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                      </div>
-                    ) : (
-                      teamMembers.map(member => (
-                        <CommandItem
-                          key={member.id}
-                          onSelect={() => toggleTeamMember(member.id)}
-                          className="flex items-center gap-2"
-                        >
-                          <div className="flex items-center gap-2 flex-1">
-                            <Checkbox
-                              checked={teamMemberFilter.includes(member.id)}
-                              onCheckedChange={() => toggleTeamMember(member.id)}
-                            />
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6 border border-black">
-                                {member.image ? (
-                                  <AvatarImage src={member.image} alt={member.name || ''} />
-                                ) : (
-                                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                    {getUserInitials(member.name)}
-                                  </AvatarFallback>
-                                )}
-                              </Avatar>
-                              <span className="text-sm truncate">
-                                {member.name || member.email}
-                              </span>
-                            </div>
-                          </div>
-                          {teamMemberFilter.includes(member.id) && <Check className="h-4 w-4" />}
-                        </CommandItem>
-                      ))
-                    )}
-                  </CommandGroup>
-                  {teamMemberFilter.length > 0 && (
-                    <div className="border-t p-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-center text-xs"
-                        onClick={() => setTeamMemberFilter([])}
-                      >
-                        Clear selection
-                      </Button>
-                    </div>
-                  )}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {/* Date Filter Button - Desktop */}
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              'h-9 w-[120px]',
-              (dateFilter.startDate || dateFilter.endDate) && 'bg-primary/10 text-primary'
-            )}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            <span className="truncate">Date Filter</span>
+          {/* New Project Button - Desktop */}
+          <Button size="sm" className="h-9" onClick={() => setIsNewProjectDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            <span>New Project</span>
           </Button>
-
-          {/* Clear Filters Button - Desktop */}
-          {(Object.keys(activeFilters).length > 2 ||
-            teamMemberFilter.length > 0 ||
-            dateFilter.startDate ||
-            dateFilter.endDate) && (
-            <Button variant="ghost" size="sm" className="h-9" onClick={resetFilters}>
-              <X className="mr-2 h-4 w-4" />
-              <span className="truncate">Clear Filters</span>
-            </Button>
-          )}
         </div>
       </div>
 
-      {/* Date Filter Panel - Enhanced Responsive Design */}
-      {showFilters && (
-        <div className="bg-muted/40 rounded-md p-3 sm:p-4 mt-3 space-y-3 sm:space-y-4 shadow-xs">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm sm:text-base font-medium">Filter Projects by Date</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 -mr-1"
-              onClick={() => setShowFilters(false)}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium">Start Date</label>
-              <Input
-                type="date"
-                value={dateFilter.startDate}
-                onChange={e => setDateFilter({ ...dateFilter, startDate: e.target.value })}
-                className="h-8 sm:h-9 text-sm"
-              />
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium">End Date</label>
-              <Input
-                type="date"
-                value={dateFilter.endDate}
-                onChange={e => setDateFilter({ ...dateFilter, endDate: e.target.value })}
-                className="h-8 sm:h-9 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-row justify-end gap-2 pt-1 sm:pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 text-xs sm:text-sm"
-              onClick={() => {
-                setDateFilter({ startDate: '', endDate: '' });
-                setShowFilters(false);
-              }}
-            >
-              Clear
-            </Button>
-            <Button size="sm" className="h-8 text-xs sm:text-sm" onClick={applyDateFilters}>
-              Apply
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Date Filter Panel removed */}
 
       {isLoading ? (
         <div className="text-center p-3 sm:p-4 mt-3 sm:mt-4">
@@ -636,14 +368,14 @@ export default function ProjectsPage() {
                           <>
                             {project.teamMembers.slice(0, 3).map(member => (
                               <Avatar key={member.id} className="h-8 w-8 border border-black">
-                                {member.user.image ? (
+                                {member.user?.image ? (
                                   <AvatarImage
                                     src={member.user.image}
-                                    alt={member.user.name || ''}
+                                    alt={member.user?.name || ''}
                                   />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                                    {getUserInitials(member.user.name)}
+                                    {getUserInitials(member.user?.name)}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
@@ -775,11 +507,11 @@ export default function ProjectsPage() {
                       <>
                         {project.teamMembers.slice(0, 3).map(member => (
                           <Avatar key={member.id} className="h-6 w-6 border border-black">
-                            {member.user.image ? (
-                              <AvatarImage src={member.user.image} alt={member.user.name || ''} />
+                            {member.user?.image ? (
+                              <AvatarImage src={member.user.image} alt={member.user?.name || ''} />
                             ) : (
                               <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
-                                {getUserInitials(member.user.name)}
+                                {getUserInitials(member.user?.name)}
                               </AvatarFallback>
                             )}
                           </Avatar>

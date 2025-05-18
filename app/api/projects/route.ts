@@ -60,38 +60,82 @@ export async function GET(req: NextRequest) {
 
     // Add title search filter if provided
     if (titleParam) {
+      // MySQL doesn't support mode: 'insensitive', use contains without mode
       where.title = {
         contains: titleParam,
-        mode: 'insensitive', // Case-insensitive search
+        // MySQL is case-insensitive by default with utf8mb4_unicode_ci collation
       };
     }
 
-    // Add date filters if provided
+    // Add date filters if provided with improved handling
     if (startDateParam) {
       try {
+        // Validate and parse the start date
         const startDate = new Date(startDateParam);
-        where.startDate = {
-          gte: startDate,
-        };
+
+        // Check if the date is valid
+        if (!isNaN(startDate.getTime())) {
+          console.log('Filtering projects with start date >=', startDate.toISOString());
+
+          // Use a more flexible filter that checks both startDate and endDate
+          // This allows finding projects that overlap with the filter period
+          where.OR = [
+            { startDate: { gte: startDate } },
+            {
+              AND: [
+                { startDate: { lte: startDate } },
+                { endDate: { gte: startDate } }
+              ]
+            }
+          ];
+        } else {
+          console.error('Invalid start date format:', startDateParam);
+        }
       } catch (error) {
-        console.error('Invalid start date format:', error);
+        console.error('Error processing start date:', error);
       }
     }
 
     if (endDateParam) {
       try {
+        // Validate and parse the end date
         const endDate = new Date(endDateParam);
-        where.endDate = {
-          lte: endDate,
-        };
+
+        // Check if the date is valid
+        if (!isNaN(endDate.getTime())) {
+          console.log('Filtering projects with end date <=', endDate.toISOString());
+
+          // If we already have a start date filter, we need to modify the existing where.OR
+          if (where.OR) {
+            // Add end date condition to each existing OR condition
+            where.OR = where.OR.map((condition: any) => ({
+              AND: [
+                condition,
+                { endDate: { lte: endDate } }
+              ]
+            }));
+          } else {
+            // If no start date filter, create a new filter
+            where.endDate = { lte: endDate };
+          }
+        } else {
+          console.error('Invalid end date format:', endDateParam);
+        }
       } catch (error) {
-        console.error('Invalid end date format:', error);
+        console.error('Error processing end date:', error);
       }
     }
 
     // Add team member filter if provided
     if (teamMemberIdsParam) {
-      const teamMemberIds = teamMemberIdsParam.split(',');
+      // Clean and validate team member IDs
+      const teamMemberIds = teamMemberIdsParam
+        .split(',')
+        .map(id => id.trim())
+        .filter(id => id !== '');
+
+      console.log('Filtering projects by team member IDs:', teamMemberIds);
+
       if (teamMemberIds.length > 0) {
         where.teamMembers = {
           some: {

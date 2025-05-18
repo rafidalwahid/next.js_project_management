@@ -485,3 +485,15 @@ export function isWorkDay(date: Date): boolean {
 export function formatDateLegacy(date: string | null, formatString = 'MMM d, yyyy'): string {
   return formatDate(date, formatString);
 }
+
+/**
+ * Safely format a date with a fallback value
+ * This is a convenience function used in several components
+ */
+export function safeFormat(
+  date: Date | string | null | undefined,
+  formatString: string = 'MMM d, yyyy',
+  fallback: string = 'N/A'
+): string {
+  return formatDate(date, formatString, fallback);
+}

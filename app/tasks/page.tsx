@@ -31,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { KanbanBoard } from '@/components/project/kanban-board';
+import { useTaskContext } from '@/hooks/use-task-context';
 
 export default function TasksPage() {
   const searchParams = useSearchParams();
@@ -53,6 +55,8 @@ export default function TasksPage() {
   const { tasks: allTasks, isLoading, isError, mutate } = useTasks(1, 100); // Increased limit
   const { users, isLoading: usersLoading } = useUsers({ limit: 100 }); // Fetch all users
   const { toast } = useToast();
+
+  const { tasks, columns, handleAddTask, handleUpdateTask, handleReorderTasks, handleMoveTask } = useTaskContext();
 
   // Update URL when filters change
   useEffect(() => {
@@ -106,7 +110,7 @@ export default function TasksPage() {
   // Calculate pagination
   const totalPages = Math.ceil(sortedTasks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const tasks = sortedTasks.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedTasks = sortedTasks.slice(startIndex, startIndex + itemsPerPage);
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -206,164 +210,16 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
-      {/* Header with title and actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Tasks</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            className="bg-black hover:bg-black/90 text-white w-full sm:w-auto"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Task
-          </Button>
-        </div>
-      </div>
-
-      {/* Search and filters */}
-      <div className="flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search tasks..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {/* Mobile filters button */}
-          <DropdownMenu open={isFilterMenuOpen} onOpenChange={setIsFilterMenuOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-9 md:hidden">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-
-              <div className="p-2">
-                <p className="text-xs font-medium mb-1">Priority</p>
-                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Priorities</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="p-2">
-                <p className="text-xs font-medium mb-1">Team Member</p>
-                <Select value={teamMemberFilter} onValueChange={setTeamMemberFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select team member" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Team Members</SelectItem>
-                    {users.map(user => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name || user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="p-2">
-                <p className="text-xs font-medium mb-1">Sort by</p>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dueDate">Due Date</SelectItem>
-                    <SelectItem value="priority">Priority</SelectItem>
-                    <SelectItem value="title">Title</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Desktop filters */}
-          <div className="hidden md:flex items-center gap-2">
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="h-9 w-[130px]">
-                <Flag className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={teamMemberFilter} onValueChange={setTeamMemberFilter}>
-              <SelectTrigger className="h-9 w-[130px]">
-                <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Team Member" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Members</SelectItem>
-                {users.map(user => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name || user.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-9 w-[130px]">
-                <ArrowDownAZ className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dueDate">Due Date</SelectItem>
-                <SelectItem value="priority">Priority</SelectItem>
-                <SelectItem value="title">Title</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      {/* Task count */}
-      <div className="text-sm text-muted-foreground">
-        Showing {tasks.length} of {filteredTasks.length} tasks
-      </div>
-
-      {/* Task list */}
-      <TaskList tasks={tasks} onDelete={deleteTask} onToggleCompletion={toggleTaskCompletion} />
-
-      {/* Pagination */}
-      {filteredTasks.length > itemsPerPage && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
-
-      {/* Create task modal */}
-      <TaskCreateModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          mutate(); // Refresh the tasks list after creating a new task
-        }}
+    <div className="h-full">
+      <KanbanBoard
+        columns={columns}
+        onAddTask={handleAddTask}
+        onUpdateTask={handleUpdateTask}
+        onReorderTasks={handleReorderTasks}
+        onMoveTask={handleMoveTask}
+        onError={handleError}
+        showAddButton={true}
+        emptyStateMessage="No tasks in this column"
       />
     </div>
   );

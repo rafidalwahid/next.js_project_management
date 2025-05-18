@@ -107,8 +107,10 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
     if (search) {
       where.user = {
         OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
+          // MySQL doesn't support mode: 'insensitive', use contains without mode
+          // MySQL is case-insensitive by default with utf8mb4_unicode_ci collation
+          { name: { contains: search } },
+          { email: { contains: search } },
         ],
       };
     }
