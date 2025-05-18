@@ -63,6 +63,11 @@ export default function TeamPage() {
       router.push('/login');
       return;
     }
+
+    // Redirect to the team members page
+    if (status === 'authenticated') {
+      router.push('/team/members');
+    }
   }, [status, router]);
 
   // Reset to first page when filters change

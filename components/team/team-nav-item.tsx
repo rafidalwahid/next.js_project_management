@@ -33,7 +33,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
   const subItems = [
     {
       title: 'Team Members',
-      href: '/team',
+      href: '/team/members',
       icon: UsersRound,
       permission: 'team_view',
       // This is a core functionality that all users should have access to
