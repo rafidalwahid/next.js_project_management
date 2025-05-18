@@ -210,18 +210,28 @@ export default function TasksPage() {
     );
   }
 
+  // Define the handleError function that was missing
+  const handleError = (error: any) => {
+    console.error('Task operation error:', error);
+    toast({
+      title: 'Error',
+      description: error instanceof Error ? error.message : 'An error occurred with the task operation',
+      variant: 'destructive',
+    });
+  };
+
   return (
     <div className="h-full">
-      <KanbanBoard
-        columns={columns}
-        onAddTask={handleAddTask}
-        onUpdateTask={handleUpdateTask}
-        onReorderTasks={handleReorderTasks}
-        onMoveTask={handleMoveTask}
-        onError={handleError}
-        showAddButton={true}
-        emptyStateMessage="No tasks in this column"
-      />
+      <TaskProvider projectId="all">
+        <KanbanBoard
+          projectId="all"
+          onAddTask={handleAddTask}
+          onEditTask={(taskId) => router.push(`/tasks/${taskId}`)}
+          onDeleteTask={deleteTask}
+          showAddButton={true}
+          emptyStateMessage="No tasks in this column"
+        />
+      </TaskProvider>
     </div>
   );
 }

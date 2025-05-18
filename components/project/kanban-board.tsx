@@ -36,6 +36,8 @@ interface KanbanBoardProps {
   onEditStatus?: (status: ProjectStatus) => void;
   onDeleteStatus?: (statusId: string) => void;
   onAddTask?: (statusId: string) => void;
+  showAddButton?: boolean;
+  emptyStateMessage?: string;
 }
 
 /**
@@ -49,8 +51,10 @@ export function KanbanBoard({
   onEditStatus,
   onDeleteStatus,
   onAddTask,
+  showAddButton = false,
+  emptyStateMessage = "No tasks in this status",
 }: KanbanBoardProps) {
-  const { tasks, statuses, moveTask, toggleTaskCompletion, updateTaskAssignees, isTasksLoading } =
+  const { tasks, statuses, moveTask, toggleTaskCompletion, updateTaskAssignees, isTasksLoading, refreshTasks } =
     useTaskContext();
 
   const { toast } = useToast();
@@ -256,13 +260,13 @@ export function KanbanBoard({
           });
 
           // Explicitly refresh tasks to recover from the error
-          await fetchTasks();
+          await refreshTasks();
         }
       } catch (refreshError) {
         console.error('Error refreshing tasks after failed drag and drop:', refreshError);
         // Last resort - try one more time after a delay
         setTimeout(() => {
-          fetchTasks().catch(e => console.error('Final attempt to refresh tasks failed:', e));
+          refreshTasks().catch(e => console.error('Final attempt to refresh tasks failed:', e));
         }, 2000);
       }
     } finally {
@@ -376,6 +380,7 @@ export function KanbanBoard({
                   onEditStatus={onEditStatus}
                   onDeleteStatus={onDeleteStatus}
                   onAddTask={onAddTask}
+                  emptyStateMessage={emptyStateMessage}
                 />
               </div>
             ))}

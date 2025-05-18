@@ -52,7 +52,12 @@ export function TaskProvider({
   // Fetch statuses
   const fetchStatuses = async () => {
     try {
-      const response = await fetch(`/api/projects/${projectId}/statuses`);
+      // If projectId is "all", fetch all statuses, otherwise filter by projectId
+      const url = projectId === "all"
+        ? `/api/project-statuses`
+        : `/api/projects/${projectId}/statuses`;
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch statuses');
       const data = await response.json();
       setStatuses(data.statuses || []);
@@ -70,7 +75,12 @@ export function TaskProvider({
   const fetchTasks = async () => {
     try {
       setIsTasksLoading(true);
-      const response = await fetch(`/api/tasks?projectId=${projectId}&limit=100`);
+      // If projectId is "all", fetch all tasks, otherwise filter by projectId
+      const url = projectId === "all"
+        ? `/api/tasks?limit=100`
+        : `/api/tasks?projectId=${projectId}&limit=100`;
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch tasks');
       const data = await response.json();
       setTasks(data.tasks || []);
@@ -89,23 +99,38 @@ export function TaskProvider({
   // Fetch users
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`/api/team-management?projectId=${projectId}`);
-      if (!response.ok) throw new Error('Failed to fetch team members');
+      // If projectId is "all", fetch all users, otherwise filter by projectId
+      const url = projectId === "all"
+        ? `/api/users?limit=100`
+        : `/api/team-management?projectId=${projectId}`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
 
-      // Extract user data from team members
-      if (data.teamMembers && Array.isArray(data.teamMembers)) {
-        const users = data.teamMembers
-          .map((tm: any) => tm.user)
-          .filter((user: any) => user && user.id);
-        setUsers(users);
+      if (projectId === "all") {
+        // For "all" projectId, the response format is different
+        if (data.users && Array.isArray(data.users)) {
+          setUsers(data.users);
+        } else {
+          setUsers([]);
+        }
       } else {
-        setUsers([]);
+        // Extract user data from team members for specific project
+        if (data.teamMembers && Array.isArray(data.teamMembers)) {
+          const users = data.teamMembers
+            .map((tm: any) => tm.user)
+            .filter((user: any) => user && user.id);
+          setUsers(users);
+        } else {
+          setUsers([]);
+        }
       }
     } catch (error) {
+      console.error('Error fetching users:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch team members',
+        description: 'Failed to fetch users',
         variant: 'destructive',
       });
     }

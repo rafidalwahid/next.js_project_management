@@ -25,6 +25,7 @@ interface StatusColumnProps {
   onEditStatus?: (status: ProjectStatus) => void;
   onDeleteStatus?: (statusId: string) => void;
   onAddTask?: (statusId: string) => void;
+  emptyStateMessage?: string;
 }
 
 /**
@@ -42,6 +43,7 @@ export const StatusColumn = React.memo(function StatusColumnImpl({
   onEditStatus,
   onDeleteStatus,
   onAddTask,
+  emptyStateMessage = "No tasks",
 }: StatusColumnProps) {
   // Make the column droppable
   const { setNodeRef, isOver } = useDroppable({
@@ -129,7 +131,7 @@ export const StatusColumn = React.memo(function StatusColumnImpl({
                       isOver ? 'text-primary font-medium' : 'text-muted-foreground'
                     )}
                   >
-                    {isOver ? 'Drop task here' : 'No tasks'}
+                    {isOver ? 'Drop task here' : emptyStateMessage}
                   </p>
                 </div>
               </div>
