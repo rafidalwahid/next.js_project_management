@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
+import { useProjects } from '@/hooks/use-data';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,8 @@ export default function TeamMembersPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { hasPermission: canAddMembers } = useHasPermission('team_add');
+  const { projects, isLoading: isLoadingProjects } = useProjects(1, 1); // Just check if any projects exist
+  const hasProjects = projects && projects.length > 0;
 
   // Show loading state when checking auth
   if (status === 'loading') {
@@ -56,6 +59,15 @@ export default function TeamMembersPage() {
           <CardTitle>Team Members</CardTitle>
           <CardDescription>
             View and manage team members in your organization.
+            {!hasProjects && !isLoadingProjects && (
+              <p className="mt-2 text-amber-600">
+                Note: Team members are associated with projects. {canAddMembers ? (
+                  <Link href="/projects/new" className="underline">Create a project</Link>
+                ) : (
+                  <span>Ask an admin to create a project</span>
+                )} to add team members.
+              </p>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

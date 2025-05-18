@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTeamMembers, useRemoveTeamMember } from '@/hooks/use-team-management';
+import { useUsers } from '@/hooks/use-users';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { RoleBadge } from '@/components/ui/role-badge';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
-import { Search, Trash, MoreHorizontal, UserCircle } from 'lucide-react';
+import { Search, Trash, MoreHorizontal, UserCircle, Info } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
 
@@ -55,6 +57,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
   const { data: session } = useSession();
   const { toast } = useToast();
   const { hasPermission: canDeleteTeamMembers } = useHasPermission('team_remove');
+  const { hasPermission: canAddMembers } = useHasPermission('team_add');
 
   const { teamMembers, isLoading, isError, mutate } = useTeamMembers(
     projectId,
@@ -62,6 +65,13 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
     limit,
     searchQuery
   );
+
+  // Fetch users as a fallback when no team members are found
+  const { users, isLoading: isLoadingUsers } = useUsers({
+    search: searchQuery,
+    page: page,
+    limit: limit
+  });
 
   const { removeTeamMember, isRemoving } = useRemoveTeamMember();
 
@@ -142,9 +152,100 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
   }
 
   if (teamMembers.length === 0) {
+    // If we're still loading users, show a loading spinner
+    if (isLoadingUsers) {
+      return (
+        <div className="flex justify-center p-4">
+          <Spinner size="md" />
+        </div>
+      );
+    }
+
     return (
-      <div className="p-4 text-center text-muted-foreground">
-        No team members found.
+      <div className="w-full">
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertTitle>No team members found</AlertTitle>
+          <AlertDescription>
+            Team members are associated with projects. {canAddMembers ? (
+              <span>Create a project first to add team members, or view all users below.</span>
+            ) : (
+              <span>Showing all users instead.</span>
+            )}
+          </AlertDescription>
+        </Alert>
+
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search users..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+          </div>
+        </div>
+
+        {users.length === 0 ? (
+          <div className="p-4 text-center text-muted-foreground">
+            No users found matching your search criteria.
+          </div>
+        ) : (
+          <div className="rounded-md border shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map(user => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.image || ''} alt={user.name || ''} />
+                          <AvatarFallback>
+                            {getUserInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{user.name || 'Unknown'}</div>
+                          <div className="text-xs text-muted-foreground">{user.email}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <RoleBadge role={user.role || 'user'} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/profile/${user.id}`} className="cursor-pointer">
+                              <UserCircle className="mr-2 h-4 w-4" />
+                              View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     );
   }
