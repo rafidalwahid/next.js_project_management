@@ -485,13 +485,19 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     const resolvedParams = await getParams(params);
     const { userId } = resolvedParams;
 
-    // Only users with user_management permission can delete users
+    // Check if user has permission to delete users
+    const hasUserDeletePermission = await PermissionService.hasPermissionById(
+      session.user.id,
+      'user_delete'
+    );
+
+    // Also check for user_management permission as a fallback for backward compatibility
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
       'user_management'
     );
 
-    if (!hasUserManagementPermission) {
+    if (!hasUserDeletePermission && !hasUserManagementPermission) {
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to delete users' },
         { status: 403 }

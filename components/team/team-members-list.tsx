@@ -53,11 +53,20 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
     name: string | null;
     email: string;
   } | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{
+    id: string;
+    name: string | null;
+    email: string;
+  } | null>(null);
+  const [isUserDeleteDialogOpen, setIsUserDeleteDialogOpen] = useState(false);
+  const [isUserDeleting, setIsUserDeleting] = useState(false);
 
   const { data: session } = useSession();
   const { toast } = useToast();
   const { hasPermission: canDeleteTeamMembers } = useHasPermission('team_remove');
   const { hasPermission: canAddMembers } = useHasPermission('team_add');
+  const { hasPermission: canDeleteUsers } = useHasPermission('user_delete');
+  const { hasPermission: canManageUsers } = useHasPermission('user_management');
 
   const { teamMembers, isLoading, isError, mutate } = useTeamMembers(
     projectId,
@@ -67,7 +76,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
   );
 
   // Fetch users as a fallback when no team members are found
-  const { users, isLoading: isLoadingUsers } = useUsers({
+  const { users, isLoading: isLoadingUsers, mutate: mutateUsers } = useUsers({
     search: searchQuery,
     page: page,
     limit: limit
@@ -108,6 +117,24 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
     setConfirmDeleteDialogOpen(true);
   };
 
+  const confirmUserDelete = (user: {
+    id: string;
+    name: string | null;
+    email: string;
+  }) => {
+    if (!canDeleteUsers && !canManageUsers) {
+      toast({
+        title: 'Permission Denied',
+        description: "You don't have permission to delete users.",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUserToDelete(user);
+    setIsUserDeleteDialogOpen(true);
+  };
+
   const handleDelete = async () => {
     if (!teamMemberToDelete) return;
 
@@ -132,6 +159,44 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
         description: error instanceof Error ? error.message : 'Failed to remove team member',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleUserDelete = async () => {
+    if (!userToDelete) return;
+
+    setIsUserDeleting(true);
+
+    try {
+      const response = await fetch(`/api/users/${userToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete user');
+      }
+
+      // Close dialog and reset state
+      setIsUserDeleteDialogOpen(false);
+      setUserToDelete(null);
+
+      toast({
+        title: 'User deleted',
+        description: 'The user has been deleted successfully.',
+      });
+
+      // Refresh the users list
+      mutateUsers();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete user. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUserDeleting(false);
     }
   };
 
@@ -237,6 +302,18 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
                               View Profile
                             </Link>
                           </DropdownMenuItem>
+                          {(canDeleteUsers || canManageUsers) && user.id !== session?.user?.id && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => confirmUserDelete(user)}
+                              >
+                                <Trash className="mr-2 h-4 w-4" />
+                                Delete User
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -247,6 +324,32 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
           </div>
         )}
       </div>
+
+      {/* User Delete Confirmation Dialog */}
+      <Dialog open={isUserDeleteDialogOpen} onOpenChange={setIsUserDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm User Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {userToDelete?.name || userToDelete?.email}?
+              This action cannot be undone and will remove all data associated with this user.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setIsUserDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleUserDelete}
+              disabled={isUserDeleting}
+            >
+              {isUserDeleting ? <Spinner className="mr-2 h-4 w-4" /> : <Trash className="mr-2 h-4 w-4" />}
+              Delete User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     );
   }
 
