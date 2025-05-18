@@ -122,10 +122,27 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
   };
 
   const confirmUserDelete = (user: { id: string; name: string | null; email: string }) => {
+    console.log('Confirming user delete:', {
+      userId: user.id,
+      canDeleteUsers,
+      canManageUsers
+    });
+
     if (!canDeleteUsers && !canManageUsers) {
+      console.log('Permission denied for user deletion');
       toast({
         title: 'Permission Denied',
         description: "You don't have permission to delete users.",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (user.id === session?.user?.id) {
+      console.log('Attempted to delete own account');
+      toast({
+        title: 'Action Denied',
+        description: "You cannot delete your own account.",
         variant: 'destructive',
       });
       return;
@@ -166,15 +183,47 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
     if (!userToDelete) return;
 
     setIsUserDeleting(true);
+    console.log('Attempting to delete user:', userToDelete.id);
 
     try {
+      // Log the request details
+      console.log('Sending DELETE request to:', `/api/users/${userToDelete.id}`);
+
       const response = await fetch(`/api/users/${userToDelete.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
+      console.log('Response status:', response.status);
+
+      // Try to get the response body regardless of status
+      let responseBody;
+      try {
+        responseBody = await response.json();
+        console.log('Response body:', responseBody);
+      } catch (e) {
+        console.log('Could not parse response as JSON:', e);
+      }
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete user');
+        // Special handling for users with associated data
+        if (response.status === 409 && responseBody?.associatedData) {
+          const { teamMembers, projects, tasks, attendanceRecords } = responseBody.associatedData;
+          let detailMessage = 'Cannot delete user with associated data:\n';
+
+          if (teamMembers > 0) detailMessage += `- ${teamMembers} team memberships\n`;
+          if (projects > 0) detailMessage += `- ${projects} projects\n`;
+          if (tasks > 0) detailMessage += `- ${tasks} tasks\n`;
+          if (attendanceRecords > 0) detailMessage += `- ${attendanceRecords} attendance records\n`;
+
+          detailMessage += '\nPlease remove these associations before deleting the user.';
+
+          throw new Error(detailMessage);
+        }
+
+        throw new Error(responseBody?.error || `Failed to delete user (${response.status})`);
       }
 
       // Close dialog and reset state
@@ -187,6 +236,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
       });
 
       // Refresh the users list
+      console.log('Refreshing user list...');
       mutateUsers();
     } catch (error: any) {
       console.error('Error deleting user:', error);

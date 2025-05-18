@@ -474,30 +474,43 @@ export const PATCH: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) 
 
 // DELETE /api/users/[userId] - Delete a user
 export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) => {
+  console.log('DELETE /api/users/[userId] - Request received', { params });
+
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
+      console.log('DELETE /api/users/[userId] - Unauthorized: No session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    console.log('DELETE /api/users/[userId] - Authenticated user:', {
+      userId: session.user.id,
+      userEmail: session.user.email,
+      userRole: session.user.role
+    });
 
     // Extract userId from params safely
     const resolvedParams = await getParams(params);
     const { userId } = resolvedParams;
+    console.log('DELETE /api/users/[userId] - Target user ID:', userId);
 
     // Check if user has permission to delete users
     const hasUserDeletePermission = await PermissionService.hasPermissionById(
       session.user.id,
       'user_delete'
     );
+    console.log('DELETE /api/users/[userId] - Has user_delete permission:', hasUserDeletePermission);
 
     // Also check for user_management permission as a fallback for backward compatibility
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
       'user_management'
     );
+    console.log('DELETE /api/users/[userId] - Has user_management permission:', hasUserManagementPermission);
 
     if (!hasUserDeletePermission && !hasUserManagementPermission) {
+      console.log('DELETE /api/users/[userId] - Permission denied');
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to delete users' },
         { status: 403 }
@@ -510,19 +523,104 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     });
 
     if (!user) {
+      console.log('DELETE /api/users/[userId] - User not found');
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Delete the user
-    await prisma.user.delete({
-      where: { id: userId },
+    console.log('DELETE /api/users/[userId] - Found user:', {
+      userId: user.id,
+      userEmail: user.email,
+      userName: user.name
     });
 
-    return NextResponse.json({
-      message: 'User deleted successfully',
+    // Check if user is trying to delete themselves
+    if (userId === session.user.id) {
+      console.log('DELETE /api/users/[userId] - User attempting to delete themselves');
+      return NextResponse.json(
+        { error: 'You cannot delete your own account' },
+        { status: 400 }
+      );
+    }
+
+    console.log('DELETE /api/users/[userId] - Checking for associated data');
+
+    // Check if user has any associated data that would prevent deletion
+    const teamMembers = await prisma.teamMember.count({
+      where: { userId },
     });
+
+    const projects = await prisma.project.count({
+      where: { createdById: userId },
+    });
+
+    const tasks = await prisma.task.count({
+      where: {
+        OR: [
+          { createdById: userId },
+          { assignedToId: userId }
+        ]
+      },
+    });
+
+    const attendanceRecords = await prisma.attendance.count({
+      where: { userId },
+    });
+
+    console.log('DELETE /api/users/[userId] - Associated data counts:', {
+      teamMembers,
+      projects,
+      tasks,
+      attendanceRecords
+    });
+
+    // If user has associated data, return an error
+    if (teamMembers > 0 || projects > 0 || tasks > 0 || attendanceRecords > 0) {
+      return NextResponse.json(
+        {
+          error: 'Cannot delete user with associated data',
+          details: 'This user has associated data that must be deleted first.',
+          associatedData: {
+            teamMembers,
+            projects,
+            tasks,
+            attendanceRecords
+          }
+        },
+        { status: 409 }
+      );
+    }
+
+    console.log('DELETE /api/users/[userId] - No associated data found, proceeding with deletion');
+
+    try {
+      // Delete the user
+      await prisma.user.delete({
+        where: { id: userId },
+      });
+
+      console.log('DELETE /api/users/[userId] - User deleted successfully');
+
+      return NextResponse.json({
+        message: 'User deleted successfully',
+      });
+    } catch (deleteError: any) {
+      console.error('DELETE /api/users/[userId] - Database error during deletion:', deleteError);
+
+      // Check if this is a foreign key constraint error
+      if (deleteError.code === 'P2003' || deleteError.message.includes('foreign key constraint')) {
+        return NextResponse.json(
+          {
+            error: 'Cannot delete user with associated data',
+            details: 'This user has associated data (projects, tasks, etc.) that must be deleted first.'
+          },
+          { status: 409 }
+        );
+      }
+
+      throw deleteError; // Re-throw for the outer catch block
+    }
   } catch (error: any) {
-    console.error('Error deleting user:', error);
+    console.error('DELETE /api/users/[userId] - Unhandled error:', error);
     return NextResponse.json(
       { error: 'Failed to delete user', details: error.message },
       { status: 500 }
