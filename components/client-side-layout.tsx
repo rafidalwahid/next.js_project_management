@@ -15,6 +15,20 @@ interface ClientSideLayoutProps {
   children: React.ReactNode;
 }
 
+// Define sidebar width constants for consistency
+const SIDEBAR_WIDTHS = {
+  collapsed: {
+    default: '3rem', // 48px
+    lg: '4rem', // 64px
+  },
+  expanded: {
+    default: '14rem', // 224px
+    lg: '15rem', // 240px
+    xl: '16rem', // 256px
+  },
+  mobile: '18rem', // 288px
+};
+
 export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
   // State for sidebar collapse
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -25,9 +39,13 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
 
   // Load sidebar state from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('sidebarCollapsed');
-    if (saved) {
-      setSidebarCollapsed(JSON.parse(saved));
+    try {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved) {
+        setSidebarCollapsed(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading sidebar state:', error);
     }
   }, []);
 
@@ -42,7 +60,11 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
   const toggleSidebar = () => {
     const newState = !sidebarCollapsed;
     setSidebarCollapsed(newState);
-    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
+    try {
+      localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
+    } catch (error) {
+      console.error('Error saving sidebar state:', error);
+    }
   };
 
   return (
@@ -50,19 +72,20 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 w-full md:hidden border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
         <div className="flex h-12 xs:h-14 items-center justify-between px-2 xs:px-3 sm:px-4">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="mr-2 size-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="size-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onClick={() => setMobileOpen(true)}
             >
               <Menu className="size-4" />
               <span className="sr-only">Toggle menu</span>
             </Button>
-            <span className="font-semibold">
-              <span className="md:hidden">PM</span>
-              <span className="hidden md:inline">Project Management</span>
+            <span className="font-semibold truncate">
+              <span className="xs:hidden">PM</span>
+              <span className="hidden xs:inline sm:hidden">Project Mgmt</span>
+              <span className="hidden sm:inline">Project Management</span>
             </span>
           </div>
           <div className="shrink-0">
@@ -74,18 +97,22 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
       <div className="flex-1 flex">
         {/* Mobile Sidebar */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-[240px] p-0">
+          <SheetContent
+            side="left"
+            className="p-0 w-full max-w-[18rem] xs:max-w-[20rem] sm:max-w-[22rem]"
+          >
             <div className="flex flex-col h-full">
               <div className="flex h-14 items-center justify-between border-b border-border px-4 bg-primary text-primary-foreground">
-                <SheetTitle className="font-bold text-base text-primary-foreground">
-                  <span className="sm:hidden">PM</span>
+                <SheetTitle className="font-bold text-base text-primary-foreground truncate">
+                  <span className="xs:hidden">PM</span>
+                  <span className="hidden xs:inline sm:hidden">Project Mgmt</span>
                   <span className="hidden sm:inline">Project Management</span>
                 </SheetTitle>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setMobileOpen(false)}
-                  className="size-8 text-primary-foreground hover:bg-primary-foreground/10 rounded-md"
+                  className="size-8 text-primary-foreground hover:bg-primary-foreground/10 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <PanelLeftClose className="size-4" />
                   <span className="sr-only">Close sidebar</span>
@@ -114,8 +141,18 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
           aria-label="Main navigation"
           className={cn(
             'fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border',
-            sidebarCollapsed ? 'w-[60px] lg:w-[64px]' : 'w-[220px] lg:w-[240px] xl:w-[260px]'
+            sidebarCollapsed
+              ? 'w-[3rem] lg:w-[4rem]'
+              : 'w-[14rem] lg:w-[15rem] xl:w-[16rem]'
           )}
+          style={{
+            // Use CSS variables for consistent sidebar widths
+            '--sidebar-width-collapsed': SIDEBAR_WIDTHS.collapsed.default,
+            '--sidebar-width-collapsed-lg': SIDEBAR_WIDTHS.collapsed.lg,
+            '--sidebar-width-expanded': SIDEBAR_WIDTHS.expanded.default,
+            '--sidebar-width-expanded-lg': SIDEBAR_WIDTHS.expanded.lg,
+            '--sidebar-width-expanded-xl': SIDEBAR_WIDTHS.expanded.xl,
+          } as React.CSSProperties}
         >
           <div className="flex h-14 items-center border-b border-border px-4 bg-primary text-primary-foreground">
             <div
@@ -135,6 +172,7 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
                 size="icon"
                 onClick={toggleSidebar}
                 className="size-8 text-primary-foreground hover:bg-primary-foreground/10 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 {sidebarCollapsed ? (
                   <PanelLeft className="size-4" />
@@ -175,13 +213,13 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
             isMobile ? 'w-full mt-12 xs:mt-14' : '',
             !isMobile &&
               (sidebarCollapsed
-                ? 'ml-[60px] lg:ml-[64px]'
-                : 'ml-[220px] lg:ml-[240px] xl:ml-[260px]'),
+                ? 'ml-[3rem] lg:ml-[4rem]'
+                : 'ml-[14rem] lg:ml-[15rem] xl:ml-[16rem]'),
             'max-w-[1920px] 2xl:mx-auto' // Center content on very large screens
           )}
         >
-          <div className="flex-1 p-3 xs:p-4 md:p-5 lg:p-6 space-y-4 xs:space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex-1 p-3 xs:p-4 md:p-5 lg:p-6">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4 xs:mb-6">
               <div className="grow min-w-0">
                 <Breadcrumbs />
               </div>
@@ -189,7 +227,9 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
                 <TopCornerAttendance />
               </div>
             </div>
-            {children}
+            <div className="space-y-4 xs:space-y-6">
+              {children}
+            </div>
           </div>
         </main>
       </div>

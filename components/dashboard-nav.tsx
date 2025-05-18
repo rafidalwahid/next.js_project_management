@@ -7,8 +7,16 @@ import { useSession } from 'next-auth/react';
 import { LayoutDashboard, Briefcase, CheckSquare, Users, UserCircle, Clock } from 'lucide-react';
 import { AttendanceNavItem } from '@/components/attendance/attendance-nav-item';
 import { TeamNavItem } from '@/components/team/team-nav-item';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-function getNavItems(userId?: string) {
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ElementType;
+  isExpandable?: boolean;
+}
+
+function getNavItems(userId?: string): NavItem[] {
   return [
     {
       title: 'Dashboard',
@@ -51,37 +59,59 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
   const navItems = getNavItems(userId);
 
   return (
-    <nav className={cn('flex flex-col gap-1', collapsed ? 'px-2' : 'px-3')}>
-      {navItems.map(item => {
-        const Icon = item.icon;
-        const isActive = pathname === item.href;
+    <TooltipProvider delayDuration={0}>
+      <nav className="flex flex-col gap-1">
+        {navItems.map(item => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-        if (item.title === 'Attendance') {
-          return <AttendanceNavItem key={item.href} collapsed={collapsed} />;
-        }
+          if (item.title === 'Attendance') {
+            return <AttendanceNavItem key={item.href} collapsed={collapsed} />;
+          }
 
-        if (item.title === 'Team') {
-          return <TeamNavItem key={item.href} collapsed={collapsed} />;
-        }
+          if (item.title === 'Team') {
+            return <TeamNavItem key={item.href} collapsed={collapsed} />;
+          }
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              'group flex items-center rounded-md py-2 text-xs font-medium transition-colors',
-              isActive
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-              collapsed ? 'justify-center h-9 w-9 mx-auto px-0' : 'px-2'
-            )}
-            title={collapsed ? item.title : undefined}
-          >
-            <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-4 w-4 mr-2')} />
-            {!collapsed && <span>{item.title}</span>}
-          </Link>
-        );
-      })}
-    </nav>
+          const navLink = (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'group flex items-center rounded-md py-2 text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+                collapsed
+                  ? 'justify-center size-9 mx-auto px-0'
+                  : 'px-3 h-9'
+              )}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon
+                className={cn(
+                  'shrink-0',
+                  collapsed ? 'size-5' : 'size-4 mr-2'
+                )}
+                aria-hidden="true"
+              />
+              {!collapsed && <span className="truncate">{item.title}</span>}
+            </Link>
+          );
+
+          // Wrap with tooltip only when collapsed
+          return collapsed ? (
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+              <TooltipContent side="right" className="font-medium">
+                {item.title}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            navLink
+          );
+        })}
+      </nav>
+    </TooltipProvider>
   );
 }
