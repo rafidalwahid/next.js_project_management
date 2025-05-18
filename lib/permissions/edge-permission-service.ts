@@ -20,6 +20,7 @@ export class EdgePermissionService {
     "user_management",
     "manage_roles",
     "manage_permissions",
+    "user_delete",
     "project_creation",
     "project_management",
     "project_deletion",
@@ -37,37 +38,6 @@ export class EdgePermissionService {
     "view_dashboard",
     "attendance_management",
     "view_team_attendance"
-  ],
-  "manager": [
-    "user_management",
-    "project_creation",
-    "project_management",
-    "project_deletion",
-    "team_management",
-    "team_add",
-    "team_remove",
-    "team_view",
-    "task_creation",
-    "task_assignment",
-    "task_management",
-    "task_deletion",
-    "view_projects",
-    "edit_profile",
-    "view_dashboard",
-    "attendance_management",
-    "view_team_attendance"
-  ],
-  "user": [
-    "task_creation",
-    "task_management",
-    "view_projects",
-    "edit_profile",
-    "view_dashboard",
-    "team_view"
-  ],
-  "guest": [
-    "view_projects",
-    "view_dashboard"
   ]
 }
 
