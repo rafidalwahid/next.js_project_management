@@ -76,10 +76,14 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
   );
 
   // Fetch users as a fallback when no team members are found
-  const { users, isLoading: isLoadingUsers, mutate: mutateUsers } = useUsers({
+  const {
+    users,
+    isLoading: isLoadingUsers,
+    mutate: mutateUsers,
+  } = useUsers({
     search: searchQuery,
     page: page,
-    limit: limit
+    limit: limit,
   });
 
   const { removeTeamMember, isRemoving } = useRemoveTeamMember();
@@ -117,11 +121,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
     setConfirmDeleteDialogOpen(true);
   };
 
-  const confirmUserDelete = (user: {
-    id: string;
-    name: string | null;
-    email: string;
-  }) => {
+  const confirmUserDelete = (user: { id: string; name: string | null; email: string }) => {
     if (!canDeleteUsers && !canManageUsers) {
       toast({
         title: 'Permission Denied',
@@ -232,7 +232,8 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
           <Info className="h-4 w-4" />
           <AlertTitle>No team members found</AlertTitle>
           <AlertDescription>
-            Team members are associated with projects. {canAddMembers ? (
+            Team members are associated with projects.{' '}
+            {canAddMembers ? (
               <span>Create a project first to add team members, or view all users below.</span>
             ) : (
               <span>Showing all users instead.</span>
@@ -274,9 +275,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={user.image || ''} alt={user.name || ''} />
-                          <AvatarFallback>
-                            {getUserInitials(user.name)}
-                          </AvatarFallback>
+                          <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-medium">{user.name || 'Unknown'}</div>
@@ -324,32 +323,6 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
           </div>
         )}
       </div>
-
-      {/* User Delete Confirmation Dialog */}
-      <Dialog open={isUserDeleteDialogOpen} onOpenChange={setIsUserDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm User Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {userToDelete?.name || userToDelete?.email}?
-              This action cannot be undone and will remove all data associated with this user.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:justify-end">
-            <Button variant="outline" onClick={() => setIsUserDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleUserDelete}
-              disabled={isUserDeleting}
-            >
-              {isUserDeleting ? <Spinner className="mr-2 h-4 w-4" /> : <Trash className="mr-2 h-4 w-4" />}
-              Delete User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     );
   }
 
@@ -384,9 +357,7 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={member.user?.image || ''} alt={member.user?.name || ''} />
-                      <AvatarFallback>
-                        {getUserInitials(member.user?.name)}
-                      </AvatarFallback>
+                      <AvatarFallback>{getUserInitials(member.user?.name)}</AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium">{member.user?.name || 'Unknown'}</div>
@@ -439,21 +410,48 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
           <DialogHeader>
             <DialogTitle>Confirm Team Member Removal</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {teamMemberToDelete?.name || teamMemberToDelete?.email} from the team?
-              This action cannot be undone.
+              Are you sure you want to remove{' '}
+              {teamMemberToDelete?.name || teamMemberToDelete?.email} from the team? This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:justify-end">
             <Button variant="outline" onClick={() => setConfirmDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isRemoving}
-            >
-              {isRemoving ? <Spinner className="mr-2 h-4 w-4" /> : <Trash className="mr-2 h-4 w-4" />}
+            <Button variant="destructive" onClick={handleDelete} disabled={isRemoving}>
+              {isRemoving ? (
+                <Spinner className="mr-2 h-4 w-4" />
+              ) : (
+                <Trash className="mr-2 h-4 w-4" />
+              )}
               Remove Member
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Delete Confirmation Dialog */}
+      <Dialog open={isUserDeleteDialogOpen} onOpenChange={setIsUserDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm User Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {userToDelete?.name || userToDelete?.email}? This
+              action cannot be undone and will remove all data associated with this user.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setIsUserDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleUserDelete} disabled={isUserDeleting}>
+              {isUserDeleting ? (
+                <Spinner className="mr-2 h-4 w-4" />
+              ) : (
+                <Trash className="mr-2 h-4 w-4" />
+              )}
+              Delete User
             </Button>
           </DialogFooter>
         </DialogContent>
