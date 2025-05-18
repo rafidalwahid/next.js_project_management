@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { KanbanBoard } from '@/components/project/kanban-board';
 import { useTaskContext } from '@/hooks/use-task-context';
+import { TaskProvider } from '@/components/project/task-context';
 
 export default function TasksPage() {
   const searchParams = useSearchParams();
@@ -56,8 +57,7 @@ export default function TasksPage() {
   const { users, isLoading: usersLoading } = useUsers({ limit: 100 }); // Fetch all users
   const { toast } = useToast();
 
-  const { tasks, columns, handleAddTask, handleUpdateTask, handleReorderTasks, handleMoveTask } =
-    useTaskContext();
+  // We'll use TaskContext inside the TaskProvider
 
   // Update URL when filters change
   useEffect(() => {
@@ -223,15 +223,45 @@ export default function TasksPage() {
   return (
     <div className="h-full">
       <TaskProvider projectId="all">
-        <KanbanBoard
-          projectId="all"
-          onAddTask={handleAddTask}
-          onEditTask={(taskId) => router.push(`/tasks/${taskId}`)}
-          onDeleteTask={deleteTask}
-          showAddButton={true}
-          emptyStateMessage="No tasks in this column"
+        <TaskBoardContent
+          router={router}
+          deleteTask={deleteTask}
         />
       </TaskProvider>
     </div>
+  );
+}
+
+// Child component that uses TaskContext within the provider
+function TaskBoardContent({
+  router,
+  deleteTask
+}: {
+  router: any;
+  deleteTask: (id: string) => Promise<void>;
+}) {
+  // Now we can safely use the TaskContext because we're inside the provider
+  const {
+    moveTask,
+    toggleTaskCompletion,
+    updateTaskAssignees,
+    refreshTasks
+  } = useTaskContext();
+
+  // Define the handleAddTask function
+  const handleAddTask = (statusId: string) => {
+    // Navigate to create task page with status pre-selected
+    router.push(`/tasks/new?status=${statusId}`);
+  };
+
+  return (
+    <KanbanBoard
+      projectId="all"
+      onAddTask={handleAddTask}
+      onEditTask={(taskId) => router.push(`/tasks/${taskId}`)}
+      onDeleteTask={deleteTask}
+      showAddButton={true}
+      emptyStateMessage="No tasks in this column"
+    />
   );
 }
