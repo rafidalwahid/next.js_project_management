@@ -19,7 +19,7 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
   // State for sidebar collapse
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  
+
   // Get breakpoint information
   const { isMobile, isXs, isLg, isXl, is2xl } = useBreakpoints();
 
@@ -114,9 +114,7 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
           aria-label="Main navigation"
           className={cn(
             'fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border',
-            sidebarCollapsed 
-              ? 'w-[60px] lg:w-[64px]' 
-              : 'w-[220px] lg:w-[240px] xl:w-[260px]'
+            sidebarCollapsed ? 'w-[60px] lg:w-[64px]' : 'w-[220px] lg:w-[240px] xl:w-[260px]'
           )}
         >
           <div className="flex h-14 items-center border-b border-border px-4 bg-primary text-primary-foreground">
@@ -156,7 +154,9 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
             </div>
           </div>
 
-          <div className={cn('border-t border-border bg-muted/50', sidebarCollapsed ? 'p-2' : 'p-3')}>
+          <div
+            className={cn('border-t border-border bg-muted/50', sidebarCollapsed ? 'p-2' : 'p-3')}
+          >
             <UserNav
               compact={sidebarCollapsed}
               showName={!sidebarCollapsed}
@@ -173,11 +173,10 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
           className={cn(
             'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out',
             isMobile ? 'w-full mt-12 xs:mt-14' : '',
-            !isMobile && (
-              sidebarCollapsed 
-                ? 'ml-[60px] lg:ml-[64px]' 
-                : 'ml-[220px] lg:ml-[240px] xl:ml-[260px]'
-            ),
+            !isMobile &&
+              (sidebarCollapsed
+                ? 'ml-[60px] lg:ml-[64px]'
+                : 'ml-[220px] lg:ml-[240px] xl:ml-[260px]'),
             'max-w-[1920px] 2xl:mx-auto' // Center content on very large screens
           )}
         >

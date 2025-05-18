@@ -72,11 +72,7 @@ export const StatusColumn = React.memo(function StatusColumnImpl({
   );
 
   return (
-    <div
-      ref={setNodeRef}
-      className={columnClasses}
-      style={{ minWidth: '220px' }}
-    >
+    <div ref={setNodeRef} className={columnClasses} style={{ minWidth: '220px' }}>
       <div className="p-2 bg-muted/50 rounded-t-md border-b border-border">
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-sm truncate">{status.name}</h3>
@@ -122,18 +118,17 @@ export const StatusColumn = React.memo(function StatusColumnImpl({
       </div>
 
       <div className="flex-1 min-h-[300px] bg-muted/20 rounded-b-md p-2 overflow-y-auto">
-        <SortableContext
-          items={tasks.map(task => task.id)}
-          strategy={verticalListSortingStrategy}
-        >
+        <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {tasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-sm">
                 <div className={emptyStateClasses}>
-                  <p className={cn(
-                    'text-center',
-                    isOver ? 'text-primary font-medium' : 'text-muted-foreground'
-                  )}>
+                  <p
+                    className={cn(
+                      'text-center',
+                      isOver ? 'text-primary font-medium' : 'text-muted-foreground'
+                    )}
+                  >
                     {isOver ? 'Drop task here' : 'No tasks'}
                   </p>
                 </div>

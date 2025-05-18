@@ -21,12 +21,7 @@ interface UseDragDropProps {
   onError?: (error: Error) => void;
 }
 
-export function useDragDrop({
-  columns,
-  onReorderTasks,
-  onMoveTask,
-  onError,
-}: UseDragDropProps) {
+export function useDragDrop({ columns, onReorderTasks, onMoveTask, onError }: UseDragDropProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [localColumns, setLocalColumns] = useState(columns);
 
@@ -67,7 +62,7 @@ export function useDragDrop({
       if (activeData.columnId !== overData.columnId) {
         // Moving between columns
         await onMoveTask(activeData.task.id, activeData.columnId, overData.columnId);
-        
+
         const { sourceColumn, targetColumn } = moveTaskBetweenColumns(
           localColumns.find(c => c.id === activeData.columnId)!,
           localColumns.find(c => c.id === overData.columnId)!,
@@ -93,11 +88,7 @@ export function useDragDrop({
         await onReorderTasks(column.id, reorderedTasks);
 
         setLocalColumns(columns =>
-          columns.map(col =>
-            col.id === column.id
-              ? { ...col, tasks: reorderedTasks }
-              : col
-          )
+          columns.map(col => (col.id === column.id ? { ...col, tasks: reorderedTasks } : col))
         );
       }
     } catch (error) {
@@ -137,9 +128,7 @@ export function useDragDrop({
   };
 
   const activeTask = activeId
-    ? localColumns
-        .flatMap(col => col.tasks)
-        .find(task => task.id === activeId)
+    ? localColumns.flatMap(col => col.tasks).find(task => task.id === activeId)
     : null;
 
   return {
@@ -151,4 +140,4 @@ export function useDragDrop({
     handleDragEnd,
     handleDragOver,
   };
-} 
+}

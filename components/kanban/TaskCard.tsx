@@ -17,13 +17,7 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, columnId, isDragging, onUpdate }: TaskCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: task.id,
     data: {
       task,
@@ -47,9 +41,7 @@ export function TaskCard({ task, columnId, isDragging, onUpdate }: TaskCardProps
     <Card
       ref={setNodeRef}
       style={style}
-      className={`p-3 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'shadow-lg' : ''
-      }`}
+      className={`p-3 cursor-grab active:cursor-grabbing ${isDragging ? 'shadow-lg' : ''}`}
       {...attributes}
       {...listeners}
     >
@@ -72,7 +64,7 @@ export function TaskCard({ task, columnId, isDragging, onUpdate }: TaskCardProps
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {task.assignees?.map((assignee) => (
+            {task.assignees?.map(assignee => (
               <Avatar key={assignee.id} className="h-6 w-6">
                 <AvatarImage src={assignee.avatar} alt={assignee.name} />
                 <AvatarFallback>{assignee.name[0]}</AvatarFallback>
@@ -88,4 +80,4 @@ export function TaskCard({ task, columnId, isDragging, onUpdate }: TaskCardProps
       </div>
     </Card>
   );
-} 
+}

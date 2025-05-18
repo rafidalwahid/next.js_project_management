@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 
 async function updateEdgePermissions() {
   console.log('Starting edge permissions update...');
-  
+
   try {
     // Get all roles with their permissions
     console.log('Fetching roles and permissions from database...');
@@ -35,32 +35,42 @@ async function updateEdgePermissions() {
     // Create a mapping of role names to permission names
     const rolePermissions = {};
 
-    roles.forEach(role => {
-      rolePermissions[role.name] = role.permissions.map(rp => rp.permission.name);
-      console.log(`Role "${role.name}" has ${role.permissions.length} permissions`);
+    roles.forEach((role) => {
+      rolePermissions[role.name] = role.permissions.map(
+        (rp) => rp.permission.name,
+      );
+      console.log(
+        `Role "${role.name}" has ${role.permissions.length} permissions`,
+      );
     });
 
     // Read the current edge-permission-service.ts file
-    const filePath = path.join(process.cwd(), 'lib', 'permissions', 'edge-permission-service.ts');
+    const filePath = path.join(
+      process.cwd(),
+      'lib',
+      'permissions',
+      'edge-permission-service.ts',
+    );
     console.log(`Reading file: ${filePath}`);
-    
+
     if (!fs.existsSync(filePath)) {
       console.error(`File not found: ${filePath}`);
       return false;
     }
-    
+
     const fileContent = fs.readFileSync(filePath, 'utf8');
     console.log(`File read successfully (${fileContent.length} bytes)`);
 
     // Find the ROLE_PERMISSIONS section
-    const startMarker = 'private static readonly ROLE_PERMISSIONS: Record<string, string[]> = ';
+    const startMarker =
+      'private static readonly ROLE_PERMISSIONS: Record<string, string[]> = ';
     const startIndex = fileContent.indexOf(startMarker);
-    
+
     if (startIndex === -1) {
       console.error('Could not find ROLE_PERMISSIONS section in the file');
       return false;
     }
-    
+
     const actualStartIndex = startIndex + startMarker.length;
     console.log(`Found ROLE_PERMISSIONS section at position ${startIndex}`);
 
@@ -115,7 +125,7 @@ async function updateEdgePermissions() {
     console.log('Writing updated file...');
     fs.writeFileSync(filePath, newContent);
     console.log('Edge permissions updated successfully');
-    
+
     return true;
   } catch (error) {
     console.error('Error updating edge permissions:', error);
@@ -131,7 +141,7 @@ console.log('Node.js version:', process.version);
 console.log('Current working directory:', process.cwd());
 
 updateEdgePermissions()
-  .then(success => {
+  .then((success) => {
     if (success) {
       console.log('Edge permissions update completed successfully');
       process.exit(0);
@@ -140,7 +150,7 @@ updateEdgePermissions()
       process.exit(1);
     }
   })
-  .catch(error => {
+  .catch((error) => {
     console.error('Unhandled error during edge permissions update:', error);
     process.exit(1);
   });

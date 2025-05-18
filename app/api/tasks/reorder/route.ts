@@ -37,37 +37,38 @@ export async function POST(request: NextRequest) {
 
     if (!hasPermission) {
       return NextResponse.json({ error }, { status: error === 'Task not found' ? 404 : 403 });
-    }    try {
-      // If the task doesn't have an order value or it's 0, initialize it
-      if (task.order === 0) {
-        // Update the task with a default order value
-        await prisma.task.update({
-          where: { id: taskId },
-          data: { order: 1000 },
-        });
+    }
 
-        // Update our local copy of the task
-        task.order = 1000;
-        console.log(`Initialized order value for task ${taskId} to 1000`);
+    // If the task doesn't have an order value or it's 0, initialize it
+    if (task.order === 0) {
+      // Update the task with a default order value
+      await prisma.task.update({
+        where: { id: taskId },
+        data: { order: 1000 },
+      });
+
+      // Update our local copy of the task
+      task.order = 1000;
+      console.log(`Initialized order value for task ${taskId} to 1000`);
+    }
+
+    // If newParentId is provided, verify it exists and belongs to the same project
+    if (newParentId) {
+      const newParent = await prisma.task.findUnique({
+        where: { id: newParentId },
+        select: { projectId: true },
+      });
+
+      if (!newParent) {
+        return NextResponse.json({ error: 'New parent task not found' }, { status: 404 });
       }
 
-      // If newParentId is provided, verify it exists and belongs to the same project
-      if (newParentId) {
-        const newParent = await prisma.task.findUnique({
-          where: { id: newParentId },
-          select: { projectId: true },
-        });
-
-        if (!newParent) {
-          return NextResponse.json({ error: 'New parent task not found' }, { status: 404 });
-        }
-
-        if (newParent.projectId !== task.projectId) {
-          return NextResponse.json(
-            { error: 'Cannot move task to a different project' },
-            { status: 400 }
-          );
-        }
+      if (newParent.projectId !== task.projectId) {
+        return NextResponse.json(
+          { error: 'Cannot move task to a different project' },
+          { status: 400 }
+        );
+      }
 
       // Prevent circular references
       if (newParentId === taskId) {

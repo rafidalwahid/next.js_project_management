@@ -11,14 +11,7 @@ interface Props {
 }
 
 export function SortableTask({ task, columnId, view }: Props) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: {
       type: 'task',
@@ -94,4 +87,4 @@ export function SortableTask({ task, columnId, view }: Props) {
       </div>
     </div>
   );
-} 
+}

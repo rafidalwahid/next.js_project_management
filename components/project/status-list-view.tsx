@@ -29,13 +29,7 @@ interface StatusListViewProps {
  * This is a wrapper around StatusListViewDndKit that handles status and task management
  */
 export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
-  const {
-    tasks,
-    statuses,
-    isLoading,
-    refreshTasks,
-    deleteTask,
-  } = useTaskContext();
+  const { tasks, statuses, isLoading, refreshTasks, deleteTask } = useTaskContext();
 
   const [editingStatusId, setEditingStatusId] = useState<string | null>(null);
   const [editingStatusName, setEditingStatusName] = useState<string>('');
@@ -158,9 +152,9 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
       <StatusListViewDndKit
         projectId={projectId}
         onEditTask={onEditTask}
-        onDeleteTask={(taskId) => setDeleteTaskId(taskId)}
+        onDeleteTask={taskId => setDeleteTaskId(taskId)}
         onEditStatus={handleEditStatus}
-        onDeleteStatus={(statusId) => setDeleteStatusId(statusId)}
+        onDeleteStatus={statusId => setDeleteStatusId(statusId)}
         onAddTask={handleAddTask}
       />
 
@@ -212,9 +206,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Edit Status</AlertDialogTitle>
-              <AlertDialogDescription>
-                Update the name of this status.
-              </AlertDialogDescription>
+              <AlertDialogDescription>Update the name of this status.</AlertDialogDescription>
             </AlertDialogHeader>
             <div className="flex items-center gap-2 py-4">
               <Input
@@ -233,9 +225,7 @@ export function StatusListView({ projectId, onEditTask }: StatusListViewProps) {
             </div>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleCancelEdit}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSaveStatusName}>
-                Save Changes
-              </AlertDialogAction>
+              <AlertDialogAction onClick={handleSaveStatusName}>Save Changes</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

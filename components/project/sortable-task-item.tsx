@@ -27,14 +27,7 @@ export const SortableTaskItem = memo(function SortableTaskItemComponent({
   onDelete,
   onUpdateAssignees,
 }: SortableTaskItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: {
       type: 'task',
@@ -59,10 +52,7 @@ export const SortableTaskItem = memo(function SortableTaskItemComponent({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        'touch-manipulation',
-        isDragging ? 'opacity-50 z-10' : ''
-      )}
+      className={cn('touch-manipulation', isDragging ? 'opacity-50 z-10' : '')}
       data-task-id={task.id}
     >
       <TaskCard

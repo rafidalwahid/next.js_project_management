@@ -16,7 +16,7 @@ export default [
       sourceType: 'module',
       globals: {
         console: true,
-        process: true
+        process: true,
       },
     },
     rules: {

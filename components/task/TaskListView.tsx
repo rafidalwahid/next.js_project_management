@@ -38,22 +38,14 @@ export function TaskListView({ columns, onError }: TaskListViewProps) {
       onDragOver={handleDragOver}
     >
       <div className="flex flex-col gap-4 h-full overflow-y-auto p-4">
-        {localColumns.map((column) => (
-          <TaskListColumn
-            key={column.id}
-            column={column}
-          />
+        {localColumns.map(column => (
+          <TaskListColumn key={column.id} column={column} />
         ))}
       </div>
 
       <DragOverlay>
-        {activeId && activeTask ? (
-          <TaskListItem
-            task={activeTask}
-            isDragging
-          />
-        ) : null}
+        {activeId && activeTask ? <TaskListItem task={activeTask} isDragging /> : null}
       </DragOverlay>
     </DndContext>
   );
-} 
+}

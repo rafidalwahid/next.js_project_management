@@ -27,7 +27,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableTask } from './tasks/sortable-task';
-import { handleDragStart, handleDragEnd, handleDragOver, reorderTasks, moveTaskBetweenColumns } from '@/lib/dnd-utils';
+import {
+  handleDragStart,
+  handleDragEnd,
+  handleDragOver,
+  reorderTasks,
+  moveTaskBetweenColumns,
+} from '@/lib/dnd-utils';
 import { useToast } from '@/hooks/use-toast';
 
 interface Props {
@@ -115,7 +121,7 @@ export default function TaskListView({
       if (activeData.columnId !== overData.columnId) {
         // Moving between columns
         await onMoveTask(activeData.task.id, activeData.columnId, overData.columnId);
-        
+
         const { sourceColumn, targetColumn } = moveTaskBetweenColumns(
           localColumns.find(c => c.id === activeData.columnId)!,
           localColumns.find(c => c.id === overData.columnId)!,
@@ -141,11 +147,7 @@ export default function TaskListView({
         await onReorderTasks(column.id, reorderedTasks);
 
         setLocalColumns(columns =>
-          columns.map(col =>
-            col.id === column.id
-              ? { ...col, tasks: reorderedTasks }
-              : col
-          )
+          columns.map(col => (col.id === column.id ? { ...col, tasks: reorderedTasks } : col))
         );
       }
     } catch (error) {
@@ -189,9 +191,7 @@ export default function TaskListView({
   };
 
   const activeTask = activeId
-    ? localColumns
-        .flatMap(col => col.tasks)
-        .find(task => task.id === activeId)
+    ? localColumns.flatMap(col => col.tasks).find(task => task.id === activeId)
     : null;
 
   return (
@@ -295,12 +295,7 @@ export default function TaskListView({
                 strategy={verticalListSortingStrategy}
               >
                 {column.tasks.map(task => (
-                  <SortableTask
-                    key={task.id}
-                    task={task}
-                    columnId={column.id}
-                    view="list"
-                  />
+                  <SortableTask key={task.id} task={task} columnId={column.id} view="list" />
                 ))}
               </SortableContext>
               {column.tasks.length === 0 && !newTask && (
@@ -314,11 +309,7 @@ export default function TaskListView({
       </div>
       <DragOverlay>
         {activeTask ? (
-          <SortableTask
-            task={activeTask}
-            columnId={activeTask.status}
-            view="list"
-          />
+          <SortableTask task={activeTask} columnId={activeTask.status} view="list" />
         ) : null}
       </DragOverlay>
     </DndContext>

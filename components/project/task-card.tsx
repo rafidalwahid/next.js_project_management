@@ -211,11 +211,7 @@ function TaskCardMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -276,10 +272,7 @@ export function AssigneeAvatars({
     <div className="flex items-center">
       <div className="flex -space-x-2 overflow-hidden">
         {assignees.slice(0, maxDisplay).map(assignee => (
-          <Avatar
-            key={assignee.id}
-            className="h-6 w-6 xs:h-7 xs:w-7 border border-black"
-          >
+          <Avatar key={assignee.id} className="h-6 w-6 xs:h-7 xs:w-7 border border-black">
             {assignee.user.image ? (
               <AvatarImage src={assignee.user.image} alt={assignee.user.name || 'Team member'} />
             ) : (
@@ -291,9 +284,7 @@ export function AssigneeAvatars({
         ))}
 
         {assignees.length > maxDisplay && (
-          <div
-            className="flex items-center justify-center h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black bg-muted text-[10px] xs:text-xs font-medium"
-          >
+          <div className="flex items-center justify-center h-6 w-6 xs:h-7 xs:w-7 rounded-full border border-black bg-muted text-[10px] xs:text-xs font-medium">
             +{assignees.length - maxDisplay}
           </div>
         )}

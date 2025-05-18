@@ -56,7 +56,8 @@ export default function TasksPage() {
   const { users, isLoading: usersLoading } = useUsers({ limit: 100 }); // Fetch all users
   const { toast } = useToast();
 
-  const { tasks, columns, handleAddTask, handleUpdateTask, handleReorderTasks, handleMoveTask } = useTaskContext();
+  const { tasks, columns, handleAddTask, handleUpdateTask, handleReorderTasks, handleMoveTask } =
+    useTaskContext();
 
   // Update URL when filters change
   useEffect(() => {

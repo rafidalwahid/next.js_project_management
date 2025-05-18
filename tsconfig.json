@@ -19,7 +19,8 @@
       {
         "name": "next"
       }
-    ],    "paths": {
+    ],
+    "paths": {
       "@/*": ["./*"],
       "@prisma/client": ["./prisma/generated/client"],
       "@prisma/client/edge": ["./prisma/generated/client/edge"]

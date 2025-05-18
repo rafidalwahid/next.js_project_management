@@ -63,7 +63,7 @@ export function calculateOrderBetween(
       // Not enough space between tasks, return a value slightly higher than beforeTaskOrder
       return beforeTaskOrder + 1;
     }
-    
+
     return Math.floor((beforeTaskOrder + afterTaskOrder) / 2);
   }
 
@@ -109,8 +109,10 @@ export async function rebalanceTaskOrders(
 
     // Execute all updates in a transaction
     await prisma.$transaction(updates);
-    
-    console.log(`Rebalanced ${tasks.length} tasks for project ${projectId}, parent ${parentId || 'none'}`);
+
+    console.log(
+      `Rebalanced ${tasks.length} tasks for project ${projectId}, parent ${parentId || 'none'}`
+    );
   } catch (error) {
     console.error('Error rebalancing task orders:', error);
     // Don't rethrow - we want to continue even if rebalancing fails
@@ -155,17 +157,17 @@ export async function needsRebalancing(
       return true;
     }
   }
-  
+
   // Check if the spacing between tasks is highly irregular (some are very close, others far apart)
   const diffs = [];
   for (let i = 1; i < tasks.length; i++) {
     diffs.push(tasks[i].order - tasks[i - 1].order);
   }
-  
+
   if (diffs.length > 1) {
     const maxDiff = Math.max(...diffs);
     const minDiff = Math.min(...diffs);
-    
+
     // If the ratio between max and min diff is too high, we should rebalance
     if (maxDiff / minDiff > 100) {
       return true;

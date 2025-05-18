@@ -2,10 +2,14 @@
   "name": "project_management",
   "version": "0.1.0",
   "private": true,
-  "type": "module",  "scripts": {
+  "type": "module",
+  "scripts": {
     "dev": "next dev",
     "build": "node scripts/verify-prisma.js && node scripts/build.js",
     "build:safe": "node scripts/build.js",
+    "build:direct": "node scripts/direct-build.js",
+    "build:minimal": "npx cross-env NEXT_WEBPACK_DISABLE_WATCHING=1 CHOKIDAR_USEPOLLING=false npx prisma generate && npx next build",
+    "build:server": "node scripts/server-build.js",
     "start": "next start",
     "start:pm2": "pm2 start npm --name \"project-management\" -- start",
     "start:custom": "node server.js",

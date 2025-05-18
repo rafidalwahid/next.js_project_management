@@ -8,10 +8,7 @@ import type { Task, Column } from '@/types';
  * Enhanced keyboard coordinates getter with custom behavior
  * Extends the default implementation with additional keyboard shortcuts
  */
-export const sortableKeyboardCoordinates: KeyboardCoordinateGetter = (
-  event,
-  { context }
-) => {
+export const sortableKeyboardCoordinates: KeyboardCoordinateGetter = (event, { context }) => {
   // Use the default implementation as a base
   const coordinates = defaultSortableKeyboardCoordinates(event, { context });
 
@@ -125,7 +122,7 @@ export type ColumnDragData = {
 export function handleDragStart(event: DragStartEvent) {
   const { active } = event;
   const data = active.data.current as TaskDragData | ColumnDragData;
-  
+
   if (data.type === 'task') {
     document.body.style.cursor = 'grabbing';
   }
@@ -169,7 +166,7 @@ export function handleDragOver(event: DragOverEvent) {
 export function reorderTasks(tasks: Task[], activeId: string, overId: string): Task[] {
   const oldIndex = tasks.findIndex(task => task.id === activeId);
   const newIndex = tasks.findIndex(task => task.id === overId);
-  
+
   return arrayMove(tasks, oldIndex, newIndex);
 }
 
@@ -184,7 +181,7 @@ export function moveTaskBetweenColumns(
 
   const sourceTasks = sourceColumn.tasks.filter(t => t.id !== taskId);
   const overIndex = targetColumn.tasks.findIndex(t => t.id === overTaskId);
-  
+
   const targetTasks = [...targetColumn.tasks];
   targetTasks.splice(overIndex, 0, { ...task, status: targetColumn.id });
 

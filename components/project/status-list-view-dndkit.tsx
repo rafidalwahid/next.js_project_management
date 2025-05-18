@@ -122,7 +122,21 @@ function StatusSection({
               onClick={() => onEditStatus(status)}
             >
               <span className="sr-only">Edit status</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-pencil"
+              >
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                <path d="m15 5 4 4" />
+              </svg>
             </Button>
           )}
 
@@ -134,7 +148,24 @@ function StatusSection({
               onClick={() => onDeleteStatus(status.id)}
             >
               <span className="sr-only">Delete status</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-trash-2"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <line x1="10" x2="10" y1="11" y2="17" />
+                <line x1="14" x2="14" y1="11" y2="17" />
+              </svg>
             </Button>
           )}
 
@@ -348,7 +379,7 @@ export function StatusListViewDndKit({
       // Update the status that's being dragged over
       setStatusesWithDragOver(prev => ({
         ...prev,
-        [overId]: true
+        [overId]: true,
       }));
 
       // If dragging over a different status than the task is currently in
@@ -357,11 +388,7 @@ export function StatusListViewDndKit({
 
         // Update the cloned tasks for optimistic UI updates
         setClonedTasks(prev =>
-          prev.map(task =>
-            task.id === activeTask.id
-              ? { ...task, statusId: overId }
-              : task
-          )
+          prev.map(task => (task.id === activeTask.id ? { ...task, statusId: overId } : task))
         );
       }
     }
@@ -377,16 +404,14 @@ export function StatusListViewDndKit({
         // Update the status that's being dragged over
         setStatusesWithDragOver(prev => ({
           ...prev,
-          [overTask.statusId]: true
+          [overTask.statusId]: true,
         }));
 
         // Update the cloned tasks for optimistic UI updates
         setClonedTasks(prev => {
           // First, update the status of the active task
           const updatedTasks = prev.map(task =>
-            task.id === activeTask.id
-              ? { ...task, statusId: overTask.statusId }
-              : task
+            task.id === activeTask.id ? { ...task, statusId: overTask.statusId } : task
           );
 
           // Then, reorder the tasks within the new status
@@ -528,12 +553,7 @@ export function StatusListViewDndKit({
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleAllStatuses}
-          className="text-xs"
-        >
+        <Button variant="outline" size="sm" onClick={toggleAllStatuses} className="text-xs">
           {expandAll ? 'Collapse All' : 'Expand All'}
         </Button>
       </div>

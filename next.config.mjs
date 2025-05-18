@@ -53,7 +53,7 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Enable caching
     config.cache = true;
-    
+
     // Handle Prisma client generation for server builds
     if (isServer) {
       config.resolve = {
@@ -65,7 +65,7 @@ const nextConfig = {
         }
       };
     }
-    
+
     return config;
   },
 }

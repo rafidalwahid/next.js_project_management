@@ -6,7 +6,7 @@ import ServerSideLayout from './server-side-layout';
 // Import client-side layout with SSR disabled
 const ClientSideLayout = dynamic(() => import('./client-side-layout'), {
   ssr: false,
-  loading: () => <ServerSideLayout>{null}</ServerSideLayout>
+  loading: () => <ServerSideLayout>{null}</ServerSideLayout>,
 });
 
 interface DashboardLayoutProps {
@@ -14,12 +14,9 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-
   return (
     <div className="min-h-screen flex flex-col">
-      <ClientSideLayout>
-        {children}
-      </ClientSideLayout>
+      <ClientSideLayout>{children}</ClientSideLayout>
     </div>
   );
 }

@@ -134,11 +134,7 @@ export function TaskProvider({
       }
 
       // Status filter - only run this check if we have status filters
-      if (
-        statusSet.size > 0 &&
-        task.statusId &&
-        !statusSet.has(task.statusId)
-      ) {
+      if (statusSet.size > 0 && task.statusId && !statusSet.has(task.statusId)) {
         return false;
       }
 
@@ -243,7 +239,7 @@ export function TaskProvider({
             ...task,
             statusId,
             // Also update the completed state based on the target status
-            completed: targetStatus.isCompletedStatus ?? task.completed
+            completed: targetStatus.isCompletedStatus ?? task.completed,
           };
         }
         return task;
@@ -258,12 +254,14 @@ export function TaskProvider({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             statusId,
-            order // Include order if we have it
+            order, // Include order if we have it
           }),
         });
 
         if (!statusResponse.ok) {
-          const errorData = await statusResponse.json().catch(() => ({ error: 'Failed to update task status' }));
+          const errorData = await statusResponse
+            .json()
+            .catch(() => ({ error: 'Failed to update task status' }));
           throw new Error(errorData.error || 'Failed to update task status');
         }
       }
@@ -333,9 +331,10 @@ export function TaskProvider({
     const newCompleted = !task.completed;
 
     // Find appropriate status based on new completion state
-    const targetStatus = statuses.find(s =>
-      s.isCompletedStatus === newCompleted &&
-      (s.isDefault || (!newCompleted && task.statusId === s.id))
+    const targetStatus = statuses.find(
+      s =>
+        s.isCompletedStatus === newCompleted &&
+        (s.isDefault || (!newCompleted && task.statusId === s.id))
     );
 
     setTasks(prev =>

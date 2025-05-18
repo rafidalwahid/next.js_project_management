@@ -50,14 +50,8 @@ export function KanbanBoard({
   onDeleteStatus,
   onAddTask,
 }: KanbanBoardProps) {
-  const {
-    tasks,
-    statuses,
-    moveTask,
-    toggleTaskCompletion,
-    updateTaskAssignees,
-    isTasksLoading,
-  } = useTaskContext();
+  const { tasks, statuses, moveTask, toggleTaskCompletion, updateTaskAssignees, isTasksLoading } =
+    useTaskContext();
 
   const { toast } = useToast();
 
@@ -130,11 +124,7 @@ export function KanbanBoard({
 
         // Update the cloned tasks for optimistic UI updates
         setClonedTasks(prev =>
-          prev.map(task =>
-            task.id === activeTask.id
-              ? { ...task, statusId: overId }
-              : task
-          )
+          prev.map(task => (task.id === activeTask.id ? { ...task, statusId: overId } : task))
         );
 
         // Log for debugging
@@ -154,9 +144,7 @@ export function KanbanBoard({
         setClonedTasks(prev => {
           // First, update the status of the active task
           const updatedTasks = prev.map(task =>
-            task.id === activeTask.id
-              ? { ...task, statusId: overTask.statusId }
-              : task
+            task.id === activeTask.id ? { ...task, statusId: overTask.statusId } : task
           );
 
           // Then, reorder the tasks within the new status
@@ -258,7 +246,7 @@ export function KanbanBoard({
         description: 'There was a problem moving the task. Please try again.',
         variant: 'destructive',
       });
-      
+
       // Force a complete refresh of tasks to ensure consistency
       try {
         if (activeTaskData) {
@@ -266,7 +254,7 @@ export function KanbanBoard({
             title: 'Refreshing task data',
             description: 'Synchronizing with the server...',
           });
-          
+
           // Explicitly refresh tasks to recover from the error
           await fetchTasks();
         }
@@ -274,9 +262,7 @@ export function KanbanBoard({
         console.error('Error refreshing tasks after failed drag and drop:', refreshError);
         // Last resort - try one more time after a delay
         setTimeout(() => {
-          fetchTasks().catch(e => 
-            console.error('Final attempt to refresh tasks failed:', e)
-          );
+          fetchTasks().catch(e => console.error('Final attempt to refresh tasks failed:', e));
         }, 2000);
       }
     } finally {
@@ -350,7 +336,7 @@ export function KanbanBoard({
             <span className="sr-only">Scroll left</span>
           </Button>
         </div>
-        
+
         <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 md:hidden">
           <Button
             variant="outline"

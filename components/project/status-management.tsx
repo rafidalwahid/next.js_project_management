@@ -17,7 +17,24 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ProjectStatus {
   id: string;
@@ -33,6 +50,79 @@ interface StatusManagementProps {
   projectId: string;
 }
 
+/**
+ * A sortable status item component that can be dragged and dropped
+ */
+function SortableStatusItem({
+  status,
+  onEdit,
+  onDelete,
+}: {
+  status: ProjectStatus;
+  onEdit: (status: ProjectStatus) => void;
+  onDelete: (statusId: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: status.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between p-3 border rounded-md mb-2"
+    >
+      <div className="flex items-center gap-3">
+        <div {...attributes} {...listeners} className="cursor-grab">
+          <Move className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div
+          className="w-4 h-4 rounded-full"
+          style={{ backgroundColor: status.color }}
+        />
+        <div>
+          <div className="font-medium flex items-center">
+            {status.name}
+            {status.isDefault && (
+              <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                Default
+              </span>
+            )}
+          </div>
+          {status.description && (
+            <div className="text-xs text-muted-foreground">
+              {status.description}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(status)}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(status.id)}
+          disabled={status.isDefault && status.isDefault}
+        >
+          <Trash className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function StatusManagement({ projectId }: StatusManagementProps) {
   const [statuses, setStatuses] = useState<ProjectStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +136,16 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  // Set up sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fetch statuses
   const fetchStatuses = async () => {
@@ -175,27 +275,31 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
     }
   };
 
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    if (sourceIndex === destinationIndex) return;
+    // Return if no over item or if the item is dropped onto itself
+    if (!over || active.id === over.id) return;
 
     try {
+      // Get the indices for the source and destination
+      const sourceIndex = statuses.findIndex(status => status.id === active.id);
+      const destinationIndex = statuses.findIndex(status => status.id === over.id);
+
+      if (sourceIndex === -1 || destinationIndex === -1) return;
+
       // Optimistically update the UI
-      const newStatuses = [...statuses];
-      const [movedStatus] = newStatuses.splice(sourceIndex, 1);
-      newStatuses.splice(destinationIndex, 0, movedStatus);
-      setStatuses(newStatuses);
+      setStatuses(prev => {
+        const newStatuses = arrayMove(prev, sourceIndex, destinationIndex);
+        return newStatuses;
+      });
 
       // Send the update to the server
       const response = await fetch(`/api/projects/${projectId}/statuses/reorder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          statusId: result.draggableId,
+          statusId: active.id as string,
           sourceIndex,
           destinationIndex,
         }),
@@ -204,8 +308,6 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to reorder statuses');
-        // If there's an error, we should refetch to get the correct order
-        await fetchStatuses();
       }
     } catch (error) {
       toast({
@@ -302,71 +404,31 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
             No statuses defined. Create your first status to get started.
           </div>
         ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="statuses">
-              {provided => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                  {statuses.map((status, index) => (
-                    <Draggable key={status.id} draggableId={status.id} index={index}>
-                      {provided => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className="flex items-center justify-between p-3 border rounded-md"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div {...provided.dragHandleProps} className="cursor-move">
-                              <Move className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div
-                              className="w-4 h-4 rounded-full"
-                              style={{ backgroundColor: status.color }}
-                            />
-                            <div>
-                              <div className="font-medium flex items-center">
-                                {status.name}
-                                {status.isDefault && (
-                                  <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                                    Default
-                                  </span>
-                                )}
-                              </div>
-                              {status.description && (
-                                <div className="text-xs text-muted-foreground">
-                                  {status.description}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingStatus(status);
-                                setIsEditDialogOpen(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteStatus(status.id)}
-                              disabled={status.isDefault && statuses.length === 1}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext
+              items={statuses.map(status => status.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {statuses.map(status => (
+                  <SortableStatusItem
+                    key={status.id}
+                    status={status}
+                    onEdit={(status) => {
+                      setEditingStatus(status);
+                      setIsEditDialogOpen(true);
+                    }}
+                    onDelete={handleDeleteStatus}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         {/* Edit Status Dialog */}

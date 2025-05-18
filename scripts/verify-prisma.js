@@ -25,18 +25,18 @@ const colors = {
 if (!fs.existsSync(clientPath)) {
   console.error(`${colors.red}[ERROR]${colors.reset} Prisma client not found at ${clientPath}`);
   console.log(`${colors.yellow}[INFO]${colors.reset} Generating Prisma client...`);
-  
+
   try {
     // For ESM compatibility, use dynamic import
     const { execSync } = await import('node:child_process');
     execSync('npx prisma generate', { stdio: 'inherit', cwd: rootDir });
-    
+
     // Check again after generation
     if (!fs.existsSync(clientPath)) {
       console.error(`${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client`);
       process.exit(1);
     }
-    
+
     console.log(`${colors.green}[SUCCESS]${colors.reset} Prisma client generated successfully`);
   } catch (error) {
     console.error(`${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client: ${error.message}`);

@@ -14,11 +14,11 @@ const BREAKPOINTS = {
 
 // Define the shape of our breakpoints state
 export interface BreakpointState {
-  isXs: boolean;  // < 480px
-  isSm: boolean;  // >= 480px and < 640px
-  isMd: boolean;  // >= 640px and < 768px
-  isLg: boolean;  // >= 768px and < 1024px
-  isXl: boolean;  // >= 1024px and < 1280px
+  isXs: boolean; // < 480px
+  isSm: boolean; // >= 480px and < 640px
+  isMd: boolean; // >= 640px and < 768px
+  isLg: boolean; // >= 768px and < 1024px
+  isXl: boolean; // >= 1024px and < 1280px
   is2xl: boolean; // >= 1280px
   isMobile: boolean; // < 768px (md)
   // Helper functions
@@ -143,11 +143,7 @@ export function BreakpointsProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('resize', updateBreakpoints);
   }, [isBrowser]);
 
-  return (
-    <BreakpointsContext.Provider value={breakpoints}>
-      {children}
-    </BreakpointsContext.Provider>
-  );
+  return <BreakpointsContext.Provider value={breakpoints}>{children}</BreakpointsContext.Provider>;
 }
 
 /**
@@ -163,8 +159,9 @@ export function useIsMobile() {
 import dynamic from 'next/dynamic';
 
 export const ClientBreakpointsProvider = dynamic(
-  () => Promise.resolve(({ children }: { children: ReactNode }) => (
-    <BreakpointsProvider>{children}</BreakpointsProvider>
-  )),
+  () =>
+    Promise.resolve(({ children }: { children: ReactNode }) => (
+      <BreakpointsProvider>{children}</BreakpointsProvider>
+    )),
   { ssr: false }
 );

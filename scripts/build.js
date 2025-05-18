@@ -33,7 +33,9 @@ function log(message, color = colors.reset) {
 
 // Helper function to log errors
 function logError(message, error = null) {
-  console.error(`${colors.red}${colors.bright}ERROR: ${message}${colors.reset}`);
+  console.error(
+    `${colors.red}${colors.bright}ERROR: ${message}${colors.reset}`,
+  );
   if (error) {
     console.error(`${colors.dim}${error.stack || error}${colors.reset}`);
   }
@@ -49,25 +51,32 @@ function logSection(title) {
 // Function to run a command and return a promise
 function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
-    log(`Running: ${colors.bright}${command} ${args.join(' ')}${colors.reset}`, colors.yellow);
+    log(
+      `Running: ${colors.bright}${command} ${args.join(' ')}${colors.reset}`,
+      colors.yellow,
+    );
 
     const env = {
       ...process.env,
-      ...options.env
+      ...options.env,
     };
 
     const childProcess = spawn(command, args, {
       stdio: 'inherit',
       shell: true,
       env,
-      ...options
+      ...options,
     });
 
     childProcess.on('close', (code) => {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Command failed with exit code ${code}: ${command} ${args.join(' ')}`));
+        reject(
+          new Error(
+            `Command failed with exit code ${code}: ${command} ${args.join(' ')}`,
+          ),
+        );
       }
     });
 
@@ -131,12 +140,13 @@ async function fixPrismaImports() {
         let modified = false;
 
         // Check for direct Prisma imports
-        const directPrismaImport = /import\s+{\s*PrismaClient\s*}\s+from\s+['"]@prisma\/client['"]/g;
+        const directPrismaImport =
+          /import\s+{\s*PrismaClient\s*}\s+from\s+['"]@prisma\/client['"]/g;
         if (directPrismaImport.test(content)) {
           log(`Found direct PrismaClient import in ${filePath}`, colors.yellow);
           content = content.replace(
             directPrismaImport,
-            `// Using singleton Prisma client\nimport prisma from '@/lib/prisma'`
+            `// Using singleton Prisma client\nimport prisma from '@/lib/prisma'`,
           );
           modified = true;
         }
@@ -147,13 +157,14 @@ async function fixPrismaImports() {
           log(`Found PrismaClient instantiation in ${filePath}`, colors.yellow);
           content = content.replace(
             prismaInstantiation,
-            `// Using singleton Prisma client from @/lib/prisma`
+            `// Using singleton Prisma client from @/lib/prisma`,
           );
           modified = true;
         }
 
         // Check if the file already imports prisma from lib/prisma
-        const hasPrismaImport = /import\s+prisma\s+from\s+['"]@\/lib\/prisma['"]/g.test(content);
+        const hasPrismaImport =
+          /import\s+prisma\s+from\s+['"]@\/lib\/prisma['"]/g.test(content);
 
         // If the file doesn't have a prisma import but uses prisma, add the import
         if (!hasPrismaImport && content.includes('prisma.')) {
@@ -162,11 +173,13 @@ async function fixPrismaImports() {
           // Check if there are any imports
           if (content.includes('import ')) {
             // Add after the last import
-            const importLines = content.split('\n').filter(line => line.trim().startsWith('import '));
+            const importLines = content
+              .split('\n')
+              .filter((line) => line.trim().startsWith('import '));
             const lastImportLine = importLines[importLines.length - 1];
             content = content.replace(
               lastImportLine,
-              `${lastImportLine}\nimport prisma from '@/lib/prisma';`
+              `${lastImportLine}\nimport prisma from '@/lib/prisma';`,
             );
           } else {
             // Add at the beginning of the file
@@ -236,12 +249,19 @@ async function build() {
     logSection('Updating Edge Permissions');
 
     // Check if the update-edge-permissions-fixed.js file exists
-    const edgePermissionsScript = path.join(rootDir, 'scripts', 'update-edge-permissions-fixed.js');
+    const edgePermissionsScript = path.join(
+      rootDir,
+      'scripts',
+      'update-edge-permissions-fixed.js',
+    );
     if (await fileExists(edgePermissionsScript)) {
       await runCommand('node', ['scripts/update-edge-permissions-fixed.js']);
       log('Edge permissions updated successfully', colors.green);
     } else {
-      log('Edge permissions script not found, skipping this step', colors.yellow);
+      log(
+        'Edge permissions script not found, skipping this step',
+        colors.yellow,
+      );
     }
 
     // Step 5: Build Next.js application with NODE_OPTIONS to suppress warnings
@@ -249,7 +269,10 @@ async function build() {
 
     // Check if node_modules folder exists
     if (!existsSync(path.join(rootDir, 'node_modules'))) {
-      log('node_modules directory not found. Installing dependencies first...', colors.yellow);
+      log(
+        'node_modules directory not found. Installing dependencies first...',
+        colors.yellow,
+      );
       await runCommand('npm', ['install'], {});
     }
 
@@ -257,41 +280,41 @@ async function build() {
     const buildEnvScriptPath = path.join(rootDir, 'scripts', '.build-env.js');
     // Add this file to our list of temporary files to clean up later
     tempFiles.push(buildEnvScriptPath);
-    
+
     log('Creating temporary build environment script...', colors.yellow);
     await fs.writeFile(
       buildEnvScriptPath,
       `
       // This is a temporary script to help with proper Prisma initialization
       import { PrismaClient } from '../prisma/generated/client/index.js';
-      
+
       // Create and connect to the Prisma client
       const prisma = new PrismaClient();
-      
+
       async function main() {
         // Force connection to verify the client works
         await prisma.$connect();
         console.log('Prisma client successfully initialized and connected');
-        
+
         // Disconnect properly
         await prisma.$disconnect();
         console.log('Prisma client disconnected');
       }
-      
+
       main().catch(e => {
         console.error('Failed to initialize Prisma client:', e);
         process.exit(1);
       });
-      `
+      `,
     );
-    
+
     // Run the build environment script
     log('Verifying Prisma client initialization...', colors.yellow);
     await runCommand('node', [buildEnvScriptPath]);
-    
+
     // Try to find the next executable directly in the local installation
     const nextBinPath = path.join(rootDir, 'node_modules', '.bin', 'next');
-    
+
     // Check if the Next.js binary exists
     if (existsSync(nextBinPath)) {
       log(`Found Next.js binary at ${nextBinPath}`, colors.green);
@@ -300,28 +323,52 @@ async function build() {
           // Make sure NODE_ENV is production for the build
           NODE_ENV: 'production',
           // Add any other needed environment variables
-          NODE_OPTIONS: '--no-warnings',
+          NODE_OPTIONS: '--no-warnings --max-old-space-size=4096',
           // Ensure Prisma has the right path
           PRISMA_CLIENT_ENGINE_TYPE: 'binary',
-        }
+          // Disable file watching to avoid permission issues
+          NEXT_WEBPACK_DISABLE_WATCHING: '1',
+          CHOKIDAR_USEPOLLING: 'false',
+          WATCHPACK_POLLING: 'false',
+          // Disable telemetry
+          NEXT_TELEMETRY_DISABLED: '1',
+        },
       });
     } else {
       // Fallback to npx with full path
-      log('Next.js binary not found in expected location, trying alternative approaches', colors.yellow);
-      
+      log(
+        'Next.js binary not found in expected location, trying alternative approaches',
+        colors.yellow,
+      );
+
       try {
         log('Attempting to use node_modules/.bin/next', colors.dim);
         await runCommand('node_modules/.bin/next', ['build'], {
           env: {
-            NODE_OPTIONS: '--no-warnings'
-          }
+            NODE_ENV: 'production',
+            NODE_OPTIONS: '--no-warnings --max-old-space-size=4096',
+            PRISMA_CLIENT_ENGINE_TYPE: 'binary',
+            NEXT_WEBPACK_DISABLE_WATCHING: '1',
+            CHOKIDAR_USEPOLLING: 'false',
+            WATCHPACK_POLLING: 'false',
+            NEXT_TELEMETRY_DISABLED: '1',
+          },
         });
       } catch (error) {
-        log('Failed using node_modules/.bin/next, trying NPM directly', colors.yellow);
+        log(
+          'Failed using node_modules/.bin/next, trying NPM directly',
+          colors.yellow,
+        );
         await runCommand('npm', ['exec', '--', 'next', 'build'], {
           env: {
-            NODE_OPTIONS: '--no-warnings'
-          }
+            NODE_ENV: 'production',
+            NODE_OPTIONS: '--no-warnings --max-old-space-size=4096',
+            PRISMA_CLIENT_ENGINE_TYPE: 'binary',
+            NEXT_WEBPACK_DISABLE_WATCHING: '1',
+            CHOKIDAR_USEPOLLING: 'false',
+            WATCHPACK_POLLING: 'false',
+            NEXT_TELEMETRY_DISABLED: '1',
+          },
         });
       }
     }
@@ -344,7 +391,10 @@ async function build() {
             log(`Removed temporary file: ${tempFile}`, colors.dim);
           }
         } catch (cleanupError) {
-          log(`Warning: Failed to clean up temporary file ${tempFile}: ${cleanupError.message}`, colors.yellow);
+          log(
+            `Warning: Failed to clean up temporary file ${tempFile}: ${cleanupError.message}`,
+            colors.yellow,
+          );
         }
       }
     }
@@ -353,7 +403,7 @@ async function build() {
 
 // Run the build function
 build()
-  .then(success => {
+  .then((success) => {
     if (success) {
       log('Build process completed successfully', colors.green);
       process.exit(0);
@@ -362,7 +412,7 @@ build()
       process.exit(1);
     }
   })
-  .catch(error => {
+  .catch((error) => {
     logError('Unhandled error during build:', error);
     process.exit(1);
   });

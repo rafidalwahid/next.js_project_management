@@ -82,11 +82,8 @@ export async function GET(req: NextRequest) {
           where.OR = [
             { startDate: { gte: startDate } },
             {
-              AND: [
-                { startDate: { lte: startDate } },
-                { endDate: { gte: startDate } }
-              ]
-            }
+              AND: [{ startDate: { lte: startDate } }, { endDate: { gte: startDate } }],
+            },
           ];
         } else {
           console.error('Invalid start date format:', startDateParam);
@@ -109,10 +106,7 @@ export async function GET(req: NextRequest) {
           if (where.OR) {
             // Add end date condition to each existing OR condition
             where.OR = where.OR.map((condition: any) => ({
-              AND: [
-                condition,
-                { endDate: { lte: endDate } }
-              ]
+              AND: [condition, { endDate: { lte: endDate } }],
             }));
           } else {
             // If no start date filter, create a new filter

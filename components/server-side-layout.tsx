@@ -16,7 +16,7 @@ export default function ServerSideLayout({ children }: ServerSideLayoutProps) {
   return (
     <>
       {/* Desktop Sidebar - Server-side rendering */}
-      <aside 
+      <aside
         className="fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border w-[240px]"
         aria-label="Main navigation"
       >

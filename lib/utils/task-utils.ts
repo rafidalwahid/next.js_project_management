@@ -162,11 +162,7 @@ export async function toggleTaskCompletion(taskId: string) {
  * @param targetOrder Optional order value for the task in the new status
  * @returns The updated task
  */
-export async function updateTaskStatus(
-  taskId: string,
-  statusId: string,
-  targetOrder?: number
-) {
+export async function updateTaskStatus(taskId: string, statusId: string, targetOrder?: number) {
   // Get the task and target status
   const [task, targetStatus] = await Promise.all([
     prisma.task.findUnique({
@@ -205,9 +201,7 @@ export async function updateTaskStatus(
       take: 1,
     });
 
-    order = tasksInTargetStatus.length > 0
-      ? tasksInTargetStatus[0].order + 1
-      : 0;
+    order = tasksInTargetStatus.length > 0 ? tasksInTargetStatus[0].order + 1 : 0;
   }
 
   // Update the task with new status, order, and synchronized completion state

@@ -36,4 +36,4 @@ export interface KanbanViewProps {
 
 export interface TaskBoardProps extends KanbanViewProps {
   defaultView?: 'kanban' | 'list';
-} 
+}
