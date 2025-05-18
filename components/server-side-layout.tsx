@@ -5,8 +5,8 @@ import { UserNav } from '@/components/user-nav';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { PanelLeftClose } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { TopCornerAttendance } from '@/components/attendance/top-corner-attendance';
+import { Container } from '@/components/ui/container';
 
 interface ServerSideLayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export default function ServerSideLayout({ children }: ServerSideLayoutProps) {
     <>
       {/* Desktop Sidebar - Server-side rendering */}
       <aside
-        className="fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border w-[240px]"
+        className="fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border w-[14rem] lg:w-[15rem] xl:w-[16rem] 2xl:w-[18rem]"
         aria-label="Main navigation"
       >
         <div className="flex h-14 items-center border-b border-border px-4 bg-primary text-primary-foreground">
@@ -53,19 +53,23 @@ export default function ServerSideLayout({ children }: ServerSideLayoutProps) {
       </aside>
 
       {/* Main Content - Server-side rendering */}
-      <main className="flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ml-[240px]">
-        <div className="flex-1 p-4 md:p-6 space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="grow min-w-0">
-              <Breadcrumbs />
+      <div className="flex-1 flex justify-center transition-all duration-300 ease-in-out ml-[14rem] lg:ml-[15rem] xl:ml-[16rem] 2xl:ml-[18rem]">
+        <main className="flex-1 flex flex-col min-h-screen">
+          <Container>
+            <div className="flex-1 p-3 xs:p-4 md:p-5 lg:p-6 2xl:p-8">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-4 xs:mb-6 2xl:mb-8">
+                <div className="grow min-w-0">
+                  <Breadcrumbs />
+                </div>
+                <div className="hidden md:block shrink-0">
+                  <TopCornerAttendance />
+                </div>
+              </div>
+              <div className="space-y-4 xs:space-y-6 2xl:space-y-8">{children}</div>
             </div>
-            <div className="hidden md:block shrink-0">
-              <TopCornerAttendance />
-            </div>
-          </div>
-          {children}
-        </div>
-      </main>
+          </Container>
+        </main>
+      </div>
     </>
   );
 }

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useBreakpoints } from '@/hooks/use-breakpoints';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { TopCornerAttendance } from '@/components/attendance/top-corner-attendance';
+import { Container } from '@/components/ui/container';
 
 interface ClientSideLayoutProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const SIDEBAR_WIDTHS = {
     default: '14rem', // 224px
     lg: '15rem', // 240px
     xl: '16rem', // 256px
+    '2xl': '18rem', // 288px - Add 2xl-specific width
   },
   mobile: '18rem', // 288px
 };
@@ -71,27 +73,29 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
     <>
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 w-full md:hidden border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
-        <div className="flex h-12 xs:h-14 items-center justify-between px-2 xs:px-3 sm:px-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              onClick={() => setMobileOpen(true)}
-            >
-              <Menu className="size-4" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-            <span className="font-semibold truncate">
-              <span className="xs:hidden">PM</span>
-              <span className="hidden xs:inline sm:hidden">Project Mgmt</span>
-              <span className="hidden sm:inline">Project Management</span>
-            </span>
+        <Container className="px-0">
+          <div className="flex h-12 xs:h-14 items-center justify-between px-2 xs:px-3 sm:px-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onClick={() => setMobileOpen(true)}
+              >
+                <Menu className="size-4" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+              <span className="font-semibold truncate">
+                <span className="xs:hidden">PM</span>
+                <span className="hidden xs:inline sm:hidden">Project Mgmt</span>
+                <span className="hidden sm:inline">Project Management</span>
+              </span>
+            </div>
+            <div className="shrink-0">
+              <TopCornerAttendance />
+            </div>
           </div>
-          <div className="shrink-0">
-            <TopCornerAttendance />
-          </div>
-        </div>
+        </Container>
       </header>
 
       <div className="flex-1 flex">
@@ -143,16 +147,19 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
             'fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col h-screen transition-all duration-300 ease-in-out bg-background border-r border-border',
             sidebarCollapsed
               ? 'w-[3rem] lg:w-[4rem]'
-              : 'w-[14rem] lg:w-[15rem] xl:w-[16rem]'
+              : 'w-[14rem] lg:w-[15rem] xl:w-[16rem] 2xl:w-[18rem]'
           )}
-          style={{
-            // Use CSS variables for consistent sidebar widths
-            '--sidebar-width-collapsed': SIDEBAR_WIDTHS.collapsed.default,
-            '--sidebar-width-collapsed-lg': SIDEBAR_WIDTHS.collapsed.lg,
-            '--sidebar-width-expanded': SIDEBAR_WIDTHS.expanded.default,
-            '--sidebar-width-expanded-lg': SIDEBAR_WIDTHS.expanded.lg,
-            '--sidebar-width-expanded-xl': SIDEBAR_WIDTHS.expanded.xl,
-          } as React.CSSProperties}
+          style={
+            {
+              // Use CSS variables for consistent sidebar widths
+              '--sidebar-width-collapsed': SIDEBAR_WIDTHS.collapsed.default,
+              '--sidebar-width-collapsed-lg': SIDEBAR_WIDTHS.collapsed.lg,
+              '--sidebar-width-expanded': SIDEBAR_WIDTHS.expanded.default,
+              '--sidebar-width-expanded-lg': SIDEBAR_WIDTHS.expanded.lg,
+              '--sidebar-width-expanded-xl': SIDEBAR_WIDTHS.expanded.xl,
+              '--sidebar-width-expanded-2xl': SIDEBAR_WIDTHS.expanded['2xl'],
+            } as React.CSSProperties
+          }
         >
           <div className="flex h-14 items-center border-b border-border px-4 bg-primary text-primary-foreground">
             <div
@@ -207,31 +214,32 @@ export default function ClientSideLayout({ children }: ClientSideLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main
+        <div
           className={cn(
-            'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out',
-            isMobile ? 'w-full mt-12 xs:mt-14' : '',
+            'flex-1 flex justify-center transition-all duration-300 ease-in-out',
+            isMobile ? 'mt-12 xs:mt-14' : '',
             !isMobile &&
               (sidebarCollapsed
                 ? 'ml-[3rem] lg:ml-[4rem]'
-                : 'ml-[14rem] lg:ml-[15rem] xl:ml-[16rem]'),
-            'max-w-[1920px] 2xl:mx-auto' // Center content on very large screens
+                : 'ml-[14rem] lg:ml-[15rem] xl:ml-[16rem] 2xl:ml-[18rem]')
           )}
         >
-          <div className="flex-1 p-3 xs:p-4 md:p-5 lg:p-6">
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-4 xs:mb-6">
-              <div className="grow min-w-0">
-                <Breadcrumbs />
+          <main className="flex-1 flex flex-col min-h-screen">
+            <Container>
+              <div className="flex-1 p-3 xs:p-4 md:p-5 lg:p-6 2xl:p-8">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-4 xs:mb-6 2xl:mb-8">
+                  <div className="grow min-w-0">
+                    <Breadcrumbs />
+                  </div>
+                  <div className="hidden md:block shrink-0">
+                    <TopCornerAttendance />
+                  </div>
+                </div>
+                <div className="space-y-4 xs:space-y-6 2xl:space-y-8">{children}</div>
               </div>
-              <div className="hidden md:block shrink-0">
-                <TopCornerAttendance />
-              </div>
-            </div>
-            <div className="space-y-4 xs:space-y-6">
-              {children}
-            </div>
-          </div>
-        </main>
+            </Container>
+          </main>
+        </div>
       </div>
     </>
   );

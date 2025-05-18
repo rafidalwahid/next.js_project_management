@@ -4,6 +4,8 @@ import { User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserCard } from '@/components/team/user-card';
 import { UserSummary } from '@/types/user';
+import { useBreakpoints } from '@/hooks/use-breakpoints';
+import { cn } from '@/lib/utils';
 
 interface UserGridProps {
   users: UserSummary[];
@@ -11,6 +13,9 @@ interface UserGridProps {
 }
 
 export function UserGrid({ users, onDelete }: UserGridProps) {
+  // Get breakpoint information
+  const { is2xl } = useBreakpoints();
+
   if (users.length === 0) {
     return (
       <div className="flex h-[300px] items-center justify-center rounded-md border border-dashed">
@@ -32,7 +37,20 @@ export function UserGrid({ users, onDelete }: UserGridProps) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+    <div
+      className={cn(
+        'grid gap-5 sm:grid-cols-2 lg:grid-cols-3',
+        is2xl ? 'xl:grid-cols-4 2xl:grid-cols-5' : 'xl:grid-cols-3 2xl:grid-cols-4'
+      )}
+    >
+      {is2xl && (
+        <div className="hidden 2xl:block col-span-full mb-2">
+          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-primary"></span>
+            <span>Large screen optimized grid layout</span>
+          </div>
+        </div>
+      )}
       {users.map(user => (
         <UserCard key={user.id} user={user} onDelete={onDelete} />
       ))}

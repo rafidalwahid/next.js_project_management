@@ -102,6 +102,7 @@ export function BreakpointsProvider({ children }: { children: ReactNode }) {
       if (width < BREAKPOINTS.lg) return 'md';
       if (width < BREAKPOINTS.xl) return 'lg';
       if (width < BREAKPOINTS['2xl']) return 'xl';
+      // Explicitly check for 2xl breakpoint (1536px and above)
       return '2xl';
     };
 
@@ -119,13 +120,16 @@ export function BreakpointsProvider({ children }: { children: ReactNode }) {
         return width < BREAKPOINTS[breakpoint === 'xs' ? 'sm' : breakpoint];
       };
 
+      // Ensure 2xl breakpoint is correctly detected
+      const is2xlBreakpoint = width >= BREAKPOINTS['2xl'];
+
       setBreakpoints({
         isXs: width < BREAKPOINTS.xs || (width >= BREAKPOINTS.xs && width < BREAKPOINTS.sm),
         isSm: width >= BREAKPOINTS.sm && width < BREAKPOINTS.md,
         isMd: width >= BREAKPOINTS.md && width < BREAKPOINTS.lg,
         isLg: width >= BREAKPOINTS.lg && width < BREAKPOINTS.xl,
         isXl: width >= BREAKPOINTS.xl && width < BREAKPOINTS['2xl'],
-        is2xl: width >= BREAKPOINTS['2xl'],
+        is2xl: is2xlBreakpoint,
         isMobile: width < BREAKPOINTS.md,
         isAtLeast,
         isAtMost,
