@@ -147,21 +147,21 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="shadow-sm">
+      <CardHeader className="pb-3 pt-5 px-5">
         <CardTitle className="text-lg flex items-center">
-          <Clock className="mr-2 h-4 w-4" />
+          <Clock className="mr-2.5 h-5 w-5" />
           Time Tracking
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="px-5 pb-5">
+        <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Total Time Spent</p>
+              <p className="text-sm font-medium mb-1">Total Time Spent</p>
               <p className="text-2xl font-bold">{formatTime(timeSpent + elapsedTime)}</p>
               {isTracking && startTime && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1.5">
                   Started {formatDistanceToNow(startTime, { addSuffix: true })}
                 </p>
               )}
@@ -169,25 +169,26 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
 
             <div>
               {!isTracking ? (
-                <Button onClick={handleStartTracking} size="sm">
-                  <Play className="mr-1 h-4 w-4" />
+                <Button onClick={handleStartTracking} size="sm" className="h-9 px-4">
+                  <Play className="mr-2 h-4 w-4" />
                   Start
                 </Button>
               ) : (
-                <Button onClick={handleStopTracking} variant="destructive" size="sm">
-                  <Pause className="mr-1 h-4 w-4" />
+                <Button onClick={handleStopTracking} variant="destructive" size="sm" className="h-9 px-4">
+                  <Pause className="mr-2 h-4 w-4" />
                   Stop
                 </Button>
               )}
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="icon"
               onClick={handleDecrement}
               disabled={isTracking || timeSpent <= 0}
+              className="h-10 w-10"
             >
               <Minus className="h-4 w-4" />
             </Button>
@@ -201,18 +202,24 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
                 onChange={handleManualTimeChange}
                 onBlur={handleManualTimeBlur}
                 disabled={isTracking || isSaving}
-                className="text-center"
+                className="text-center h-10"
               />
-              <p className="text-xs text-center text-muted-foreground mt-1">Hours</p>
+              <p className="text-xs text-center text-muted-foreground mt-1.5">Hours</p>
             </div>
 
-            <Button variant="outline" size="icon" onClick={handleIncrement} disabled={isTracking}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleIncrement}
+              disabled={isTracking}
+              className="h-10 w-10"
+            >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
 
           {isSaving && (
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-2">
               <Spinner size="sm" />
             </div>
           )}

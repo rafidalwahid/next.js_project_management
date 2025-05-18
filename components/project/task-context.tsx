@@ -53,10 +53,12 @@ export function TaskProvider({
   const fetchStatuses = async () => {
     try {
       // If projectId is "all", fetch all statuses, otherwise filter by projectId
+      // We now have two endpoints that handle the "all" case
       const url = projectId === "all"
-        ? `/api/project-statuses`
+        ? `/api/projects/all/statuses`
         : `/api/projects/${projectId}/statuses`;
 
+      console.log('Fetching statuses from URL:', url);
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch statuses');
       const data = await response.json();
@@ -101,17 +103,25 @@ export function TaskProvider({
     try {
       // If projectId is "all", fetch all users, otherwise filter by projectId
       const url = projectId === "all"
-        ? `/api/users?limit=100`
+        ? `/api/team-management/all?limit=100`
         : `/api/team-management?projectId=${projectId}`;
 
+      console.log('Fetching users from URL:', url);
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
 
       if (projectId === "all") {
-        // For "all" projectId, the response format is different
-        if (data.users && Array.isArray(data.users)) {
-          setUsers(data.users);
+        // For "all" projectId, extract users from team members
+        if (data.teamMembers && Array.isArray(data.teamMembers)) {
+          // Extract unique users from team members
+          const userMap = new Map();
+          data.teamMembers.forEach((tm: any) => {
+            if (tm.user && tm.user.id) {
+              userMap.set(tm.user.id, tm.user);
+            }
+          });
+          setUsers(Array.from(userMap.values()));
         } else {
           setUsers([]);
         }

@@ -143,10 +143,10 @@ const columns = (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="-ml-4"
+        className="flex items-center gap-1 font-medium -ml-3 px-3"
       >
         Title
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
@@ -183,10 +183,10 @@ const columns = (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="-ml-4"
+        className="flex items-center gap-1 font-medium -ml-3 px-3"
       >
         Status
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
@@ -227,10 +227,10 @@ const columns = (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="-ml-4 hidden lg:inline-flex"
+        className="items-center gap-1 font-medium -ml-3 px-3 hidden lg:inline-flex"
       >
         Project
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
@@ -255,10 +255,10 @@ const columns = (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="-ml-4"
+        className="items-center gap-1 font-medium -ml-3 px-3"
       >
         Priority
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
@@ -276,10 +276,10 @@ const columns = (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        className="-ml-4 hidden md:inline-flex"
+        className="items-center gap-1 font-medium -ml-3 px-3 hidden md:inline-flex"
       >
         Due Date
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
@@ -394,15 +394,91 @@ const columns = (
 
 // --- Main Component ---
 
-export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps) {
+export function TaskList({
+  tasks,
+  onDelete,
+  onToggleCompletion,
+  sortField,
+  sortDirection,
+  onSort
+}: TaskListProps & {
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+  onSort?: (field: string) => void;
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  // Use external sorting if provided
+  React.useEffect(() => {
+    if (sortField && sortDirection) {
+      setSorting([{ id: sortField, desc: sortDirection === 'desc' }]);
+    }
+  }, [sortField, sortDirection]);
+
+  const handleColumnSort = React.useCallback(
+    (columnId: string) => {
+      if (onSort) {
+        onSort(columnId);
+      } else {
+        setSorting(prev => {
+          const isDesc = prev[0]?.id === columnId && !prev[0]?.desc;
+          return [{ id: columnId, desc: isDesc }];
+        });
+      }
+    },
+    [onSort]
+  );
+
+  const tableColumns = React.useMemo(() => {
+    const cols = columns(onDelete, onToggleCompletion);
+
+    // Update column headers to use external sorting if provided
+    return cols.map(col => {
+      if (col.accessorKey && col.header && typeof col.header === 'function') {
+        return {
+          ...col,
+          header: ({ column }) => {
+            const columnId = col.accessorKey as string;
+            const isSorted = sortField === columnId;
+            const isAsc = sortDirection === 'asc';
+
+            return (
+              <Button
+                variant="ghost"
+                onClick={() => handleColumnSort(columnId)}
+                className={cn(
+                  'flex items-center gap-1 font-medium -ml-3 px-3',
+                  isSorted && 'text-primary',
+                  col.id === 'project.title' && 'hidden lg:inline-flex',
+                  col.id === 'dueDate' && 'hidden md:inline-flex',
+                  col.id === 'status' && 'hidden md:inline-flex',
+                  col.id === 'priority' && 'hidden md:inline-flex'
+                )}
+              >
+                {columnId === 'title' ? 'Title' :
+                 columnId === 'status' ? 'Status' :
+                 columnId === 'project.title' ? 'Project' :
+                 columnId === 'priority' ? 'Priority' :
+                 columnId === 'dueDate' ? 'Due Date' :
+                 columnId}
+                <ArrowUpDown className={cn('h-4 w-4', isSorted && 'text-primary')} />
+                {isSorted && (
+                  <span className="sr-only">
+                    {isAsc ? 'sorted ascending' : 'sorted descending'}
+                  </span>
+                )}
+              </Button>
+            );
+          }
+        };
+      }
+      return col;
+    });
+  }, [onDelete, onToggleCompletion, sortField, sortDirection, handleColumnSort]);
 
   const table = useReactTable({
     data: tasks,
-    columns: React.useMemo(
-      () => columns(onDelete, onToggleCompletion),
-      [onDelete, onToggleCompletion]
-    ),
+    columns: tableColumns,
     state: {
       sorting,
     },
@@ -412,38 +488,36 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
   });
 
   const columnCount = React.useMemo(
-    () => columns(onDelete, onToggleCompletion).length,
-    [onDelete, onToggleCompletion]
+    () => tableColumns.length,
+    [tableColumns]
   );
 
   return (
-    <div className="rounded-md border shadow-xs overflow-hidden">
-      {/* Responsive table with horizontal scrolling on small screens */}
-      <div className="hidden sm:block overflow-x-auto">
-        <Table className="w-full">
+    <>
+      {/* Desktop Table View - Hidden on Small Screens */}
+      <div className="hidden sm:block rounded-md border shadow-xs overflow-x-auto">
+        <Table>
           <TableHeader>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      'whitespace-nowrap px-3 py-2 text-sm font-medium text-muted-foreground',
-                      header.id === 'project.title' && 'hidden lg:table-cell',
-                      header.id === 'dueDate' && 'hidden md:table-cell',
-                      header.id === 'assignees' && 'hidden md:table-cell',
-                      header.id === 'completed' && 'w-10',
-                      header.id === 'status' && 'hidden md:table-cell',
-                      header.id === 'priority' && 'hidden md:table-cell'
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              {table.getHeaderGroups()[0].headers.map(header => (
+                <TableHead
+                  key={header.id}
+                  className={cn(
+                    'whitespace-nowrap px-3 py-2 text-sm font-medium',
+                    header.id === 'project.title' && 'hidden lg:table-cell',
+                    header.id === 'dueDate' && 'hidden md:table-cell',
+                    header.id === 'assignees' && 'hidden md:table-cell',
+                    header.id === 'completed' && 'w-10',
+                    header.id === 'status' && 'hidden md:table-cell',
+                    header.id === 'priority' && 'hidden md:table-cell'
+                  )}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
@@ -451,13 +525,13 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className="group hover:bg-muted/50"
+                  className="hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map(cell => (
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        'px-3 py-2.5 text-sm',
+                        'px-3 py-2.5',
                         cell.column.id === 'project.title' && 'hidden lg:table-cell',
                         cell.column.id === 'dueDate' && 'hidden md:table-cell',
                         cell.column.id === 'assignees' && 'hidden md:table-cell',
@@ -482,100 +556,96 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
         </Table>
       </div>
 
-      {/* Mobile view - card layout for small screens */}
-      <div className="sm:hidden">
+      {/* Mobile Card View - Enhanced for Small Screens */}
+      <div className="sm:hidden space-y-3">
         {table.getRowModel().rows?.length ? (
-          <div className="divide-y">
-            {table.getRowModel().rows.map(row => {
-              const task = row.original;
-              return (
-                <div key={task.id} className={cn('p-4 space-y-3', task.completed && 'opacity-70')}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-2">
-                      {onToggleCompletion && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            'h-8 w-8 p-0 shrink-0 mt-0.5',
-                            task.completed && 'text-green-500'
-                          )}
-                          onClick={() => onToggleCompletion(task.id)}
-                          aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
-                        >
-                          {task.completed ? (
-                            <CircleCheck className="h-5 w-5" />
-                          ) : (
-                            <Circle className="h-5 w-5" />
-                          )}
-                        </Button>
-                      )}
-                      <Link
-                        href={`/tasks/${task.id}`}
+          table.getRowModel().rows.map(row => {
+            const task = row.original;
+            return (
+              <div key={task.id} className="border rounded-md p-3 shadow-xs bg-card">
+                <div className="flex justify-between items-start mb-1.5">
+                  <div className="flex items-start gap-2">
+                    {onToggleCompletion && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className={cn(
-                          'font-medium hover:text-primary hover:underline break-words line-clamp-2',
-                          task.completed && 'line-through text-muted-foreground'
+                          'h-7 w-7 p-0 shrink-0 -ml-1.5 -mt-0.5',
+                          task.completed && 'text-green-500'
                         )}
-                        title={task.title}
+                        onClick={() => onToggleCompletion(task.id)}
+                        aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                       >
-                        {task.title}
-                      </Link>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/tasks/${task.id}`}
-                            className="cursor-pointer w-full flex items-center"
-                          >
-                            <CheckCircle2 className="mr-2 h-4 w-4" /> View
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/tasks/${task.id}`}
-                            className="cursor-pointer w-full flex items-center"
-                          >
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer flex items-center"
-                          onClick={() => onDelete(task.id)}
-                        >
-                          <Trash className="mr-2 h-4 w-4" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {task.description && (
-                    <p
+                        {task.completed ? (
+                          <CircleCheck className="h-4 w-4" />
+                        ) : (
+                          <Circle className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                    <Link
+                      href={`/tasks/${task.id}`}
                       className={cn(
-                        'text-xs text-muted-foreground line-clamp-1',
-                        task.completed && 'line-through'
+                        'text-base font-medium hover:underline line-clamp-2',
+                        task.completed && 'line-through text-muted-foreground'
                       )}
                     >
-                      {task.description}
-                    </p>
+                      {task.title}
+                    </Link>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 -mt-1 -mr-1">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[150px]">
+                      <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild className="text-xs">
+                        <Link
+                          href={`/tasks/${task.id}`}
+                          className="cursor-pointer flex items-center"
+                        >
+                          <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> View
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-xs">
+                        <Link
+                          href={`/tasks/${task.id}`}
+                          className="cursor-pointer flex items-center"
+                        >
+                          <Edit className="mr-2 h-3.5 w-3.5" /> Edit
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onDelete(task.id)}
+                        className="text-destructive focus:text-destructive cursor-pointer flex items-center text-xs"
+                      >
+                        <Trash className="mr-2 h-3.5 w-3.5" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="text-xs text-muted-foreground mb-2 space-y-0.5">
+                  {task.project && (
+                    <div className="flex items-center gap-1">
+                      <span>Project: {task.project.title}</span>
+                    </div>
                   )}
+                  {task.dueDate && (
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="flex flex-wrap gap-2 items-center text-xs">
-                    <Badge
-                      variant={getPriorityBadgeVariant(task.priority)}
-                      className="capitalize whitespace-nowrap text-xs font-medium"
-                    >
-                      {task.priority}
-                    </Badge>
-
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2 items-center">
                     {task.status && (
                       <Badge
                         style={
@@ -590,73 +660,52 @@ export function TaskList({ tasks, onDelete, onToggleCompletion }: TaskListProps)
                         variant={
                           !task.status.color ? getStatusBadgeVariant(task.status.name) : null
                         }
-                        className={cn(
-                          'capitalize whitespace-nowrap flex items-center w-fit text-xs font-medium border',
-                          !task.status.color && 'px-2 py-0.5',
-                          task.status.color && 'px-2 py-0.5'
-                        )}
+                        className="text-xs"
                       >
-                        {getStatusIcon(task.status.name)}
-                        {task.status.name || 'No Status'}
+                        {task.status.name}
                       </Badge>
                     )}
-
-                    {task.dueDate && (
-                      <span className="text-xs text-muted-foreground flex items-center">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                    )}
+                    <Badge
+                      variant={getPriorityBadgeVariant(task.priority)}
+                      className="capitalize text-xs"
+                    >
+                      {task.priority}
+                    </Badge>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 items-center">
-                    {task.project && (
-                      <div className="text-xs text-muted-foreground">
-                        <span className="font-medium">Project:</span>{' '}
-                        <Link href={`/projects/${task.project.id}`} className="hover:underline">
-                          {task.project.title}
-                        </Link>
-                      </div>
-                    )}
-
-                    {task.assignees && task.assignees.length > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Assigned to:
-                        </span>
-                        <div className="flex -space-x-2">
-                          {task.assignees.slice(0, 3).map(assignee => (
-                            <Avatar key={assignee.id} className="h-5 w-5 border border-background">
-                              {assignee.user.image ? (
-                                <AvatarImage
-                                  src={assignee.user.image}
-                                  alt={assignee.user.name || 'User'}
-                                />
-                              ) : null}
-                              <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">
-                                {getUserInitials(assignee.user.name)}
-                              </AvatarFallback>
-                            </Avatar>
-                          ))}
-                          {task.assignees.length > 3 && (
-                            <div className="flex h-5 w-5 items-center justify-center rounded-full border border-background bg-muted text-[10px] text-muted-foreground">
-                              +{task.assignees.length - 3}
-                            </div>
+                  {task.assignees && task.assignees.length > 0 && (
+                    <div className="flex -space-x-1.5 overflow-hidden">
+                      {task.assignees.slice(0, 3).map(assignee => (
+                        <Avatar key={assignee.id} className="h-6 w-6 border border-black">
+                          {assignee.user.image ? (
+                            <AvatarImage
+                              src={assignee.user.image}
+                              alt={assignee.user.name || ''}
+                            />
+                          ) : (
+                            <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                              {getUserInitials(assignee.user.name)}
+                            </AvatarFallback>
                           )}
+                        </Avatar>
+                      ))}
+                      {task.assignees.length > 3 && (
+                        <div className="flex items-center justify-center h-6 w-6 rounded-full border border-black bg-muted text-[10px] font-medium">
+                          +{task.assignees.length - 3}
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })
         ) : (
-          <div className="p-8 text-center">
-            <p className="text-muted-foreground">No tasks found.</p>
+          <div className="text-center p-4 border rounded-md bg-muted/10 shadow-xs">
+            <p className="text-muted-foreground text-sm">No tasks found</p>
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
