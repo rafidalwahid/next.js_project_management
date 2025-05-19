@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Filter, Plus, Search, LayoutGrid, List, Info } from 'lucide-react';
+import { Search, LayoutGrid, List } from 'lucide-react';
 import { useUsers } from '@/hooks/use-users';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
 
 import { Button } from '@/components/ui/button';
@@ -51,10 +50,9 @@ export default function TeamPage() {
 
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   // Use the permission hook instead of manual fetch
-  const { hasPermission: canAddMembers } = useHasPermission('team_add');
   const { hasPermission: canDeleteUsers } = useHasPermission('user_delete');
 
   useEffect(() => {
@@ -166,16 +164,6 @@ export default function TeamPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-background sticky top-0 z-10 py-2">
         <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
-        <div className="flex items-center gap-2">
-          {canAddMembers && (
-            <Link href="/team/new">
-              <Button className="bg-black hover:bg-black/90 text-white">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Member
-              </Button>
-            </Link>
-          )}
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4 mt-2">
@@ -234,8 +222,8 @@ export default function TeamPage() {
             <div className="text-sm text-muted-foreground">
               {pagination && (
                 <span>
-                  Showing {users.length} of {pagination.totalCount}{' '}
-                  {pagination.totalCount === 1 ? 'member' : 'members'}
+                  Showing {users.length} of {pagination.total}{' '}
+                  {pagination.total === 1 ? 'member' : 'members'}
                   {roleFilter !== 'all' &&
                     ` with role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`}
                   {searchQuery && ` matching: "${searchQuery}"`}

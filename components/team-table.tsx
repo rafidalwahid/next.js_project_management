@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Calendar, MoreHorizontal, Search, Filter, UserPlus } from 'lucide-react';
+import { Calendar, MoreHorizontal, Search, Filter } from 'lucide-react';
 import { useTeamMembers, useRemoveTeamMember } from '@/hooks/use-team-management';
 import { Input } from '@/components/ui/input';
 import { teamManagementApi } from '@/lib/api';
@@ -122,12 +122,7 @@ export function TeamTable({ projectId }: TeamTableProps) {
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        <Button className="gap-2" asChild>
-          <a href="/team/new">
-            <UserPlus className="h-4 w-4" />
-            Add Member
-          </a>
-        </Button>
+
       </div>
 
       <Table>

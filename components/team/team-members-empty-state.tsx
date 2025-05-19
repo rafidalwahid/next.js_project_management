@@ -3,11 +3,10 @@
 import { memo } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, UserPlus, Users } from 'lucide-react';
+import { UserPlus, Users } from 'lucide-react';
 
 interface TeamMembersEmptyStateProps {
   hasFilters: boolean;
-  canCreateProject: boolean;
   onClearFilters: () => void;
 }
 
@@ -16,7 +15,6 @@ interface TeamMembersEmptyStateProps {
  */
 export const TeamMembersEmptyState = memo(function TeamMembersEmptyState({
   hasFilters,
-  canCreateProject,
   onClearFilters,
 }: TeamMembersEmptyStateProps) {
   return (
@@ -32,19 +30,12 @@ export const TeamMembersEmptyState = memo(function TeamMembersEmptyState({
       <p className="text-muted-foreground max-w-md mb-6">
         {hasFilters
           ? 'No team members match your current filters.'
-          : 'Team members are associated with projects. Create a project first to add team members.'}
+          : 'No team members found. Team members are associated with projects.'}
       </p>
       <div className="flex gap-3">
         {hasFilters ? (
           <Button variant="outline" onClick={onClearFilters}>
             Clear Filters
-          </Button>
-        ) : canCreateProject ? (
-          <Button asChild variant="default">
-            <Link href="/projects/new">
-              <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" />
-              Create Project
-            </Link>
           </Button>
         ) : (
           <Button asChild variant="default">

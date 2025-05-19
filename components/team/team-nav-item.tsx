@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronRight,
   UserCircle,
-  UserPlus,
   UsersRound,
   ShieldCheck,
 } from 'lucide-react';
@@ -38,14 +37,6 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       permission: 'team_view',
       // This is a core functionality that all users should have access to
       alwaysShow: true,
-      category: 'team',
-    },
-    {
-      title: 'Add Team Member',
-      href: '/team/new',
-      icon: UserPlus,
-      permission: 'team_add',
-      alwaysShow: false,
       category: 'team',
     },
     {

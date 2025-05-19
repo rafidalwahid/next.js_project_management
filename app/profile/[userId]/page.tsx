@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Spinner } from '@/components/ui/spinner';
-import { UserProfileView } from '@/components/profile/user-profile-view';
+import { UnifiedProfileView } from '@/components/profile/unified-profile-view';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { useToast } from '@/hooks/use-toast';
 
@@ -98,7 +98,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto py-6 space-y-8">
-      <UserProfileView
+      <UnifiedProfileView
         profile={profile}
         projects={projects}
         tasks={tasks}
@@ -107,6 +107,7 @@ export default function UserProfilePage() {
         stats={stats}
         canEdit={canEdit}
         isOwnProfile={isOwnProfile}
+        isLoading={false}
         onUpdateProfile={updateProfile}
         onUploadImage={uploadProfileImage}
       />

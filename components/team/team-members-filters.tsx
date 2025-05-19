@@ -1,8 +1,10 @@
 'use client';
 
 import { memo, useCallback, useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -10,24 +12,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Project, TeamMembersFilters } from './team-types';
+import { Project, TeamMembersFilters as FiltersType } from './team-types';
+import { cn } from '@/lib/utils';
 
 interface TeamMembersFiltersProps {
-  filters: TeamMembersFilters;
+  filters: FiltersType;
   projects: Project[] | undefined;
-  onFiltersChange: (filters: TeamMembersFilters) => void;
+  onFiltersChange: (filters: FiltersType) => void;
   className?: string;
+  showActiveFilters?: boolean;
 }
 
 /**
  * A memoized component for filtering team members
- * Handles search, project filtering, and sorting
+ * Handles search, project filtering, and sorting with active filter indicators
  */
 export const TeamMembersFilters = memo(function TeamMembersFilters({
   filters,
   projects,
   onFiltersChange,
   className,
+  showActiveFilters = false,
 }: TeamMembersFiltersProps) {
   // Local state for search input with debounce
   const [searchInput, setSearchInput] = useState(filters.search);
@@ -64,38 +69,41 @@ export const TeamMembersFilters = memo(function TeamMembersFilters({
     [filters, onFiltersChange]
   );
 
-  // Handle sort change
-  const handleSortChange = useCallback(
-    (value: string) => {
-      onFiltersChange({
-        ...filters,
-        sortBy: value as 'name' | 'role' | 'project',
-      });
-    },
-    [filters, onFiltersChange]
-  );
+
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    onFiltersChange({
+      search: '',
+      projectId: null,
+    });
+    setSearchInput('');
+  }, [onFiltersChange]);
+
+  // Check if any filters are active
+  const hasActiveFilters = filters.search || filters.projectId;
 
   return (
-    <div className={`flex flex-col sm:flex-row gap-3 ${className || ''}`}>
-      <div className="relative flex-1">
-        <Search
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70"
-          aria-hidden="true"
-        />
-        <Input
-          type="search"
-          placeholder="Search team members..."
-          className="pl-9 bg-background border-muted"
-          value={searchInput}
-          onChange={handleSearchChange}
-          aria-label="Search team members"
-        />
-      </div>
+    <div className={cn('mb-6', className)}>
+      <div className="flex items-center gap-3 w-full">
+        <div className="relative flex-1">
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            placeholder="Search team members..."
+            className="pl-9 bg-background border-border h-10"
+            value={searchInput}
+            onChange={handleSearchChange}
+            aria-label="Search team members"
+          />
+        </div>
 
-      <div className="flex gap-2">
         <Select value={filters.projectId || 'all'} onValueChange={handleProjectChange}>
           <SelectTrigger
-            className="w-[180px] bg-background border-muted"
+            className="w-[140px] bg-background border-border h-10"
             aria-label="Filter by project"
           >
             <SelectValue placeholder="All Projects" />
@@ -109,18 +117,46 @@ export const TeamMembersFilters = memo(function TeamMembersFilters({
             ))}
           </SelectContent>
         </Select>
-
-        <Select value={filters.sortBy} onValueChange={handleSortChange}>
-          <SelectTrigger className="w-[140px] bg-background border-muted" aria-label="Sort by">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Sort by Name</SelectItem>
-            <SelectItem value="role">Sort by Role</SelectItem>
-            <SelectItem value="project">Sort by Project</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
+
+      {showActiveFilters && hasActiveFilters && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Active filters:</span>
+          <div className="flex flex-wrap gap-2">
+            {filters.search && (
+              <Badge variant="outline" className="gap-1 pl-2">
+                Search: {filters.search}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 ml-1 p-0"
+                  onClick={() => onFiltersChange({ ...filters, search: '' })}
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Remove search filter</span>
+                </Button>
+              </Badge>
+            )}
+            {filters.projectId && (
+              <Badge variant="outline" className="gap-1 pl-2">
+                Project: {projects?.find(p => p.id === filters.projectId)?.title || 'Unknown'}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 ml-1 p-0"
+                  onClick={() => onFiltersChange({ ...filters, projectId: null })}
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Remove project filter</span>
+                </Button>
+              </Badge>
+            )}
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={clearFilters}>
+              Clear all
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

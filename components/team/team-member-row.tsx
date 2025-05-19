@@ -46,17 +46,17 @@ export const TeamMemberRow = memo(function TeamMemberRow({
   };
 
   return (
-    <TableRow className="hover:bg-muted/5">
+    <TableRow className="hover:bg-muted/5 border-b border-border">
       <TableCell className="py-3">
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border border-muted">
+          <Avatar className="h-8 w-8 border border-border">
             <AvatarImage src={member.user?.image || ''} alt={member.user?.name || 'Team member'} />
-            <AvatarFallback className="bg-primary/5 text-primary">
+            <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
               {getUserInitials(member.user?.name)}
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="font-medium">{member.user?.name || 'Unknown'}</div>
+            <div className="font-medium text-foreground">{member.user?.name || 'Unknown'}</div>
             <div className="text-xs text-muted-foreground">{member.user?.email}</div>
           </div>
         </div>
@@ -70,10 +70,10 @@ export const TeamMemberRow = memo(function TeamMemberRow({
             <Link
               key={project?.id}
               href={`/projects/${project?.id}`}
-              className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-muted/30 hover:bg-muted/50 transition-colors"
+              className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors"
             >
-              <Briefcase className="h-3 w-3 mr-1 text-muted-foreground" />
-              <span className="truncate max-w-[150px]">{project?.title}</span>
+              <Briefcase className="h-3 w-3 mr-1 text-foreground/70" />
+              <span className="truncate max-w-[150px] text-foreground/90">{project?.title}</span>
             </Link>
           ))}
         </div>
@@ -85,16 +85,16 @@ export const TeamMemberRow = memo(function TeamMemberRow({
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel className="text-xs font-medium">Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/profile/${member.user?.id}`}>
+              <Link href={`/profile/${member.user?.id}`} className="cursor-pointer">
                 <UserCircle className="mr-2 h-4 w-4" />
                 View Profile
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`/projects/${member.project?.id}`}>
+              <Link href={`/projects/${member.project?.id}`} className="cursor-pointer">
                 <Briefcase className="mr-2 h-4 w-4" />
                 View Project
               </Link>
@@ -103,7 +103,7 @@ export const TeamMemberRow = memo(function TeamMemberRow({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
+                  className="text-destructive focus:text-destructive cursor-pointer"
                   onClick={() => onDeleteClick(member)}
                 >
                   <Trash className="mr-2 h-4 w-4" />

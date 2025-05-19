@@ -30,7 +30,6 @@ const PROTECTED_PATHS = {
   '/api/permissions': 'manage_permissions', // Changed from manage_roles to manage_permissions
 
   // User management paths
-  '/team/new': 'team_add', // Changed from user_management to team_add
   '/api/users': 'user_management',
 
   // Project management paths

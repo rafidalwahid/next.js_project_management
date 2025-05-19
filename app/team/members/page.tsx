@@ -2,13 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { UserPlus, PlusCircle } from 'lucide-react';
-import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { useProjects } from '@/hooks/use-data';
 
-import { Button } from '@/components/ui/button';
-import { ElegantTeamMembersList } from '@/components/team/elegant-team-members-list';
+import { TeamMembersList } from '@/components/team/team-members-list';
 import { Spinner } from '@/components/ui/spinner';
 
 /**
@@ -45,34 +42,11 @@ export default function TeamMembersPage() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto">
-      <div className="flex flex-col gap-8">
+    <main>
+      <div className="flex flex-col">
         {/* Header */}
-        <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Team Members</h1>
-            <p className="text-muted-foreground mt-1">
-              View and manage team members across all projects in your organization.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {canAddMembers && hasProjects && (
-              <Button asChild>
-                <Link href="/team/new">
-                  <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-                  <span>Add Team Member</span>
-                </Link>
-              </Button>
-            )}
-            {canCreateProject && (
-              <Button asChild variant={canAddMembers && hasProjects ? 'outline' : 'default'}>
-                <Link href="/projects/new">
-                  <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" />
-                  <span>Create Project</span>
-                </Link>
-              </Button>
-            )}
-          </div>
+        <header className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Team Members</h1>
         </header>
 
         {/* Team Members List */}
@@ -80,7 +54,9 @@ export default function TeamMembersPage() {
           <h2 id="team-members-heading" className="sr-only">
             Team Members List
           </h2>
-          <ElegantTeamMembersList limit={50} />
+          <TeamMembersList
+            limit={50}
+          />
         </section>
       </div>
     </main>

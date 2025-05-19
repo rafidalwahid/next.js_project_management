@@ -1,106 +1,219 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useTeamMembers, useRemoveTeamMember } from '@/hooks/use-team-management';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { RoleBadge } from '@/components/ui/role-badge';
-import { Spinner } from '@/components/ui/spinner';
-import { Input } from '@/components/ui/input';
-import { Search, Trash, MoreHorizontal, UserCircle, Info } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
+import { useProjects } from '@/hooks/use-data';
+import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { Briefcase, ChevronDown, ChevronRight } from 'lucide-react';
+
+// Import our extracted components
+import { TeamMembersFilters } from './team-members-filters';
+import { TeamMemberRow } from './team-member-row';
+import { TeamMembersEmptyState } from './team-members-empty-state';
+import { DeleteTeamMemberDialog } from './delete-team-member-dialog';
+
+// Import our type definitions
+import {
+  DeleteConfirmation,
+  TeamMembersFilters as FiltersType,
+  TeamMemberWithProjects,
+} from './team-types';
 
 interface TeamMembersListProps {
   projectId?: string;
   limit?: number;
+  showFilters?: boolean;
+  groupByProject?: boolean;
 }
 
-export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps) {
+/**
+ * An optimized component for displaying and managing team members
+ * Features:
+ * - Filtering and sorting
+ * - Deduplication of team members across projects
+ * - Optional grouping by project
+ * - Deletion confirmation
+ * - Accessibility support
+ */
+export function TeamMembersList({
+  projectId,
+  limit = 50,
+  showFilters = true,
+  groupByProject = false,
+}: TeamMembersListProps) {
+  // State for pagination, filters, and deletion
   const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<FiltersType>({
+    search: '',
+    projectId: projectId || null,
+  });
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
-  const [teamMemberToDelete, setTeamMemberToDelete] = useState<{
-    id: string;
-    name: string | null;
-    email: string;
-  } | null>(null);
+  const [teamMemberToDelete, setTeamMemberToDelete] = useState<DeleteConfirmation | null>(null);
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
 
+  // Hooks for data and permissions
   const { data: session } = useSession();
   const { toast } = useToast();
   const { hasPermission: canDeleteTeamMembers } = useHasPermission('team_remove');
+  const { hasPermission: canCreateProject } = useHasPermission('project_create');
   const { hasPermission: canAddMembers } = useHasPermission('team_add');
+  const { projects } = useProjects(1, 100);
 
+  // Update filters if projectId prop changes
+  useEffect(() => {
+    if (projectId) {
+      setFilters(prev => ({ ...prev, projectId }));
+    }
+  }, [projectId]);
+
+  // Fetch team members with current filters
   const { teamMembers, isLoading, isError, mutate } = useTeamMembers(
-    projectId,
+    filters.projectId || undefined,
     page,
     limit,
-    searchQuery
+    filters.search
   );
 
+  // Hook for removing team members
   const { removeTeamMember, isRemoving } = useRemoveTeamMember();
 
-  // Get user initials for avatar fallback
-  const getUserInitials = (name: string | null) => {
-    if (!name) return '?';
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
+  /**
+   * Process team members to remove duplicates and add project information
+   * This is an expensive operation, so we memoize it
+   */
+  const processedMembers = useMemo(() => {
+    if (!teamMembers || teamMembers.length === 0) return [];
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+    // Create a map to track unique users
+    const userMap = new Map<string, TeamMemberWithProjects>();
 
-  const confirmDelete = (teamMember: any) => {
-    if (!canDeleteTeamMembers) {
-      toast({
-        title: 'Permission Denied',
-        description: "You don't have permission to remove team members.",
-        variant: 'destructive',
-      });
-      return;
-    }
+    // First pass: collect all projects for each user
+    teamMembers.forEach(member => {
+      if (!member.user?.id || !member.project) return;
 
-    setTeamMemberToDelete({
-      id: teamMember.id,
-      name: teamMember.user?.name,
-      email: teamMember.user?.email,
+      const userId = member.user.id;
+      if (!userMap.has(userId)) {
+        userMap.set(userId, {
+          ...member,
+          projects: [member.project],
+        });
+      } else {
+        const existingUser = userMap.get(userId)!;
+        if (!existingUser.projects.some(p => p?.id === member.project?.id)) {
+          existingUser.projects.push(member.project);
+        }
+      }
     });
-    setConfirmDeleteDialogOpen(true);
-  };
 
-  const handleDelete = async () => {
+    // Convert map to array
+    return Array.from(userMap.values());
+  }, [teamMembers]);
+
+  /**
+   * Group team members by project
+   */
+  const groupedMembers = useMemo(() => {
+    if (!teamMembers || teamMembers.length === 0 || !groupByProject) return {};
+
+    // Group by project
+    const projectGroups: Record<string, TeamMemberWithProjects[]> = {};
+
+    processedMembers.forEach(member => {
+      member.projects.forEach(project => {
+        if (!project?.id) return;
+
+        const projectId = project.id;
+        if (!projectGroups[projectId]) {
+          projectGroups[projectId] = [];
+        }
+
+        // Check if this user is already in this project group
+        const existingMember = projectGroups[projectId].find(m => m.user?.id === member.user?.id);
+        if (!existingMember) {
+          projectGroups[projectId].push(member);
+        }
+      });
+    });
+
+    return projectGroups;
+  }, [processedMembers, groupByProject, teamMembers]);
+
+  // Initialize expanded state for projects
+  useEffect(() => {
+    if (groupByProject) {
+      const initialExpandedState: Record<string, boolean> = {};
+      Object.keys(groupedMembers).forEach(projectId => {
+        initialExpandedState[projectId] = true;
+      });
+      setExpandedProjects(initialExpandedState);
+    }
+  }, [groupedMembers, groupByProject]);
+
+
+
+  /**
+   * Handle filter changes
+   */
+  const handleFiltersChange = useCallback((newFilters: FiltersType) => {
+    setFilters(newFilters);
+  }, []);
+
+  /**
+   * Clear all filters
+   */
+  const clearFilters = useCallback(() => {
+    setFilters({
+      search: '',
+      projectId: projectId || null, // Keep the projectId if it was provided as a prop
+    });
+  }, [projectId]);
+
+  /**
+   * Toggle project expanded state
+   */
+  const toggleProjectExpanded = useCallback((projectId: string) => {
+    setExpandedProjects(prev => ({
+      ...prev,
+      [projectId]: !prev[projectId],
+    }));
+  }, []);
+
+  /**
+   * Prepare for team member deletion
+   */
+  const confirmDelete = useCallback(
+    (member: TeamMemberWithProjects) => {
+      if (!canDeleteTeamMembers) {
+        toast({
+          title: 'Permission Denied',
+          description: "You don't have permission to remove team members.",
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setTeamMemberToDelete({
+        id: member.id,
+        name: member.user?.name || null,
+        email: member.user?.email || '',
+      });
+      setConfirmDeleteDialogOpen(true);
+    },
+    [canDeleteTeamMembers, toast]
+  );
+
+  /**
+   * Handle team member deletion
+   */
+  const handleDelete = useCallback(async () => {
     if (!teamMemberToDelete) return;
 
     try {
@@ -125,166 +238,194 @@ export function TeamMembersList({ projectId, limit = 10 }: TeamMembersListProps)
         variant: 'destructive',
       });
     }
-  };
+  }, [teamMemberToDelete, removeTeamMember, toast, mutate]);
 
+  /**
+   * Close the delete confirmation dialog
+   */
+  const closeDeleteDialog = useCallback(() => {
+    setConfirmDeleteDialogOpen(false);
+    setTeamMemberToDelete(null);
+  }, []);
+
+  // Render loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center p-4">
-        <Spinner size="md" />
+      <div className="flex justify-center items-center py-12" aria-live="polite" aria-busy="true">
+        <Spinner size="lg" className="text-primary/50" />
+        <span className="sr-only">Loading team members...</span>
       </div>
     );
   }
 
+  // Render error state
   if (isError) {
     return (
-      <div className="p-4 text-center text-destructive">
+      <div
+        className="flex justify-center items-center py-12 text-muted-foreground"
+        role="alert"
+        aria-live="assertive"
+      >
         Error loading team members. Please try again.
       </div>
     );
   }
 
+  // Render empty state
   if (teamMembers.length === 0) {
     return (
-      <div className="w-full">
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertTitle>No team members found</AlertTitle>
-          <AlertDescription>
-            Team members are associated with projects.{' '}
-            {canAddMembers ? (
-              <span>
-                <Link href="/projects/new" className="underline">
-                  Create a project
-                </Link>{' '}
-                first to add team members, or
-                <Link href="/team/users" className="underline ml-1">
-                  manage users
-                </Link>{' '}
-                in the user management section.
-              </span>
-            ) : (
-              <span>Ask an administrator to create a project and add team members.</span>
-            )}
-          </AlertDescription>
-        </Alert>
+      <TeamMembersEmptyState
+        hasFilters={!!filters.search || !!filters.projectId}
+        onClearFilters={clearFilters}
+      />
+    );
+  }
+
+  // Render team members list grouped by project
+  if (groupByProject) {
+    return (
+      <div className="space-y-6">
+        {/* Filters */}
+        {showFilters && (
+          <TeamMembersFilters
+            filters={filters}
+            projects={projects}
+            onFiltersChange={handleFiltersChange}
+          />
+        )}
+
+        {/* Team Members List Grouped by Project */}
+        <div className="space-y-4">
+          {Object.keys(groupedMembers).length === 0 ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center text-muted-foreground">
+                  No team members match your current filters.
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            Object.entries(groupedMembers).map(([projectId, members]) => (
+              <Card key={projectId} className="overflow-hidden">
+                <Collapsible
+                  open={expandedProjects[projectId]}
+                  onOpenChange={() => toggleProjectExpanded(projectId)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="p-4 cursor-pointer hover:bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-muted-foreground" />
+                          <CardTitle className="text-lg">
+                            {members[0]?.projects.find(p => p.id === projectId)?.title || 'Unknown Project'}
+                          </CardTitle>
+                          <Badge variant="outline" className="ml-2">
+                            {members.length} {members.length === 1 ? 'member' : 'members'}
+                          </Badge>
+                        </div>
+                        {expandedProjects[projectId] ? (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="font-medium">Name</TableHead>
+                            <TableHead className="font-medium">Role</TableHead>
+                            <TableHead className="font-medium">Projects</TableHead>
+                            <TableHead className="text-right font-medium w-[100px]">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {members.map(member => (
+                            <TeamMemberRow
+                              key={`${projectId}-${member.user?.id}`}
+                              member={member}
+                              currentUserId={session?.user?.id}
+                              canDeleteTeamMembers={canDeleteTeamMembers}
+                              onDeleteClick={confirmDelete}
+                            />
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteTeamMemberDialog
+          isOpen={confirmDeleteDialogOpen}
+          isDeleting={isRemoving}
+          teamMemberToDelete={teamMemberToDelete}
+          onClose={closeDeleteDialog}
+          onConfirm={handleDelete}
+        />
       </div>
     );
   }
 
+  // Render flat team members list
   return (
-    <div className="w-full">
-      <div className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search team members..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
+    <div>
+      {/* Filters */}
+      {showFilters && (
+        <TeamMembersFilters
+          filters={filters}
+          projects={projects}
+          onFiltersChange={handleFiltersChange}
+        />
+      )}
 
-      <div className="rounded-md border shadow-sm">
+      {/* Team Members Table */}
+      <div
+        className="rounded-md border border-border overflow-hidden bg-background"
+        role="region"
+        aria-label="Team members list"
+      >
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
+              <TableHead className="font-semibold text-foreground py-3">Name</TableHead>
+              <TableHead className="font-semibold text-foreground py-3">Role</TableHead>
+              <TableHead className="font-semibold text-foreground py-3">Projects</TableHead>
+              <TableHead className="text-right font-semibold text-foreground w-[100px] py-3">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {teamMembers.map(member => (
-              <TableRow key={member.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={member.user?.image || ''} alt={member.user?.name || ''} />
-                      <AvatarFallback>{getUserInitials(member.user?.name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{member.user?.name || 'Unknown'}</div>
-                      <div className="text-xs text-muted-foreground">{member.user?.email}</div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <RoleBadge role={member.user?.role || 'user'} />
-                </TableCell>
-                <TableCell>
-                  {member.project?.title ? (
-                    <Link href={`/projects/${member.project.id}`} className="hover:underline">
-                      {member.project.title}
-                    </Link>
-                  ) : (
-                    <span className="text-muted-foreground">Unknown project</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/profile/${member.user?.id}`} className="cursor-pointer">
-                          <UserCircle className="mr-2 h-4 w-4" />
-                          View Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      {canDeleteTeamMembers && member.user?.id !== session?.user?.id && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => confirmDelete(member)}
-                          >
-                            <Trash className="mr-2 h-4 w-4" />
-                            Remove from Team
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+            {processedMembers.map(member => (
+              <TeamMemberRow
+                key={member.user?.id}
+                member={member}
+                currentUserId={session?.user?.id}
+                canDeleteTeamMembers={canDeleteTeamMembers}
+                onDeleteClick={confirmDelete}
+              />
             ))}
           </TableBody>
         </Table>
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Team Member Removal</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove{' '}
-              {teamMemberToDelete?.name || teamMemberToDelete?.email} from the team? This action
-              cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:justify-end">
-            <Button variant="outline" onClick={() => setConfirmDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isRemoving}>
-              {isRemoving ? (
-                <Spinner className="mr-2 h-4 w-4" />
-              ) : (
-                <Trash className="mr-2 h-4 w-4" />
-              )}
-              Remove Member
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteTeamMemberDialog
+        isOpen={confirmDeleteDialogOpen}
+        isDeleting={isRemoving}
+        teamMemberToDelete={teamMemberToDelete}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
+
+// Export the component with its original name for backward compatibility
+export const ElegantTeamMembersList = TeamMembersList;

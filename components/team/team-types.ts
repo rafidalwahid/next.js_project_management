@@ -32,8 +32,6 @@ export interface TeamMemberWithProjects extends TeamMember {
 export interface TeamMembersFilters {
   search: string;
   projectId: string | null;
-  sortBy: 'name' | 'role' | 'project';
-  sortOrder: 'asc' | 'desc';
 }
 
 export interface DeleteConfirmation {
