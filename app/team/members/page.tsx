@@ -54,9 +54,7 @@ export default function TeamMembersPage() {
           <h2 id="team-members-heading" className="sr-only">
             Team Members List
           </h2>
-          <TeamMembersList
-            limit={50}
-          />
+          <TeamMembersList limit={50} />
         </section>
       </div>
     </main>

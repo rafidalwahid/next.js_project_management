@@ -69,8 +69,6 @@ export const TeamMembersFilters = memo(function TeamMembersFilters({
     [filters, onFiltersChange]
   );
 
-
-
   // Clear all filters
   const clearFilters = useCallback(() => {
     onFiltersChange({

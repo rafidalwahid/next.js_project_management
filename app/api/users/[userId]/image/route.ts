@@ -17,7 +17,7 @@ export const PUT: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) =>
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // Extract userId from params safely
     const userId = await getParams(params).then(p => p.userId);
 
@@ -31,7 +31,7 @@ export const PUT: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) =>
 
     if (!isOwnProfile && !hasUserManagementPermission) {
       return NextResponse.json(
-        { error: 'Forbidden: You do not have permission to update this user\'s profile image' },
+        { error: "Forbidden: You do not have permission to update this user's profile image" },
         { status: 403 }
       );
     }
@@ -97,10 +97,10 @@ export const PUT: ApiRouteHandlerOneParam<'userId'> = async (req, { params }) =>
       },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Profile image updated successfully',
       image: imageUrl,
-      user: updatedUser
+      user: updatedUser,
     });
   } catch (error: any) {
     console.error('Error uploading profile image:', error);

@@ -157,8 +157,6 @@ export function TeamMembersList({
     }
   }, [groupedMembers, groupByProject]);
 
-
-
   /**
    * Handle filter changes
    */
@@ -317,7 +315,8 @@ export function TeamMembersList({
                         <div className="flex items-center gap-2">
                           <Briefcase className="h-5 w-5 text-muted-foreground" />
                           <CardTitle className="text-lg">
-                            {members[0]?.projects.find(p => p.id === projectId)?.title || 'Unknown Project'}
+                            {members[0]?.projects.find(p => p.id === projectId)?.title ||
+                              'Unknown Project'}
                           </CardTitle>
                           <Badge variant="outline" className="ml-2">
                             {members.length} {members.length === 1 ? 'member' : 'members'}
@@ -339,7 +338,9 @@ export function TeamMembersList({
                             <TableHead className="font-medium">Name</TableHead>
                             <TableHead className="font-medium">Role</TableHead>
                             <TableHead className="font-medium">Projects</TableHead>
-                            <TableHead className="text-right font-medium w-[100px]">Actions</TableHead>
+                            <TableHead className="text-right font-medium w-[100px]">
+                              Actions
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -398,7 +399,9 @@ export function TeamMembersList({
               <TableHead className="font-semibold text-foreground py-3">Name</TableHead>
               <TableHead className="font-semibold text-foreground py-3">Role</TableHead>
               <TableHead className="font-semibold text-foreground py-3">Projects</TableHead>
-              <TableHead className="text-right font-semibold text-foreground w-[100px] py-3">Actions</TableHead>
+              <TableHead className="text-right font-semibold text-foreground w-[100px] py-3">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

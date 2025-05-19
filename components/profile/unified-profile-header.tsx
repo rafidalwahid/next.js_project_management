@@ -99,7 +99,7 @@ export function UnifiedProfileHeader({
   };
 
   // Format dates in a more readable way
-  const formattedCreatedDate = user.createdAt 
+  const formattedCreatedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -154,7 +154,7 @@ export function UnifiedProfileHeader({
               <div className="flex items-center gap-2 mb-2">
                 <Input
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   className="h-9 max-w-[250px]"
                   placeholder="Enter name"
                 />

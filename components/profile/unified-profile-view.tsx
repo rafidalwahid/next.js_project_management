@@ -145,10 +145,7 @@ export function UnifiedProfileView({
                   <CardTitle>Project Memberships</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <UserProjectRoles
-                    userId={profile.id}
-                    teamMemberships={teamMemberships}
-                  />
+                  <UserProjectRoles userId={profile.id} teamMemberships={teamMemberships} />
                 </CardContent>
               </Card>
             </div>

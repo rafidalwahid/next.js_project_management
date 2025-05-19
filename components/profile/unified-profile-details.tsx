@@ -31,11 +31,12 @@ export function UnifiedProfileDetails({
     department: profile.department || '',
     location: profile.location || '',
     phone: profile.phone || '',
-    skills: typeof profile.skills === 'string'
-      ? profile.skills
-      : Array.isArray(profile.skills)
-        ? profile.skills.join(', ')
-        : '',
+    skills:
+      typeof profile.skills === 'string'
+        ? profile.skills
+        : Array.isArray(profile.skills)
+          ? profile.skills.join(', ')
+          : '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -62,11 +63,12 @@ export function UnifiedProfileDetails({
       department: profile.department || '',
       location: profile.location || '',
       phone: profile.phone || '',
-      skills: typeof profile.skills === 'string'
-        ? profile.skills
-        : Array.isArray(profile.skills)
-          ? profile.skills.join(', ')
-          : '',
+      skills:
+        typeof profile.skills === 'string'
+          ? profile.skills
+          : Array.isArray(profile.skills)
+            ? profile.skills.join(', ')
+            : '',
     });
     setIsEditing(false);
   };
@@ -177,7 +179,7 @@ export function UnifiedProfileDetails({
                 {profile.bio || 'No bio information available.'}
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="font-medium flex items-center gap-2 mb-2">
@@ -188,7 +190,7 @@ export function UnifiedProfileDetails({
                   {profile.jobTitle || 'Not specified'}
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium flex items-center gap-2 mb-2">
                   <Building className="h-4 w-4 text-muted-foreground" />
@@ -198,7 +200,7 @@ export function UnifiedProfileDetails({
                   {profile.department || 'Not specified'}
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium flex items-center gap-2 mb-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -208,18 +210,16 @@ export function UnifiedProfileDetails({
                   {profile.location || 'Not specified'}
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium flex items-center gap-2 mb-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   Phone
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {profile.phone || 'Not specified'}
-                </p>
+                <p className="text-sm text-muted-foreground">{profile.phone || 'Not specified'}</p>
               </div>
             </div>
-            
+
             <div>
               <h3 className="font-medium flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-muted-foreground" />
@@ -254,16 +254,16 @@ function ProfileDetailsSkeleton() {
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3 mt-1" />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i}>
                 <Skeleton className="h-5 w-24 mb-2" />
                 <Skeleton className="h-4 w-32" />
               </div>
             ))}
           </div>
-          
+
           <div>
             <Skeleton className="h-5 w-24 mb-2" />
             <Skeleton className="h-4 w-full" />
