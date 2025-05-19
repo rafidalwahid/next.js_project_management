@@ -21,27 +21,89 @@ const colors = {
   yellow: '\x1b[33m',
 };
 
-// Verify the Prisma client is generated
-if (!fs.existsSync(clientPath)) {
-  console.error(`${colors.red}[ERROR]${colors.reset} Prisma client not found at ${clientPath}`);
-  console.log(`${colors.yellow}[INFO]${colors.reset} Generating Prisma client...`);
+// Verify the Prisma client is generated and up-to-date
+const schemaPath = path.join(rootDir, 'prisma', 'schema.prisma');
+const schemaExists = fs.existsSync(schemaPath);
+const clientExists = fs.existsSync(clientPath);
+const indexJsExists = fs.existsSync(path.join(clientPath, 'index.js'));
+
+// Check if schema exists
+if (!schemaExists) {
+  console.error(
+    `${colors.red}[ERROR]${colors.reset} Prisma schema not found at ${schemaPath}`,
+  );
+  process.exit(1);
+}
+
+// Check if client exists and is complete
+if (!clientExists || !indexJsExists) {
+  console.error(
+    `${colors.red}[ERROR]${colors.reset} Prisma client not found or incomplete at ${clientPath}`,
+  );
+  console.log(
+    `${colors.yellow}[INFO]${colors.reset} Generating Prisma client...`,
+  );
 
   try {
     // For ESM compatibility, use dynamic import
     const { execSync } = await import('node:child_process');
+
+    // Force clean generation
+    if (clientExists) {
+      console.log(
+        `${colors.yellow}[INFO]${colors.reset} Removing existing client directory for clean generation`,
+      );
+      fs.rmSync(clientPath, { recursive: true, force: true });
+    }
+
+    // Generate Prisma client
     execSync('npx prisma generate', { stdio: 'inherit', cwd: rootDir });
 
     // Check again after generation
-    if (!fs.existsSync(clientPath)) {
-      console.error(`${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client`);
+    if (!fs.existsSync(path.join(clientPath, 'index.js'))) {
+      console.error(
+        `${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client`,
+      );
       process.exit(1);
     }
 
-    console.log(`${colors.green}[SUCCESS]${colors.reset} Prisma client generated successfully`);
+    console.log(
+      `${colors.green}[SUCCESS]${colors.reset} Prisma client generated successfully`,
+    );
   } catch (error) {
-    console.error(`${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client: ${error.message}`);
+    console.error(
+      `${colors.red}[ERROR]${colors.reset} Failed to generate Prisma client: ${error.message}`,
+    );
     process.exit(1);
   }
 } else {
-  console.log(`${colors.green}[SUCCESS]${colors.reset} Prisma client exists at ${clientPath}`);
+  // Check if schema has been modified more recently than the client
+  const schemaStats = fs.statSync(schemaPath);
+  const clientStats = fs.statSync(path.join(clientPath, 'index.js'));
+
+  if (schemaStats.mtime > clientStats.mtime) {
+    console.log(
+      `${colors.yellow}[WARNING]${colors.reset} Schema has been modified since client generation`,
+    );
+    console.log(
+      `${colors.yellow}[INFO]${colors.reset} Regenerating Prisma client...`,
+    );
+
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync('npx prisma generate', { stdio: 'inherit', cwd: rootDir });
+      console.log(
+        `${colors.green}[SUCCESS]${colors.reset} Prisma client regenerated successfully`,
+      );
+    } catch (error) {
+      console.error(
+        `${colors.red}[ERROR]${colors.reset} Failed to regenerate Prisma client: ${error.message}`,
+      );
+      process.exit(1);
+    }
+  } else {
+    console.log(
+      `${colors.green}[SUCCESS]${colors.reset} Prisma client exists and is up-to-date at ${clientPath}`,
+    );
+  }
 }

@@ -15,7 +15,7 @@ const rootDir = path.resolve(__dirname, '..');
 function runCommand(command, args) {
   return new Promise((resolve, reject) => {
     console.log(`Running: ${command} ${args.join(' ')}`);
-    
+
     const child = spawn(command, args, {
       cwd: rootDir,
       stdio: 'inherit',
@@ -42,7 +42,9 @@ async function setupAdminOnly() {
 
   try {
     // Step 1: Run the seed-admin-only.js script
-    console.log('\n=== STEP 1: Seeding database with admin user and permissions ===');
+    console.log(
+      '\n=== STEP 1: Seeding database with admin user and permissions ===',
+    );
     await runCommand('node', ['scripts/seed-admin-only.js']);
 
     // Step 2: Update edge permissions
@@ -54,7 +56,7 @@ async function setupAdminOnly() {
     console.log('  Email: admin@example.com');
     console.log('  Password: admin123');
     console.log('\nYou can now log in with these credentials.');
-    
+
     return true;
   } catch (error) {
     console.error('\n=== SETUP FAILED ===');

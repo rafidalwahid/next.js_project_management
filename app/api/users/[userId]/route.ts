@@ -487,7 +487,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     console.log('DELETE /api/users/[userId] - Authenticated user:', {
       userId: session.user.id,
       userEmail: session.user.email,
-      userRole: session.user.role
+      userRole: session.user.role,
     });
 
     // Extract userId from params safely
@@ -500,14 +500,20 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
       session.user.id,
       'user_delete'
     );
-    console.log('DELETE /api/users/[userId] - Has user_delete permission:', hasUserDeletePermission);
+    console.log(
+      'DELETE /api/users/[userId] - Has user_delete permission:',
+      hasUserDeletePermission
+    );
 
     // Also check for user_management permission as a fallback for backward compatibility
     const hasUserManagementPermission = await PermissionService.hasPermissionById(
       session.user.id,
       'user_management'
     );
-    console.log('DELETE /api/users/[userId] - Has user_management permission:', hasUserManagementPermission);
+    console.log(
+      'DELETE /api/users/[userId] - Has user_management permission:',
+      hasUserManagementPermission
+    );
 
     if (!hasUserDeletePermission && !hasUserManagementPermission) {
       console.log('DELETE /api/users/[userId] - Permission denied');
@@ -530,16 +536,13 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
     console.log('DELETE /api/users/[userId] - Found user:', {
       userId: user.id,
       userEmail: user.email,
-      userName: user.name
+      userName: user.name,
     });
 
     // Check if user is trying to delete themselves
     if (userId === session.user.id) {
       console.log('DELETE /api/users/[userId] - User attempting to delete themselves');
-      return NextResponse.json(
-        { error: 'You cannot delete your own account' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'You cannot delete your own account' }, { status: 400 });
     }
 
     console.log('DELETE /api/users/[userId] - Checking for associated data');
@@ -553,14 +556,33 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
       where: { createdById: userId },
     });
 
-    const tasks = await prisma.task.count({
-      where: {
-        OR: [
-          { createdById: userId },
-          { assignedToId: userId }
-        ]
-      },
+    // Check for task assignments
+    const taskAssignments = await prisma.taskAssignee.count({
+      where: { userId },
     });
+
+    // Check for tasks created by the user - using the correct field name from the schema
+    // Note: If there's no createdById field in the Task model, we'll skip this check
+    let tasksCreated = 0;
+    try {
+      // Check if the field exists in the schema before querying
+      const taskFields = Object.keys(prisma.task.fields);
+      if (taskFields.includes('createdById')) {
+        tasksCreated = await prisma.task.count({
+          where: { createdById: userId },
+        });
+      } else {
+        console.log(
+          'DELETE /api/users/[userId] - createdById field not found in Task model, skipping check'
+        );
+      }
+    } catch (error) {
+      console.error('DELETE /api/users/[userId] - Error checking tasks created:', error);
+      // Continue with deletion process even if this check fails
+    }
+
+    // Total tasks count
+    const tasks = taskAssignments + tasksCreated;
 
     const attendanceRecords = await prisma.attendance.count({
       where: { userId },
@@ -570,7 +592,7 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
       teamMembers,
       projects,
       tasks,
-      attendanceRecords
+      attendanceRecords,
     });
 
     // If user has associated data, return an error
@@ -583,8 +605,8 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
             teamMembers,
             projects,
             tasks,
-            attendanceRecords
-          }
+            attendanceRecords,
+          },
         },
         { status: 409 }
       );
@@ -611,7 +633,8 @@ export const DELETE: ApiRouteHandlerOneParam<'userId'> = async (req, { params })
         return NextResponse.json(
           {
             error: 'Cannot delete user with associated data',
-            details: 'This user has associated data (projects, tasks, etc.) that must be deleted first.'
+            details:
+              'This user has associated data (projects, tasks, etc.) that must be deleted first.',
           },
           { status: 409 }
         );

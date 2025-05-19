@@ -400,7 +400,7 @@ export function TaskList({
   onToggleCompletion,
   sortField,
   sortDirection,
-  onSort
+  onSort,
 }: TaskListProps & {
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -455,12 +455,17 @@ export function TaskList({
                   col.id === 'priority' && 'hidden md:inline-flex'
                 )}
               >
-                {columnId === 'title' ? 'Title' :
-                 columnId === 'status' ? 'Status' :
-                 columnId === 'project.title' ? 'Project' :
-                 columnId === 'priority' ? 'Priority' :
-                 columnId === 'dueDate' ? 'Due Date' :
-                 columnId}
+                {columnId === 'title'
+                  ? 'Title'
+                  : columnId === 'status'
+                    ? 'Status'
+                    : columnId === 'project.title'
+                      ? 'Project'
+                      : columnId === 'priority'
+                        ? 'Priority'
+                        : columnId === 'dueDate'
+                          ? 'Due Date'
+                          : columnId}
                 <ArrowUpDown className={cn('h-4 w-4', isSorted && 'text-primary')} />
                 {isSorted && (
                   <span className="sr-only">
@@ -469,7 +474,7 @@ export function TaskList({
                 )}
               </Button>
             );
-          }
+          },
         };
       }
       return col;
@@ -487,10 +492,7 @@ export function TaskList({
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const columnCount = React.useMemo(
-    () => tableColumns.length,
-    [tableColumns]
-  );
+  const columnCount = React.useMemo(() => tableColumns.length, [tableColumns]);
 
   return (
     <>
@@ -678,10 +680,7 @@ export function TaskList({
                       {task.assignees.slice(0, 3).map(assignee => (
                         <Avatar key={assignee.id} className="h-6 w-6 border border-black">
                           {assignee.user.image ? (
-                            <AvatarImage
-                              src={assignee.user.image}
-                              alt={assignee.user.name || ''}
-                            />
+                            <AvatarImage src={assignee.user.image} alt={assignee.user.name || ''} />
                           ) : (
                             <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
                               {getUserInitials(assignee.user.name)}

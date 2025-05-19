@@ -52,10 +52,17 @@ export function KanbanBoard({
   onDeleteStatus,
   onAddTask,
   showAddButton = false,
-  emptyStateMessage = "No tasks in this status",
+  emptyStateMessage = 'No tasks in this status',
 }: KanbanBoardProps) {
-  const { tasks, statuses, moveTask, toggleTaskCompletion, updateTaskAssignees, isTasksLoading, refreshTasks } =
-    useTaskContext();
+  const {
+    tasks,
+    statuses,
+    moveTask,
+    toggleTaskCompletion,
+    updateTaskAssignees,
+    isTasksLoading,
+    refreshTasks,
+  } = useTaskContext();
 
   const { toast } = useToast();
 

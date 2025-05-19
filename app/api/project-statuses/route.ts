@@ -40,20 +40,20 @@ export async function GET() {
           in: projectIds,
         },
       },
-      orderBy: [
-        { projectId: 'asc' },
-        { order: 'asc' },
-      ],
+      orderBy: [{ projectId: 'asc' }, { order: 'asc' }],
     });
 
     // Group statuses by project for better organization
-    const statusesByProject = statuses.reduce((acc, status) => {
-      if (!acc[status.projectId]) {
-        acc[status.projectId] = [];
-      }
-      acc[status.projectId].push(status);
-      return acc;
-    }, {} as Record<string, typeof statuses>);
+    const statusesByProject = statuses.reduce(
+      (acc, status) => {
+        if (!acc[status.projectId]) {
+          acc[status.projectId] = [];
+        }
+        acc[status.projectId].push(status);
+        return acc;
+      },
+      {} as Record<string, typeof statuses>
+    );
 
     // Get unique statuses based on name (prioritizing default statuses)
     const uniqueStatuses = Object.values(statusesByProject)

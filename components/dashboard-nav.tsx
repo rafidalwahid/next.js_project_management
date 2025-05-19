@@ -60,7 +60,7 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-2">
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -78,21 +78,16 @@ export function DashboardNav({ collapsed = false }: DashboardNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'group flex items-center rounded-md py-2 text-sm font-medium transition-colors',
+                'group flex items-center rounded-md text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-accent text-accent-foreground'
                   : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-                collapsed
-                  ? 'justify-center size-9 mx-auto px-0'
-                  : 'px-3 h-9'
+                collapsed ? 'justify-center size-10 mx-auto' : 'px-3 py-2 h-10'
               )}
               aria-current={isActive ? 'page' : undefined}
             >
               <Icon
-                className={cn(
-                  'shrink-0',
-                  collapsed ? 'size-5' : 'size-4 mr-2'
-                )}
+                className={cn('shrink-0', collapsed ? 'size-5' : 'size-5 mr-3')}
                 aria-hidden="true"
               />
               {!collapsed && <span className="truncate">{item.title}</span>}

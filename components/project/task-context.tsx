@@ -54,9 +54,8 @@ export function TaskProvider({
     try {
       // If projectId is "all", fetch all statuses, otherwise filter by projectId
       // We now have two endpoints that handle the "all" case
-      const url = projectId === "all"
-        ? `/api/projects/all/statuses`
-        : `/api/projects/${projectId}/statuses`;
+      const url =
+        projectId === 'all' ? `/api/projects/all/statuses` : `/api/projects/${projectId}/statuses`;
 
       console.log('Fetching statuses from URL:', url);
       const response = await fetch(url);
@@ -78,9 +77,10 @@ export function TaskProvider({
     try {
       setIsTasksLoading(true);
       // If projectId is "all", fetch all tasks, otherwise filter by projectId
-      const url = projectId === "all"
-        ? `/api/tasks?limit=100`
-        : `/api/tasks?projectId=${projectId}&limit=100`;
+      const url =
+        projectId === 'all'
+          ? `/api/tasks?limit=100`
+          : `/api/tasks?projectId=${projectId}&limit=100`;
 
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch tasks');
@@ -102,16 +102,17 @@ export function TaskProvider({
   const fetchUsers = async () => {
     try {
       // If projectId is "all", fetch all users, otherwise filter by projectId
-      const url = projectId === "all"
-        ? `/api/team-management/all?limit=100`
-        : `/api/team-management?projectId=${projectId}`;
+      const url =
+        projectId === 'all'
+          ? `/api/team-management/all?limit=100`
+          : `/api/team-management?projectId=${projectId}`;
 
       console.log('Fetching users from URL:', url);
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
 
-      if (projectId === "all") {
+      if (projectId === 'all') {
         // For "all" projectId, extract users from team members
         if (data.teamMembers && Array.isArray(data.teamMembers)) {
           // Extract unique users from team members

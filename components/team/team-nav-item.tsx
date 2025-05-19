@@ -38,6 +38,15 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       permission: 'team_view',
       // This is a core functionality that all users should have access to
       alwaysShow: true,
+      category: 'team',
+    },
+    {
+      title: 'Add Team Member',
+      href: '/team/new',
+      icon: UserPlus,
+      permission: 'team_add',
+      alwaysShow: false,
+      category: 'team',
     },
     {
       title: 'My Profile',
@@ -46,13 +55,15 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       permission: 'edit_profile',
       // This is a core functionality that all users should have access to
       alwaysShow: true,
+      category: 'profile',
     },
     {
-      title: 'Add Member',
-      href: '/team/new',
-      icon: UserPlus,
-      permission: 'team_add',
+      title: 'User Management',
+      href: '/team/users',
+      icon: UsersRound,
+      permission: 'user_management',
       alwaysShow: false,
+      category: 'users',
     },
     {
       title: 'Role Management',
@@ -60,6 +71,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       icon: ShieldCheck,
       permission: 'manage_roles',
       alwaysShow: false,
+      category: 'roles',
     },
     {
       title: 'Permissions',
@@ -67,6 +79,7 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       icon: ShieldCheck,
       permission: 'manage_permissions',
       alwaysShow: false,
+      category: 'roles',
     },
   ];
 
@@ -107,14 +120,15 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
       <Link
         href="/team"
         className={cn(
-          'group flex items-center justify-center rounded-md py-2 h-9 w-9 mx-auto px-0 text-xs font-medium transition-colors',
+          'group flex items-center justify-center rounded-md text-sm font-medium transition-colors',
           isActive
             ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+          'size-10 mx-auto'
         )}
         title="Team"
       >
-        <Users className="h-5 w-5" />
+        <Users className="size-5" />
       </Link>
     );
   }
@@ -123,20 +137,21 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
       <CollapsibleTrigger
         className={cn(
-          'flex w-full items-center justify-between rounded-md py-2 px-2 text-xs font-medium transition-colors',
+          'flex w-full items-center justify-between rounded-md text-sm font-medium transition-colors',
           isActive
             ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+          'px-3 py-2 h-10'
         )}
       >
         <div className="flex items-center">
-          <Users className="h-4 w-4 mr-2" />
+          <Users className="size-5 mr-3" />
           <span>Team</span>
         </div>
-        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
       </CollapsibleTrigger>
       <CollapsibleContent className="pl-8 pr-2">
-        <div className="flex flex-col gap-1 pt-1">
+        <div className="flex flex-col gap-2 pt-2">
           {filteredSubItems.map(item => {
             const Icon = item.icon;
             const subItemActive = pathname === item.href || pathname.startsWith(item.href);
@@ -146,13 +161,13 @@ export function TeamNavItem({ collapsed = false }: TeamNavItemProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center rounded-md py-1.5 px-2 text-xs transition-colors',
+                  'flex items-center rounded-md py-2 px-3 text-sm transition-colors',
                   subItemActive
                     ? 'bg-accent/50 text-accent-foreground'
                     : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground'
                 )}
               >
-                <Icon className="h-3.5 w-3.5 mr-2" />
+                <Icon className="size-4 mr-3" />
                 <span>{item.title}</span>
               </Link>
             );

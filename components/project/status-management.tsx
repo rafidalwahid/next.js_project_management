@@ -82,10 +82,7 @@ function SortableStatusItem({
         <div {...attributes} {...listeners} className="cursor-grab">
           <Move className="h-4 w-4 text-muted-foreground" />
         </div>
-        <div
-          className="w-4 h-4 rounded-full"
-          style={{ backgroundColor: status.color }}
-        />
+        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: status.color }} />
         <div>
           <div className="font-medium flex items-center">
             {status.name}
@@ -96,18 +93,12 @@ function SortableStatusItem({
             )}
           </div>
           {status.description && (
-            <div className="text-xs text-muted-foreground">
-              {status.description}
-            </div>
+            <div className="text-xs text-muted-foreground">{status.description}</div>
           )}
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onEdit(status)}
-        >
+        <Button variant="ghost" size="sm" onClick={() => onEdit(status)}>
           <Edit className="h-4 w-4" />
         </Button>
         <Button
@@ -419,7 +410,7 @@ export function StatusManagement({ projectId }: StatusManagementProps) {
                   <SortableStatusItem
                     key={status.id}
                     status={status}
-                    onEdit={(status) => {
+                    onEdit={status => {
                       setEditingStatus(status);
                       setIsEditDialogOpen(true);
                     }}

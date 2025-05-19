@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-
 export default function TasksPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -97,9 +96,10 @@ export default function TasksPage() {
       return directionMultiplier * a.title.localeCompare(b.title);
     } else if (sortBy === 'priority') {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
-      return directionMultiplier * (
-        priorityOrder[b.priority.toLowerCase() as keyof typeof priorityOrder] -
-        priorityOrder[a.priority.toLowerCase() as keyof typeof priorityOrder]
+      return (
+        directionMultiplier *
+        (priorityOrder[b.priority.toLowerCase() as keyof typeof priorityOrder] -
+          priorityOrder[a.priority.toLowerCase() as keyof typeof priorityOrder])
       );
     } else if (sortBy === 'dueDate') {
       if (!a.dueDate) return directionMultiplier * 1;
@@ -317,11 +317,7 @@ export default function TasksPage() {
             </DropdownMenu>
 
             {/* New Task Button - Mobile */}
-            <Button
-              size="sm"
-              className="h-9 flex-1"
-              onClick={() => setIsCreateModalOpen(true)}
-            >
+            <Button size="sm" className="h-9 flex-1" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />
               <span className="truncate">New Task</span>
             </Button>
@@ -422,7 +418,7 @@ export default function TasksPage() {
           onToggleCompletion={toggleTaskCompletion}
           sortField={sortBy}
           sortDirection={sortDirection}
-          onSort={(field) => {
+          onSort={field => {
             if (sortBy === field) {
               setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
             } else {

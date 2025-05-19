@@ -36,7 +36,9 @@ async function updateEdgePermissions() {
       return false;
     }
 
-    console.log(`Found admin role with ${adminRole.permissions.length} permissions`);
+    console.log(
+      `Found admin role with ${adminRole.permissions.length} permissions`,
+    );
 
     // Create a mapping of role names to permission names
     const rolePermissions = {

@@ -174,7 +174,12 @@ export function TimeTracker({ taskId, initialTimeSpent = 0, onTimeUpdate }: Time
                   Start
                 </Button>
               ) : (
-                <Button onClick={handleStopTracking} variant="destructive" size="sm" className="h-9 px-4">
+                <Button
+                  onClick={handleStopTracking}
+                  variant="destructive"
+                  size="sm"
+                  className="h-9 px-4"
+                >
                   <Pause className="mr-2 h-4 w-4" />
                   Stop
                 </Button>

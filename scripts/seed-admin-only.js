@@ -117,7 +117,7 @@ async function main() {
 // Clear existing data - be careful with this in production!
 async function clearExistingData() {
   console.log('Clearing existing data...');
-  
+
   // Delete dependent records first to avoid foreign key constraints
   await prisma.rolePermission.deleteMany({});
   await prisma.permission.deleteMany({});
@@ -142,9 +142,9 @@ async function clearExistingData() {
 // Seed roles
 async function seedRoles() {
   console.log('Seeding roles...');
-  
+
   const roleMap = {};
-  
+
   // Only create the admin role
   const adminRole = await prisma.role.create({
     data: {
@@ -153,9 +153,9 @@ async function seedRoles() {
       color: '#FF0000', // Red color for admin
     },
   });
-  
+
   roleMap[ROLES.ADMIN.toLowerCase()] = adminRole;
-  
+
   console.log('Roles seeded');
   return roleMap;
 }
@@ -163,7 +163,7 @@ async function seedRoles() {
 // Seed permissions
 async function seedPermissions() {
   console.log('Seeding permissions...');
-  
+
   const permissionMap = {};
 
   // Get all permissions with metadata
@@ -189,7 +189,7 @@ async function seedPermissions() {
 // Seed role-permission relationships
 async function seedRolePermissions(roles, permissions) {
   console.log('Assigning permissions to roles...');
-  
+
   // For each role in the permission matrix
   for (const [roleKey, permissionList] of Object.entries(PERMISSION_MATRIX)) {
     const role = roles[roleKey.toLowerCase()];
@@ -215,16 +215,16 @@ async function seedRolePermissions(roles, permissions) {
       });
     }
   }
-  
+
   console.log('Role permissions assigned');
 }
 
 // Seed admin user
 async function seedAdminUser() {
   console.log('Creating admin user...');
-  
+
   const hashedPassword = await hash('admin123', 10);
-  
+
   const adminUser = await prisma.user.create({
     data: {
       name: 'Admin User',
@@ -240,7 +240,7 @@ async function seedAdminUser() {
       active: true,
     },
   });
-  
+
   console.log(`Admin user created with ID: ${adminUser.id}`);
   return adminUser;
 }
@@ -248,7 +248,7 @@ async function seedAdminUser() {
 // Update edge permissions
 async function updateEdgePermissions() {
   console.log('Updating edge permissions...');
-  
+
   try {
     // Get all roles with their permissions
     const roles = await prisma.role.findMany({

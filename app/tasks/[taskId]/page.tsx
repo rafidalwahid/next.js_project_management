@@ -798,10 +798,7 @@ export default function TaskDetailPage() {
                 <CheckCircle className="h-4 w-4" />
                 <span className="hidden xs:inline">Subtasks</span>
                 {task.subtasks && task.subtasks.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]"
-                  >
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]">
                     {task.subtasks.length}
                   </Badge>
                 )}
@@ -813,10 +810,7 @@ export default function TaskDetailPage() {
                 <MessageSquare className="h-4 w-4" />
                 <span className="hidden xs:inline">Comments</span>
                 {task.comments && task.comments.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]"
-                  >
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]">
                     {task.comments.length}
                   </Badge>
                 )}
@@ -828,10 +822,7 @@ export default function TaskDetailPage() {
                 <Paperclip className="h-4 w-4" />
                 <span className="hidden xs:inline">Files</span>
                 {task.attachments && task.attachments.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]"
-                  >
+                  <Badge variant="secondary" className="ml-0 xs:ml-1 h-5 px-1.5 text-[10px]">
                     {task.attachments.length}
                   </Badge>
                 )}
@@ -1399,9 +1390,7 @@ export default function TaskDetailPage() {
 
               {/* Time tracking - with improved styling */}
               <div className="bg-muted/30 rounded-md p-3">
-                <div className="text-xs text-muted-foreground font-medium mb-2">
-                  Time Tracking
-                </div>
+                <div className="text-xs text-muted-foreground font-medium mb-2">Time Tracking</div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />

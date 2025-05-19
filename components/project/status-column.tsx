@@ -43,7 +43,7 @@ export const StatusColumn = React.memo(function StatusColumnImpl({
   onEditStatus,
   onDeleteStatus,
   onAddTask,
-  emptyStateMessage = "No tasks",
+  emptyStateMessage = 'No tasks',
 }: StatusColumnProps) {
   // Make the column droppable
   const { setNodeRef, isOver } = useDroppable({

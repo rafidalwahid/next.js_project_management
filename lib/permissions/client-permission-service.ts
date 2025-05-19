@@ -101,6 +101,12 @@ export class ClientPermissionService {
       this.permissionCache[cacheKey] = data.hasPermission;
       this.cacheTimestamp = now;
 
+      // If we got user role information, cache it for future use
+      if (data.userRole) {
+        const userRoleKey = `user_role:${userId}`;
+        this.roleCache[userRoleKey] = data.userRole;
+      }
+
       return data.hasPermission;
     } catch (error) {
       console.error(`Error checking permission ${permission} for user ${userId}:`, error);
@@ -118,6 +124,11 @@ export class ClientPermissionService {
    * @returns True if the user has the permission based on role, false otherwise
    */
   static hasPermissionSync(role: string, permission: string): boolean {
+    // Special case for admin role - always has all permissions
+    if (role === 'admin') {
+      return true;
+    }
+
     // Check cache first
     const cacheKey = `role:${role}:${permission}`;
     const now = Date.now();
@@ -148,6 +159,12 @@ export class ClientPermissionService {
     // If cache is valid and has this permission check, return it
     if (now - this.cacheTimestamp < this.CACHE_TTL && cacheKey in this.permissionCache) {
       return this.permissionCache[cacheKey];
+    }
+
+    // Check if we have the user's role in cache
+    const userRoleKey = `user_role:${userId}`;
+    if (this.roleCache[userRoleKey] === 'admin') {
+      return true;
     }
 
     // Without cache, we need to check with the server

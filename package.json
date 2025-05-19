@@ -25,6 +25,7 @@
     "db:reset": "npm run db:setup && npx prisma migrate reset --force && npm run db:seed && npm run db:seed-permissions && npm run db:update-permissions",
     "db:validate": "node scripts/validate-db.js",
     "prisma:generate": "npx prisma generate",
+    "prisma:regenerate": "node scripts/regenerate-prisma.js",
     "postinstall": "npx prisma generate",
     "prepare": "husky",
     "setup:production": "node scripts/setup-production.js"

@@ -55,10 +55,7 @@ export const GET = withAuth(async (req: NextRequest, context: any, session: any)
 
     if (search) {
       where.user = {
-        OR: [
-          { name: { contains: search } },
-          { email: { contains: search } },
-        ],
+        OR: [{ name: { contains: search } }, { email: { contains: search } }],
       };
     }
 

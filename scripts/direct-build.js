@@ -9,14 +9,14 @@ console.log('Starting minimal build process...');
 try {
   // Generate Prisma client
   console.log('Generating Prisma client...');
-  execSync('npx prisma generate', { 
+  execSync('npx prisma generate', {
     stdio: 'inherit',
     env: {
       ...process.env,
-      PRISMA_CLIENT_ENGINE_TYPE: 'binary'
-    }
+      PRISMA_CLIENT_ENGINE_TYPE: 'binary',
+    },
   });
-  
+
   // Build Next.js with specific environment variables to avoid file watching
   console.log('Building Next.js application...');
   execSync('npx next build', {
@@ -28,10 +28,10 @@ try {
       CHOKIDAR_USEPOLLING: 'false',
       WATCHPACK_POLLING: 'false',
       NEXT_TELEMETRY_DISABLED: '1',
-      NODE_OPTIONS: '--no-warnings --max-old-space-size=4096'
-    }
+      NODE_OPTIONS: '--no-warnings --max-old-space-size=4096',
+    },
   });
-  
+
   console.log('Build completed successfully!');
   process.exit(0);
 } catch (error) {

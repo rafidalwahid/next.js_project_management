@@ -239,8 +239,36 @@ async function build() {
 
     // Step 2: Generate Prisma client
     logSection('Generating Prisma Client');
+
+    // First, check if the schema has changed since last generation
+    log('Checking Prisma schema for changes...', colors.yellow);
+
+    // Force regeneration to ensure the client is up-to-date
+    log('Forcing Prisma client regeneration...', colors.yellow);
+
+    // Delete the generated client directory first to ensure clean generation
+    const generatedClientDir = path.join(
+      rootDir,
+      'prisma',
+      'generated',
+      'client',
+    );
+    if (await fileExists(generatedClientDir)) {
+      log('Removing existing generated client directory', colors.yellow);
+      await fs.rm(generatedClientDir, { recursive: true, force: true });
+    }
+
+    // Generate the Prisma client
     await runCommand('npx', ['prisma', 'generate']);
-    log('Prisma client generated successfully', colors.green);
+
+    // Verify the client was generated correctly
+    if (await fileExists(path.join(generatedClientDir, 'index.js'))) {
+      log('Prisma client generated successfully', colors.green);
+    } else {
+      throw new Error(
+        'Prisma client generation failed - client files not found',
+      );
+    }
 
     // Step 3: Fix Prisma imports in API routes
     await fixPrismaImports();

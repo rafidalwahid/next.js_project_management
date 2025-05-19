@@ -101,14 +101,15 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
       <Link
         href="/attendance"
         className={cn(
-          'group flex items-center justify-center rounded-md py-2 h-9 w-9 mx-auto px-0 text-xs font-medium transition-colors',
+          'group flex items-center justify-center rounded-md text-sm font-medium transition-colors',
           isActive
             ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+          'size-10 mx-auto'
         )}
         title="Attendance"
       >
-        <Clock className="h-5 w-5" />
+        <Clock className="size-5" />
       </Link>
     );
   }
@@ -117,20 +118,21 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
       <CollapsibleTrigger
         className={cn(
-          'flex w-full items-center justify-between rounded-md py-2 px-2 text-xs font-medium transition-colors',
+          'flex w-full items-center justify-between rounded-md text-sm font-medium transition-colors',
           isActive
             ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+          'px-3 py-2 h-10'
         )}
       >
         <div className="flex items-center">
-          <Clock className="h-4 w-4 mr-2" />
+          <Clock className="size-5 mr-3" />
           <span>Attendance</span>
         </div>
-        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
       </CollapsibleTrigger>
       <CollapsibleContent className="pl-8 pr-2">
-        <div className="flex flex-col gap-1 pt-1">
+        <div className="flex flex-col gap-2 pt-2">
           {filteredSubItems.map(item => {
             const Icon = item.icon;
             const subItemActive = pathname === item.href || pathname.startsWith(item.href);
@@ -140,13 +142,13 @@ export function AttendanceNavItem({ collapsed = false }: AttendanceNavItemProps)
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center rounded-md py-1.5 px-2 text-xs transition-colors',
+                  'flex items-center rounded-md py-2 px-3 text-sm transition-colors',
                   subItemActive
                     ? 'bg-accent/50 text-accent-foreground'
                     : 'text-muted-foreground hover:bg-accent/30 hover:text-foreground'
                 )}
               >
-                <Icon className="h-3.5 w-3.5 mr-2" />
+                <Icon className="size-4 mr-3" />
                 <span>{item.title}</span>
               </Link>
             );

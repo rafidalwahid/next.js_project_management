@@ -1,32 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Plus } from 'lucide-react';
+import { UserPlus, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useHasPermission } from '@/hooks/use-has-permission';
 import { useProjects } from '@/hooks/use-data';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TeamMembersList } from '@/components/team/team-members-list';
+import { ElegantTeamMembersList } from '@/components/team/elegant-team-members-list';
 import { Spinner } from '@/components/ui/spinner';
 
+/**
+ * Team Members Page
+ *
+ * Displays a list of team members across all projects with filtering and sorting capabilities.
+ * Provides actions for adding team members and creating projects based on user permissions.
+ */
 export default function TeamMembersPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { hasPermission: canAddMembers } = useHasPermission('team_add');
-  const { projects, isLoading: isLoadingProjects } = useProjects(1, 1); // Just check if any projects exist
+  const { hasPermission: canCreateProject } = useHasPermission('project_create');
+  const { projects, isLoading: isLoadingProjects } = useProjects(1, 100);
   const hasProjects = projects && projects.length > 0;
 
   // Show loading state when checking auth
   if (status === 'loading') {
     return (
-      <div className="flex flex-col gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
+      <div className="flex flex-col gap-4" aria-live="polite" aria-busy="true">
+        <h1 className="text-3xl font-bold">Team Members</h1>
         <div className="flex justify-center p-12">
           <Spinner size="lg" />
+          <span className="sr-only">Loading...</span>
         </div>
       </div>
     );
@@ -39,41 +45,44 @@ export default function TeamMembersPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Team Members</h1>
-        <div className="flex items-center gap-2">
-          {canAddMembers && (
-            <Link href="/team/new">
-              <Button className="bg-black hover:bg-black/90 text-white">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Member
+    <main className="max-w-6xl mx-auto">
+      <div className="flex flex-col gap-8">
+        {/* Header */}
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Team Members</h1>
+            <p className="text-muted-foreground mt-1">
+              View and manage team members across all projects in your organization.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {canAddMembers && hasProjects && (
+              <Button asChild>
+                <Link href="/team/new">
+                  <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Add Team Member</span>
+                </Link>
               </Button>
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <Card className="shadow-xs border-0">
-        <CardHeader className="pb-3">
-          <CardTitle>Team Members</CardTitle>
-          <CardDescription>
-            View and manage team members in your organization.
-            {!hasProjects && !isLoadingProjects && (
-              <p className="mt-2 text-amber-600">
-                Note: Team members are associated with projects. {canAddMembers ? (
-                  <Link href="/projects/new" className="underline">Create a project</Link>
-                ) : (
-                  <span>Ask an admin to create a project</span>
-                )} to add team members.
-              </p>
             )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TeamMembersList limit={20} />
-        </CardContent>
-      </Card>
-    </div>
+            {canCreateProject && (
+              <Button asChild variant={canAddMembers && hasProjects ? 'outline' : 'default'}>
+                <Link href="/projects/new">
+                  <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Create Project</span>
+                </Link>
+              </Button>
+            )}
+          </div>
+        </header>
+
+        {/* Team Members List */}
+        <section aria-labelledby="team-members-heading">
+          <h2 id="team-members-heading" className="sr-only">
+            Team Members List
+          </h2>
+          <ElegantTeamMembersList limit={50} />
+        </section>
+      </div>
+    </main>
   );
 }

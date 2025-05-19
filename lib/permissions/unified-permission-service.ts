@@ -46,6 +46,11 @@ export class PermissionService {
    */
   static async hasPermission(role: string, permission: string): Promise<boolean> {
     try {
+      // Special case for admin role - always has all permissions
+      if (role === 'admin') {
+        return true;
+      }
+
       // Check cache first
       const cacheKey = `role:${role}:${permission}`;
       const now = Date.now();
@@ -118,6 +123,12 @@ export class PermissionService {
       if (!user) {
         this.permissionCache[cacheKey] = false;
         return false;
+      }
+
+      // Special case for admin role - always has all permissions
+      if (user.role === 'admin') {
+        this.permissionCache[cacheKey] = true;
+        return true;
       }
 
       // Get the role from the database with its permissions
